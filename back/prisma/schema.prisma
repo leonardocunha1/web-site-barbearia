@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENTE
+  PROFISSIONAL
+}
+
+enum Status {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+  CONCLUIDO
+}
+
+model User {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  telefone  String?
+  role      Role     @default(CLIENTE)
+  createdAt DateTime @default(now())
+
+  reservas Booking[]
+
+  @@map("users")
+}
+
+model Professional {
+  id            String  @id @default(uuid())
+  nome          String
+  especialidade String
+  telefone      String?
+
+  reservas Booking[]
+
+  createdAt DateTime @default(now())
+
+  @@map("professionals")
+}
+
+model Service {
+  id        String    @id @default(uuid())
+  nome      String
+  descricao String?
+  preco     Float
+  duracao   Int // Minutos
+  createdAt DateTime  @default(now())
+  Reserva   Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  validatedAt DateTime?
+
+  user      User   @relation(fields: [usuarioId], references: [id])
+  usuarioId String
+
+  profissional   Professional @relation(fields: [profissionalId], references: [id])
+  profissionalId String
+
+  servico   Service @relation(fields: [servicoId], references: [id])
+  servicoId String
+
+  dataHora DateTime
+  status   Status   @default(PENDENTE)
+
+  @@map("bookings")
+}
