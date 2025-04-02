@@ -12,7 +12,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+// Enums
 enum Role {
   ADMIN
   CLIENTE
@@ -26,61 +26,110 @@ enum Status {
   CONCLUIDO
 }
 
+// Tabelas principais
 model User {
-  id        String   @id @default(uuid())
-  nome      String
-  email     String   @unique
-  senha     String
-  telefone  String?
-  role      Role     @default(CLIENTE)
-  createdAt DateTime @default(now())
-
-  reservas Booking[]
-
+  id            String     @id @default(uuid())
+  nome          String
+  email         String     @unique
+  senha         String
+  telefone      String?
+  role          Role       @default(CLIENTE)
+  emailVerified Boolean    @default(false)
+  active        Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  // Relações
+  professional     Professional?
+  bookings         Booking[]
+  
   @@map("users")
 }
 
 model Professional {
-  id            String  @id @default(uuid())
-  nome          String
+  id            String     @id @default(uuid())
+  userId        String     @unique
+  user          User       @relation(fields: [userId], references: [id])
   especialidade String
-  telefone      String?
-
-  reservas Booking[]
-
-  createdAt DateTime @default(now())
+  bio           String?
+  avatarUrl     String?
+  documento     String?    // CPF/CNPJ
+  registro      String?    // CRM, CRP, etc.
+  ativo         Boolean    @default(true)
+  intervalosAgendamento Int @default(30) // Intervalo entre agendamentos (minutos)
+  servicos      Service[]
+  bookings      Booking[]
+  horariosFuncionamento HorarioFuncionamento[]
+  feriados      Feriado[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   @@map("professionals")
 }
 
+model HorarioFuncionamento {
+  id            String     @id @default(uuid())
+  profissional  Professional @relation(fields: [profissionalId], references: [id])
+  profissionalId String
+  diaSemana     Int        // 0-6 (Domingo-Sábado)
+  abreAs        String     // Formato "HH:MM"
+  fechaAs       String     // Formato "HH:MM"
+  pausaInicio   String?    // Formato "HH:MM"
+  pausaFim      String?    // Formato "HH:MM"
+  ativo         Boolean    @default(true)
+  
+  @@unique([profissionalId, diaSemana])
+  @@map("business_hours")
+}
+
+model Feriado {
+  id            String     @id @default(uuid())
+  profissional  Professional @relation(fields: [profissionalId], references: [id])
+  profissionalId String
+  data          DateTime   // Data específica
+  motivo        String
+  createdAt     DateTime   @default(now())
+  
+  @@index([profissionalId, data])
+  @@map("holidays")
+}
+
 model Service {
-  id        String    @id @default(uuid())
-  nome      String
-  descricao String?
-  preco     Float
-  duracao   Int // Minutos
-  createdAt DateTime  @default(now())
-  Reserva   Booking[]
+  id             String    @id @default(uuid())
+  nome           String
+  descricao      String?
+  preco          Float
+  duracao        Int       // Duração em minutos
+  profissional   Professional @relation(fields: [profissionalId], references: [id])
+  profissionalId String
+  categoria      String?
+  ativo          Boolean   @default(true)
+  bookings       Booking[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("services")
 }
 
 model Booking {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  validatedAt DateTime?
-
-  user      User   @relation(fields: [usuarioId], references: [id])
-  usuarioId String
-
+  id             String     @id @default(uuid())
+  user           User       @relation(fields: [usuarioId], references: [id])
+  usuarioId      String
   profissional   Professional @relation(fields: [profissionalId], references: [id])
   profissionalId String
+  servico        Service    @relation(fields: [servicoId], references: [id])
+  servicoId      String
+  dataHoraInicio DateTime
+  dataHoraFim    DateTime
+  status         Status     @default(PENDENTE)
+  observacoes    String?
+  valorFinal     Float?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  canceledAt     DateTime?
+  confirmedAt    DateTime?
 
-  servico   Service @relation(fields: [servicoId], references: [id])
-  servicoId String
-
-  dataHora DateTime
-  status   Status   @default(PENDENTE)
-
+  @@index([usuarioId, dataHoraInicio])
+  @@index([profissionalId, dataHoraInicio])
   @@map("bookings")
 }
