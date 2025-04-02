@@ -5,6 +5,11 @@ interface UserForToken {
   role: string;
 }
 
+interface TokenPayload {
+  id: string;
+  role: string;
+}
+
 export class TokenService {
   constructor(private reply: FastifyReply) {}
 
@@ -19,6 +24,20 @@ export class TokenService {
       { sign: { sub: user.id, expiresIn: '7d' } }
     );
 
+    return { token, refreshToken };
+  }
+
+  async generateTokensFromPayload(payload: TokenPayload) {
+    const token = await this.reply.jwtSign(
+      { role: payload.role },
+      { sign: { sub: payload.id } }
+    );
+  
+    const refreshToken = await this.reply.jwtSign(
+      { role: payload.role },
+      { sign: { sub: payload.id, expiresIn: '7d' } }
+    );
+  
     return { token, refreshToken };
   }
 

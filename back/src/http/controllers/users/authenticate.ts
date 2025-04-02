@@ -1,4 +1,3 @@
-// src/controllers/auth/authenticate.ts
 import { makeAuthenticateUseCase } from '@/use-cases/factories/make-authenticate-use-case';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
