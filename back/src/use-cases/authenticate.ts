@@ -1,36 +1,53 @@
+// src/use-cases/authenticate.ts
 import { UsersRepository } from '@/repositories/users-repository';
-import bcrypt from 'bcryptjs';
-import { User } from '@prisma/client';
 import { InvalidCredentialsError } from './errors/invalid-credentials-error';
+import { InactiveUserError } from './errors/inactive-user-error';
+import bcrypt from 'bcryptjs';
+import type { User } from '@prisma/client';
 
-interface AuthenticateUseCaseRequest {
+interface AuthenticateRequest {
   email: string;
   senha: string;
 }
 
-interface AuthenticateUseCaseResponse {
-  user: User;
+interface AuthenticateResponse {
+  user: {
+    id: string;
+    nome: string;
+    email: string;
+    role: string;
+  };
 }
 
 export class AuthenticateUseCase {
   constructor(private usersRepository: UsersRepository) {}
 
-  async execute({
-    email,
-    senha,
-  }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
+  async execute({ email, senha }: AuthenticateRequest): Promise<AuthenticateResponse> {
     const user = await this.usersRepository.findByEmail(email);
 
+    // verificando se o usuário existe
     if (!user) {
       throw new InvalidCredentialsError();
     }
 
-    const doesPasswordMatches = await bcrypt.compare(senha, user.senha);
+    // verificando se o usuário está ativo
+    if (!user.active) {
+      throw new InactiveUserError();
+    }
 
-    if (!doesPasswordMatches) {
+    // verificando se a senha está correta
+    const passwordMatches = await bcrypt.compare(senha, user.senha);
+    if (!passwordMatches) {
       throw new InvalidCredentialsError();
     }
 
-    return { user };
+    return {
+      user: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 }

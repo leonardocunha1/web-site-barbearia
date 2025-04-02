@@ -1,7 +1,11 @@
-import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error';
+// src/controllers/auth/authenticate.ts
 import { makeAuthenticateUseCase } from '@/use-cases/factories/make-authenticate-use-case';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+
+import { TokenService } from '@/services/token-service';
+import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error';
+import { InactiveUserError } from '@/use-cases/errors/inactive-user-error';
 
 export async function authenticate(
   request: FastifyRequest,
@@ -16,51 +20,23 @@ export async function authenticate(
 
   try {
     const authenticateUseCase = makeAuthenticateUseCase();
+    const { user } = await authenticateUseCase.execute({ email, senha });
 
-    const { user } = await authenticateUseCase.execute({
-      email,
-      senha,
-    });
+    const tokenService = new TokenService(reply);
+    const { token, refreshToken } = await tokenService.generateTokens(user);
 
-    const token = await reply.jwtSign(
-      {
-        role: user.role,
-      },
-      {
-        sign: {
-          sub: user.id,
-        },
-      },
-    );
-
-    const refreshToken = await reply.jwtSign(
-      {
-        role: user.role,
-      },
-      {
-        sign: {
-          sub: user.id,
-          expiresIn: '7d',
-        },
-      },
-    );
-
-    return reply
-      .setCookie('refreshToken', refreshToken, {
-        secure: true,
-        sameSite: true,
-        httpOnly: true,
-        path: '/',
-      })
+    return tokenService.setAuthCookies(token, refreshToken)
       .status(200)
-      .send({
-        token,
-      });
+      .send({ token });
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
-      return reply.status(400).send({ message: err.message });
+      return reply.status(401).send({ message: 'Credenciais inválidas' });
     }
-
-    throw err;
+    if (err instanceof InactiveUserError) {
+      return reply.status(403).send({ message: 'Conta desativada' });
+    }
+    
+    console.error('Authentication error:', err);
+    return reply.status(500).send({ message: 'Erro interno no servidor' });
   }
 }
