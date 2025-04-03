@@ -4,6 +4,8 @@ import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { registerUser } from './register';
 import { authenticate } from './authenticate';
 import { logout } from './logout';
+import { verifyEmail } from './verify-email';
+import { sendVerificationEmail } from './send-verification-email';
 
 export async function usersRoutes(app: FastifyInstance) {
   // Rota pública para registro de clientes
@@ -19,4 +21,8 @@ export async function usersRoutes(app: FastifyInstance) {
 
   // Rota de logout
   app.post('/logout', logout);
+
+  // Rota de verificação de e-mail
+  app.get('/users/verify-email', verifyEmail); 
+  app.post('/users/send-verification-email', sendVerificationEmail);
 }
