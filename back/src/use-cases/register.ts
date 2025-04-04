@@ -1,8 +1,8 @@
-// src/use-cases/register-user.ts
 import { UsersRepository } from '@/repositories/users-repository';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
 import type { User, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { InsufficientPermissionsError } from './errors/insufficient-permissions-error';
 
 interface RegisterUserRequest {
   nome: string;
@@ -27,8 +27,8 @@ export class RegisterUserUseCase {
     requestRole,
   }: RegisterUserRequest): Promise<RegisterUserResponse> {
     // Validação de permissões
-    if (role === 'ADMIN' && requestRole !== 'ADMIN') {
-      throw new Error('Somente administradores podem criar esse tipo de usuário.');
+    if ((role === 'ADMIN' || role === 'PROFISSIONAL') && requestRole !== 'ADMIN') {
+      throw new InsufficientPermissionsError();
     }
 
     // Validação de email existente

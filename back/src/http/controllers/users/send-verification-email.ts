@@ -15,13 +15,13 @@ export async function sendVerificationEmail(
 
   try {
     const sendVerificationEmailUseCase = makeSendVerificationEmailUseCase();
-    
+
     await sendVerificationEmailUseCase.execute({
       email,
     });
 
-    return reply.status(200).send({ 
-      message: 'E-mail de verificação enviado com sucesso' 
+    return reply.status(200).send({
+      message: 'E-mail de verificação enviado com sucesso',
     });
   } catch (err) {
     if (err instanceof UserNotFoundError) {
@@ -29,6 +29,8 @@ export async function sendVerificationEmail(
     }
 
     console.error('Send verification email error:', err);
-    return reply.status(500).send({ message: 'Erro ao enviar e-mail de verificação' });
+    return reply
+      .status(500)
+      .send({ message: 'Erro ao enviar e-mail de verificação' });
   }
 }

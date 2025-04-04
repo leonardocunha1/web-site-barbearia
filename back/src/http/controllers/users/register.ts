@@ -2,7 +2,7 @@ import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists-e
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { makeRegisterUserUseCase } from '@/use-cases/factories/make-register-use-case';
-import { InvalidRoleError } from '@/use-cases/errors/invalid-role-error';
+import { InsufficientPermissionsError } from '@/use-cases/errors/insufficient-permissions-error';
 
 export async function registerUser(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z.object({
@@ -28,9 +28,11 @@ export async function registerUser(request: FastifyRequest, reply: FastifyReply)
     if (err instanceof UserAlreadyExistsError) {
       return reply.status(409).send({ message: err.message });
     }
-    if (err instanceof InvalidRoleError) {
+
+    if (err instanceof InsufficientPermissionsError) {
       return reply.status(403).send({ message: err.message });
     }
+    
 
     throw err;
   }

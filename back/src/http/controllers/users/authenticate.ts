@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { TokenService } from '@/services/token-service';
 import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error';
 import { InactiveUserError } from '@/use-cases/errors/inactive-user-error';
+import { EmailNotVerifiedError } from '@/use-cases/errors/user-email-not-verified-error';
 
 export async function authenticate(
   request: FastifyRequest,
@@ -33,6 +34,10 @@ export async function authenticate(
     }
     if (err instanceof InactiveUserError) {
       return reply.status(403).send({ message: 'Conta desativada' });
+    }
+
+    if (err instanceof EmailNotVerifiedError) {
+      return reply.status(403).send({ message: 'Email não verificado' });
     }
     
     console.error('Authentication error:', err);

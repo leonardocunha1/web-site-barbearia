@@ -1,9 +1,8 @@
-// src/use-cases/authenticate.ts
 import { UsersRepository } from '@/repositories/users-repository';
 import { InvalidCredentialsError } from './errors/invalid-credentials-error';
 import { InactiveUserError } from './errors/inactive-user-error';
 import bcrypt from 'bcryptjs';
-import type { User } from '@prisma/client';
+import { EmailNotVerifiedError } from './errors/user-email-not-verified-error';
 
 interface AuthenticateRequest {
   email: string;
@@ -28,6 +27,11 @@ export class AuthenticateUseCase {
     // verificando se o usuário existe
     if (!user) {
       throw new InvalidCredentialsError();
+    }
+
+    // Verifica se o e-mail foi verificado (se emailVerified não é null)
+    if (!user.emailVerified) {
+      throw new EmailNotVerifiedError();
     }
 
     // verificando se o usuário está ativo

@@ -7,7 +7,7 @@ export class EmailService {
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const verificationLink = `${process.env.APP_URL}/verify-email?token=${token}`;
-    
+
     const msg = {
       to: email,
       from: process.env.EMAIL_FROM!,
