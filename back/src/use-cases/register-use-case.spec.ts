@@ -1,16 +1,27 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
-import { RegisterUserUseCase } from './register';
 import { InsufficientPermissionsError } from './errors/insufficient-permissions-error';
+import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
+import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
+import { RegisterUserUseCase } from './register-use-case';
+import { MockEmailService } from '@/mock/mock-email-service';
 
 let usersRepository: InMemoryUsersRepository;
+let professionalsRepository: InMemoryProfessionalsRepository;
+let emailService: MockEmailService;
 let sut: RegisterUserUseCase;
 
 describe('Register User Use Case', () => {
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository();
-    sut = new RegisterUserUseCase(usersRepository);
+    professionalsRepository = new InMemoryProfessionalsRepository();
+    emailService = new MockEmailService();
+
+    sut = new RegisterUserUseCase(
+      usersRepository,
+      professionalsRepository,
+      emailService.sendVerificationEmail.bind(emailService),
+    );
   });
 
   it('deve cadastrar um novo usuário', async () => {
@@ -36,7 +47,7 @@ describe('Register User Use Case', () => {
         nome: 'Maria 2',
         email: 'maria@example.com',
         senha: '123456',
-      })
+      }),
     ).rejects.toBeInstanceOf(UserAlreadyExistsError);
   });
 
@@ -48,7 +59,7 @@ describe('Register User Use Case', () => {
         senha: '123456',
         role: 'ADMIN',
         requestRole: 'CLIENTE',
-      })
+      }),
     ).rejects.toBeInstanceOf(InsufficientPermissionsError);
   });
 

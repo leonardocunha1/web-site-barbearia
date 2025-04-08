@@ -16,12 +16,12 @@ export class TokenService {
   async generateTokens(user: UserForToken) {
     const token = await this.reply.jwtSign(
       { role: user.role },
-      { sign: { sub: user.id } }
+      { sign: { sub: user.id } },
     );
 
     const refreshToken = await this.reply.jwtSign(
       { role: user.role },
-      { sign: { sub: user.id, expiresIn: '7d' } }
+      { sign: { sub: user.id, expiresIn: '7d' } },
     );
 
     return { token, refreshToken };
@@ -30,14 +30,14 @@ export class TokenService {
   async generateTokensFromPayload(payload: TokenPayload) {
     const token = await this.reply.jwtSign(
       { role: payload.role },
-      { sign: { sub: payload.id } }
+      { sign: { sub: payload.id } },
     );
-  
+
     const refreshToken = await this.reply.jwtSign(
       { role: payload.role },
-      { sign: { sub: payload.id, expiresIn: '7d' } }
+      { sign: { sub: payload.id, expiresIn: '7d' } },
     );
-  
+
     return { token, refreshToken };
   }
 

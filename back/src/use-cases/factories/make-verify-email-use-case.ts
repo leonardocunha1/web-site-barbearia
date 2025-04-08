@@ -1,4 +1,4 @@
-import { VerifyEmailUseCase } from '@/use-cases/verify-email';
+import { VerifyEmailUseCase } from '@/use-cases/verify-email-use-case';
 import { PrismaVerificationTokensRepository } from '@/repositories/prisma/prisma-verification-tokens-repository';
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
 

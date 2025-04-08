@@ -10,12 +10,16 @@ import { sendVerificationEmail } from './send-verification-email';
 export async function usersRoutes(app: FastifyInstance) {
   // Rota pública para registro de clientes
   app.post('/users', registerUser);
-  
+
   // Rota protegida para registro de administradores
-  app.post('/users/admin', { 
-    onRequest: [verifyJwt, verifyUserRole('ADMIN')] 
-  }, registerUser);
-  
+  app.post(
+    '/users/admin',
+    {
+      onRequest: [verifyJwt, verifyUserRole('ADMIN')],
+    },
+    registerUser,
+  );
+
   // Rotas de autenticação
   app.post('/sessions', authenticate);
 
@@ -23,6 +27,6 @@ export async function usersRoutes(app: FastifyInstance) {
   app.post('/logout', logout);
 
   // Rota de verificação de e-mail
-  app.get('/users/verify-email', verifyEmail); 
+  app.get('/users/verify-email', verifyEmail);
   app.post('/users/send-verification-email', sendVerificationEmail);
 }

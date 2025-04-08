@@ -25,7 +25,8 @@ export async function authenticate(
     const tokenService = new TokenService(reply);
     const { token, refreshToken } = await tokenService.generateTokens(user);
 
-    return tokenService.setAuthCookies(token, refreshToken)
+    return tokenService
+      .setAuthCookies(token, refreshToken)
       .status(200)
       .send({ token });
   } catch (err) {
@@ -39,7 +40,7 @@ export async function authenticate(
     if (err instanceof EmailNotVerifiedError) {
       return reply.status(403).send({ message: 'Email não verificado' });
     }
-    
+
     console.error('Authentication error:', err);
     return reply.status(500).send({ message: 'Erro interno no servidor' });
   }

@@ -44,6 +44,7 @@ model User {
   professional      Professional?
   bookings          Booking[]
   VerificationToken VerificationToken[]
+  Log               Log[]
 
   @@map("users")
 }
@@ -65,6 +66,7 @@ model Professional {
   feriados              Feriado[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
+  ServiceProfessional   ServiceProfessional[]
 
   @@map("professionals")
 }
@@ -97,43 +99,64 @@ model Feriado {
 }
 
 model Service {
-  id             String       @id @default(uuid())
+  id             String                @id @default(uuid())
   nome           String
   descricao      String?
-  preco          Float
-  duracao        Int // Duração em minutos
-  profissional   Professional @relation(fields: [profissionalId], references: [id])
-  profissionalId String
+  precoPadrao    Float
+  duracao        Int
   categoria      String?
-  ativo          Boolean      @default(true)
+  ativo          Boolean               @default(true)
+  profissionais  ServiceProfessional[]
   bookings       Booking[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  BookingItem    BookingItem[]
+  Professional   Professional?         @relation(fields: [professionalId], references: [id])
+  professionalId String?
 
   @@map("services")
 }
 
-model Booking {
+model ServiceProfessional {
   id             String       @id @default(uuid())
-  user           User         @relation(fields: [usuarioId], references: [id])
+  service        Service      @relation(fields: [serviceId], references: [id])
+  serviceId      String
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  professionalId String
+  preco          Float
+  duracao        Int
+
+  @@map("service_professional")
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  user           User          @relation(fields: [usuarioId], references: [id])
   usuarioId      String
-  profissional   Professional @relation(fields: [profissionalId], references: [id])
+  profissional   Professional  @relation(fields: [profissionalId], references: [id])
   profissionalId String
-  servico        Service      @relation(fields: [servicoId], references: [id])
-  servicoId      String
   dataHoraInicio DateTime
   dataHoraFim    DateTime
-  status         Status       @default(PENDENTE)
+  status         Status        @default(PENDENTE)
   observacoes    String?
   valorFinal     Float?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   canceledAt     DateTime?
   confirmedAt    DateTime?
+  items          BookingItem[]
+  Service        Service?      @relation(fields: [serviceId], references: [id])
+  serviceId      String?
 
-  @@index([usuarioId, dataHoraInicio])
-  @@index([profissionalId, dataHoraInicio])
   @@map("bookings")
+}
+
+model BookingItem {
+  id        String  @id @default(uuid())
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  bookingId String
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId String
+  preco     Float
+  duracao   Int
 }
 
 model VerificationToken {
@@ -145,4 +168,20 @@ model VerificationToken {
   createdAt DateTime @default(now())
 
   @@map("verification_tokens")
+}
+
+model Log {
+  id         String   @id @default(uuid())
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     String? // Quem fez a ação (pode ser nulo para sistema)
+  tipo       String // Tipo do evento: "STATUS_UPDATE", "CANCELAMENTO", etc.
+  descricao  String // Texto explicativo do que aconteceu
+  referencia String? // ID da entidade afetada (ex: bookingId, serviceId etc)
+  entidade   String? // Nome da entidade: "Booking", "Service", "User"
+  userAgent  String? // Navegador ou client info (opcional)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entidade, referencia])
+  @@map("logs")
 }

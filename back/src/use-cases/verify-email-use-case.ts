@@ -15,15 +15,16 @@ export class VerifyEmailUseCase {
   ) {}
 
   async execute({ verificationToken }: VerifyEmailRequest): Promise<void> {
-    const verificationTokenEntity = await this.verificationTokensRepository.findByToken(
-      verificationToken,
-    );
+    const verificationTokenEntity =
+      await this.verificationTokensRepository.findByToken(verificationToken);
 
     if (!verificationTokenEntity) {
       throw new InvalidTokenError();
     }
 
-    const user = await this.usersRepository.findById(verificationTokenEntity.userId);
+    const user = await this.usersRepository.findById(
+      verificationTokenEntity.userId,
+    );
 
     if (!user) {
       throw new UserNotFoundError();
@@ -37,7 +38,9 @@ export class VerifyEmailUseCase {
     const tokenExpired = new Date() > verificationTokenEntity.expiresAt;
 
     if (tokenExpired) {
-      await this.verificationTokensRepository.delete(verificationTokenEntity.id);
+      await this.verificationTokensRepository.delete(
+        verificationTokenEntity.id,
+      );
       throw new InvalidTokenError();
     }
 

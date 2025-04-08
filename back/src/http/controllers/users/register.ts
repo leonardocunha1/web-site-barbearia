@@ -4,7 +4,10 @@ import { z } from 'zod';
 import { makeRegisterUserUseCase } from '@/use-cases/factories/make-register-use-case';
 import { InsufficientPermissionsError } from '@/use-cases/errors/insufficient-permissions-error';
 
-export async function registerUser(request: FastifyRequest, reply: FastifyReply) {
+export async function registerUser(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
   const registerBodySchema = z.object({
     nome: z.string(),
     email: z.string().email(),
@@ -22,7 +25,7 @@ export async function registerUser(request: FastifyRequest, reply: FastifyReply)
       email,
       senha,
       role,
-      requestRole: request.user?.role, 
+      requestRole: request.user?.role,
     });
   } catch (err) {
     if (err instanceof UserAlreadyExistsError) {
@@ -32,7 +35,6 @@ export async function registerUser(request: FastifyRequest, reply: FastifyReply)
     if (err instanceof InsufficientPermissionsError) {
       return reply.status(403).send({ message: err.message });
     }
-    
 
     throw err;
   }

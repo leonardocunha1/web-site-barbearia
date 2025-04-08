@@ -24,14 +24,14 @@ export class SendVerificationEmailUseCase {
     }
 
     if (user.emailVerified) {
-      return; 
+      return;
     }
 
     const token = randomUUID();
-    const expiresAt = dayjs().add(24, 'hours').toDate(); 
+    const expiresAt = dayjs().add(24, 'hours').toDate();
 
     await this.verificationTokensRepository.create(token, user.id, expiresAt);
-    
+
     await this.emailService.sendVerificationEmail(user.email, token);
   }
 }

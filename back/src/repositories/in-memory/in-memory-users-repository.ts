@@ -1,4 +1,4 @@
-import { User, Prisma, Role } from '@prisma/client';
+import { User, Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { UsersRepository } from '@/repositories/users-repository';
 
@@ -26,18 +26,18 @@ export class InMemoryUsersRepository implements UsersRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.items.find(user => user.email === email) ?? null;
+    return this.items.find((user) => user.email === email) ?? null;
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.items.find(user => user.id === id) ?? null;
+    return this.items.find((user) => user.id === id) ?? null;
   }
 
   async update(id: string, data: Partial<User>): Promise<void> {
-    const userIndex = this.items.findIndex(user => user.id === id);
+    const userIndex = this.items.findIndex((user) => user.id === id);
     if (userIndex >= 0) {
       const currentUser = this.items[userIndex];
-  
+
       this.items[userIndex] = {
         ...currentUser,
         ...data,
@@ -45,5 +45,4 @@ export class InMemoryUsersRepository implements UsersRepository {
       };
     }
   }
-  
 }

@@ -1,4 +1,6 @@
+// src/use-cases/register-user.ts
 import { UsersRepository } from '@/repositories/users-repository';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
 import type { User, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -9,7 +11,7 @@ interface RegisterUserRequest {
   email: string;
   senha: string;
   role?: Role;
-  requestRole?: Role; // Papel do usuário que está fazendo a requisição
+  requestRole?: Role;
 }
 
 interface RegisterUserResponse {
@@ -17,7 +19,11 @@ interface RegisterUserResponse {
 }
 
 export class RegisterUserUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    private professionalsRepository: ProfessionalsRepository,
+    private sendVerificationEmail?: (email: string) => Promise<void>, // Nova dependência
+  ) {}
 
   async execute({
     nome,
@@ -26,27 +32,43 @@ export class RegisterUserUseCase {
     role = 'CLIENTE',
     requestRole,
   }: RegisterUserRequest): Promise<RegisterUserResponse> {
-    // Validação de permissões
-    if ((role === 'ADMIN' || role === 'PROFISSIONAL') && requestRole !== 'ADMIN') {
+    if (
+      (role === 'ADMIN' || role === 'PROFISSIONAL') &&
+      requestRole !== 'ADMIN'
+    ) {
       throw new InsufficientPermissionsError();
     }
 
-    // Validação de email existente
     const userWithSameEmail = await this.usersRepository.findByEmail(email);
     if (userWithSameEmail) {
       throw new UserAlreadyExistsError();
     }
 
-    // Criptografia da senha
     const senha_hash = await bcrypt.hash(senha, 6);
 
-    // Criação do usuário
     const user = await this.usersRepository.create({
       nome,
       email,
       senha: senha_hash,
       role,
     });
+
+    if (role === 'PROFISSIONAL') {
+      await this.professionalsRepository.create({
+        userId: user.id,
+        especialidade: '',
+        bio: null,
+        avatarUrl: null,
+        documento: null,
+        registro: null,
+        ativo: true,
+        intervalosAgendamento: 0,
+      });
+    }
+
+    if (this.sendVerificationEmail) {
+      await this.sendVerificationEmail(user.email);
+    }
 
     return { user };
   }

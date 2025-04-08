@@ -1,9 +1,9 @@
 import { Prisma, User } from '@prisma/client';
-import { UpdateUserData, UsersRepository } from '@/repositories/users-repository';
+import { UsersRepository } from '@/repositories/users-repository';
 import { prisma } from '@/lib/prisma';
 
 export class PrismaUsersRepository implements UsersRepository {
-  async update(id: string, data: UpdateUserData): Promise<void> {
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<void> {
     await prisma.user.update({
       where: { id },
       data,

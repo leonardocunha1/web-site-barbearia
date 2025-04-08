@@ -7,7 +7,11 @@ export interface VerificationToken {
 }
 
 export interface VerificationTokensRepository {
-  create(token: string, userId: string, expiresAt: Date): Promise<VerificationToken>;
+  create(
+    token: string,
+    userId: string,
+    expiresAt: Date,
+  ): Promise<VerificationToken>;
   findByToken(token: string): Promise<VerificationToken | null>;
   delete(id: string): Promise<void>;
 }
