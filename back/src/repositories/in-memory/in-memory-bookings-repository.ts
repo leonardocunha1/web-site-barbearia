@@ -1,31 +1,25 @@
-import { Booking, Status } from '@prisma/client';
+import { Booking, Prisma } from '@prisma/client';
 import { BookingsRepository } from '../bookings-repository';
-
-type InMemoryBookingCreateInput = {
-  usuarioId: string;
-  profissionalId: string;
-  dataHoraInicio: Date;
-  dataHoraFim: Date;
-  status: Status;
-  observacoes?: string | null;
-  valorFinal?: number | null;
-  serviceId?: string | null;
-};
+import { randomUUID } from 'node:crypto';
 
 export class InMemoryBookingsRepository implements BookingsRepository {
   public items: Booking[] = [];
 
-  async create(data: InMemoryBookingCreateInput): Promise<Booking> {
+  async create(data: Prisma.BookingCreateInput): Promise<Booking> {
     const booking: Booking = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
+      usuarioId: data.user.connect?.id || '',
+      profissionalId: data.profissional.connect?.id || '',
+      dataHoraInicio: new Date(data.dataHoraInicio),
+      dataHoraFim: new Date(data.dataHoraFim),
+      status: 'PENDENTE',
+      observacoes: data.observacoes || null,
+      valorFinal: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       canceledAt: null,
-      ...data,
-      observacoes: data.observacoes ?? null,
-      valorFinal: data.valorFinal ?? null,
-      serviceId: data.serviceId ?? null,
       confirmedAt: null,
+      serviceId: data.Service?.connect?.id || null,
     };
 
     this.items.push(booking);

@@ -34,10 +34,12 @@ export class CreateBookingUseCase {
 
   async execute(request: BookingRequest): Promise<BookingResponse> {
     // Validação de data/hora
-    if (request.startDateTime < new Date()) {
+    const now = new Date();
+    if (request.startDateTime < now) {
       throw new InvalidDateTimeError();
     }
 
+    // Verificações em paralelo
     const [user, professional, service] = await Promise.all([
       this.usersRepository.findById(request.userId),
       this.professionalsRepository.findById(request.professionalId),
@@ -53,10 +55,12 @@ export class CreateBookingUseCase {
       throw new InvalidDurationError();
     }
 
+    // Cálculo do horário final
     const endDateTime = new Date(
       request.startDateTime.getTime() + service.duracao * 60000,
     );
 
+    // Verificação de conflito
     const conflictingBooking =
       await this.bookingsRepository.findOverlappingBooking(
         request.professionalId,
@@ -68,6 +72,7 @@ export class CreateBookingUseCase {
       throw new TimeSlotAlreadyBookedError();
     }
 
+    // Criação do agendamento
     const booking = await this.bookingsRepository.create({
       dataHoraInicio: request.startDateTime,
       dataHoraFim: endDateTime,
@@ -75,6 +80,7 @@ export class CreateBookingUseCase {
       user: { connect: { id: request.userId } },
       profissional: { connect: { id: request.professionalId } },
       Service: { connect: { id: request.serviceId } },
+      status: 'PENDENTE',
       items: {
         create: [
           {

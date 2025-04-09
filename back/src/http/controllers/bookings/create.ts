@@ -15,14 +15,14 @@ export async function createBooking(
   const createBookingBodySchema = z.object({
     professionalId: z.string().uuid(),
     serviceId: z.string().uuid(),
-    startDateTime: z.string().datetime(),
-    notes: z.string().optional(),
+    startDateTime: z.string().datetime({ offset: true }),
+    notes: z.string().max(500).optional(),
   });
 
-  const { professionalId, serviceId, startDateTime, notes } =
-    createBookingBodySchema.parse(request.body);
-
   try {
+    const { professionalId, serviceId, startDateTime, notes } =
+      createBookingBodySchema.parse(request.body);
+
     const createBookingUseCase = makeCreateBookingUseCase();
 
     const { booking } = await createBookingUseCase.execute({
@@ -35,33 +35,44 @@ export async function createBooking(
 
     return reply.status(201).send({
       bookingId: booking.id,
+      startDateTime: booking.dataHoraInicio,
+      endDateTime: booking.dataHoraFim,
+      status: booking.status,
     });
   } catch (err) {
+    // Tratamento de erros mais robusto
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Validation error',
+        errors: err.errors,
+      });
+    }
+
     if (err instanceof UserNotFoundError) {
-      return reply.status(404).send({ message: err.message });
+      return reply.status(404).send({ message: 'User not found' });
     }
 
     if (err instanceof ProfessionalNotFoundError) {
-      return reply.status(404).send({ message: err.message });
+      return reply.status(404).send({ message: 'Professional not found' });
     }
 
     if (err instanceof ServiceNotFoundError) {
-      return reply.status(404).send({ message: err.message });
+      return reply.status(404).send({ message: 'Service not found' });
     }
 
     if (err instanceof TimeSlotAlreadyBookedError) {
-      return reply.status(409).send({ message: err.message });
+      return reply.status(409).send({ message: 'Time slot already booked' });
     }
 
-    if (
-      err instanceof InvalidDateTimeError ||
-      err instanceof InvalidDurationError
-    ) {
-      return reply.status(400).send({ message: err.message });
+    if (err instanceof InvalidDateTimeError) {
+      return reply.status(400).send({ message: 'Invalid date/time' });
     }
 
-    // Log do erro para debug
-    console.error('Error creating booking:', err);
+    if (err instanceof InvalidDurationError) {
+      return reply.status(400).send({ message: 'Invalid service duration' });
+    }
+
+    console.error('Booking creation error:', err);
     return reply.status(500).send({ message: 'Internal server error' });
   }
 }
