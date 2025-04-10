@@ -4,6 +4,7 @@ import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createService } from './create';
 import { listServices } from './list-services';
 import { getService } from './get-service';
+import { updateService } from './update-service';
 
 export async function servicesRoutes(app: FastifyInstance) {
   app.post(
@@ -16,14 +17,16 @@ export async function servicesRoutes(app: FastifyInstance) {
 
   app.get('/services', listServices);
   app.get('/services/:id', getService);
+
+  app.put(
+    '/services/:id',
+    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    updateService,
+  );
   /*
   app.get('/services/professional/:professionalId', listServicesByProfessional); 
   
-  app.put(
-    '/services/:id',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN', 'PROFISSIONAL')] },
-    updateService
-  );
+
   
   app.patch(
     '/services/:id/status',
