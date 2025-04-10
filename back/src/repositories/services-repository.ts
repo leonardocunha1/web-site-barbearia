@@ -6,4 +6,12 @@ export interface ServicesRepository {
   findByName(name: string): Promise<Service | null>;
   update(id: string, data: Prisma.ServiceUpdateInput): Promise<Service>;
   delete(id: string): Promise<void>;
+  list(params: {
+    page: number;
+    limit: number;
+    nome?: string;
+    categoria?: string;
+    ativo?: boolean;
+    professionalId?: string;
+  }): Promise<{ services: Service[]; total: number }>;
 }
