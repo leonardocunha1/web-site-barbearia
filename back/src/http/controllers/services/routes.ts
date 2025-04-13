@@ -5,6 +5,7 @@ import { createService } from './create';
 import { listServices } from './list-services';
 import { getService } from './get-service';
 import { updateService } from './update-service';
+import { deleteService } from './delete';
 
 export async function servicesRoutes(app: FastifyInstance) {
   app.post(
@@ -23,6 +24,12 @@ export async function servicesRoutes(app: FastifyInstance) {
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
     updateService,
   );
+
+  app.delete(
+    '/services/:id',
+    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    deleteService,
+  );
   /*
   app.get('/services/professional/:professionalId', listServicesByProfessional); 
   
@@ -34,10 +41,6 @@ export async function servicesRoutes(app: FastifyInstance) {
     toggleServiceStatus
   );
   
-  app.delete(
-    '/services/:id',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
-    deleteService
-  );
+
   */
 }

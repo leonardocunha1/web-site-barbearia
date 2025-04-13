@@ -6,6 +6,8 @@ export interface ServicesRepository {
   findByName(name: string): Promise<Service | null>;
   update(id: string, data: Prisma.ServiceUpdateInput): Promise<Service>;
   delete(id: string): Promise<void>;
+  softDelete(id: string): Promise<void>;
+  toggleStatus(id: string, newStatus: boolean): Promise<Service>;
   list(params: {
     page: number;
     limit: number;

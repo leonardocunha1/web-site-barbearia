@@ -64,6 +64,24 @@ export class PrismaServicesRepository implements ServicesRepository {
     });
   }
 
+  async softDelete(id: string): Promise<void> {
+    await prisma.service.update({
+      where: { id },
+      data: {
+        ativo: false,
+      },
+    });
+  }
+
+  async toggleStatus(id: string, newStatus: boolean): Promise<Service> {
+    return prisma.service.update({
+      where: { id },
+      data: {
+        ativo: newStatus,
+      },
+    });
+  }
+
   async list({
     page,
     limit,
