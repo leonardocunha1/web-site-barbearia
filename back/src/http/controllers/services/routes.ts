@@ -9,6 +9,7 @@ import { deleteService } from './delete';
 import { toggleServiceStatus } from './toggle-status';
 import { addToProfessional } from './add-to-professional';
 import { removeFromProfessional } from './remove-from-professional';
+import { listProfessionalServices } from './professionals-services';
 
 export async function servicesRoutes(app: FastifyInstance) {
   app.post(
@@ -51,9 +52,6 @@ export async function servicesRoutes(app: FastifyInstance) {
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
     removeFromProfessional,
   );
-  /*
-  app.get('/services/professional/:professionalId', listServicesByProfessional); 
-  
 
-  */
+  app.get('/professionals/:professionalId/services', listProfessionalServices);
 }

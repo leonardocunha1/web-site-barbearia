@@ -9,4 +9,27 @@ export interface ServiceProfessionalRepository {
     serviceId: string,
     professionalId: string,
   ): Promise<ServiceProfessional | null>;
+  findByProfessional(
+    professionalId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      activeOnly?: boolean;
+    },
+  ): Promise<{
+    services: Array<{
+      service: {
+        id: string;
+        nome: string;
+        descricao: string | null;
+        precoPadrao: number;
+        duracao: number;
+        categoria: string | null;
+        ativo: boolean;
+      };
+      preco: number;
+      duracao: number;
+    }>;
+    total: number;
+  }>;
 }

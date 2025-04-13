@@ -60,4 +60,73 @@ export class PrismaServiceProfessionalRepository
       duracao: result.duracao,
     };
   }
+
+  async findByProfessional(
+    professionalId: string,
+    options: {
+      page?: number;
+      limit?: number;
+      activeOnly?: boolean;
+    } = {},
+  ): Promise<{
+    services: Array<{
+      service: {
+        id: string;
+        nome: string;
+        descricao: string | null;
+        precoPadrao: number;
+        duracao: number;
+        categoria: string | null;
+        ativo: boolean;
+      };
+      preco: number;
+      duracao: number;
+    }>;
+    total: number;
+  }> {
+    const { page = 1, limit = 10, activeOnly = true } = options;
+
+    const where: Prisma.ServiceProfessionalWhereInput = {
+      professionalId,
+      service: activeOnly ? { ativo: true } : undefined,
+    };
+
+    const [serviceProfessionals, total] = await Promise.all([
+      prisma.serviceProfessional.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          preco: true,
+          duracao: true,
+          service: {
+            select: {
+              id: true,
+              nome: true,
+              descricao: true,
+              precoPadrao: true,
+              duracao: true,
+              categoria: true,
+              ativo: true,
+            },
+          },
+        },
+        orderBy: {
+          service: {
+            nome: 'asc',
+          },
+        },
+      }),
+      prisma.serviceProfessional.count({ where }),
+    ]);
+
+    return {
+      services: serviceProfessionals.map((sp) => ({
+        service: sp.service,
+        preco: sp.preco,
+        duracao: sp.duracao,
+      })),
+      total,
+    };
+  }
 }
