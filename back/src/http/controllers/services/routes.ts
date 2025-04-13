@@ -2,10 +2,13 @@ import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createService } from './create';
-import { listServices } from './list-services';
-import { getService } from './get-service';
-import { updateService } from './update-service';
+import { listServices } from './list';
+import { getService } from './get';
+import { updateService } from './update';
 import { deleteService } from './delete';
+import { toggleServiceStatus } from './toggle-status';
+import { addToProfessional } from './add-to-professional';
+import { removeFromProfessional } from './remove-from-professional';
 
 export async function servicesRoutes(app: FastifyInstance) {
   app.post(
@@ -30,16 +33,26 @@ export async function servicesRoutes(app: FastifyInstance) {
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
     deleteService,
   );
-  /*
-  app.get('/services/professional/:professionalId', listServicesByProfessional); 
-  
 
-  
   app.patch(
     '/services/:id/status',
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
-    toggleServiceStatus
+    toggleServiceStatus,
   );
+
+  app.post(
+    '/services/add-to-professional',
+    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    addToProfessional,
+  );
+
+  app.delete(
+    '/services/remove-from-professional',
+    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    removeFromProfessional,
+  );
+  /*
+  app.get('/services/professional/:professionalId', listServicesByProfessional); 
   
 
   */

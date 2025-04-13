@@ -18,7 +18,6 @@ export class PrismaBookingsRepository implements BookingsRepository {
       },
       include: {
         items: true, // retornando os itens relacionados junto com a consulta
-        Service: true, // retornando o serviço relacionado junto com a consulta
       },
     });
   }
@@ -70,6 +69,28 @@ export class PrismaBookingsRepository implements BookingsRepository {
   async delete(id: string): Promise<void> {
     await prisma.booking.delete({
       where: { id },
+    });
+  }
+
+  async countActiveByServiceAndProfessional(
+    serviceId: string,
+    professionalId: string,
+  ): Promise<number> {
+    return prisma.booking.count({
+      where: {
+        profissionalId: professionalId,
+        items: {
+          some: {
+            serviceId,
+          },
+        },
+        status: {
+          not: 'CANCELADO',
+        },
+        dataHoraFim: {
+          gt: new Date(), // Apenas agendamentos futuros
+        },
+      },
     });
   }
 }

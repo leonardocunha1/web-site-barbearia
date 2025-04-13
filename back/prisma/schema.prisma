@@ -60,7 +60,6 @@ model Professional {
   registro              String? // CRM, CRP, etc.
   ativo                 Boolean                @default(true)
   intervalosAgendamento Int                    @default(30) // Intervalo entre agendamentos (minutos)
-  servicos              Service[]
   bookings              Booking[]
   horariosFuncionamento HorarioFuncionamento[]
   feriados              Feriado[]
@@ -99,18 +98,15 @@ model Feriado {
 }
 
 model Service {
-  id             String                @id @default(uuid())
-  nome           String
-  descricao      String?
-  precoPadrao    Float
-  duracao        Int
-  categoria      String?
-  ativo          Boolean               @default(true)
-  profissionais  ServiceProfessional[]
-  bookings       Booking[]
-  BookingItem    BookingItem[]
-  Professional   Professional?         @relation(fields: [professionalId], references: [id])
-  professionalId String?
+  id            String                @id @default(uuid())
+  nome          String
+  descricao     String?
+  precoPadrao   Float
+  duracao       Int
+  categoria     String?
+  ativo         Boolean               @default(true)
+  profissionais ServiceProfessional[]
+  BookingItem   BookingItem[]
 
   @@map("services")
 }
@@ -143,8 +139,6 @@ model Booking {
   canceledAt     DateTime?
   confirmedAt    DateTime?
   items          BookingItem[]
-  Service        Service?      @relation(fields: [serviceId], references: [id])
-  serviceId      String?
 
   @@map("bookings")
 }
@@ -157,6 +151,8 @@ model BookingItem {
   serviceId String
   preco     Float
   duracao   Int
+
+  @@map("booking_items")
 }
 
 model VerificationToken {

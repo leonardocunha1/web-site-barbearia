@@ -12,4 +12,8 @@ export interface BookingsRepository {
   findManyByUserId(userId: string): Promise<Booking[]>;
   update(id: string, data: Prisma.BookingUpdateInput): Promise<Booking | null>;
   delete(id: string): Promise<void>;
+  countActiveByServiceAndProfessional(
+    serviceId: string,
+    professionalId: string,
+  ): Promise<number>;
 }
