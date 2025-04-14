@@ -5,6 +5,6 @@ import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-reposi
 export function makeVerifyEmailUseCase() {
   const verificationTokensRepository = new PrismaVerificationTokensRepository();
   const usersRepository = new PrismaUsersRepository();
-  
+
   return new VerifyEmailUseCase(verificationTokensRepository, usersRepository);
 }

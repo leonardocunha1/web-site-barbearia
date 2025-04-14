@@ -3,8 +3,8 @@ import { UsersRepository } from '@/repositories/users-repository';
 import { prisma } from '@/lib/prisma';
 
 export class PrismaUsersRepository implements UsersRepository {
-  async update(id: string, data: Prisma.UserUpdateInput): Promise<void> {
-    await prisma.user.update({
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    return await prisma.user.update({
       where: { id },
       data,
     });

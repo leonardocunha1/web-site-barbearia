@@ -6,6 +6,7 @@ import { authenticate } from './authenticate';
 import { logout } from './logout';
 import { verifyEmail } from './verify-email';
 import { sendVerificationEmail } from './send-verification-email';
+import { profile } from './profile';
 
 export async function usersRoutes(app: FastifyInstance) {
   // Rota pública para registro de clientes
@@ -29,4 +30,6 @@ export async function usersRoutes(app: FastifyInstance) {
   // Rota de verificação de e-mail
   app.get('/users/verify-email', verifyEmail);
   app.post('/users/send-verification-email', sendVerificationEmail);
+
+  app.get('/me', { onRequest: [verifyJwt] }, profile);
 }

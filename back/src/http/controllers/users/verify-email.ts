@@ -5,7 +5,10 @@ import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { makeVerifyEmailUseCase } from '@/use-cases/factories/make-verify-email-use-case';
 import { UserAlreadyVerifiedError } from '@/use-cases/errors/user-already-verified-error';
 
-export async function verifyEmail(request: FastifyRequest, reply: FastifyReply) {
+export async function verifyEmail(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
   const verifyEmailQuerySchema = z.object({
     token: z.string().uuid(),
   });
@@ -14,7 +17,7 @@ export async function verifyEmail(request: FastifyRequest, reply: FastifyReply) 
 
   try {
     const verifyEmailUseCase = makeVerifyEmailUseCase();
-    
+
     await verifyEmailUseCase.execute({
       verificationToken: token,
     });

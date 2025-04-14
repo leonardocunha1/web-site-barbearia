@@ -1,8 +1,17 @@
-import { VerificationTokensRepository, VerificationToken } from '@/repositories/verification-tokens-repository';
+import {
+  VerificationTokensRepository,
+  VerificationToken,
+} from '@/repositories/verification-tokens-repository';
 import { prisma } from '@/lib/prisma';
 
-export class PrismaVerificationTokensRepository implements VerificationTokensRepository {
-  async create(token: string, userId: string, expiresAt: Date): Promise<VerificationToken> {
+export class PrismaVerificationTokensRepository
+  implements VerificationTokensRepository
+{
+  async create(
+    token: string,
+    userId: string,
+    expiresAt: Date,
+  ): Promise<VerificationToken> {
     const verificationToken = await prisma.verificationToken.create({
       data: {
         token,
