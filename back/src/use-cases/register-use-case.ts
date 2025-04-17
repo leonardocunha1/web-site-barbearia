@@ -1,4 +1,3 @@
-// src/use-cases/register-user.ts
 import { UsersRepository } from '@/repositories/users-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
@@ -22,7 +21,7 @@ export class RegisterUserUseCase {
   constructor(
     private usersRepository: UsersRepository,
     private professionalsRepository: ProfessionalsRepository,
-    private sendVerificationEmail?: (email: string) => Promise<void>, // Nova dependência
+    private sendVerificationEmail?: (email: string) => Promise<void>,
   ) {}
 
   async execute({

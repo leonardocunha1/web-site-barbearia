@@ -7,6 +7,10 @@ import { logout } from './logout';
 import { verifyEmail } from './verify-email';
 import { sendVerificationEmail } from './send-verification-email';
 import { profile } from './profile';
+import { updateProfile } from './update-profile';
+import { forgotPassword } from './forgot-password-controller';
+import { updatePassword } from './update-password';
+import { listUsers } from './list';
 
 export async function usersRoutes(app: FastifyInstance) {
   // Rota pública para registro de clientes
@@ -31,5 +35,16 @@ export async function usersRoutes(app: FastifyInstance) {
   app.get('/users/verify-email', verifyEmail);
   app.post('/users/send-verification-email', sendVerificationEmail);
 
+  // Rota para pegar/atualizar os dados do usuário logado
   app.get('/me', { onRequest: [verifyJwt] }, profile);
+  app.patch('/me', { onRequest: [verifyJwt] }, updateProfile);
+
+  app.get(
+    '/users',
+    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    listUsers,
+  );
+
+  app.post('/users/forgot-password', forgotPassword);
+  app.post('/users/update-password', updatePassword);
 }

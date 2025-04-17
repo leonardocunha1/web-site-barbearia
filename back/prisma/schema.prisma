@@ -41,10 +41,11 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relações
-  professional      Professional?
-  bookings          Booking[]
-  VerificationToken VerificationToken[]
-  Log               Log[]
+  professional       Professional?
+  bookings           Booking[]
+  VerificationToken  VerificationToken[]
+  Log                Log[]
+  PasswordResetToken PasswordResetToken[]
 
   @@map("users")
 }
@@ -180,4 +181,15 @@ model Log {
   @@index([userId])
   @@index([entidade, referencia])
   @@map("logs")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
 }

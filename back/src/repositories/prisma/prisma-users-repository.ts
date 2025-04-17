@@ -1,4 +1,4 @@
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Role, User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
 import { prisma } from '@/lib/prisma';
 
@@ -24,5 +24,29 @@ export class PrismaUsersRepository implements UsersRepository {
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
     return await prisma.user.create({ data });
+  }
+
+  async updatePassword(id: string, password: string): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: { senha: password },
+    });
+  }
+
+  async listUsers(page: number, limit: number, role?: Role): Promise<User[]> {
+    const skip = (page - 1) * limit;
+    const where = role ? { role } : {};
+
+    return prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async countUsers(role?: Role): Promise<number> {
+    const where = role ? { role } : {};
+    return prisma.user.count({ where });
   }
 }

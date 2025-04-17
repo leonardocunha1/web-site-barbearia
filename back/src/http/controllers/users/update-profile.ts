@@ -1,11 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { UpdateUserProfileUseCase } from '@/use-cases/update-user-profile';
-import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
 import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { EmailAlreadyExistsError } from '@/use-cases/errors/user-email-already-exists-error';
 import { InvalidDataError } from '@/use-cases/errors/invalid-data-error';
-import { UserDTO } from './profile';
+import { makeUpdateUserProfileUseCase } from '@/use-cases/factories/make-update-user-profile-factory-use-case';
+import { UserDTO } from '@/dtos/user-dto';
 
 export async function updateProfile(
   request: FastifyRequest,
@@ -22,9 +21,7 @@ export async function updateProfile(
       request.body,
     );
 
-    const updateUserProfile = new UpdateUserProfileUseCase(
-      new PrismaUsersRepository(),
-    );
+    const updateUserProfile = makeUpdateUserProfileUseCase();
 
     const { user } = await updateUserProfile.execute({
       userId: request.user.sub,
@@ -33,7 +30,6 @@ export async function updateProfile(
       telefone,
     });
 
-    // Não retornar a senha
     const userWithoutPassword: UserDTO = {
       id: user.id,
       nome: user.nome,
