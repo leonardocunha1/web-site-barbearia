@@ -33,9 +33,27 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  async listUsers(page: number, limit: number, role?: Role): Promise<User[]> {
+  async listUsers({
+    page,
+    limit,
+    role,
+    name,
+  }: {
+    page: number;
+    limit: number;
+    role?: Role;
+    name?: string;
+  }): Promise<User[]> {
     const skip = (page - 1) * limit;
-    const where = role ? { role } : {};
+
+    const where: Prisma.UserWhereInput = {};
+    if (role) where.role = role;
+    if (name) {
+      where.nome = {
+        contains: name,
+        mode: 'insensitive', // Busca case-insensitive
+      };
+    }
 
     return prisma.user.findMany({
       where,
@@ -45,8 +63,22 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  async countUsers(role?: Role): Promise<number> {
-    const where = role ? { role } : {};
+  async countUsers({
+    role,
+    name,
+  }: {
+    role?: Role;
+    name?: string;
+  }): Promise<number> {
+    const where: Prisma.UserWhereInput = {};
+    if (role) where.role = role;
+    if (name) {
+      where.nome = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
     return prisma.user.count({ where });
   }
 }

@@ -6,6 +6,7 @@ interface ListUsersUseCaseRequest {
   page?: number;
   limit?: number;
   role?: Role;
+  name?: string;
 }
 
 export class ListUsersUseCase {
@@ -15,10 +16,11 @@ export class ListUsersUseCase {
     page = 1,
     limit = 10,
     role,
+    name,
   }: ListUsersUseCaseRequest): Promise<ListUsersResponse> {
     const [users, total] = await Promise.all([
-      this.usersRepository.listUsers(page, limit, role),
-      this.usersRepository.countUsers(role),
+      this.usersRepository.listUsers({ page, limit, role, name }),
+      this.usersRepository.countUsers({ role, name }),
     ]);
 
     return {

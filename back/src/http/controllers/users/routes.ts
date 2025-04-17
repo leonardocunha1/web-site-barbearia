@@ -11,6 +11,7 @@ import { updateProfile } from './update-profile';
 import { forgotPassword } from './forgot-password-controller';
 import { updatePassword } from './update-password';
 import { listUsers } from './list';
+import { resetPassword } from './reset-password';
 
 export async function usersRoutes(app: FastifyInstance) {
   // Rota pública para registro de clientes
@@ -47,4 +48,5 @@ export async function usersRoutes(app: FastifyInstance) {
 
   app.post('/users/forgot-password', forgotPassword);
   app.post('/users/update-password', updatePassword);
+  app.post('/users/reset-password', resetPassword);
 }
