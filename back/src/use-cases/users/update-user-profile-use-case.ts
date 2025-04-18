@@ -1,8 +1,8 @@
 import { User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
-import { UserNotFoundError } from './errors/user-not-found-error';
-import { InvalidDataError } from './errors/invalid-data-error';
-import { EmailAlreadyExistsError } from './errors/user-email-already-exists-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { InvalidDataError } from '../errors/invalid-data-error';
+import { EmailAlreadyExistsError } from '../errors/user-email-already-exists-error';
 
 interface UpdateUserProfileUseCaseRequest {
   userId: string;

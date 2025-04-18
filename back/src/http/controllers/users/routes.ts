@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
-import { profile } from './profile';
+import { profile } from './get';
 import { listUsers } from './list';
 import { anonymizeUser } from './anonymize';
 import { updateProfile } from './update';

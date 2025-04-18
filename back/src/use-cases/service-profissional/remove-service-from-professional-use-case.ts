@@ -1,7 +1,7 @@
 import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { BookingsRepository } from '@/repositories/bookings-repository';
-import { ServiceProfessionalNotFoundError } from './errors/service-professional-not-found-error';
-import { ServiceWithBookingsError } from './errors/service-with-bookings-error';
+import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
+import { ServiceWithBookingsError } from '../errors/service-with-bookings-error';
 
 interface RemoveServiceFromProfessionalRequest {
   serviceId: string;

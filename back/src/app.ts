@@ -5,6 +5,9 @@ import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import { usersRoutes } from './http/controllers/users/routes';
 import fastifyCors from '@fastify/cors';
+import { professionalsRoutes } from './http/controllers/professional/routes';
+import { servicesRoutes } from './http/controllers/services/routes';
+import { bookingsRoutes } from './http/controllers/bookings/routes';
 
 export const app = fastify();
 
@@ -26,6 +29,9 @@ app.register(fastifyCors, {
 });
 
 app.register(usersRoutes);
+app.register(professionalsRoutes);
+app.register(servicesRoutes);
+app.register(bookingsRoutes);
 
 app.setErrorHandler((error, _request, reply) => {
   if (error instanceof ZodError) {

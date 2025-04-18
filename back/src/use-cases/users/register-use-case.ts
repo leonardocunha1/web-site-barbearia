@@ -1,9 +1,9 @@
 import { UsersRepository } from '@/repositories/users-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { UserAlreadyExistsError } from './errors/user-already-exists-error';
 import type { User, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { InsufficientPermissionsError } from './errors/insufficient-permissions-error';
+import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
+import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
 
 interface RegisterUserRequest {
   nome: string;
@@ -51,19 +51,6 @@ export class RegisterUserUseCase {
       senha: senha_hash,
       role,
     });
-
-    if (role === 'PROFISSIONAL') {
-      await this.professionalsRepository.create({
-        userId: user.id,
-        especialidade: '',
-        bio: null,
-        avatarUrl: null,
-        documento: null,
-        registro: null,
-        ativo: true,
-        intervalosAgendamento: 0,
-      });
-    }
 
     if (this.sendVerificationEmail) {
       await this.sendVerificationEmail(user.email);

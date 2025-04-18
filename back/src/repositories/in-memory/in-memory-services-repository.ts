@@ -15,7 +15,6 @@ export class InMemoryServicesRepository implements ServicesRepository {
       duracao: data.duracao,
       categoria: data.categoria || null,
       ativo: data.ativo !== undefined ? data.ativo : true,
-      professionalId: data.Professional?.connect?.id || null,
     };
 
     this.items.push(service);
@@ -55,8 +54,36 @@ export class InMemoryServicesRepository implements ServicesRepository {
     return updatedService;
   }
 
-  async list(): Promise<Service[]> {
-    return this.items;
+  async list(params: {
+    page: number;
+    limit: number;
+    nome?: string;
+    categoria?: string;
+    ativo?: boolean;
+    professionalId?: string;
+  }): Promise<{ services: Service[]; total: number }> {
+    const { page, limit, nome, categoria, ativo } = params;
+
+    let filteredItems = this.items;
+
+    if (nome) {
+      filteredItems = filteredItems.filter((item) => item.nome.includes(nome));
+    }
+
+    if (categoria) {
+      filteredItems = filteredItems.filter(
+        (item) => item.categoria === categoria,
+      );
+    }
+
+    if (ativo !== undefined) {
+      filteredItems = filteredItems.filter((item) => item.ativo === ativo);
+    }
+
+    const total = filteredItems.length;
+    const services = filteredItems.slice((page - 1) * limit, page * limit);
+
+    return { services, total };
   }
 
   async delete(id: string): Promise<void> {
@@ -65,5 +92,15 @@ export class InMemoryServicesRepository implements ServicesRepository {
     if (index !== -1) {
       this.items.splice(index, 1);
     }
+  }
+
+  async softDelete(id: string): Promise<void> {
+    console.log(id);
+    throw new Error('Method not implemented.');
+  }
+
+  async toggleStatus(id: string, newStatus: boolean): Promise<Service> {
+    console.log(id, newStatus);
+    throw new Error('Method not implemented.');
   }
 }

@@ -15,9 +15,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     });
   }
 
-  async create(
-    data: Prisma.ProfessionalUncheckedCreateInput,
-  ): Promise<Professional> {
+  async create(data: Prisma.ProfessionalCreateInput): Promise<Professional> {
     return prisma.professional.create({
       data,
     });

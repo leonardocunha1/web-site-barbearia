@@ -19,7 +19,6 @@ export class InMemoryBookingsRepository implements BookingsRepository {
       updatedAt: new Date(),
       canceledAt: null,
       confirmedAt: null,
-      serviceId: data.Service?.connect?.id || null,
     };
 
     this.items.push(booking);
@@ -76,5 +75,13 @@ export class InMemoryBookingsRepository implements BookingsRepository {
 
   async delete(id: string): Promise<void> {
     this.items = this.items.filter((item) => item.id !== id);
+  }
+
+  async countActiveByServiceAndProfessional(
+    serviceId: string,
+    professionalId: string,
+  ): Promise<number> {
+    console.log(serviceId, professionalId);
+    return Promise.resolve(0);
   }
 }

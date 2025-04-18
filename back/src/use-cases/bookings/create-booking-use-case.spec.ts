@@ -10,7 +10,7 @@ import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
 import { InvalidDurationError } from '../errors/invalid-duration-error';
 import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
-import { CreateBookingUseCase } from '../create-booking-use-case';
+import { CreateBookingUseCase } from './create-booking-use-case';
 
 let bookingsRepository: InMemoryBookingsRepository;
 let usersRepository: InMemoryUsersRepository;
@@ -55,7 +55,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
     });
 
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       bio: null,
       avatarUrl: null,
@@ -86,7 +86,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
 
   it('não deve permitir agendamento com usuário inválido', async () => {
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       ativo: true,
       intervalosAgendamento: 30,
@@ -143,7 +143,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
     });
 
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       ativo: true,
       intervalosAgendamento: 30,
@@ -171,7 +171,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
     });
 
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       ativo: true,
       intervalosAgendamento: 30,
@@ -207,7 +207,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
     });
 
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       ativo: true,
       intervalosAgendamento: 30,
@@ -241,7 +241,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
     });
 
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       ativo: true,
       intervalosAgendamento: 30,
@@ -286,7 +286,7 @@ describe('Caso de Uso: Criar Agendamento', () => {
     });
 
     const professional = await professionalsRepository.create({
-      userId: 'professional-1',
+      user: { connect: { id: 'professional-1' } },
       especialidade: 'Barbeiro',
       ativo: true,
       intervalosAgendamento: 30,

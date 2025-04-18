@@ -7,9 +7,6 @@ import { getService } from './get';
 import { updateService } from './update';
 import { deleteService } from './delete';
 import { toggleServiceStatus } from './toggle-status';
-import { addToProfessional } from './add-to-professional';
-import { removeFromProfessional } from './remove-from-professional';
-import { listProfessionalServices } from './professionals-services';
 
 export async function servicesRoutes(app: FastifyInstance) {
   app.post(
@@ -40,18 +37,4 @@ export async function servicesRoutes(app: FastifyInstance) {
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
     toggleServiceStatus,
   );
-
-  app.post(
-    '/services/add-to-professional',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
-    addToProfessional,
-  );
-
-  app.delete(
-    '/services/remove-from-professional',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
-    removeFromProfessional,
-  );
-
-  app.get('/professionals/:professionalId/services', listProfessionalServices);
 }

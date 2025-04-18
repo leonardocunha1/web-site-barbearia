@@ -14,13 +14,17 @@ export async function createBooking(
 ) {
   const createBookingBodySchema = z.object({
     professionalId: z.string().uuid(),
-    serviceId: z.string().uuid(),
+    services: z.array(
+      z.object({
+        serviceId: z.string().uuid(),
+      }),
+    ),
     startDateTime: z.string().datetime({ offset: true }),
     notes: z.string().max(500).optional(),
   });
 
   try {
-    const { professionalId, serviceId, startDateTime, notes } =
+    const { professionalId, services, startDateTime, notes } =
       createBookingBodySchema.parse(request.body);
 
     const createBookingUseCase = makeCreateBookingUseCase();
@@ -28,7 +32,7 @@ export async function createBooking(
     const { booking } = await createBookingUseCase.execute({
       userId: request.user.sub,
       professionalId,
-      serviceId,
+      services,
       startDateTime: new Date(startDateTime),
       notes,
     });

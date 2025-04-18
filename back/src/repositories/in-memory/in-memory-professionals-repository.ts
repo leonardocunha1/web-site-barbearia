@@ -1,4 +1,4 @@
-import { Professional } from '@prisma/client';
+import { Prisma, Professional } from '@prisma/client';
 import { ProfessionalsRepository } from '../professionals-repository';
 
 export class InMemoryProfessionalsRepository
@@ -6,14 +6,19 @@ export class InMemoryProfessionalsRepository
 {
   public items: Professional[] = [];
 
-  async create(
-    data: Omit<Professional, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Professional> {
+  async create(data: Prisma.ProfessionalCreateInput): Promise<Professional> {
     const professional: Professional = {
       id: crypto.randomUUID(),
+      userId: data.user.connect?.id || '',
+      especialidade: data.especialidade || '',
+      bio: data.bio ?? null,
+      avatarUrl: data.avatarUrl ?? null,
+      documento: data.documento ?? null,
+      registro: data.registro ?? null,
+      ativo: data.ativo ?? false,
+      intervalosAgendamento: data.intervalosAgendamento ?? 0,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...data,
     };
 
     this.items.push(professional);

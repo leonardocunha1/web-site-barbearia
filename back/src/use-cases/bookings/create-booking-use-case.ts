@@ -15,7 +15,7 @@ import { InvalidDurationError } from '../errors/invalid-duration-error';
 export interface BookingRequest {
   userId: string;
   professionalId: string;
-  serviceId: string;
+  services: Array<{ serviceId: string }>;
   startDateTime: Date;
   notes?: string;
 }
@@ -33,62 +33,63 @@ export class CreateBookingUseCase {
   ) {}
 
   async execute(request: BookingRequest): Promise<BookingResponse> {
-    // Validação de data/hora
     const now = new Date();
     if (request.startDateTime < now) {
       throw new InvalidDateTimeError();
     }
 
-    // Verificações em paralelo
-    const [user, professional, service] = await Promise.all([
+    const [user, professional] = await Promise.all([
       this.usersRepository.findById(request.userId),
       this.professionalsRepository.findById(request.professionalId),
-      this.servicesRepository.findById(request.serviceId),
     ]);
 
     if (!user) throw new UserNotFoundError();
     if (!professional) throw new ProfessionalNotFoundError();
-    if (!service) throw new ServiceNotFoundError();
 
-    // Validação de duração
-    if (service.duracao <= 0) {
-      throw new InvalidDurationError();
-    }
-
-    // Cálculo do horário final
-    const endDateTime = new Date(
-      request.startDateTime.getTime() + service.duracao * 60000,
+    // Buscar todos os serviços
+    const services = await Promise.all(
+      request.services.map(async ({ serviceId }) => {
+        const service = await this.servicesRepository.findById(serviceId);
+        if (!service) throw new ServiceNotFoundError();
+        if (service.duracao <= 0) throw new InvalidDurationError();
+        return service;
+      }),
     );
 
-    // Verificação de conflito
+    // Somar as durações dos serviços
+    const totalDuration = services.reduce(
+      (sum, service) => sum + service.duracao,
+      0,
+    );
+    const endDateTime = new Date(
+      request.startDateTime.getTime() + totalDuration * 60000,
+    );
+
+    // Verificar conflito de horário
     const conflictingBooking =
       await this.bookingsRepository.findOverlappingBooking(
         request.professionalId,
         request.startDateTime,
         endDateTime,
       );
-
     if (conflictingBooking) {
       throw new TimeSlotAlreadyBookedError();
     }
 
-    // Criação do agendamento
+    // Criar o agendamento com múltiplos serviços
     const booking = await this.bookingsRepository.create({
       dataHoraInicio: request.startDateTime,
       dataHoraFim: endDateTime,
       observacoes: request.notes,
       user: { connect: { id: request.userId } },
       profissional: { connect: { id: request.professionalId } },
-      Service: { connect: { id: request.serviceId } },
       status: 'PENDENTE',
       items: {
-        create: [
-          {
-            service: { connect: { id: request.serviceId } },
-            preco: service.precoPadrao,
-            duracao: service.duracao,
-          },
-        ],
+        create: services.map((service) => ({
+          service: { connect: { id: service.id } },
+          preco: service.precoPadrao,
+          duracao: service.duracao,
+        })),
       },
     });
 
