@@ -1,9 +1,10 @@
-import { User, Prisma } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { Prisma, Role, User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
+import { randomUUID } from 'crypto';
+import { hash } from 'bcryptjs';
 
 export class InMemoryUsersRepository implements UsersRepository {
-  public items: User[] = [];
+  private users: User[] = [];
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
     const now = new Date();
@@ -21,28 +22,97 @@ export class InMemoryUsersRepository implements UsersRepository {
       updatedAt: data.updatedAt ? new Date(data.updatedAt) : now,
     };
 
-    this.items.push(user);
+    this.users.push(user);
     return user;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.items.find((user) => user.email === email) ?? null;
+    return this.users.find((user) => user.email === email) ?? null;
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.items.find((user) => user.id === id) ?? null;
+    return this.users.find((user) => user.id === id) ?? null;
   }
 
-  async update(id: string, data: Partial<User>): Promise<void> {
-    const userIndex = this.items.findIndex((user) => user.id === id);
-    if (userIndex >= 0) {
-      const currentUser = this.items[userIndex];
+  async update(id: string, data: Partial<User>): Promise<User> {
+    const userIndex = this.users.findIndex((u) => u.id === id);
+    if (userIndex === -1) throw new Error('User not found');
 
-      this.items[userIndex] = {
-        ...currentUser,
-        ...data,
-        updatedAt: new Date(),
-      };
+    const updatedUser = {
+      ...this.users[userIndex],
+      ...data,
+      updatedAt: new Date(),
+    };
+
+    this.users[userIndex] = updatedUser;
+    return updatedUser;
+  }
+
+  async updatePassword(id: string, password: string): Promise<User> {
+    return this.update(id, { senha: password });
+  }
+
+  async listUsers({
+    page,
+    limit,
+    role,
+    name,
+  }: {
+    page: number;
+    limit: number;
+    role?: Role;
+    name?: string;
+  }): Promise<User[]> {
+    let filtered = [...this.users];
+
+    if (role) {
+      filtered = filtered.filter((user) => user.role === role);
     }
+
+    if (name) {
+      const nameLower = name.toLowerCase();
+      filtered = filtered.filter((user) =>
+        user.nome.toLowerCase().includes(nameLower),
+      );
+    }
+
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    return filtered.slice(start, end);
+  }
+
+  async countUsers({
+    role,
+    name,
+  }: {
+    role?: Role;
+    name?: string;
+  }): Promise<number> {
+    let filtered = [...this.users];
+
+    if (role) {
+      filtered = filtered.filter((user) => user.role === role);
+    }
+
+    if (name) {
+      const nameLower = name.toLowerCase();
+      filtered = filtered.filter((user) =>
+        user.nome.toLowerCase().includes(nameLower),
+      );
+    }
+
+    return filtered.length;
+  }
+
+  async anonymize(userId: string): Promise<void> {
+    const user = await this.findById(userId);
+    if (!user) return;
+
+    user.email = `anon-${Date.now()}@deleted.com`;
+    user.telefone = `deleted-${Math.random().toString(36).substring(2, 10)}`;
+    user.active = false;
+    user.senha = await hash('deleted-account', 6);
+    user.updatedAt = new Date();
   }
 }

@@ -3,14 +3,14 @@ import { UsersRepository } from '@/repositories/users-repository';
 import { ServicesRepository } from '@/repositories/services-repository';
 
 import { Booking } from '@prisma/client';
-import { UserNotFoundError } from './errors/user-not-found-error';
-import { ProfessionalNotFoundError } from './errors/professional-not-found-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 
-import { TimeSlotAlreadyBookedError } from './errors/time-slot-already-booked-error';
-import { ServiceNotFoundError } from './errors/service-not-found-error';
+import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
+import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { InvalidDateTimeError } from './errors/invalid-date-time-error';
-import { InvalidDurationError } from './errors/invalid-duration-error';
+import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
+import { InvalidDurationError } from '../errors/invalid-duration-error';
 
 export interface BookingRequest {
   userId: string;

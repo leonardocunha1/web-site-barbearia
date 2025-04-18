@@ -13,4 +13,5 @@ export interface UsersRepository {
     name?: string;
   }): Promise<User[]>;
   countUsers(params: { role?: Role; name?: string }): Promise<number>;
+  anonymize(userId: string): Promise<void>;
 }

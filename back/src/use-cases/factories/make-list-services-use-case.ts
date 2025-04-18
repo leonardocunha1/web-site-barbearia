@@ -1,5 +1,5 @@
 import { PrismaServicesRepository } from '@/repositories/prisma/prisma-services-repository';
-import { ListServicesUseCase } from '../list-services';
+import { ListServicesUseCase } from '../services-barber/list-services';
 
 export function makeListServicesUseCase() {
   const servicesRepository = new PrismaServicesRepository();

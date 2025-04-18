@@ -1,9 +1,9 @@
 import { ServicesRepository } from '@/repositories/services-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { ServiceNotFoundError } from './errors/service-not-found-error';
-import { ProfessionalNotFoundError } from './errors/professional-not-found-error';
+import { ServiceNotFoundError } from '../errors/service-not-found-error';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
-import { ServiceAlreadyAddedError } from './errors/service-already-added-error';
+import { ServiceAlreadyAddedError } from '../errors/service-already-added-error';
 
 interface AddServiceToProfessionalRequest {
   serviceId: string;

@@ -4,13 +4,13 @@ import { InMemoryBookingsRepository } from '@/repositories/in-memory/in-memory-b
 import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
 import { InMemoryServicesRepository } from '@/repositories/in-memory/in-memory-services-repository';
-import { UserNotFoundError } from './errors/user-not-found-error';
-import { ProfessionalNotFoundError } from './errors/professional-not-found-error';
-import { ServiceNotFoundError } from './errors/service-not-found-error';
-import { InvalidDateTimeError } from './errors/invalid-date-time-error';
-import { InvalidDurationError } from './errors/invalid-duration-error';
-import { TimeSlotAlreadyBookedError } from './errors/time-slot-already-booked-error';
-import { CreateBookingUseCase } from './create-booking-use-case';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
+import { ServiceNotFoundError } from '../errors/service-not-found-error';
+import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
+import { InvalidDurationError } from '../errors/invalid-duration-error';
+import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
+import { CreateBookingUseCase } from '../create-booking-use-case';
 
 let bookingsRepository: InMemoryBookingsRepository;
 let usersRepository: InMemoryUsersRepository;

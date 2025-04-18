@@ -57,8 +57,8 @@ model Professional {
   especialidade         String
   bio                   String?
   avatarUrl             String?
-  documento             String? // CPF/CNPJ
-  registro              String? // CRM, CRP, etc.
+  documento             String?
+  registro              String?
   ativo                 Boolean                @default(true)
   intervalosAgendamento Int                    @default(30) // Intervalo entre agendamentos (minutos)
   bookings              Booking[]

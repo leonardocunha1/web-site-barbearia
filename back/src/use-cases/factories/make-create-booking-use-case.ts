@@ -3,7 +3,7 @@ import { PrismaBookingsRepository } from '@/repositories/prisma/prisma-bookings-
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
 import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
 import { PrismaServicesRepository } from '@/repositories/prisma/prisma-services-repository';
-import { CreateBookingUseCase } from '../create-booking-use-case';
+import { CreateBookingUseCase } from '../bookings/create-booking-use-case';
 
 export function makeCreateBookingUseCase() {
   const bookingsRepository = new PrismaBookingsRepository();

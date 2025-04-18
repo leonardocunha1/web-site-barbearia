@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { UserAlreadyExistsError } from './errors/user-already-exists-error';
-import { InsufficientPermissionsError } from './errors/insufficient-permissions-error';
+import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
+import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
 import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
 import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { RegisterUserUseCase } from './register-use-case';

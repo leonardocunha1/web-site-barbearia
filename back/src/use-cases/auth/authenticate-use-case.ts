@@ -1,8 +1,8 @@
 import { UsersRepository } from '@/repositories/users-repository';
-import { InvalidCredentialsError } from './errors/invalid-credentials-error';
-import { InactiveUserError } from './errors/inactive-user-error';
+import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
+import { InactiveUserError } from '../errors/inactive-user-error';
 import bcrypt from 'bcryptjs';
-import { EmailNotVerifiedError } from './errors/user-email-not-verified-error';
+import { EmailNotVerifiedError } from '../errors/user-email-not-verified-error';
 
 interface AuthenticateRequest {
   email: string;
