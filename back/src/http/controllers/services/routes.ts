@@ -6,7 +6,7 @@ import { listServices } from './list';
 import { getService } from './get';
 import { updateService } from './update';
 import { deleteService } from './delete';
-import { toggleServiceStatus } from './toggle-status';
+import { toggleServiceStatus } from './toggle-status-ativo';
 
 export async function servicesRoutes(app: FastifyInstance) {
   app.post(

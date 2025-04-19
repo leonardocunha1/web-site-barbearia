@@ -5,7 +5,7 @@ import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import { usersRoutes } from './http/controllers/users/routes';
 import fastifyCors from '@fastify/cors';
-import { professionalsRoutes } from './http/controllers/professional/routes';
+import { professionalsRoutes } from './http/controllers/professionals/routes';
 import { servicesRoutes } from './http/controllers/services/routes';
 import { bookingsRoutes } from './http/controllers/bookings/routes';
 

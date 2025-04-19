@@ -3,7 +3,7 @@ import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { addToProfessional } from './add-to-professional-service';
 import { removeFromProfessional } from './remove-from-professional-service';
-import { listProfessionalServices } from './list-professionals-services';
+import { listProfessionalServices } from './list-professional-services';
 
 export async function serviceProfessionalRoutes(app: FastifyInstance) {
   app.post(
