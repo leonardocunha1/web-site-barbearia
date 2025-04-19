@@ -3,6 +3,9 @@ import { Prisma, Professional, Service, User } from '@prisma/client';
 export interface ProfessionalsRepository {
   findById(id: string): Promise<Professional | null>;
   findByUserId(userId: string): Promise<Professional | null>;
+  findByProfessionalId(
+    professionalId: string,
+  ): Promise<(Professional & { user: User }) | null>;
   create(data: Prisma.ProfessionalCreateInput): Promise<Professional>;
   update(
     id: string,

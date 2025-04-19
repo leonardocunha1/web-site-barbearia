@@ -6,6 +6,8 @@ import { updateProfessional } from './update';
 import { listProfessionals } from './list';
 import { toggleProfessionalStatus } from './toggle-status-ativo';
 import { searchProfessionals } from './search-professionals';
+import { dashboard } from './get-dashboard';
+import { getSchedule } from './get-schedule';
 
 export async function professionalsRoutes(app: FastifyInstance) {
   app.post(
@@ -28,5 +30,15 @@ export async function professionalsRoutes(app: FastifyInstance) {
     '/professionals/search',
     { onRequest: [verifyJwt] },
     searchProfessionals,
+  );
+  app.get(
+    '/professionals/dashboard',
+    { onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')] },
+    dashboard,
+  );
+  app.get(
+    '/professionals/schedule',
+    { onRequest: verifyUserRole('PROFISSIONAL') },
+    getSchedule,
   );
 }

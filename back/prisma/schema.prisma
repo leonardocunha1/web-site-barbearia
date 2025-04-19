@@ -58,9 +58,7 @@ model Professional {
   bio                   String?
   avatarUrl             String?
   documento             String?
-  registro              String?
   ativo                 Boolean                @default(true)
-  intervalosAgendamento Int                    @default(30) // Intervalo entre agendamentos (minutos)
   bookings              Booking[]
   horariosFuncionamento HorarioFuncionamento[]
   feriados              Feriado[]

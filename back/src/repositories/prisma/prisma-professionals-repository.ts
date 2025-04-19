@@ -15,6 +15,15 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     });
   }
 
+  async findByProfessionalId(
+    id: string,
+  ): Promise<(Professional & { user: User }) | null> {
+    return prisma.professional.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+  }
+
   async create(data: Prisma.ProfessionalCreateInput): Promise<Professional> {
     return prisma.professional.create({
       data,
