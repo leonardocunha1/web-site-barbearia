@@ -29,16 +29,16 @@ enum Status {
 
 // Tabelas principais
 model User {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   nome          String
-  email         String    @unique
+  email         String   @unique
   senha         String
   telefone      String?
-  role          Role      @default(CLIENTE)
-  emailVerified DateTime? @map("email_verified")
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          Role     @default(CLIENTE)
+  emailVerified Boolean  @default(false)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relações
   professional       Professional?

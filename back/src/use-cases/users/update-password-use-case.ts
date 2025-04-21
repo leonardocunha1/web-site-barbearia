@@ -1,8 +1,8 @@
 import { compare, hash } from 'bcryptjs';
 import { UsersRepository } from '@/repositories/users-repository';
-import { UserNotFoundError } from './errors/user-not-found-error';
-import { InvalidCredentialsError } from './errors/invalid-credentials-error';
-import { SamePasswordError } from './errors/same-password-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
+import { SamePasswordError } from '../errors/same-password-error';
 
 interface UpdatePasswordUseCaseRequest {
   userId: string;

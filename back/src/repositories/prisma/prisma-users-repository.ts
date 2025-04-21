@@ -84,7 +84,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async anonymize(userId: string): Promise<void> {
-    const anonymizedEmail = `anon-${Date.now()}@deleted.com`;
+    const anonymizedEmail = `anon-${Date.now()}-${hash(userId, 6)}@deleted.com`;
     const anonymizedPhone = `deleted-${Math.random().toString(36).substring(2, 10)}`;
 
     await prisma.user.update({

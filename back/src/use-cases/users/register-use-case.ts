@@ -1,5 +1,4 @@
 import { UsersRepository } from '@/repositories/users-repository';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import type { User, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
@@ -20,7 +19,6 @@ interface RegisterUserResponse {
 export class RegisterUserUseCase {
   constructor(
     private usersRepository: UsersRepository,
-    private professionalsRepository: ProfessionalsRepository,
     private sendVerificationEmail?: (email: string) => Promise<void>,
   ) {}
 

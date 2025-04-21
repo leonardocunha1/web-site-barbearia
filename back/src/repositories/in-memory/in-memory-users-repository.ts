@@ -16,7 +16,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       senha: data.senha,
       telefone: data.telefone ?? null,
       role: data.role ?? 'CLIENTE',
-      emailVerified: data.emailVerified ? new Date(data.emailVerified) : null,
+      emailVerified: !!data.emailVerified,
       active: data.active ?? true,
       createdAt: data.createdAt ? new Date(data.createdAt) : now,
       updatedAt: data.updatedAt ? new Date(data.updatedAt) : now,

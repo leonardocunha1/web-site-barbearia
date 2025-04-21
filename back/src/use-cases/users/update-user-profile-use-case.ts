@@ -1,8 +1,8 @@
-import { User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { EmailAlreadyExistsError } from '../errors/user-email-already-exists-error';
+import { UserDTO } from '@/dtos/user-dto';
 
 interface UpdateUserProfileUseCaseRequest {
   userId: string;
@@ -12,7 +12,7 @@ interface UpdateUserProfileUseCaseRequest {
 }
 
 interface UpdateUserProfileUseCaseResponse {
-  user: User;
+  user: UserDTO;
 }
 
 export class UpdateUserProfileUseCase {
@@ -44,12 +44,27 @@ export class UpdateUserProfileUseCase {
       }
     }
 
-    const updatedUser = await this.usersRepository.update(userId, {
-      nome,
-      email,
-      telefone,
-    });
+    const dataToUpdate: Partial<Pick<UserDTO, 'nome' | 'email' | 'telefone'>> =
+      {};
 
-    return { user: updatedUser };
+    if (nome !== undefined) dataToUpdate.nome = nome;
+    if (email !== undefined) dataToUpdate.email = email;
+    if (telefone !== undefined) dataToUpdate.telefone = telefone;
+
+    const updatedUser = await this.usersRepository.update(userId, dataToUpdate);
+
+    const userWithoutPassword: UserDTO = {
+      id: updatedUser.id,
+      nome: updatedUser.nome,
+      email: updatedUser.email,
+      telefone: updatedUser.telefone,
+      role: updatedUser.role,
+      emailVerified: updatedUser.emailVerified,
+      active: updatedUser.active,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
+
+    return { user: userWithoutPassword };
   }
 }

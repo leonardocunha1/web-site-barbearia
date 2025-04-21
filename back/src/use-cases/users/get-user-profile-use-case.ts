@@ -1,13 +1,13 @@
-import { User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
-import { UserNotFoundError } from './errors/user-not-found-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { UserDTO } from '@/dtos/user-dto';
 
 interface GetUserProfileUseCaseRequest {
   userId: string;
 }
 
 interface GetUserProfileUseCaseResponse {
-  user: User;
+  user: UserDTO;
 }
 
 export class GetUserProfileUseCase {
@@ -22,6 +22,18 @@ export class GetUserProfileUseCase {
       throw new UserNotFoundError();
     }
 
-    return { user };
+    const userWithoutPassword: UserDTO = {
+      id: user.id,
+      nome: user.nome,
+      email: user.email,
+      telefone: user.telefone,
+      role: user.role,
+      emailVerified: user.emailVerified,
+      active: user.active,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    return { user: userWithoutPassword };
   }
 }

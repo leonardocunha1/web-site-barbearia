@@ -6,7 +6,7 @@ export type UserDTO = {
   email: string;
   telefone: string | null;
   role: string;
-  emailVerified: Date | null;
+  emailVerified: boolean | null;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
