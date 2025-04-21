@@ -20,7 +20,7 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
-          include: ['src/use-cases/**.spec.ts'],
+          include: ['src/use-cases/**/**.spec.ts'],
           environment: 'node',
           alias: {
             '@': path.resolve(__dirname, './src'),

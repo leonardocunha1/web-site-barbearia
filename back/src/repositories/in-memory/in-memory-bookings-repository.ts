@@ -1,24 +1,31 @@
-import { Booking, Prisma } from '@prisma/client';
+import { Booking, Prisma, Status } from '@prisma/client';
 import { BookingsRepository } from '../bookings-repository';
 import { randomUUID } from 'node:crypto';
 
+interface CompleteBooking extends Booking {
+  user: { nome: string };
+  items: Array<{ service: { nome: string } }>;
+}
+
 export class InMemoryBookingsRepository implements BookingsRepository {
-  public items: Booking[] = [];
+  public items: CompleteBooking[] = [];
 
   async create(data: Prisma.BookingCreateInput): Promise<Booking> {
-    const booking: Booking = {
+    const booking: CompleteBooking = {
       id: randomUUID(),
       usuarioId: data.user.connect?.id || '',
       profissionalId: data.profissional.connect?.id || '',
       dataHoraInicio: new Date(data.dataHoraInicio),
       dataHoraFim: new Date(data.dataHoraFim),
-      status: 'PENDENTE',
+      status: data.status || 'PENDENTE',
       observacoes: data.observacoes || null,
-      valorFinal: null,
+      valorFinal: data.valorFinal || null,
       createdAt: new Date(),
       updatedAt: new Date(),
       canceledAt: null,
       confirmedAt: null,
+      user: { nome: 'Cliente não especificado' }, // Valor padrão para user
+      items: [], // Array vazio inicial para items
     };
 
     this.items.push(booking);
@@ -47,30 +54,46 @@ export class InMemoryBookingsRepository implements BookingsRepository {
   }
 
   async findManyByProfessionalId(professionalId: string): Promise<Booking[]> {
-    return this.items.filter((item) => item.profissionalId === professionalId);
+    return this.items
+      .filter((item) => item.profissionalId === professionalId)
+      .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
   }
 
   async findManyByUserId(userId: string): Promise<Booking[]> {
-    return this.items.filter((item) => item.usuarioId === userId);
+    return this.items
+      .filter((item) => item.usuarioId === userId)
+      .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
   }
 
   async update(
     id: string,
-    data: Partial<Omit<Booking, 'id' | 'createdAt'>>,
+    data: Prisma.BookingUpdateInput,
   ): Promise<Booking | null> {
     const index = this.items.findIndex((item) => item.id === id);
     if (index === -1) return null;
 
     const existing = this.items[index];
 
-    const updated: Booking = {
+    const updated: CompleteBooking = {
       ...existing,
-      ...data,
+      status: (data.status as Status) || existing.status,
+      observacoes: (data.observacoes as string | null) ?? existing.observacoes,
+      valorFinal: (data.valorFinal as number | null) ?? existing.valorFinal,
+      canceledAt: data.canceledAt
+        ? new Date(data.canceledAt as Date)
+        : existing.canceledAt,
+      confirmedAt: data.confirmedAt
+        ? new Date(data.confirmedAt as Date)
+        : existing.confirmedAt,
       updatedAt: new Date(),
     };
 
     this.items[index] = updated;
-    return updated;
+
+    // Retorna apenas as propriedades de Booking
+    const { user, items, ...bookingData } = updated;
+    console.log(user, items);
+    return bookingData;
   }
 
   async delete(id: string): Promise<void> {
@@ -78,10 +101,163 @@ export class InMemoryBookingsRepository implements BookingsRepository {
   }
 
   async countActiveByServiceAndProfessional(
-    serviceId: string,
     professionalId: string,
   ): Promise<number> {
-    console.log(serviceId, professionalId);
-    return Promise.resolve(0);
+    // Nota: Esta implementação assume que você tem acesso aos itens do agendamento
+    // Em um cenário real, você precisaria de uma estrutura mais complexa
+    return this.items.filter(
+      (booking) =>
+        booking.profissionalId === professionalId &&
+        booking.status !== 'CANCELADO' &&
+        booking.dataHoraFim > new Date(),
+    ).length;
+  }
+
+  async countByProfessionalAndDate(
+    professionalId: string,
+    start: Date,
+    end: Date,
+    status?: Status,
+  ): Promise<number> {
+    return this.items.filter((booking) => {
+      return (
+        booking.profissionalId === professionalId &&
+        booking.dataHoraInicio >= start &&
+        booking.dataHoraInicio <= end &&
+        (status ? booking.status === status : true)
+      );
+    }).length;
+  }
+
+  async getEarningsByProfessionalAndDate(
+    professionalId: string,
+    start: Date,
+    end: Date,
+    status?: Status,
+  ): Promise<number> {
+    return this.items
+      .filter((booking) => {
+        return (
+          booking.profissionalId === professionalId &&
+          booking.dataHoraInicio >= start &&
+          booking.dataHoraInicio <= end &&
+          (status ? booking.status === status : true) &&
+          booking.valorFinal !== null
+        );
+      })
+      .reduce((sum, booking) => sum + (booking.valorFinal || 0), 0);
+  }
+
+  async countByProfessionalAndStatus(
+    professionalId: string,
+    status: Status,
+    start?: Date,
+    end?: Date,
+  ): Promise<number> {
+    return this.items.filter((booking) => {
+      return (
+        booking.profissionalId === professionalId &&
+        booking.status === status &&
+        (start && end
+          ? booking.dataHoraInicio >= start && booking.dataHoraInicio <= end
+          : true)
+      );
+    }).length;
+  }
+
+  async getMonthlyEarnings(
+    professionalId: string,
+    month?: number,
+    year?: number,
+  ): Promise<number> {
+    const date = new Date();
+    const targetMonth = month ?? date.getMonth();
+    const targetYear = year ?? date.getFullYear();
+
+    const start = new Date(targetYear, targetMonth, 1);
+    const end = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59, 999);
+
+    return this.getEarningsByProfessionalAndDate(
+      professionalId,
+      start,
+      end,
+      'CONCLUIDO',
+    );
+  }
+
+  async findNextAppointments(
+    professionalId: string,
+    limit: number,
+    filters?: { startDate?: Date; endDate?: Date },
+  ): Promise<
+    {
+      id: string;
+      dataHoraInicio: Date;
+      status: Status;
+      user: { nome: string };
+      items: { service: { nome: string } }[];
+    }[]
+  > {
+    const filtered = this.items
+      .filter((booking) => {
+        return (
+          booking.profissionalId === professionalId &&
+          booking.dataHoraInicio >= (filters?.startDate || new Date()) &&
+          (filters?.endDate
+            ? booking.dataHoraInicio <= filters.endDate
+            : true) &&
+          ['PENDENTE', 'CONFIRMADO'].includes(booking.status)
+        );
+      })
+      .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime())
+      .slice(0, limit);
+
+    return filtered.map((booking) => ({
+      id: booking.id,
+      dataHoraInicio: booking.dataHoraInicio,
+      status: booking.status as Status,
+      user: booking.user,
+      items: booking.items,
+    }));
+  }
+
+  async findByProfessionalAndDate(
+    professionalId: string,
+    date: Date,
+  ): Promise<
+    {
+      id: string;
+      dataHoraInicio: Date;
+      dataHoraFim: Date;
+      status: string;
+      user: { nome: string };
+      items: { service: { nome: string } }[];
+    }[]
+  > {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const filtered = this.items
+      .filter((booking) => {
+        return (
+          booking.profissionalId === professionalId &&
+          booking.dataHoraInicio >= startOfDay &&
+          booking.dataHoraInicio <= endOfDay &&
+          booking.status !== 'CANCELADO'
+        );
+      })
+      .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
+
+    return filtered.map((booking) => ({
+      id: booking.id,
+      dataHoraInicio: booking.dataHoraInicio,
+      dataHoraFim: booking.dataHoraFim,
+      status: booking.status,
+      user: booking.user,
+      items: booking.items,
+    }));
   }
 }

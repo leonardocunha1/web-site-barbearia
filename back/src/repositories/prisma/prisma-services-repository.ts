@@ -120,9 +120,6 @@ export class PrismaServicesRepository implements ServicesRepository {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { nome: 'asc' },
-      include: {
-        Professional: true,
-      },
     });
 
     const total = await prisma.service.count({

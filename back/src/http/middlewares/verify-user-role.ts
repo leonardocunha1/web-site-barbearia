@@ -1,8 +1,16 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 export function verifyUserRole(
-  roleToVerify: 'ADMIN' | 'CLIENTE' | 'PROFISSIONAL',
+  rolesToVerify:
+    | 'ADMIN'
+    | 'CLIENTE'
+    | 'PROFISSIONAL'
+    | Array<'ADMIN' | 'CLIENTE' | 'PROFISSIONAL'>,
 ) {
+  const rolesArray = Array.isArray(rolesToVerify)
+    ? rolesToVerify
+    : [rolesToVerify];
+
   return async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
       return reply
@@ -12,10 +20,10 @@ export function verifyUserRole(
 
     const { role } = request.user;
 
-    if (role !== roleToVerify) {
+    if (!rolesArray.includes(role)) {
       return reply
-        .status(401)
-        .send({ message: 'Acesso negado, você não tem permissão para isso' });
+        .status(403)
+        .send({ message: 'Acesso negado. Permissão insuficiente.' });
     }
   };
 }

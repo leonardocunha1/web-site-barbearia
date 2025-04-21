@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { VerifyEmailUseCase } from '@/use-cases/verify-email-use-case';
 import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
-import { InvalidTokenError } from '@/use-cases/errors/invalid-token-error';
 import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { UserAlreadyVerifiedError } from '@/use-cases/errors/user-already-verified-error';
 import { InMemoryVerificationTokensRepository } from '@/repositories/in-memory/in-memory-tokens-repository';
+import { VerifyEmailUseCase } from './verify-email-use-case';
+import { InvalidTokenError } from '@/use-cases/errors/invalid-token-error';
 
 let usersRepository: InMemoryUsersRepository;
 let tokensRepository: InMemoryVerificationTokensRepository;

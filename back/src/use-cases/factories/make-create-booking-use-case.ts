@@ -1,4 +1,3 @@
-// src/use-cases/factories/make-create-booking-use-case.ts
 import { PrismaBookingsRepository } from '@/repositories/prisma/prisma-bookings-repository';
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
 import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';

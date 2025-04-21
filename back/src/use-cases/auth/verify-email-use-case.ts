@@ -1,8 +1,8 @@
 import { VerificationTokensRepository } from '@/repositories/verification-tokens-repository';
 import { UsersRepository } from '@/repositories/users-repository';
-import { InvalidTokenError } from './errors/invalid-token-error';
-import { UserAlreadyVerifiedError } from './errors/user-already-verified-error';
-import { UserNotFoundError } from './errors/user-not-found-error';
+import { InvalidTokenError } from '../errors/invalid-token-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { UserAlreadyVerifiedError } from '../errors/user-already-verified-error';
 
 interface VerifyEmailRequest {
   verificationToken: string;

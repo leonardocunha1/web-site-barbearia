@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createBooking } from './create';
+import { updateBookingStatus } from './update-booking-status';
 
 export async function bookingsRoutes(app: FastifyInstance) {
   app.post(
@@ -10,5 +11,13 @@ export async function bookingsRoutes(app: FastifyInstance) {
       onRequest: [verifyJwt, verifyUserRole('CLIENTE')],
     },
     createBooking,
+  );
+
+  app.patch(
+    '/:bookingId/status',
+    {
+      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+    },
+    updateBookingStatus,
   );
 }

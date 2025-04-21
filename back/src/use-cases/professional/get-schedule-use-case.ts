@@ -1,4 +1,3 @@
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { addMinutes, format, parseISO, isSameDay } from 'date-fns';
 import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
@@ -7,7 +6,6 @@ import { TimeSlot } from '@/dtos/schedule-dto';
 
 export class GetProfessionalScheduleUseCase {
   constructor(
-    private professionalsRepository: ProfessionalsRepository,
     private bookingsRepository: BookingsRepository,
     private horariosFuncionamentoRepository: HorariosFuncionamentoRepository,
     private feriadosRepository: FeriadosRepository,
@@ -91,7 +89,7 @@ export class GetProfessionalScheduleUseCase {
     }>,
   ): TimeSlot[] {
     const slots: TimeSlot[] = [];
-    const slotDuration = 30; // 30 minutos por slot
+    const slotDuration = 15; // 15 minutos por slot
 
     let currentTime = new Date(date);
     const [openHour, openMinute] = businessHours.abreAs.split(':').map(Number);

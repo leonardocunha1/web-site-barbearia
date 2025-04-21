@@ -15,28 +15,36 @@ export class GetProfessionalDashboardUseCase {
 
   private getDateRange(range: TimeRange, startDate?: Date, endDate?: Date) {
     const now = new Date();
+    const start = new Date(now); // Cria uma cópia
+    const end = new Date(now); // Cria outra cópia
 
     switch (range) {
       case 'today':
-        return {
-          start: new Date(now.setHours(0, 0, 0, 0)),
-          end: new Date(now.setHours(23, 59, 59, 999)),
-        };
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        return { start, end };
+
       case 'week':
-        return {
-          start: new Date(now.setDate(now.getDate() - now.getDay())), // Domingo
-          end: new Date(now.setDate(now.getDate() - now.getDay() + 6)), // Sábado
-        };
+        start.setDate(now.getDate() - 6); // 7 dias (incluindo hoje)
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        return { start, end };
+
       case 'month':
-        return {
-          start: new Date(now.getFullYear(), now.getMonth(), 1),
-          end: new Date(now.getFullYear(), now.getMonth() + 1, 0),
-        };
+        start.setDate(now.getDate() - 30); // 30 dias (nao inclui hoje)
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        return { start, end };
+
       case 'custom':
         if (!startDate || !endDate) {
           throw new Error('Custom range requires start and end dates');
         }
+        if (startDate > endDate) {
+          throw new Error('Start date must be before end date');
+        }
         return { start: startDate, end: endDate };
+
       default:
         throw new Error('Invalid time range');
     }
