@@ -1,6 +1,6 @@
 import { ServicesRepository } from '@/repositories/services-repository';
 import type { Service, Role } from '@prisma/client';
-import { ServiceAlreadyExistsError } from './errors/service-already-exists-error';
+import { ServiceAlreadyExistsError } from '../errors/service-already-exists-error';
 
 interface CreateServiceRequest {
   nome: string;

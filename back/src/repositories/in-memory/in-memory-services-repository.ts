@@ -15,6 +15,8 @@ export class InMemoryServicesRepository implements ServicesRepository {
       duracao: data.duracao,
       categoria: data.categoria || null,
       ativo: data.ativo !== undefined ? data.ativo : true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     this.items.push(service);
@@ -67,7 +69,9 @@ export class InMemoryServicesRepository implements ServicesRepository {
     let filteredItems = this.items;
 
     if (nome) {
-      filteredItems = filteredItems.filter((item) => item.nome.includes(nome));
+      filteredItems = filteredItems.filter((item) =>
+        item.nome.toLowerCase().includes(nome.toLowerCase()),
+      );
     }
 
     if (categoria) {
@@ -95,12 +99,17 @@ export class InMemoryServicesRepository implements ServicesRepository {
   }
 
   async softDelete(id: string): Promise<void> {
-    console.log(id);
-    throw new Error('Method not implemented.');
+    const service = await this.findById(id);
+    if (!service) return;
+    service.ativo = false;
+    service.updatedAt = new Date();
   }
 
   async toggleStatus(id: string, newStatus: boolean): Promise<Service> {
-    console.log(id, newStatus);
-    throw new Error('Method not implemented.');
+    const service = await this.findById(id);
+    if (!service) throw new Error('Service not found');
+    service.ativo = newStatus;
+    service.updatedAt = new Date();
+    return service;
   }
 }

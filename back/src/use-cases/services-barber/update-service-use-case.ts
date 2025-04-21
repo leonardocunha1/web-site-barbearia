@@ -1,18 +1,10 @@
 import { ServicesRepository } from '@/repositories/services-repository';
-import { Service } from '@prisma/client';
+import { Prisma, Service } from '@prisma/client';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 
 interface UpdateServiceRequest {
   id: string;
-  data: {
-    nome?: string;
-    descricao?: string | null;
-    precoPadrao?: number;
-    duracao?: number;
-    categoria?: string | null;
-    ativo?: boolean;
-    professionalId?: string | null;
-  };
+  data: Prisma.ServiceUpdateInput;
 }
 
 interface UpdateServiceResponse {

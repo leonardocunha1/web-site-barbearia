@@ -1,5 +1,5 @@
 import { ServicesRepository } from '@/repositories/services-repository';
-import { ServiceNotFoundError } from './errors/service-not-found-error';
+import { ServiceNotFoundError } from '../errors/service-not-found-error';
 
 export class DeleteServiceUseCase {
   constructor(private servicesRepository: ServicesRepository) {}

@@ -106,6 +106,8 @@ model Service {
   ativo         Boolean               @default(true)
   profissionais ServiceProfessional[]
   BookingItem   BookingItem[]
+  updatedAt     DateTime              @updatedAt
+  createdAt     DateTime              @default(now())
 
   @@map("services")
 }
