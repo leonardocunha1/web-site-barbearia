@@ -7,7 +7,7 @@ import { UserAlreadyProfessionalError } from '../errors/user-already-professiona
 
 let usersRepository: InMemoryUsersRepository;
 let professionalsRepository: InMemoryProfessionalsRepository;
-let sut: CreateProfessionalUseCase; // system under test
+let sut: CreateProfessionalUseCase;
 
 describe('CreateProfessionalUseCase', () => {
   beforeEach(() => {

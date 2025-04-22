@@ -3,6 +3,9 @@ import {
   toProfessionalDTO,
   ListProfessionalsResponse,
 } from '@/dtos/professional-dto';
+import { InvalidQueryError } from '../errors/invalid-query-error';
+import { InvalidPageError } from '../errors/invalid-page-error';
+import { InvalidLimitError } from '../errors/invalid-limit-error';
 
 interface SearchProfessionalsUseCaseRequest {
   query: string;
@@ -20,8 +23,27 @@ export class SearchProfessionalsUseCase {
     limit = 10,
     ativo = true,
   }: SearchProfessionalsUseCaseRequest): Promise<ListProfessionalsResponse> {
+    if (!query || query.trim() === '') {
+      throw new InvalidQueryError();
+    }
+
+    if (page < 1) {
+      throw new InvalidPageError();
+    }
+
+    if (limit < 1 || limit > 100) {
+      throw new InvalidLimitError();
+    }
+
+    const isAtivo = typeof ativo === 'boolean' ? ativo : true;
+
     const [professionals, total] = await Promise.all([
-      this.professionalsRepository.search({ query, page, limit, ativo }),
+      this.professionalsRepository.search({
+        query,
+        page,
+        limit,
+        ativo: isAtivo,
+      }),
       this.professionalsRepository.countSearch({ query, ativo }),
     ]);
 

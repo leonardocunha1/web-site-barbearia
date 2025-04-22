@@ -6,7 +6,6 @@ export type ProfessionalDTO = {
   bio: string | null;
   avatarUrl: string | null;
   ativo: boolean;
-  intervalosAgendamento: number;
   user: {
     id: string;
     nome: string;
@@ -31,7 +30,6 @@ export function toProfessionalDTO(
     bio: professional.bio,
     avatarUrl: professional.avatarUrl,
     ativo: professional.ativo,
-    intervalosAgendamento: professional.intervalosAgendamento,
     user: {
       id: professional.user.id,
       nome: professional.user.nome,

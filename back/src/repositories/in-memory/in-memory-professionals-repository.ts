@@ -2,29 +2,23 @@ import { Prisma, Professional, Service, User } from '@prisma/client';
 import { ProfessionalsRepository } from '../professionals-repository';
 import { randomUUID } from 'node:crypto';
 
-// Interface auxiliar para armazenar relações em memória
-interface InMemoryProfessional extends Professional {
-  user?: User;
-  services?: Service[];
-}
-
 export class InMemoryProfessionalsRepository
   implements ProfessionalsRepository
 {
-  public items: InMemoryProfessional[] = [];
-  private users: User[] = [];
-  private services: Service[] = [];
+  public items: Professional[] = [];
+  public users: User[] = [];
+  public services: Service[] = [];
 
-  // Método auxiliar para adicionar usuários (usado em testes)
+  // Métodos auxiliares para testes
   addUser(user: User) {
     this.users.push(user);
   }
 
-  // Método auxiliar para adicionar serviços (usado em testes)
   addService(service: Service) {
     this.services.push(service);
   }
 
+  // Métodos principais
   async findById(id: string): Promise<Professional | null> {
     return this.items.find((item) => item.id === id) ?? null;
   }
@@ -49,7 +43,7 @@ export class InMemoryProfessionalsRepository
   }
 
   async create(data: Prisma.ProfessionalCreateInput): Promise<Professional> {
-    const professional: InMemoryProfessional = {
+    const professional: Professional = {
       id: randomUUID(),
       userId: data.user.connect?.id || '',
       especialidade: data.especialidade,
@@ -72,20 +66,21 @@ export class InMemoryProfessionalsRepository
     const index = this.items.findIndex((item) => item.id === id);
     if (index === -1) return null;
 
-    const existing = this.items[index];
-
-    const updated: InMemoryProfessional = {
-      ...existing,
-      especialidade: (data.especialidade as string) ?? existing.especialidade,
-      bio: (data.bio as string | null) ?? existing.bio,
-      avatarUrl: (data.avatarUrl as string | null) ?? existing.avatarUrl,
-      documento: (data.documento as string | null) ?? existing.documento,
-      ativo: (data.ativo as boolean) ?? existing.ativo,
+    const updatedProfessional = {
+      ...this.items[index],
+      especialidade:
+        (data.especialidade as string) ?? this.items[index].especialidade,
+      bio: (data.bio as string | null) ?? this.items[index].bio,
+      avatarUrl:
+        (data.avatarUrl as string | null) ?? this.items[index].avatarUrl,
+      documento:
+        (data.documento as string | null) ?? this.items[index].documento,
+      ativo: (data.ativo as boolean) ?? this.items[index].ativo,
       updatedAt: new Date(),
     };
 
-    this.items[index] = updated;
-    return updated;
+    this.items[index] = updatedProfessional;
+    return updatedProfessional;
   }
 
   async delete(id: string): Promise<void> {
@@ -101,7 +96,7 @@ export class InMemoryProfessionalsRepository
     const { page, limit, especialidade, ativo } = params;
     const startIndex = (page - 1) * limit;
 
-    let filtered = this.items;
+    let filtered = [...this.items];
 
     if (especialidade) {
       filtered = filtered.filter((item) =>
@@ -113,14 +108,9 @@ export class InMemoryProfessionalsRepository
       filtered = filtered.filter((item) => item.ativo === ativo);
     }
 
-    const paginated = filtered.slice(startIndex, startIndex + limit);
-
-    return paginated.map((professional) => ({
-      ...professional,
-      user:
-        this.users.find((u) => u.id === professional.userId) ?? ({} as User),
-      services: this.services, // Mock - em um cenário real é necessário armazenar as relações
-    }));
+    return filtered
+      .slice(startIndex, startIndex + limit)
+      .map((professional) => this.enrichProfessional(professional));
   }
 
   async count(params: {
@@ -129,7 +119,7 @@ export class InMemoryProfessionalsRepository
   }): Promise<number> {
     const { especialidade, ativo } = params;
 
-    let filtered = this.items;
+    let filtered = [...this.items];
 
     if (especialidade) {
       filtered = filtered.filter((item) =>
@@ -150,59 +140,64 @@ export class InMemoryProfessionalsRepository
     limit: number;
     ativo?: boolean;
   }): Promise<(Professional & { user: User; services: Service[] })[]> {
-    const { query, page, limit, ativo } = params;
+    const { query, page, limit, ativo = true } = params;
     const startIndex = (page - 1) * limit;
 
-    let filtered = this.items.filter((item) => {
-      const matchesUser = this.users.some(
-        (u) =>
-          u.id === item.userId &&
-          u.nome.toLowerCase().includes(query.toLowerCase()),
+    const filtered = this.items.filter((professional) => {
+      const userMatch = this.users.some(
+        (user) =>
+          user.id === professional.userId &&
+          user.nome.toLowerCase().includes(query.toLowerCase()),
       );
 
-      return (
-        item.especialidade.toLowerCase().includes(query.toLowerCase()) ||
-        matchesUser
-      );
+      const specialtyMatch = professional.especialidade
+        .toLowerCase()
+        .includes(query.toLowerCase());
+
+      const statusMatch = ativo === undefined || professional.ativo === ativo;
+
+      return (userMatch || specialtyMatch) && statusMatch;
     });
 
-    if (ativo !== undefined) {
-      filtered = filtered.filter((item) => item.ativo === ativo);
-    }
-
-    const paginated = filtered.slice(startIndex, startIndex + limit);
-
-    return paginated.map((professional) => ({
-      ...professional,
-      user:
-        this.users.find((u) => u.id === professional.userId) ?? ({} as User),
-      services: this.services, // Mock - em um cenário real é necessário armazenar as relações
-    }));
+    return filtered
+      .slice(startIndex, startIndex + limit)
+      .map((professional) => this.enrichProfessional(professional));
   }
 
   async countSearch(params: {
     query: string;
     ativo?: boolean;
   }): Promise<number> {
-    const { query, ativo } = params;
+    const { query, ativo = true } = params;
 
-    let filtered = this.items.filter((item) => {
-      const matchesUser = this.users.some(
-        (u) =>
-          u.id === item.userId &&
-          u.nome.toLowerCase().includes(query.toLowerCase()),
+    return this.items.filter((professional) => {
+      const userMatch = this.users.some(
+        (user) =>
+          user.id === professional.userId &&
+          user.nome.toLowerCase().includes(query.toLowerCase()),
       );
 
-      return (
-        item.especialidade.toLowerCase().includes(query.toLowerCase()) ||
-        matchesUser
-      );
-    });
+      const specialtyMatch = professional.especialidade
+        .toLowerCase()
+        .includes(query.toLowerCase());
 
-    if (ativo !== undefined) {
-      filtered = filtered.filter((item) => item.ativo === ativo);
-    }
+      const statusMatch = ativo === undefined || professional.ativo === ativo;
 
-    return filtered.length;
+      return (userMatch || specialtyMatch) && statusMatch;
+    }).length;
+  }
+
+  private enrichProfessional(
+    professional: Professional,
+  ): Professional & { user: User; services: Service[] } {
+    const user =
+      this.users.find((u) => u.id === professional.userId) ?? ({} as User);
+    return {
+      ...professional,
+      user,
+      services: this.services.filter((service) =>
+        this.services.some((s) => s.id === service.id),
+      ),
+    };
   }
 }
