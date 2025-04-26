@@ -1,8 +1,8 @@
-import { BookingsRepository } from '@/repositories/bookings-repository';
-import { addMinutes, format, parseISO, isSameDay } from 'date-fns';
-import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
-import { FeriadosRepository } from '@/repositories/feriados-repository';
 import { TimeSlot } from '@/dtos/schedule-dto';
+import { BookingsRepository } from '@/repositories/bookings-repository';
+import { FeriadosRepository } from '@/repositories/feriados-repository';
+import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
+import { parseISO, isSameDay, startOfDay, addMinutes, format } from 'date-fns';
 
 export class GetProfessionalScheduleUseCase {
   constructor(
@@ -13,13 +13,13 @@ export class GetProfessionalScheduleUseCase {
 
   async execute(params: { professionalId: string; date: string }) {
     const { professionalId, date } = params;
-    const parsedDate = parseISO(date);
-    const dayOfWeek = parsedDate.getDay(); // 0-6 (Domingo-Sábado)
+    const parsedDate = parseISO(date); // Parse ISO string to Date object
+    const startOfParsedDate = startOfDay(parsedDate); // Zera hora/minuto/segundo para comparação precisa
 
     // Verificar se é feriado
     const isHoliday = await this.feriadosRepository.isProfessionalHoliday(
       professionalId,
-      parsedDate,
+      startOfParsedDate, // Passar a data zerada
     );
 
     if (isHoliday) {
@@ -35,7 +35,7 @@ export class GetProfessionalScheduleUseCase {
     const businessHours =
       await this.horariosFuncionamentoRepository.findByProfessionalAndDay(
         professionalId,
-        dayOfWeek,
+        startOfParsedDate.getDay(), // Pega o dia da semana (0-6)
       );
 
     if (!businessHours || !businessHours.ativo) {
@@ -49,13 +49,13 @@ export class GetProfessionalScheduleUseCase {
     // Obter agendamentos do dia
     const bookings = await this.bookingsRepository.findByProfessionalAndDate(
       professionalId,
-      parsedDate,
+      startOfParsedDate, // Passar a data zerada
     );
 
     // Gerar slots de tempo
     const timeSlots = this.generateTimeSlots(
       businessHours,
-      parsedDate,
+      startOfParsedDate, // Passar a data zerada
       bookings,
     );
 
@@ -85,13 +85,15 @@ export class GetProfessionalScheduleUseCase {
       dataHoraFim: Date;
       status: string;
       user: { nome: string };
-      items: Array<{ service: { nome: string } }>;
+      items: Array<{
+        service: { nome: string };
+      }>;
     }>,
   ): TimeSlot[] {
     const slots: TimeSlot[] = [];
     const slotDuration = 15; // 15 minutos por slot
 
-    let currentTime = new Date(date);
+    let currentTime = startOfDay(date); // Zera hora/minuto/segundo para o início do dia
     const [openHour, openMinute] = businessHours.abreAs.split(':').map(Number);
     currentTime.setHours(openHour, openMinute, 0, 0);
 

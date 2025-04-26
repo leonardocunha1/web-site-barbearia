@@ -190,14 +190,18 @@ export class InMemoryProfessionalsRepository
   private enrichProfessional(
     professional: Professional,
   ): Professional & { user: User; services: Service[] } {
-    const user =
-      this.users.find((u) => u.id === professional.userId) ?? ({} as User);
+    const user = this.users.find((u) => u.id === professional.userId);
+
+    if (!user) {
+      throw new Error(
+        `Usuário não encontrado para o profissional: ${professional.id}`,
+      );
+    }
+
     return {
       ...professional,
       user,
-      services: this.services.filter((service) =>
-        this.services.some((s) => s.id === service.id),
-      ),
+      services: [],
     };
   }
 }

@@ -1,6 +1,6 @@
 import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { ProfessionalNotFoundError } from './errors/professional-not-found-error';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 
 interface ListProfessionalServicesRequest {
   professionalId: string;

@@ -115,6 +115,32 @@ describe('Caso de Uso: Buscar Profissionais', () => {
       ativo: false,
     });
 
+    professionalsRepository.addUser({
+      id: 'user-1',
+      nome: 'Dr. Ativo',
+      email: 'ativo@example.com',
+      senha: 'hashed-password',
+      role: 'PROFISSIONAL',
+      active: true,
+      createdAt: new Date(),
+      emailVerified: false,
+      updatedAt: new Date(),
+      telefone: null,
+    });
+
+    professionalsRepository.addUser({
+      id: 'user-2',
+      nome: 'Dr. Inativo',
+      email: 'inativo@example.com',
+      senha: 'hashed-password',
+      role: 'PROFISSIONAL',
+      active: false,
+      createdAt: new Date(),
+      emailVerified: false,
+      updatedAt: new Date(),
+      telefone: null,
+    });
+
     // Testa busca por ativos
     const activeResult = await sut.execute({ query: 'ti', ativo: true });
     expect(activeResult.total).toBe(1);

@@ -3,10 +3,14 @@ import { BookingsRepository } from '../bookings-repository';
 import { randomUUID } from 'node:crypto';
 
 interface CompleteBooking extends Booking {
-  user: { nome: string };
-  items: Array<{ service: { nome: string } }>;
+  user: { nome: string; id: string };
+  items: Array<{
+    service: {
+      id: string;
+      nome: string;
+    };
+  }>;
 }
-
 export class InMemoryBookingsRepository implements BookingsRepository {
   public items: CompleteBooking[] = [];
 
@@ -24,7 +28,7 @@ export class InMemoryBookingsRepository implements BookingsRepository {
       updatedAt: new Date(),
       canceledAt: null,
       confirmedAt: null,
-      user: { nome: 'Cliente não especificado' }, // Valor padrão para user
+      user: { nome: 'Cliente não especificado', id: 'teste' }, // Valor padrão para user
       items: [], // Array vazio inicial para items
     };
 
@@ -101,16 +105,24 @@ export class InMemoryBookingsRepository implements BookingsRepository {
   }
 
   async countActiveByServiceAndProfessional(
+    serviceId: string,
     professionalId: string,
   ): Promise<number> {
-    // Nota: Esta implementação assume que você tem acesso aos itens do agendamento
-    // Em um cenário real, você precisaria de uma estrutura mais complexa
-    return this.items.filter(
-      (booking) =>
-        booking.profissionalId === professionalId &&
-        booking.status !== 'CANCELADO' &&
-        booking.dataHoraFim > new Date(),
-    ).length;
+    return this.items.filter((booking) => {
+      // Verifica se é do profissional correto
+      const isSameProfessional = booking.profissionalId === professionalId;
+
+      // Verifica se tem algum item com o serviço correto
+      const hasServiceItem = booking.items.some(
+        (item) => item.service.id === serviceId,
+      );
+
+      // Verifica se está ativo (não cancelado e data futura)
+      const isActive =
+        booking.status !== 'CANCELADO' && booking.dataHoraFim > new Date();
+
+      return isSameProfessional && hasServiceItem && isActive;
+    }).length;
   }
 
   async countByProfessionalAndDate(
