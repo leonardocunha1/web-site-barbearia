@@ -9,7 +9,7 @@ export async function businessHoursRoutes(app: FastifyInstance) {
   app.post(
     '/business-hours',
     {
-      onRequest: [verifyJwt, verifyUserRole('ADMIN')],
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
     },
     createBusinessHours,
   );
@@ -18,7 +18,7 @@ export async function businessHoursRoutes(app: FastifyInstance) {
   app.put(
     '/business-hours/:professionalId',
     {
-      onRequest: [verifyJwt, verifyUserRole('ADMIN')],
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
     },
     updateBusinessHours,
   );

@@ -8,6 +8,11 @@ import fastifyCors from '@fastify/cors';
 import { professionalsRoutes } from './http/controllers/professionals/routes';
 import { servicesRoutes } from './http/controllers/services/routes';
 import { bookingsRoutes } from './http/controllers/bookings/routes';
+import { authRoutes } from './http/controllers/auth/routes';
+import { tokenRoutes } from './http/controllers/tokens/routes';
+import { holidayRoutes } from './http/controllers/feriados/routes';
+import { businessHoursRoutes } from './http/controllers/horarios-funcionamento/routes';
+import { serviceProfessionalRoutes } from './http/controllers/service-professional/routes';
 
 export const app = fastify();
 
@@ -32,6 +37,11 @@ app.register(usersRoutes);
 app.register(professionalsRoutes);
 app.register(servicesRoutes);
 app.register(bookingsRoutes);
+app.register(tokenRoutes);
+app.register(authRoutes);
+app.register(businessHoursRoutes);
+app.register(holidayRoutes);
+app.register(serviceProfessionalRoutes);
 
 app.setErrorHandler((error, _request, reply) => {
   if (error instanceof ZodError) {

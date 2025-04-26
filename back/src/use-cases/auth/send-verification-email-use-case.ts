@@ -2,8 +2,8 @@ import { randomUUID } from 'crypto';
 import dayjs from 'dayjs';
 import { UsersRepository } from '@/repositories/users-repository';
 import { VerificationTokensRepository } from '@/repositories/verification-tokens-repository';
-import { UserNotFoundError } from './errors/user-not-found-error';
 import { EmailService } from '@/services/email-service';
+import { UserNotFoundError } from '../errors/user-not-found-error';
 
 interface SendVerificationEmailRequest {
   email: string;

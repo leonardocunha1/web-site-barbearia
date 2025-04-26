@@ -3,7 +3,7 @@ import { PasswordResetTokensRepository } from '@/repositories/password-reset-tok
 import { EmailService } from '@/services/email-service';
 import { randomBytes } from 'crypto';
 import { addHours } from 'date-fns';
-import { UserNotFoundError } from './errors/user-not-found-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
 
 interface ForgotPasswordUseCaseRequest {
   email: string;

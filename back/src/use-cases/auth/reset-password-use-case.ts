@@ -1,8 +1,8 @@
 import { UsersRepository } from '@/repositories/users-repository';
 import { PasswordResetTokensRepository } from '@/repositories/password-reset-tokens-repository';
-import { hash } from 'bcryptjs';
-import { InvalidTokenError } from './errors/invalid-token-error';
-import { ExpiredTokenError } from './errors/expired-token-error';
+import bcrypt from 'bcryptjs';
+import { InvalidTokenError } from '../errors/invalid-token-error';
+import { ExpiredTokenError } from '../errors/expired-token-error';
 
 interface ResetPasswordUseCaseRequest {
   token: string;
@@ -30,7 +30,7 @@ export class ResetPasswordUseCase {
       throw new ExpiredTokenError();
     }
 
-    const hashedPassword = await hash(newPassword, 6);
+    const hashedPassword = await bcrypt.hash(newPassword, 6);
 
     await Promise.all([
       this.usersRepository.updatePassword(resetToken.userId, hashedPassword),

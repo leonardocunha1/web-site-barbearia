@@ -16,11 +16,22 @@ interface RegisterUserResponse {
   user: User;
 }
 
+interface RegisterUserUseCaseProps {
+  usersRepository: UsersRepository;
+  sendVerificationEmail: (email: string) => Promise<void>;
+}
+
 export class RegisterUserUseCase {
-  constructor(
-    private usersRepository: UsersRepository,
-    private sendVerificationEmail?: (email: string) => Promise<void>,
-  ) {}
+  private usersRepository: UsersRepository;
+  private sendVerificationEmail: (email: string) => Promise<void>;
+
+  constructor({
+    usersRepository,
+    sendVerificationEmail,
+  }: RegisterUserUseCaseProps) {
+    this.usersRepository = usersRepository;
+    this.sendVerificationEmail = sendVerificationEmail;
+  }
 
   async execute({
     nome,
@@ -50,9 +61,7 @@ export class RegisterUserUseCase {
       role,
     });
 
-    if (this.sendVerificationEmail) {
-      await this.sendVerificationEmail(user.email);
-    }
+    await this.sendVerificationEmail(user.email);
 
     return { user };
   }

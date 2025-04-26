@@ -1,7 +1,7 @@
 import { Prisma, Role, User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
 import { prisma } from '@/lib/prisma';
-import { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 export class PrismaUsersRepository implements UsersRepository {
   async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
@@ -84,7 +84,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async anonymize(userId: string): Promise<void> {
-    const anonymizedEmail = `anon-${Date.now()}-${hash(userId, 6)}@deleted.com`;
+    const anonymizedEmail = `anon-${Date.now()}-${bcrypt.hash(userId, 6)}@deleted.com`;
     const anonymizedPhone = `deleted-${Math.random().toString(36).substring(2, 10)}`;
 
     await prisma.user.update({
@@ -93,7 +93,7 @@ export class PrismaUsersRepository implements UsersRepository {
         email: anonymizedEmail,
         telefone: anonymizedPhone,
         active: false,
-        senha: await hash('deleted-account', 6), // Senha padrão para conta deletada
+        senha: await bcrypt.hash('deleted-account', 6), // Senha padrão para conta deletada
       },
     });
   }
