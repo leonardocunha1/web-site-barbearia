@@ -3,14 +3,13 @@ import { z } from 'zod';
 import { Role } from '@prisma/client';
 import { ListUsersResponse } from '@/dtos/user-dto';
 import { makeListUsersUseCase } from '@/use-cases/factories/make-list-users-factory-use-case';
+import { paginationSchema } from '@/validators/pagination-params';
 
 export async function listUsers(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<ListUsersResponse> {
-  const listUsersQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(10),
+  const listUsersQuerySchema = paginationSchema.extend({
     role: z.nativeEnum(Role).optional(),
     name: z.string().optional(),
   });

@@ -1,14 +1,13 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeListServicesUseCase } from '@/use-cases/factories/make-list-services-use-case';
 import { z } from 'zod';
+import { paginationSchema } from '@/validators/pagination-params';
 
 export async function listServices(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const listServicesQuerySchema = z.object({
-    page: z.coerce.number().min(1).default(1),
-    limit: z.coerce.number().min(1).max(100).default(10),
+  const listServicesQuerySchema = paginationSchema.extend({
     nome: z.string().optional(),
     categoria: z.string().optional(),
     ativo: z.coerce.boolean().optional(),

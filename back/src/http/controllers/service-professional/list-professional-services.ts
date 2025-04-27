@@ -1,4 +1,5 @@
 import { makeListProfessionalServicesUseCase } from '@/use-cases/factories/make-list-professional-services-use-case';
+import { paginationSchema } from '@/validators/pagination-params';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
@@ -6,9 +7,7 @@ export async function listProfessionalServices(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const listProfessionalServicesQuerySchema = z.object({
-    page: z.coerce.number().min(1).default(1),
-    limit: z.coerce.number().min(1).max(100).default(10),
+  const listProfessionalServicesQuerySchema = paginationSchema.extend({
     activeOnly: z.coerce.boolean().optional().default(true),
   });
 

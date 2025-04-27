@@ -2,14 +2,13 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { ListProfessionalsResponse } from '@/dtos/professional-dto';
 import { makeListProfessionalsUseCase } from '@/use-cases/factories/make-list-professionals-use-case';
+import { paginationSchema } from '@/validators/pagination-params';
 
 export async function listProfessionals(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<ListProfessionalsResponse> {
-  const listProfessionalsQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(10),
+  const listProfessionalsQuerySchema = paginationSchema.extend({
     especialidade: z.string().optional(),
     ativo: z.coerce.boolean().optional(),
   });

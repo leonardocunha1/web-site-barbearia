@@ -18,7 +18,6 @@ export interface ProfessionalsRepository {
     especialidade?: string;
     ativo?: boolean;
   }): Promise<(Professional & { user: User; services: Service[] })[]>;
-
   count(params: { especialidade?: string; ativo?: boolean }): Promise<number>;
   search(params: {
     query: string;
