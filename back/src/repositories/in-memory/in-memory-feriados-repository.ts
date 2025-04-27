@@ -60,4 +60,31 @@ export class InMemoryFeriadosRepository implements FeriadosRepository {
   async delete(id: string) {
     this.items = this.items.filter((item) => item.id !== id);
   }
+
+  // Novo método para buscar feriados por profissional com paginação
+  async findManyByProfessionalId(
+    professionalId: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    // Filtra os feriados do profissional
+    const holidays = this.items.filter(
+      (item) => item.profissionalId === professionalId,
+    );
+
+    // Aplica paginação
+    const startIndex = (page - 1) * limit;
+    const paginatedHolidays = holidays.slice(startIndex, startIndex + limit);
+
+    return paginatedHolidays;
+  }
+
+  // Novo método para contar o total de feriados de um profissional
+  async countByProfessionalId(professionalId: string) {
+    // Conta os feriados do profissional
+    const count = this.items.filter(
+      (item) => item.profissionalId === professionalId,
+    ).length;
+
+    return count;
+  }
 }

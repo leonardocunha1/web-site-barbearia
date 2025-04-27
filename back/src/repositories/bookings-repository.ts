@@ -9,13 +9,21 @@ export interface BookingsRepository {
     end: Date,
   ): Promise<Booking | null>;
   findManyByProfessionalId(professionalId: string): Promise<Booking[]>;
-  findManyByUserId(userId: string): Promise<Booking[]>;
+
+  findManyByUserId(
+    userId: string,
+    { page, limit }: { page: number; limit: number },
+  ): Promise<Booking[]>;
+
   update(id: string, data: Prisma.BookingUpdateInput): Promise<Booking | null>;
   delete(id: string): Promise<void>;
+
   countActiveByServiceAndProfessional(
     serviceId: string,
     professionalId: string,
   ): Promise<number>;
+
+  countByUserId(userId: string): Promise<number>;
 
   countByProfessionalAndDate(
     professionalId: string,
@@ -28,7 +36,7 @@ export interface BookingsRepository {
     professionalId: string,
     start: Date,
     end: Date,
-    status?: Status, // Novo parâmetro opcional
+    status?: Status,
   ): Promise<number>;
 
   countByProfessionalAndStatus(
@@ -40,8 +48,8 @@ export interface BookingsRepository {
 
   getMonthlyEarnings(
     professionalId: string,
-    month?: number, // Novo parâmetro opcional
-    year?: number, // Novo parâmetro opcional
+    month?: number,
+    year?: number,
   ): Promise<number>;
 
   findNextAppointments(
@@ -55,7 +63,7 @@ export interface BookingsRepository {
     Array<{
       id: string;
       dataHoraInicio: Date;
-      status: Status; // Campo adicionado
+      status: Status;
       user: { nome: string };
       items: Array<{ service: { nome: string } }>;
     }>

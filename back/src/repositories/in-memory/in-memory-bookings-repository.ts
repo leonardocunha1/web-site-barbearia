@@ -63,10 +63,19 @@ export class InMemoryBookingsRepository implements BookingsRepository {
       .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
   }
 
-  async findManyByUserId(userId: string): Promise<Booking[]> {
+  async findManyByUserId(
+    userId: string,
+    { page, limit }: { page: number; limit: number },
+  ): Promise<Booking[]> {
+    const offset = (page - 1) * limit;
     return this.items
       .filter((item) => item.usuarioId === userId)
+      .slice(offset, offset + limit)
       .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    return this.items.filter((item) => item.usuarioId === userId).length;
   }
 
   async update(

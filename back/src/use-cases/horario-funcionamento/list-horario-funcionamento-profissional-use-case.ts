@@ -13,7 +13,6 @@ export class ListBusinessHoursUseCase {
   ) {}
 
   async execute({ professionalId }: ListBusinessHoursUseCaseRequest) {
-    // Verifica se o profissional existe
     const professional =
       await this.professionalsRepository.findById(professionalId);
     if (!professional) {

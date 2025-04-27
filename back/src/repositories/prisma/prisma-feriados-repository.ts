@@ -67,4 +67,31 @@ export class PrismaFeriadosRepository implements FeriadosRepository {
       where: { id },
     });
   }
+
+  async findManyByProfessionalId(
+    professionalId: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    return prisma.feriado.findMany({
+      where: {
+        profissionalId: professionalId,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        profissionalId: true,
+        data: true,
+        motivo: true,
+      },
+    });
+  }
+
+  async countByProfessionalId(professionalId: string) {
+    return prisma.feriado.count({
+      where: {
+        profissionalId: professionalId,
+      },
+    });
+  }
 }

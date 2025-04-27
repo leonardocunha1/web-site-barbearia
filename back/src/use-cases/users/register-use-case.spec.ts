@@ -14,10 +14,11 @@ describe('Register User Use Case', () => {
     usersRepository = new InMemoryUsersRepository();
     emailService = new MockEmailService();
 
-    sut = new RegisterUserUseCase(
+    sut = new RegisterUserUseCase({
       usersRepository,
-      emailService.sendVerificationEmail.bind(emailService),
-    );
+      sendVerificationEmail:
+        emailService.sendVerificationEmail.bind(emailService),
+    });
   });
 
   it('deve cadastrar um novo usuário', async () => {

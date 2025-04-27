@@ -25,7 +25,7 @@ describe('VerifyEmailUseCase', () => {
       senha: 'hashed-password',
       telefone: null,
       role: 'CLIENTE',
-      emailVerified: null,
+      emailVerified: false,
       active: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -40,7 +40,7 @@ describe('VerifyEmailUseCase', () => {
     await sut.execute({ verificationToken: 'valid-token' });
 
     const updatedUser = await usersRepository.findById(user.id);
-    expect(updatedUser?.emailVerified).toBeInstanceOf(Date);
+    expect(updatedUser?.emailVerified).toBeTruthy();
   });
 
   it('deve lançar erro se o token não existir', async () => {
@@ -69,7 +69,7 @@ describe('VerifyEmailUseCase', () => {
       senha: 'hashed-password',
       telefone: null,
       role: 'CLIENTE',
-      emailVerified: new Date(), // já verificado
+      emailVerified: true, // já verificado
       active: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -94,7 +94,7 @@ describe('VerifyEmailUseCase', () => {
       senha: 'hashed-password',
       telefone: null,
       role: 'CLIENTE',
-      emailVerified: null,
+      emailVerified: false,
       active: true,
       createdAt: new Date(),
       updatedAt: new Date(),

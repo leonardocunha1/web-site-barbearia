@@ -48,13 +48,26 @@ export class PrismaBookingsRepository implements BookingsRepository {
     });
   }
 
-  async findManyByUserId(userId: string): Promise<Booking[]> {
+  async findManyByUserId(
+    userId: string,
+    { page, limit }: { page: number; limit: number },
+  ): Promise<Booking[]> {
     return prisma.booking.findMany({
       where: {
         user: { id: userId },
       },
+      skip: (page - 1) * limit,
+      take: limit,
       orderBy: {
         dataHoraInicio: 'asc',
+      },
+    });
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    return prisma.booking.count({
+      where: {
+        user: { id: userId },
       },
     });
   }
