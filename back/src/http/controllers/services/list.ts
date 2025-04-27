@@ -15,27 +15,41 @@ export async function listServices(
     professionalId: z.string().uuid().optional(),
   });
 
-  const { page, limit, nome, categoria, ativo, professionalId } =
-    listServicesQuerySchema.parse(request.query);
+  try {
+    // Validação dos query params
+    const { page, limit, nome, categoria, ativo, professionalId } =
+      listServicesQuerySchema.parse(request.query);
 
-  const listServicesUseCase = makeListServicesUseCase();
+    const listServicesUseCase = makeListServicesUseCase();
 
-  const { services, total, totalPages } = await listServicesUseCase.execute({
-    page,
-    limit,
-    nome,
-    categoria,
-    ativo,
-    professionalId,
-  });
-
-  return reply.status(200).send({
-    services,
-    pagination: {
+    // Execução do caso de uso
+    const { services, total, totalPages } = await listServicesUseCase.execute({
       page,
       limit,
-      total,
-      totalPages,
-    },
-  });
+      nome,
+      categoria,
+      ativo,
+      professionalId,
+    });
+
+    return reply.status(200).send({
+      services,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    // Erro de validação do Zod
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Erro na validação dos dados de entrada',
+        issues: error.format(),
+      });
+    }
+
+    throw error;
+  }
 }

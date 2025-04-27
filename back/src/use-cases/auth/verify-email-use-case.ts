@@ -46,7 +46,7 @@ export class VerifyEmailUseCase {
 
     // Atualiza o usuário
     await this.usersRepository.update(user.id, {
-      emailVerified: new Date(), // Armazena a data de verificação
+      emailVerified: true,
     });
 
     // Remove o token de verificação

@@ -34,7 +34,7 @@ export async function updateBookingStatus(
   } catch (err) {
     if (err instanceof z.ZodError) {
       return reply.status(400).send({
-        message: 'Validation error',
+        message: 'Erro na validação dos dados de entrada',
         errors: err.errors,
       });
     }

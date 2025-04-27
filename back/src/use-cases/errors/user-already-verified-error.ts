@@ -1,6 +1,6 @@
 export class UserAlreadyVerifiedError extends Error {
   constructor() {
-    super('User email already verified');
+    super('Usuário já verificado.');
     this.name = 'UserAlreadyVerifiedError';
   }
 }

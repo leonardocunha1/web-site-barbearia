@@ -34,11 +34,10 @@ export async function createProfessional(
 
     if (error instanceof z.ZodError) {
       return reply.status(400).send({
-        message: 'Validation error',
-        issues: error.format(),
+        message: 'Erro na validação dos dados de entrada',
       });
     }
 
-    return reply.status(500).send({ message: 'Internal server error' });
+    throw error;
   }
 }

@@ -43,11 +43,11 @@ export async function updatePassword(
     }
     if (error instanceof z.ZodError) {
       return reply.status(400).send({
-        message: 'Validation error',
+        message: 'Erro na validação dos dados de entrada',
         issues: error.format(),
       });
     }
 
-    return reply.status(500).send({ message: 'Internal server error' });
+    throw error;
   }
 }

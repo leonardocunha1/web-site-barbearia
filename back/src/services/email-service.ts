@@ -22,7 +22,7 @@ export class EmailService {
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const subject = 'Verifique seu e-mail';
-    const html = `<p>Clique <a href="${this.appUrl}/verify-email?token=${token}">aqui</a> para verificar seu e-mail</p>`;
+    const html = `<p>Clique <a href="${this.appUrl}/users/verify-email?token=${token}">aqui</a> para verificar seu e-mail</p>`;
     await this.sendEmail(email, subject, html, 'verificação de e-mail');
   }
 
@@ -30,7 +30,7 @@ export class EmailService {
     const subject = 'Redefinição de senha';
     const html = `
       <p>Você solicitou a redefinição de senha. Clique no link abaixo para continuar:</p>
-      <p><a href="${this.appUrl}/reset-password?token=${token}">Redefinir senha</a></p>
+      <p><a href="${this.appUrl}/users/reset-password?token=${token}">Redefinir senha</a></p>
       <p>Se você não solicitou esta alteração, ignore este e-mail.</p>
       <p>O link expirará em 2 horas.</p>
     `;

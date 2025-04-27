@@ -23,7 +23,7 @@ export async function getSchedule(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return reply.status(400).send({
-        message: 'Validation error',
+        message: 'Erro na validação dos dados de entrada',
         issues: error.format(),
       });
     }

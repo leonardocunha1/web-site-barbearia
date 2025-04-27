@@ -64,6 +64,13 @@ export async function createBusinessHours(
       return reply.status(409).send({ message: err.message });
     }
 
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Erro na validação dos dados de entrada',
+        issues: err.format(),
+      });
+    }
+
     throw err;
   }
 }

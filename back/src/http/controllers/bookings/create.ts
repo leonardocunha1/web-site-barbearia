@@ -44,11 +44,10 @@ export async function createBooking(
       status: booking.status,
     });
   } catch (err) {
-    // Tratamento de erros mais robusto
     if (err instanceof z.ZodError) {
       return reply.status(400).send({
-        message: 'Validation error',
-        errors: err.errors,
+        message: 'Erro na validação dos dados de entrada',
+        issues: err.format(),
       });
     }
 

@@ -24,8 +24,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
         .send({ message: 'Token inválido ou expirado' });
     }
 
-    console.error('Refresh token error:', err);
-    return reply.status(500).send({ message: 'Erro interno no servidor' });
+    throw err;
   }
 }
 

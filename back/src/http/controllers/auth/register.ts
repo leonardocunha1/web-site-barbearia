@@ -27,6 +27,8 @@ export async function registerUser(
       role,
       requestRole: request.user?.role,
     });
+
+    return reply.status(201).send();
   } catch (err) {
     if (err instanceof UserAlreadyExistsError) {
       return reply.status(409).send({ message: err.message });
@@ -36,8 +38,13 @@ export async function registerUser(
       return reply.status(403).send({ message: err.message });
     }
 
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Erro na validação dos dados de entrada',
+        issues: err.format(),
+      });
+    }
+
     throw err;
   }
-
-  return reply.status(201).send();
 }

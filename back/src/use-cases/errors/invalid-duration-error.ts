@@ -1,6 +1,6 @@
 export class InvalidDurationError extends Error {
   constructor() {
-    super('Service duration must be a positive number');
+    super('O tempo de duração do serviço deve ser um número positivo.');
     this.name = 'InvalidDurationError';
   }
 }

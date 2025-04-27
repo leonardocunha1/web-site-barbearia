@@ -16,6 +16,6 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
       return reply.status(404).send({ message: error.message });
     }
 
-    return reply.status(500).send({ message: 'Internal server error' });
+    throw error;
   }
 }

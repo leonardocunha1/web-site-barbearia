@@ -16,6 +16,7 @@ import { serviceProfessionalRoutes } from './http/controllers/service-profession
 
 export const app = fastify();
 
+app.register(fastifyCookie);
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
   cookie: {
@@ -26,8 +27,6 @@ app.register(fastifyJwt, {
     expiresIn: '10m',
   },
 });
-
-app.register(fastifyCookie);
 app.register(fastifyCors, {
   origin: 'http://localhost:3000',
   credentials: true,
@@ -56,5 +55,5 @@ app.setErrorHandler((error, _request, reply) => {
     // TODO. Aqui poderia ser enviado um email para o time de desenvolvimento.
   }
 
-  reply.status(500).send({ message: 'Internal server error.' });
+  reply.status(500).send({ message: 'Erro genérico' });
 });

@@ -1,6 +1,6 @@
 export class InactiveUserError extends Error {
   constructor() {
-    super('User account is inactive');
+    super('A conta do usuário está inativa');
     this.name = 'InactiveUserError';
   }
 }

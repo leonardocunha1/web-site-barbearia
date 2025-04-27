@@ -46,6 +46,13 @@ export async function addToProfessional(
         .send({ message: 'Service already added to professional' });
     }
 
-    return reply.status(500).send({ message: 'Internal server error' });
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Erro na validação dos dados de entrada',
+        issues: err.format(),
+      });
+    }
+
+    throw err;
   }
 }

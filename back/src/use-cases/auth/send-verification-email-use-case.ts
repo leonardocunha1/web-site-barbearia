@@ -4,6 +4,7 @@ import { UsersRepository } from '@/repositories/users-repository';
 import { VerificationTokensRepository } from '@/repositories/verification-tokens-repository';
 import { EmailService } from '@/services/email-service';
 import { UserNotFoundError } from '../errors/user-not-found-error';
+import { UserEmailAlreadyVerifiedError } from '../errors/user-email-already-verified-error';
 
 interface SendVerificationEmailRequest {
   email: string;
@@ -24,7 +25,7 @@ export class SendVerificationEmailUseCase {
     }
 
     if (user.emailVerified) {
-      return;
+      throw new UserEmailAlreadyVerifiedError();
     }
 
     const token = randomUUID();

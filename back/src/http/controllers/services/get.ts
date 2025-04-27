@@ -22,6 +22,13 @@ export async function getService(request: FastifyRequest, reply: FastifyReply) {
       return reply.status(404).send({ message: err.message });
     }
 
-    return reply.status(500).send({ message: 'Internal server error' });
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Erro na validação dos dados de entrada',
+        issues: err.format(),
+      });
+    }
+
+    throw err;
   }
 }

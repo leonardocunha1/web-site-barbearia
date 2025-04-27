@@ -1,6 +1,6 @@
 export class SamePasswordError extends Error {
   constructor() {
-    super('New password must be different from current password');
+    super('A nova senha não pode ser igual à senha atual.');
     this.name = 'SamePasswordError';
   }
 }

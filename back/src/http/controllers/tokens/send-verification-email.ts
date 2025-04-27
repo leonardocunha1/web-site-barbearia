@@ -28,9 +28,13 @@ export async function sendVerificationEmail(
       return reply.status(404).send({ message: 'Usuário não encontrado' });
     }
 
-    console.error('Send verification email error:', err);
-    return reply
-      .status(500)
-      .send({ message: 'Erro ao enviar e-mail de verificação' });
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: 'Erro na validação dos dados de entrada',
+        issues: err.format(),
+      });
+    }
+
+    throw err;
   }
 }
