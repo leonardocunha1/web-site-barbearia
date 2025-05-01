@@ -7,6 +7,7 @@ import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error
 import { TimeSlotAlreadyBookedError } from '@/use-cases/errors/time-slot-already-booked-error';
 import { InvalidDateTimeError } from '@/use-cases/errors/invalid-date-time-error';
 import { InvalidDurationError } from '@/use-cases/errors/invalid-duration-error';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function createBooking(
   request: FastifyRequest,
@@ -29,7 +30,7 @@ export async function createBooking(
 
     const createBookingUseCase = makeCreateBookingUseCase();
 
-    const { booking } = await createBookingUseCase.execute({
+    await createBookingUseCase.execute({
       userId: request.user.sub,
       professionalId,
       services,
@@ -37,45 +38,36 @@ export async function createBooking(
       notes,
     });
 
-    return reply.status(201).send({
-      bookingId: booking.id,
-      startDateTime: booking.dataHoraInicio,
-      endDateTime: booking.dataHoraFim,
-      status: booking.status,
-    });
+    return reply.status(201).send();
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     if (err instanceof UserNotFoundError) {
-      return reply.status(404).send({ message: 'User not found' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof ProfessionalNotFoundError) {
-      return reply.status(404).send({ message: 'Professional not found' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof ServiceNotFoundError) {
-      return reply.status(404).send({ message: 'Service not found' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof TimeSlotAlreadyBookedError) {
-      return reply.status(409).send({ message: 'Time slot already booked' });
+      return reply.status(409).send({ message: err.message });
     }
 
     if (err instanceof InvalidDateTimeError) {
-      return reply.status(400).send({ message: 'Invalid date/time' });
+      return reply.status(400).send({ message: err.message });
     }
 
     if (err instanceof InvalidDurationError) {
-      return reply.status(400).send({ message: 'Invalid service duration' });
+      return reply.status(400).send({ message: err.message });
     }
 
-    console.error('Booking creation error:', err);
-    return reply.status(500).send({ message: 'Internal server error' });
+    throw err;
   }
 }

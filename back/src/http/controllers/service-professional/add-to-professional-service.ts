@@ -4,6 +4,7 @@ import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeAddServiceToProfessionalUseCase } from '@/use-cases/factories/make-add-service-to-professional-use-case';
 import { ServiceAlreadyAddedError } from '@/use-cases/errors/service-already-added-error';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function addToProfessional(
   request: FastifyRequest,
@@ -47,10 +48,7 @@ export async function addToProfessional(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

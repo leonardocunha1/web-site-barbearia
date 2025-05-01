@@ -1,112 +1,67 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { AuthenticateUseCase } from '@/use-cases/auth/authenticate-use-case';
-import { hash } from 'bcryptjs';
-import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
-import { EmailNotVerifiedError } from '../errors/user-email-not-verified-error';
+import { describe, it, expect } from 'vitest';
+import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
 import { InactiveUserError } from '../errors/inactive-user-error';
+import { EmailNotVerifiedError } from '../errors/user-email-not-verified-error';
+import { createMockUsersRepository } from '@/mock/mock-users-repository';
+import { AuthenticateUseCase } from './authenticate-use-case';
+import bcrypt from 'bcryptjs';
 
-let usersRepository: InMemoryUsersRepository;
-let sut: AuthenticateUseCase;
+describe('AuthenticateUseCase', () => {
+  const { mockRepository, createMockUser } = createMockUsersRepository();
 
-describe('Authenticate Use Case', () => {
-  beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
-    sut = new AuthenticateUseCase(usersRepository);
-  });
+  const useCase = new AuthenticateUseCase(mockRepository);
 
-  it('deve ser possível logar com email verificado', async () => {
-    const userData = {
-      nome: 'John Doe',
-      email: 'johndoe@example.com',
-      senha: await hash('123456', 6),
-      telefone: null,
-      role: 'CLIENTE' as const,
-      emailVerified: new Date(),
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await usersRepository.create(userData);
-
-    const { user } = await sut.execute({
-      email: 'johndoe@example.com',
-      senha: '123456',
+  it('should authenticate a valid user with correct credentials', async () => {
+    const user = createMockUser({
+      email: 'john@example.com',
+      senha: await bcrypt.hash('password', 6),
     });
 
-    expect(user.id).toEqual(expect.any(String));
-  });
+    mockRepository.findByEmail.mockResolvedValue(user);
 
-  it('não deve ser possível autenticar com e-mail errado/inexistente', async () => {
-    await expect(() =>
-      sut.execute({
-        email: 'nonexistent@example.com',
-        senha: '123456',
-      }),
-    ).rejects.toBeInstanceOf(InvalidCredentialsError);
-  });
-
-  it('não deve ser possível autenticar com senha errada', async () => {
-    await usersRepository.create({
-      nome: 'John Doe',
-      email: 'johndoe@example.com',
-      senha: await hash('123456', 6),
-      telefone: null,
-      role: 'CLIENTE' as const,
-      emailVerified: new Date(),
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const result = await useCase.execute({
+      email: 'john@example.com',
+      senha: 'password',
     });
 
-    await expect(() =>
-      sut.execute({
-        email: 'johndoe@example.com',
-        senha: 'wrong-password',
-      }),
-    ).rejects.toBeInstanceOf(InvalidCredentialsError);
+    expect(result.user.id).toBe(user.id);
+    expect(result.user.nome).toBe(user.nome);
+    expect(result.user.email).toBe(user.email);
+    expect(result.user.role).toBe(user.role);
   });
 
-  it('não deve ser possível autenticar com uma conta inativa', async () => {
-    await usersRepository.create({
-      nome: 'Inactive User',
-      email: 'inactive@example.com',
-      senha: await hash('123456', 6),
-      telefone: null,
-      role: 'CLIENTE' as const,
-      emailVerified: new Date(),
-      active: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+  it('should throw InvalidCredentialsError when user does not exist', async () => {
+    mockRepository.findByEmail.mockResolvedValue(null);
 
-    await expect(() =>
-      sut.execute({
-        email: 'inactive@example.com',
-        senha: '123456',
-      }),
-    ).rejects.toBeInstanceOf(InactiveUserError);
+    await expect(
+      useCase.execute({ email: 'invalid@example.com', senha: 'password' }),
+    ).rejects.toThrowError(InvalidCredentialsError);
   });
 
-  it('não deve ser possível autenticar com uma conta sem email verificado', async () => {
-    await usersRepository.create({
-      nome: 'Unverified User',
-      email: 'unverified@example.com',
-      senha: await hash('123456', 6),
-      telefone: null,
-      role: 'CLIENTE' as const,
-      emailVerified: null,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+  it('should throw EmailNotVerifiedError when email is not verified', async () => {
+    const user = createMockUser({ emailVerified: false });
+    mockRepository.findByEmail.mockResolvedValue(user);
 
-    await expect(() =>
-      sut.execute({
-        email: 'unverified@example.com',
-        senha: '123456',
-      }),
-    ).rejects.toBeInstanceOf(EmailNotVerifiedError);
+    await expect(
+      useCase.execute({ email: 'john@example.com', senha: 'password' }),
+    ).rejects.toThrowError(EmailNotVerifiedError);
+  });
+
+  it('should throw InactiveUserError when user is inactive', async () => {
+    const user = createMockUser({ active: false });
+    mockRepository.findByEmail.mockResolvedValue(user);
+
+    await expect(
+      useCase.execute({ email: 'john@example.com', senha: 'password' }),
+    ).rejects.toThrowError(InactiveUserError);
+  });
+
+  it('should throw InvalidCredentialsError when password is incorrect', async () => {
+    const user = createMockUser({ senha: 'hashed-password' });
+    mockRepository.findByEmail.mockResolvedValue(user);
+
+    await expect(
+      useCase.execute({ email: 'john@example.com', senha: 'wrong-password' }),
+    ).rejects.toThrowError(InvalidCredentialsError);
   });
 });

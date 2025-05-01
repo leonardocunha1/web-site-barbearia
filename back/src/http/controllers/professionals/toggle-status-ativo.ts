@@ -1,5 +1,6 @@
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeToggleProfessionalStatusUseCase } from '@/use-cases/factories/make-toggle-professional-status-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
@@ -32,10 +33,7 @@ export async function toggleProfessionalStatus(
     }
 
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

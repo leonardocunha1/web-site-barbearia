@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeListBusinessHoursUseCase } from '@/use-cases/factories/make-list-holiday-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function listBusinessHours(
   request: FastifyRequest,
@@ -28,10 +29,7 @@ export async function listBusinessHours(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

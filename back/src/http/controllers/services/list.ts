@@ -1,7 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeListServicesUseCase } from '@/use-cases/factories/make-list-services-use-case';
 import { z } from 'zod';
-import { paginationSchema } from '@/validators/pagination-params';
+import { paginationSchema } from '@/schemas/pagination-params';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function listServices(
   request: FastifyRequest,
@@ -15,13 +16,11 @@ export async function listServices(
   });
 
   try {
-    // Validação dos query params
     const { page, limit, nome, categoria, ativo, professionalId } =
       listServicesQuerySchema.parse(request.query);
 
     const listServicesUseCase = makeListServicesUseCase();
 
-    // Execução do caso de uso
     const { services, total, totalPages } = await listServicesUseCase.execute({
       page,
       limit,
@@ -41,12 +40,8 @@ export async function listServices(
       },
     });
   } catch (error) {
-    // Erro de validação do Zod
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

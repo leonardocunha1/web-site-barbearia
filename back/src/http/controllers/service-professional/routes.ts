@@ -1,11 +1,11 @@
-import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { addToProfessional } from './add-to-professional-service';
 import { removeFromProfessional } from './remove-from-professional-service';
 import { listProfessionalServices } from './list-professional-services';
+import { FastifyTypedInstance } from '@/types';
 
-export async function serviceProfessionalRoutes(app: FastifyInstance) {
+export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
   app.post(
     '/services/add-to-professional',
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },

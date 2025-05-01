@@ -6,17 +6,14 @@ import { TokenService } from '@/services/token-service';
 import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error';
 import { InactiveUserError } from '@/use-cases/errors/inactive-user-error';
 import { EmailNotVerifiedError } from '@/use-cases/errors/user-email-not-verified-error';
+import { formatZodError } from '@/utils/formatZodError';
+import { loginUserSchema } from '@/schemas/user';
 
 export async function authenticate(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const authenticateBodySchema = z.object({
-    email: z.string().email(),
-    senha: z.string().min(6),
-  });
-
-  const { email, senha } = authenticateBodySchema.parse(request.body);
+  const { email, senha } = loginUserSchema.parse(request.body);
 
   try {
     const authenticateUseCase = makeAuthenticateUseCase();
@@ -28,7 +25,7 @@ export async function authenticate(
     return tokenService
       .setAuthCookies(token, refreshToken)
       .status(200)
-      .send({ token });
+      .send({ token, user });
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
       return reply.status(401).send({ message: 'Credenciais inválidas' });
@@ -42,10 +39,7 @@ export async function authenticate(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

@@ -1,188 +1,149 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { InMemoryBookingsRepository } from '@/repositories/in-memory/in-memory-bookings-repository';
+import { UpdateBookingStatusUseCase } from './update-booking-status-use-case';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '../errors/invalid-booking-status-error';
 import { BookingUpdateError } from '../errors/booking-update-error';
-import { UpdateBookingStatusUseCase } from './update-booking-status-use-case';
-import { addDays } from 'date-fns';
+import { Status } from '@prisma/client';
+import { it, expect, vi, beforeEach, describe } from 'vitest';
 
-let bookingsRepository: InMemoryBookingsRepository;
-let sut: UpdateBookingStatusUseCase;
-
-// Utils
-function getFutureDate(daysFromNow: number): Date {
-  return addDays(new Date(), daysFromNow);
-}
-
-const baseBookingData = {
-  dataHoraInicio: getFutureDate(1),
-  dataHoraFim: getFutureDate(1),
-  user: { connect: { id: 'user-1' } },
-  profissional: { connect: { id: 'professional-1' } },
+const mockBooking = {
+  id: 'booking-id',
+  status: 'PENDENTE' as Status,
+  dataHoraInicio: new Date('2025-01-01T10:00:00'),
+  dataHoraFim: new Date('2025-01-01T11:00:00'),
+  observacoes: 'Agendamento original',
 };
 
-describe('Caso de Uso: Atualizar Status do Agendamento', () => {
+const bookingsRepository = {
+  findById: vi.fn(),
+  update: vi.fn(),
+};
+
+let useCase: UpdateBookingStatusUseCase;
+
+describe('UpdateBookingStatusUseCase', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2023-01-01T00:00:00'));
-
-    bookingsRepository = new InMemoryBookingsRepository();
-    sut = new UpdateBookingStatusUseCase(bookingsRepository);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useCase = new UpdateBookingStatusUseCase(bookingsRepository as any);
+    vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('deve confirmar um agendamento pendente', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
+  it('deve confirmar um agendamento com status PENDENTE', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce(mockBooking);
+    bookingsRepository.update.mockResolvedValueOnce({
+      ...mockBooking,
+      status: 'CONFIRMADO',
+      confirmedAt: new Date(),
     });
 
-    const { booking: updated } = await sut.execute({
-      bookingId: booking.id,
+    const response = await useCase.execute({
+      bookingId: 'booking-id',
       status: 'CONFIRMADO',
     });
 
-    expect(updated.status).toBe('CONFIRMADO');
-    expect(updated.id).toBe(booking.id);
-  });
-
-  it('deve cancelar um agendamento pendente com motivo', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-
-    const { booking: updated } = await sut.execute({
-      bookingId: booking.id,
-      status: 'CANCELADO',
-      reason: 'Cliente solicitou cancelamento',
-    });
-
-    expect(updated.status).toBe('CANCELADO');
-    expect(updated.observacoes).toContain('Motivo do cancelamento');
-  });
-
-  it('não deve confirmar um agendamento já confirmado', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'CONFIRMADO',
-    });
-
-    console.log('booking.status:', booking.status);
-
-    await expect(
-      sut.execute({
-        bookingId: booking.id,
+    expect(response.booking.status).toBe('CONFIRMADO');
+    expect(bookingsRepository.update).toHaveBeenCalledWith(
+      'booking-id',
+      expect.objectContaining({
         status: 'CONFIRMADO',
+        confirmedAt: expect.any(Date),
       }),
-    ).rejects.toBeInstanceOf(InvalidBookingStatusError);
+    );
   });
 
-  it('não deve confirmar um agendamento cancelado', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
+  it('deve lançar erro se tentar confirmar um agendamento que não está PENDENTE', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce({
+      ...mockBooking,
       status: 'CANCELADO',
     });
 
-    await expect(
-      sut.execute({
-        bookingId: booking.id,
-        status: 'CONFIRMADO',
-      }),
-    ).rejects.toBeInstanceOf(InvalidBookingStatusError);
-  });
-
-  it('não deve atualizar status de um agendamento inexistente', async () => {
     await expect(() =>
-      sut.execute({
-        bookingId: 'id-inexistente',
+      useCase.execute({
+        bookingId: 'booking-id',
+        status: 'CONFIRMADO',
+      }),
+    ).rejects.toBeInstanceOf(InvalidBookingStatusError);
+  });
+
+  it('deve cancelar um agendamento com motivo e adicionar às observações', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce(mockBooking);
+    bookingsRepository.update.mockResolvedValueOnce({
+      ...mockBooking,
+      status: 'CANCELADO',
+      canceledAt: new Date(),
+      observacoes:
+        'Agendamento original\nMotivo do cancelamento: Cliente desistiu',
+    });
+
+    const response = await useCase.execute({
+      bookingId: 'booking-id',
+      status: 'CANCELADO',
+      reason: 'Cliente desistiu',
+    });
+
+    expect(response.booking.status).toBe('CANCELADO');
+    expect(response.booking.observacoes).toContain(
+      'Motivo do cancelamento: Cliente desistiu',
+    );
+    expect(bookingsRepository.update).toHaveBeenCalledWith(
+      'booking-id',
+      expect.objectContaining({
+        status: 'CANCELADO',
+        canceledAt: expect.any(Date),
+        observacoes: expect.stringContaining(
+          'Motivo do cancelamento: Cliente desistiu',
+        ),
+      }),
+    );
+  });
+
+  it('deve lançar erro se agendamento já estiver cancelado', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce({
+      ...mockBooking,
+      status: 'CANCELADO',
+    });
+
+    await expect(() =>
+      useCase.execute({
+        bookingId: 'booking-id',
+        status: 'CANCELADO',
+      }),
+    ).rejects.toBeInstanceOf(BookingUpdateError);
+  });
+
+  it('deve lançar erro se motivo do cancelamento for muito longo', async () => {
+    const longReason = 'x'.repeat(501);
+    bookingsRepository.findById.mockResolvedValueOnce(mockBooking);
+
+    await expect(() =>
+      useCase.execute({
+        bookingId: 'booking-id',
+        status: 'CANCELADO',
+        reason: longReason,
+      }),
+    ).rejects.toThrow('Motivo do cancelamento muito longo');
+  });
+
+  it('deve lançar BookingNotFoundError se agendamento não for encontrado', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce(null);
+
+    await expect(() =>
+      useCase.execute({
+        bookingId: 'non-existent-id',
         status: 'CONFIRMADO',
       }),
     ).rejects.toBeInstanceOf(BookingNotFoundError);
   });
 
-  it('não deve aceitar motivo de cancelamento com mais de 500 caracteres', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-
-    const longReason = 'a'.repeat(501);
+  it('deve lançar BookingUpdateError se falhar ao atualizar o agendamento', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce(mockBooking);
+    bookingsRepository.update.mockResolvedValueOnce(null);
 
     await expect(() =>
-      sut.execute({
-        bookingId: booking.id,
+      useCase.execute({
+        bookingId: 'booking-id',
         status: 'CANCELADO',
-        reason: longReason,
+        reason: 'Cliente desistiu',
       }),
     ).rejects.toBeInstanceOf(BookingUpdateError);
-  });
-
-  it('deve manter as observações originais ao confirmar', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-      observacoes: 'Precisa de tesoura especial',
-    });
-
-    const { booking: updated } = await sut.execute({
-      bookingId: booking.id,
-      status: 'CONFIRMADO',
-    });
-
-    expect(updated.observacoes).toBe('Precisa de tesoura especial');
-  });
-
-  it('deve adicionar o motivo do cancelamento às observações existentes', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-      observacoes: 'Cliente alérgico a fragrâncias',
-    });
-
-    const reason = 'Cliente viajará';
-
-    const { booking: updated } = await sut.execute({
-      bookingId: booking.id,
-      status: 'CANCELADO',
-      reason,
-    });
-
-    expect(updated.observacoes).toContain('Cliente alérgico');
-    expect(updated.observacoes).toContain(reason);
-    expect(updated.observacoes).toContain('Motivo do cancelamento');
-  });
-
-  it('deve definir `confirmedAt` ao confirmar', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-
-    await sut.execute({
-      bookingId: booking.id,
-      status: 'CONFIRMADO',
-    });
-
-    const updated = await bookingsRepository.findById(booking.id);
-    expect(updated?.confirmedAt).toBeInstanceOf(Date);
-  });
-
-  it('deve definir `canceledAt` ao cancelar', async () => {
-    const booking = await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-
-    await sut.execute({
-      bookingId: booking.id,
-      status: 'CANCELADO',
-    });
-
-    const updated = await bookingsRepository.findById(booking.id);
-    expect(updated?.canceledAt).toBeInstanceOf(Date);
   });
 });

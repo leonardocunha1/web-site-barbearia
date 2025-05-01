@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { UserAlreadyProfessionalError } from '@/use-cases/errors/user-already-professional-error';
 import { makeCreateProfessionalUseCase } from '@/use-cases/factories/make-create-professional-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function createProfessional(
   request: FastifyRequest,
@@ -33,9 +34,7 @@ export async function createProfessional(
     }
 
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

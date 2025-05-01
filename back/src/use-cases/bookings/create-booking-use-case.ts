@@ -32,7 +32,7 @@ export class CreateBookingUseCase {
     private servicesRepository: ServicesRepository,
   ) {}
 
-  async execute(request: BookingRequest): Promise<BookingResponse> {
+  async execute(request: BookingRequest): Promise<void> {
     const now = new Date();
     if (request.startDateTime < now) {
       throw new InvalidDateTimeError();
@@ -77,7 +77,7 @@ export class CreateBookingUseCase {
     }
 
     // Criar o agendamento com múltiplos serviços
-    const booking = await this.bookingsRepository.create({
+    await this.bookingsRepository.create({
       dataHoraInicio: request.startDateTime,
       dataHoraFim: endDateTime,
       observacoes: request.notes,
@@ -92,7 +92,5 @@ export class CreateBookingUseCase {
         })),
       },
     });
-
-    return { booking };
   }
 }

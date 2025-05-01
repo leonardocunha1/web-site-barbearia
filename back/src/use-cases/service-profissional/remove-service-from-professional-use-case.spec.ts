@@ -1,132 +1,123 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RemoveServiceFromProfessionalUseCase } from './remove-service-from-professional-use-case';
-import { InMemoryServiceProfessionalRepository } from '@/repositories/in-memory/in-memory-service-professional-repository';
-import { InMemoryBookingsRepository } from '@/repositories/in-memory/in-memory-bookings-repository';
+import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
+import { BookingsRepository } from '@/repositories/bookings-repository';
 import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
 import { ServiceWithBookingsError } from '../errors/service-with-bookings-error';
-import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('RemoveServiceFromProfessionalUseCase', () => {
-  let serviceProfessionalRepository: InMemoryServiceProfessionalRepository;
-  let bookingsRepository: InMemoryBookingsRepository;
+  let serviceProfessionalRepository: ServiceProfessionalRepository;
+  let bookingsRepository: BookingsRepository;
   let sut: RemoveServiceFromProfessionalUseCase;
 
   beforeEach(() => {
-    serviceProfessionalRepository = new InMemoryServiceProfessionalRepository();
-    bookingsRepository = new InMemoryBookingsRepository();
+    serviceProfessionalRepository = {
+      findByServiceAndProfessional: vi.fn(),
+      delete: vi.fn(),
+      create: vi.fn(),
+      findByProfessional: vi.fn(),
+    };
+
+    bookingsRepository = {
+      countActiveByServiceAndProfessional: vi.fn(),
+      // Adicione outros métodos que possam ser necessários para os testes
+    } as unknown as BookingsRepository;
+
     sut = new RemoveServiceFromProfessionalUseCase(
       serviceProfessionalRepository,
       bookingsRepository,
     );
   });
 
-  it('should remove a service from a professional successfully', async () => {
-    // Criar relação serviço-profissional
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-1' } },
-      professional: { connect: { id: 'professional-1' } },
+  it('should remove service from professional when no bookings exist', async () => {
+    // Arrange
+    const mockRelation = {
+      id: 'relation-1',
+      serviceId: 'service-1',
+      professionalId: 'professional-1',
       preco: 100,
       duracao: 60,
-    });
+    };
 
-    // Executar
+    vi.mocked(
+      serviceProfessionalRepository.findByServiceAndProfessional,
+    ).mockResolvedValueOnce(mockRelation);
+    vi.mocked(
+      bookingsRepository.countActiveByServiceAndProfessional,
+    ).mockResolvedValueOnce(0);
+
+    // Act
     await sut.execute({
       serviceId: 'service-1',
       professionalId: 'professional-1',
     });
 
-    // Verificar se foi removido
-    const result =
-      await serviceProfessionalRepository.findByServiceAndProfessional(
-        'service-1',
-        'professional-1',
-      );
-    expect(result).toBeNull();
+    // Assert
+    expect(
+      serviceProfessionalRepository.findByServiceAndProfessional,
+    ).toHaveBeenCalledWith('service-1', 'professional-1');
+    expect(
+      bookingsRepository.countActiveByServiceAndProfessional,
+    ).toHaveBeenCalledWith('service-1', 'professional-1');
+    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith(
+      'relation-1',
+    );
   });
 
-  it('should throw error when service-professional relation does not exist', async () => {
+  it('should throw ServiceProfessionalNotFoundError when relation does not exist', async () => {
+    // Arrange
+    vi.mocked(
+      serviceProfessionalRepository.findByServiceAndProfessional,
+    ).mockResolvedValueOnce(null);
+
+    // Act & Assert
     await expect(
       sut.execute({
-        serviceId: 'non-existent-service',
-        professionalId: 'non-existent-professional',
+        serviceId: 'service-1',
+        professionalId: 'professional-1',
       }),
     ).rejects.toBeInstanceOf(ServiceProfessionalNotFoundError);
+
+    expect(
+      serviceProfessionalRepository.findByServiceAndProfessional,
+    ).toHaveBeenCalledWith('service-1', 'professional-1');
+    expect(
+      bookingsRepository.countActiveByServiceAndProfessional,
+    ).not.toHaveBeenCalled();
+    expect(serviceProfessionalRepository.delete).not.toHaveBeenCalled();
   });
 
-  it('should throw error when service has active bookings', async () => {
-    // Criar relação
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-1' } },
-      professional: { connect: { id: 'professional-1' } },
+  it('should throw ServiceWithBookingsError when service has active bookings', async () => {
+    // Arrange
+    const mockRelation = {
+      id: 'relation-1',
+      serviceId: 'service-1',
+      professionalId: 'professional-1',
       preco: 100,
       duracao: 60,
-    });
+    };
 
-    // Criar booking ativo
-    bookingsRepository.items.push({
-      id: 'booking-1',
-      items: [
-        {
-          service: {
-            id: 'service-1',
-            nome: 'Test Service',
-          },
-        },
-      ],
-      profissionalId: 'professional-1',
-      user: { nome: 'Test User', id: 'user-1' },
-      status: 'CONFIRMADO',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      canceledAt: null,
-      confirmedAt: null,
-      observacoes: null,
-      dataHoraInicio: new Date(),
-      dataHoraFim: new Date(new Date().getTime() + 60 * 60 * 1000),
-      valorFinal: 100,
-      usuarioId: 'user-1',
-    });
+    vi.mocked(
+      serviceProfessionalRepository.findByServiceAndProfessional,
+    ).mockResolvedValueOnce(mockRelation);
+    vi.mocked(
+      bookingsRepository.countActiveByServiceAndProfessional,
+    ).mockResolvedValueOnce(1);
 
+    // Act & Assert
     await expect(
       sut.execute({
         serviceId: 'service-1',
         professionalId: 'professional-1',
       }),
     ).rejects.toBeInstanceOf(ServiceWithBookingsError);
-  });
 
-  it('should allow removal when service only has canceled bookings', async () => {
-    // Criar relação
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-1' } },
-      professional: { connect: { id: 'professional-1' } },
-      preco: 100,
-      duracao: 60,
-    });
-
-    // Criar booking cancelado
-    bookingsRepository.items.push({
-      id: 'booking-1',
-      items: [{ service: { nome: 'item1', id: 'item-1' } }],
-      profissionalId: 'professional-1',
-      user: { nome: 'user1', id: 'user-1' },
-      status: 'CANCELADO',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      canceledAt: null,
-      confirmedAt: null,
-      observacoes: null,
-      dataHoraInicio: new Date(),
-      dataHoraFim: new Date(new Date().getTime() + 60 * 60 * 1000),
-      valorFinal: 100,
-      usuarioId: 'user-1',
-    });
-
-    // Executar (não deve lançar erro)
-    await expect(
-      sut.execute({
-        serviceId: 'service-1',
-        professionalId: 'professional-1',
-      }),
-    ).resolves.not.toThrow();
+    expect(
+      serviceProfessionalRepository.findByServiceAndProfessional,
+    ).toHaveBeenCalledWith('service-1', 'professional-1');
+    expect(
+      bookingsRepository.countActiveByServiceAndProfessional,
+    ).toHaveBeenCalledWith('service-1', 'professional-1');
+    expect(serviceProfessionalRepository.delete).not.toHaveBeenCalled();
   });
 });

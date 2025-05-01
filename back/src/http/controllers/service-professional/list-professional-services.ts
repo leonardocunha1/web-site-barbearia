@@ -1,7 +1,8 @@
 import { makeListProfessionalServicesUseCase } from '@/use-cases/factories/make-list-professional-services-use-case';
-import { paginationSchema } from '@/validators/pagination-params';
+import { paginationSchema } from '@/schemas/pagination-params';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function listProfessionalServices(
   request: FastifyRequest,
@@ -44,10 +45,7 @@ export async function listProfessionalServices(
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
     throw err;
   }

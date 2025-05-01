@@ -5,6 +5,7 @@ import { InvalidTimeFormatError } from '@/use-cases/errors/invalid-time-format-e
 import { InvalidBusinessHoursError } from '@/use-cases/errors/invalid-business-hours-error';
 import { DuplicateBusinessHoursError } from '@/use-cases/errors/duplicate-business-hours-error';
 import { makeCreateBusinessHoursUseCase } from '@/use-cases/factories/make-create-business-hours-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function createBusinessHours(
   request: FastifyRequest,
@@ -65,10 +66,7 @@ export async function createBusinessHours(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

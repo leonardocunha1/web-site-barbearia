@@ -1,19 +1,33 @@
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 
+interface SortParams {
+  field: 'dataHoraInicio' | 'profissional' | 'status' | 'valorFinal';
+  order: 'asc' | 'desc';
+}
+
 interface ListBookingsUseCaseRequest {
   userId: string;
   page?: number;
   limit?: number;
+  sort?: SortParams[];
 }
 
 export class ListBookingsUseCase {
   constructor(private bookingsRepository: BookingsRepository) {}
 
-  async execute({ userId, page = 1, limit = 10 }: ListBookingsUseCaseRequest) {
-    // Calcula o número total de reservas para o usuário
+  async execute({
+    userId,
+    page = 1,
+    limit = 10,
+    sort = [{ field: 'dataHoraInicio', order: 'asc' }],
+  }: ListBookingsUseCaseRequest) {
     const [bookings, total] = await Promise.all([
-      this.bookingsRepository.findManyByUserId(userId, { page, limit }),
+      this.bookingsRepository.findManyByUserId(userId, {
+        page,
+        limit,
+        sort,
+      }),
       this.bookingsRepository.countByUserId(userId),
     ]);
 
@@ -21,7 +35,6 @@ export class ListBookingsUseCase {
       throw new BookingNotFoundError();
     }
 
-    // Calcula o número total de páginas
     const totalPages = Math.ceil(total / limit);
 
     return {
@@ -30,6 +43,7 @@ export class ListBookingsUseCase {
       page,
       limit,
       totalPages,
+      sort,
     };
   }
 }

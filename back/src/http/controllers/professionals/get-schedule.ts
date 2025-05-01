@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { getScheduleQuerySchema } from '@/dtos/schedule-dto';
 import { makeGetProfessionalScheduleUseCase } from '@/use-cases/factories/make-schedule-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function getSchedule(
   request: FastifyRequest,
@@ -22,10 +23,7 @@ export async function getSchedule(
     return reply.status(200).send(schedule);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     if (error instanceof ProfessionalNotFoundError) {

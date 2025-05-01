@@ -1,5 +1,5 @@
 import { UsersRepository } from '@/repositories/users-repository';
-import type { User, Role } from '@prisma/client';
+import type { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
@@ -10,10 +10,6 @@ interface RegisterUserRequest {
   senha: string;
   role?: Role;
   requestRole?: Role;
-}
-
-interface RegisterUserResponse {
-  user: User;
 }
 
 interface RegisterUserUseCaseProps {
@@ -39,7 +35,7 @@ export class RegisterUserUseCase {
     senha,
     role = 'CLIENTE',
     requestRole,
-  }: RegisterUserRequest): Promise<RegisterUserResponse> {
+  }: RegisterUserRequest): Promise<void> {
     if (
       (role === 'ADMIN' || role === 'PROFISSIONAL') &&
       requestRole !== 'ADMIN'
@@ -62,7 +58,5 @@ export class RegisterUserUseCase {
     });
 
     await this.sendVerificationEmail(user.email);
-
-    return { user };
   }
 }

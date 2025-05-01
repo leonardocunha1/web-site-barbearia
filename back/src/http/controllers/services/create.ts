@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { InsufficientPermissionsError } from '@/use-cases/errors/insufficient-permissions-error';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeCreateServiceUseCase } from '@/use-cases/factories/make-create-service-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function createService(
   request: FastifyRequest,
@@ -41,10 +42,7 @@ export async function createService(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

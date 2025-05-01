@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Role } from '@prisma/client';
 import { ListUsersResponse } from '@/dtos/user-dto';
 import { makeListUsersUseCase } from '@/use-cases/factories/make-list-users-factory-use-case';
-import { paginationSchema } from '@/validators/pagination-params';
+import { paginationSchema } from '@/schemas/pagination-params';
 
 export async function listUsers(
   request: FastifyRequest,

@@ -1,7 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { paginationSchema } from '@/validators/pagination-params';
+import { paginationSchema } from '@/schemas/pagination-params';
 import { makeListHolidaysUseCase } from '@/use-cases/factories/make-list-holidays-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function listHolidays(
   request: FastifyRequest,
@@ -26,10 +27,7 @@ export async function listHolidays(
     return reply.status(200).send(result);
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

@@ -4,6 +4,7 @@ import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-f
 import { InvalidBusinessHoursError } from '@/use-cases/errors/invalid-business-hours-error';
 import { InvalidTimeFormatError } from '@/use-cases/errors/invalid-time-format-error';
 import { makeUpdateBusinessHoursUseCase } from '@/use-cases/factories/make-update-business-hours-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function updateBusinessHours(
   request: FastifyRequest,
@@ -48,10 +49,7 @@ export async function updateBusinessHours(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

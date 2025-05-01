@@ -1,14 +1,24 @@
 import { Prisma, Booking, Status } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { BookingsRepository } from '../bookings-repository';
+import { SortBookingSchema } from '@/schemas/booking-sort-schema';
+
+function mapSortToOrderBy(
+  sort: SortBookingSchema[],
+): Prisma.BookingOrderByWithRelationInput[] {
+  return sort.map(({ field, order }) => {
+    if (field === 'profissional') {
+      return { profissional: { user: { nome: order } } };
+    }
+    return { [field]: order };
+  });
+}
 
 export class PrismaBookingsRepository implements BookingsRepository {
-  async create(data: Prisma.BookingCreateInput): Promise<Booking> {
-    const booking = await prisma.booking.create({
+  async create(data: Prisma.BookingCreateInput): Promise<void> {
+    await prisma.booking.create({
       data,
     });
-
-    return booking;
   }
 
   async findById(id: string): Promise<Booking | null> {
@@ -17,7 +27,7 @@ export class PrismaBookingsRepository implements BookingsRepository {
         id,
       },
       include: {
-        items: true, // retornando os itens relacionados junto com a consulta
+        items: true,
       },
     });
   }
@@ -37,7 +47,7 @@ export class PrismaBookingsRepository implements BookingsRepository {
     });
   }
 
-  async findManyByProfessionalId(professionalId: string): Promise<Booking[]> {
+  async findManyByProfessionalId(professionalId: string) {
     return prisma.booking.findMany({
       where: {
         profissionalId: professionalId,
@@ -45,21 +55,48 @@ export class PrismaBookingsRepository implements BookingsRepository {
       orderBy: {
         dataHoraInicio: 'asc',
       },
+      include: {
+        items: true,
+        profissional: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
   }
 
   async findManyByUserId(
     userId: string,
-    { page, limit }: { page: number; limit: number },
-  ): Promise<Booking[]> {
+    {
+      page,
+      limit,
+      sort = [{ field: 'dataHoraInicio', order: 'asc' }],
+    }: {
+      page: number;
+      limit: number;
+      sort?: Array<{
+        field: 'dataHoraInicio' | 'profissional' | 'status' | 'valorFinal';
+        order: 'asc' | 'desc';
+      }>;
+    },
+  ) {
+    const orderBy = mapSortToOrderBy(sort);
+
     return prisma.booking.findMany({
       where: {
         user: { id: userId },
       },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: {
-        dataHoraInicio: 'asc',
+      orderBy,
+      include: {
+        items: true,
+        profissional: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -72,10 +109,18 @@ export class PrismaBookingsRepository implements BookingsRepository {
     });
   }
 
-  async update(id: string, data: Prisma.BookingUpdateInput): Promise<Booking> {
+  async update(id: string, data: Prisma.BookingUpdateInput) {
     return prisma.booking.update({
       where: { id },
       data,
+      include: {
+        items: true,
+        profissional: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
   }
 

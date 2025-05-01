@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error';
 import { makeDeleteServiceUseCase } from '@/use-cases/factories/make-delete-service-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function deleteService(
   request: FastifyRequest,
@@ -34,10 +35,7 @@ export async function deleteService(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

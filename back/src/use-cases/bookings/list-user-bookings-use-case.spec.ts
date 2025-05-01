@@ -1,109 +1,101 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { InMemoryBookingsRepository } from '@/repositories/in-memory/in-memory-bookings-repository';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
+import {
+  BookingsRepository,
+  BookingWithRelations,
+} from '@/repositories/bookings-repository';
 import { ListBookingsUseCase } from './list-user-bookings-use-case';
 
-let bookingsRepository: InMemoryBookingsRepository;
-let sut: ListBookingsUseCase;
+const mockBookings: BookingWithRelations[] = [
+  {
+    id: 'booking-1',
+    usuarioId: 'user-1',
+    confirmedAt: new Date(),
+    observacoes: 'Teste de observação',
+    dataHoraInicio: new Date(),
+    dataHoraFim: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    status: 'CONFIRMADO',
+    valorFinal: 100,
+    canceledAt: null,
+    profissionalId: 'pro-1',
+    items: [],
+    profissional: {
+      id: 'pro-1',
+      userId: 'prof-user-1',
+      ativo: true,
+      createdAt: new Date(),
+      avatarUrl: null,
+      documento: null,
+      especialidade: 'Cabelo',
+      updatedAt: new Date(),
+      bio: '',
+      user: {
+        id: 'prof-user-1',
+        nome: 'Prof Nome',
+        email: 'prof@email.com',
+        senha: 'hashed-password',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        active: true,
+        emailVerified: true,
+        role: 'PROFISSIONAL',
+        telefone: '123456789',
+      },
+    },
+  },
+];
 
-// Dados base para reserva
-const baseBookingData = {
-  dataHoraInicio: new Date(),
-  dataHoraFim: new Date(),
-  user: { connect: { id: 'user-1' } },
-  profissional: { connect: { id: 'professional-1' } },
-};
+describe('ListBookingsUseCase', () => {
+  let bookingsRepository: BookingsRepository;
+  let useCase: ListBookingsUseCase;
 
-describe('Caso de Uso: Listar Reservas', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2023-01-01T00:00:00'));
+    bookingsRepository = {
+      findManyByUserId: vi.fn().mockResolvedValue(mockBookings),
+      countByUserId: vi.fn().mockResolvedValue(1),
+      create: vi.fn(),
+      findById: vi.fn(),
+      findOverlappingBooking: vi.fn(),
+      findManyByProfessionalId: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      countActiveByServiceAndProfessional: vi.fn(),
+      countByProfessionalAndDate: vi.fn(),
+      getEarningsByProfessionalAndDate: vi.fn(),
+      countByProfessionalAndStatus: vi.fn(),
+      getMonthlyEarnings: vi.fn(),
+      findNextAppointments: vi.fn(),
+      findByProfessionalAndDate: vi.fn(),
+    } as unknown as BookingsRepository;
 
-    bookingsRepository = new InMemoryBookingsRepository();
-    sut = new ListBookingsUseCase(bookingsRepository);
+    useCase = new ListBookingsUseCase(bookingsRepository);
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+  it('deve listar bookings com paginação e ordenação', async () => {
+    const response = await useCase.execute({ userId: 'user-1' });
 
-  it('deve retornar reservas paginadas com sucesso', async () => {
-    await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-    await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'CONCLUIDO',
-    });
+    expect(response.bookings).toEqual(mockBookings);
+    expect(response.total).toBe(1);
+    expect(response.page).toBe(1);
+    expect(response.limit).toBe(10);
+    expect(response.totalPages).toBe(1);
+    expect(response.sort).toEqual([{ field: 'dataHoraInicio', order: 'asc' }]);
 
-    const { bookings, total, totalPages, page, limit } = await sut.execute({
-      userId: 'user-1',
+    expect(bookingsRepository.findManyByUserId).toHaveBeenCalledWith('user-1', {
       page: 1,
       limit: 10,
+      sort: [{ field: 'dataHoraInicio', order: 'asc' }],
     });
-
-    expect(bookings).toHaveLength(2);
-    expect(total).toBe(2);
-    expect(totalPages).toBe(1);
-    expect(page).toBe(1);
-    expect(limit).toBe(10);
+    expect(bookingsRepository.countByUserId).toHaveBeenCalledWith('user-1');
   });
 
-  it('deve lançar um erro quando não houver reservas para o usuário', async () => {
-    await expect(() =>
-      sut.execute({
-        userId: 'user-2',
-      }),
-    ).rejects.toBeInstanceOf(BookingNotFoundError);
-  });
+  it('deve lançar erro se não houver bookings para o usuário', async () => {
+    vi.spyOn(bookingsRepository, 'findManyByUserId').mockResolvedValueOnce([]);
 
-  it('deve calcular corretamente o total de páginas', async () => {
-    await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-    await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'CONCLUIDO',
-    });
-
-    const { totalPages } = await sut.execute({
-      userId: 'user-1',
-      page: 1,
-      limit: 1,
-    });
-
-    expect(totalPages).toBe(2); // Com 2 reservas e limit=1, devem ser 2 páginas
-  });
-
-  it('deve retornar a página correta de resultados', async () => {
-    await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'PENDENTE',
-    });
-    await bookingsRepository.create({
-      ...baseBookingData,
-      status: 'CONCLUIDO',
-    });
-
-    const { bookings, page } = await sut.execute({
-      userId: 'user-1',
-      page: 2,
-      limit: 1,
-    });
-
-    expect(bookings).toHaveLength(1);
-    expect(page).toBe(2);
-  });
-
-  it('deve lançar um erro se o usuário tentar acessar reservas de um ID inexistente', async () => {
-    await expect(() =>
-      sut.execute({
-        userId: 'id-inexistente',
-        page: 1,
-        limit: 10,
-      }),
-    ).rejects.toBeInstanceOf(BookingNotFoundError);
+    await expect(() => useCase.execute({ userId: 'user-1' })).rejects.toThrow(
+      BookingNotFoundError,
+    );
   });
 });

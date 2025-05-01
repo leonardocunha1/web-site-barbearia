@@ -22,14 +22,18 @@ describe('Register User Use Case', () => {
   });
 
   it('deve cadastrar um novo usuário', async () => {
-    const { user } = await sut.execute({
+    await sut.execute({
       nome: 'João Silva',
       email: 'joao@example.com',
       senha: '123456',
     });
 
-    expect(user).toHaveProperty('id');
-    expect(user.email).toBe('joao@example.com');
+    // Verifica se o usuário foi criado buscando diretamente no repositório
+    const user = await usersRepository.findByEmail('joao@example.com');
+
+    expect(user).toBeDefined();
+    expect(user?.id).toBeDefined();
+    expect(user?.email).toBe('joao@example.com');
   });
 
   it('não deve permitir cadastrar com email já existente', async () => {
@@ -61,7 +65,7 @@ describe('Register User Use Case', () => {
   });
 
   it('deve permitir ADMIN criar outro ADMIN', async () => {
-    const { user } = await sut.execute({
+    await sut.execute({
       nome: 'Admin Master',
       email: 'admin@example.com',
       senha: '123456',
@@ -69,6 +73,8 @@ describe('Register User Use Case', () => {
       requestRole: 'ADMIN',
     });
 
-    expect(user.role).toBe('ADMIN');
+    // Verifica se o usuário ADMIN foi criado corretamente
+    const adminUser = await usersRepository.findByEmail('admin@example.com');
+    expect(adminUser?.role).toBe('ADMIN');
   });
 });

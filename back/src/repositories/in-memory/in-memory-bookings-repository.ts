@@ -14,7 +14,7 @@ interface CompleteBooking extends Booking {
 export class InMemoryBookingsRepository implements BookingsRepository {
   public items: CompleteBooking[] = [];
 
-  async create(data: Prisma.BookingCreateInput): Promise<Booking> {
+  async create(data: Prisma.BookingCreateInput): Promise<void> {
     const booking: CompleteBooking = {
       id: randomUUID(),
       usuarioId: data.user.connect?.id || '',
@@ -33,7 +33,6 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     };
 
     this.items.push(booking);
-    return booking;
   }
 
   async findById(id: string): Promise<Booking | null> {
@@ -78,10 +77,7 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     return this.items.filter((item) => item.usuarioId === userId).length;
   }
 
-  async update(
-    id: string,
-    data: Prisma.BookingUpdateInput,
-  ): Promise<Booking | null> {
+  async update(id: string, data: Prisma.BookingUpdateInput): Promise<void> {
     const index = this.items.findIndex((item) => item.id === id);
     if (index === -1) return null;
 
@@ -102,11 +98,6 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     };
 
     this.items[index] = updated;
-
-    // Retorna apenas as propriedades de Booking
-    const { user, items, ...bookingData } = updated;
-    console.log(user, items);
-    return bookingData;
   }
 
   async delete(id: string): Promise<void> {

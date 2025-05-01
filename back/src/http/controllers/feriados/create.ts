@@ -5,6 +5,7 @@ import { PastDateError } from '@/use-cases/errors/past-date-error';
 import { InvalidHolidayDescriptionError } from '@/use-cases/errors/invalid-holiday-description-error';
 import { DuplicateHolidayError } from '@/use-cases/errors/duplicate-holiday-error';
 import { makeCreateHolidayUseCase } from '@/use-cases/factories/make-create-holiday-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function createHoliday(
   request: FastifyRequest,
@@ -50,10 +51,7 @@ export async function createHoliday(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

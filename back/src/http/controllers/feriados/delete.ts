@@ -4,6 +4,7 @@ import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-f
 import { HolidayNotFoundError } from '@/use-cases/errors/holiday-not-found-error';
 import { PastHolidayDeletionError } from '@/use-cases/errors/past-holiday-deletion-error';
 import { makeDeleteHolidayUseCase } from '@/use-cases/factories/make-delete-holiday-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function deleteHoliday(
   request: FastifyRequest,
@@ -41,10 +42,7 @@ export async function deleteHoliday(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

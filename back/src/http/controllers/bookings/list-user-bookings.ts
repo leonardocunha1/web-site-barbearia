@@ -2,7 +2,9 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { BookingNotFoundError } from '@/use-cases/errors/booking-not-found-error';
 import { makeListUserBookingsUseCase } from '@/use-cases/factories/make-list-user-bookings-use-case';
-import { paginationSchema } from '@/validators/pagination-params';
+import { paginationSchema } from '@/schemas/pagination-params';
+import { formatZodError } from '@/utils/formatZodError';
+import { SortBookingSchema, sortSchema } from '@/schemas/booking-sort-schema';
 
 export async function listBookings(
   request: FastifyRequest,
@@ -10,16 +12,24 @@ export async function listBookings(
 ) {
   const listBookingsParamsSchema = paginationSchema.extend({
     userId: z.string().uuid(),
+    sort: z.array(sortSchema).optional(),
   });
 
-  const { userId, page, limit } = listBookingsParamsSchema.parse(request.query);
-
   try {
+    const { userId, page, limit, sort } = listBookingsParamsSchema.parse(
+      request.query,
+    );
+
+    const sortCriteria: SortBookingSchema[] = sort?.length
+      ? sort
+      : [{ field: 'dataHoraInicio', order: 'asc' }];
+
     const listBookingsUseCase = makeListUserBookingsUseCase();
     const result = await listBookingsUseCase.execute({
       userId,
       page,
       limit,
+      sort: sortCriteria,
     });
 
     return reply.status(200).send(result);
@@ -29,10 +39,7 @@ export async function listBookings(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

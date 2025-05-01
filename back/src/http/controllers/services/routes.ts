@@ -1,4 +1,3 @@
-import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createService } from './create';
@@ -7,8 +6,9 @@ import { getService } from './get';
 import { updateService } from './update';
 import { deleteService } from './delete';
 import { toggleServiceStatus } from './toggle-status-ativo';
+import { FastifyTypedInstance } from '@/types';
 
-export async function servicesRoutes(app: FastifyInstance) {
+export async function servicesRoutes(app: FastifyTypedInstance) {
   app.post(
     '/services',
     {

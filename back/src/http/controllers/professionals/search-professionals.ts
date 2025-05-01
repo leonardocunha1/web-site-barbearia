@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { ListProfessionalsResponse } from '@/dtos/professional-dto';
 import { makeSearchProfessionalsUseCase } from '@/use-cases/factories/make-search-professionals-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function searchProfessionals(
   request: FastifyRequest,
@@ -30,10 +31,7 @@ export async function searchProfessionals(
     return reply.status(200).send(response);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

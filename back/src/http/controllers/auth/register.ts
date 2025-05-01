@@ -1,30 +1,22 @@
-import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists-error';
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { z } from 'zod';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeRegisterUserUseCase } from '@/use-cases/factories/make-register-use-case';
+import { registerUserSchema } from '@/schemas/user';
+import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists-error';
 import { InsufficientPermissionsError } from '@/use-cases/errors/insufficient-permissions-error';
+import { ZodError } from 'zod';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function registerUser(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const registerBodySchema = z.object({
-    nome: z.string(),
-    email: z.string().email(),
-    senha: z.string().min(6),
-    role: z.enum(['ADMIN', 'CLIENTE', 'PROFISSIONAL']).optional(),
-  });
-
-  const { nome, email, senha, role } = registerBodySchema.parse(request.body);
+  const data = registerUserSchema.parse(request.body);
 
   try {
     const registerUserUseCase = makeRegisterUserUseCase();
 
     await registerUserUseCase.execute({
-      nome,
-      email,
-      senha,
-      role,
+      ...data,
       requestRole: request.user?.role,
     });
 
@@ -38,11 +30,8 @@ export async function registerUser(
       return reply.status(403).send({ message: err.message });
     }
 
-    if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+    if (err instanceof ZodError) {
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

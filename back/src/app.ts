@@ -13,8 +13,34 @@ import { tokenRoutes } from './http/controllers/tokens/routes';
 import { holidayRoutes } from './http/controllers/feriados/routes';
 import { businessHoursRoutes } from './http/controllers/horarios-funcionamento/routes';
 import { serviceProfessionalRoutes } from './http/controllers/service-professional/routes';
+import {
+  validatorCompiler,
+  serializerCompiler,
+  ZodTypeProvider,
+  jsonSchemaTransform,
+} from 'fastify-type-provider-zod';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 
-export const app = fastify();
+export const app = fastify().withTypeProvider<ZodTypeProvider>();
+
+// essas duas linhas abaixo são para o fastify usar o zod como provider de validação e serialização
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'API Barber Shop',
+      description: 'API para agendamento de serviços de barbearia',
+      version: '1.0.0',
+    },
+  },
+  transform: jsonSchemaTransform,
+});
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+});
 
 app.register(fastifyCookie);
 app.register(fastifyJwt, {
@@ -28,7 +54,7 @@ app.register(fastifyJwt, {
   },
 });
 app.register(fastifyCors, {
-  origin: 'http://localhost:3000',
+  origin: '*',
   credentials: true,
 });
 

@@ -1,21 +1,49 @@
-import { Booking, Prisma, Status } from '@prisma/client';
+import { SortBookingSchema } from '@/schemas/booking-sort-schema';
+import {
+  Booking,
+  BookingItem,
+  Prisma,
+  Professional,
+  Status,
+  User,
+} from '@prisma/client';
+
+export type BookingWithRelations = Booking & {
+  items: BookingItem[];
+  profissional: Professional & {
+    user: User;
+  };
+};
+
+export interface FindManyByUserIdParams {
+  page: number;
+  limit: number;
+  sort?: SortBookingSchema[];
+}
 
 export interface BookingsRepository {
-  create(data: Prisma.BookingCreateInput): Promise<Booking>;
+  create(data: Prisma.BookingCreateInput): Promise<void>;
   findById(id: string): Promise<Booking | null>;
   findOverlappingBooking(
     professionalId: string,
     start: Date,
     end: Date,
   ): Promise<Booking | null>;
-  findManyByProfessionalId(professionalId: string): Promise<Booking[]>;
+
+  findManyByProfessionalId(
+    professionalId: string,
+  ): Promise<BookingWithRelations[]>;
 
   findManyByUserId(
     userId: string,
-    { page, limit }: { page: number; limit: number },
-  ): Promise<Booking[]>;
+    params: FindManyByUserIdParams,
+  ): Promise<BookingWithRelations[]>;
 
-  update(id: string, data: Prisma.BookingUpdateInput): Promise<Booking | null>;
+  update(
+    id: string,
+    data: Prisma.BookingUpdateInput,
+  ): Promise<BookingWithRelations | null>;
+
   delete(id: string): Promise<void>;
 
   countActiveByServiceAndProfessional(

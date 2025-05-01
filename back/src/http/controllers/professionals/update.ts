@@ -1,6 +1,7 @@
 import { InvalidUpdateError } from '@/use-cases/errors/invalid-update-error';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeUpdateProfessionalUseCase } from '@/use-cases/factories/make-update-professional-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
@@ -43,10 +44,7 @@ export async function updateProfessional(
     }
 
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

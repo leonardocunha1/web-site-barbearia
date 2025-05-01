@@ -1,4 +1,3 @@
-import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createProfessional } from './create';
@@ -8,8 +7,9 @@ import { toggleProfessionalStatus } from './toggle-status-ativo';
 import { searchProfessionals } from './search-professionals';
 import { dashboard } from './get-dashboard';
 import { getSchedule } from './get-schedule';
+import { FastifyTypedInstance } from '@/types';
 
-export async function professionalsRoutes(app: FastifyInstance) {
+export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.post(
     '/professionals',
     { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },

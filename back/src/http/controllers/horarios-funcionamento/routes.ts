@@ -1,10 +1,10 @@
-import { FastifyInstance } from 'fastify';
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createBusinessHours } from './create';
 import { updateBusinessHours } from './update';
+import { FastifyTypedInstance } from '@/types';
 
-export async function businessHoursRoutes(app: FastifyInstance) {
+export async function businessHoursRoutes(app: FastifyTypedInstance) {
   // Rota para criar horários de funcionamento
   app.post(
     '/business-hours',

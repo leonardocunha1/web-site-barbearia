@@ -8,6 +8,7 @@ import {
 import { BookingUpdateError } from '@/use-cases/errors/booking-update-error';
 import { z } from 'zod';
 import { makeUpdateBookingStatusUseCase } from '@/use-cases/factories/make-update-booking-status-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function updateBookingStatus(
   request: FastifyRequest,
@@ -33,10 +34,7 @@ export async function updateBookingStatus(
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        errors: err.errors,
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     if (err instanceof BookingNotFoundError) {
@@ -50,7 +48,6 @@ export async function updateBookingStatus(
       return reply.status(400).send({ message: err.message });
     }
 
-    console.error('Booking status update error:', err);
-    return reply.status(500).send({ message: 'Internal server error' });
+    throw err;
   }
 }

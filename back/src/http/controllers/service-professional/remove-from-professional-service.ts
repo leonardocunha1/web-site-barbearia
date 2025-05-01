@@ -1,6 +1,7 @@
 import { ServiceProfessionalNotFoundError } from '@/use-cases/errors/service-professional-not-found-error';
 import { ServiceWithBookingsError } from '@/use-cases/errors/service-with-bookings-error';
 import { makeRemoveServiceFromProfessionalUseCase } from '@/use-cases/factories/make-remove-service-from-professional-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
@@ -40,10 +41,7 @@ export async function removeFromProfessional(
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;
