@@ -8,6 +8,7 @@ interface UpdateBookingStatusUseCaseRequest {
   bookingId: string;
   status: 'CONFIRMADO' | 'CANCELADO';
   reason?: string;
+  profissionalId: string;
 }
 
 interface UpdateBookingStatusUseCaseResponse {
@@ -26,7 +27,7 @@ export class UpdateBookingStatusUseCase {
   async execute(
     request: UpdateBookingStatusUseCaseRequest,
   ): Promise<UpdateBookingStatusUseCaseResponse> {
-    const { bookingId, status, reason } = request;
+    const { bookingId, status, reason, profissionalId } = request;
 
     // Buscar o agendamento
     const booking = await this.bookingsRepository.findById(bookingId);
@@ -37,6 +38,13 @@ export class UpdateBookingStatusUseCase {
     // Validações específicas para cada status
     if (status === 'CONFIRMADO' && booking.status !== 'PENDENTE') {
       throw new InvalidBookingStatusError(booking.status, 'PENDENTE');
+    }
+
+    // Verificar se o profissional é o dono do agendamento
+    if (booking.profissionalId !== profissionalId) {
+      throw new BookingUpdateError(
+        'Você não tem permissão para alterar este agendamento',
+      );
     }
 
     if (status === 'CANCELADO') {

@@ -1,16 +1,16 @@
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { UsersRepository } from '@/repositories/users-repository';
-import { ServicesRepository } from '@/repositories/services-repository';
 
 import { Booking } from '@prisma/client';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 
 import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
-import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
 import { InvalidDurationError } from '../errors/invalid-duration-error';
+import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
+import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
 
 export interface BookingRequest {
   userId: string;
@@ -29,15 +29,17 @@ export class CreateBookingUseCase {
     private bookingsRepository: BookingsRepository,
     private usersRepository: UsersRepository,
     private professionalsRepository: ProfessionalsRepository,
-    private servicesRepository: ServicesRepository,
+    private serviceProfessionalRepository: ServiceProfessionalRepository,
   ) {}
 
   async execute(request: BookingRequest): Promise<void> {
+    // 1. Validação básica da data/hora
     const now = new Date();
     if (request.startDateTime < now) {
       throw new InvalidDateTimeError();
     }
 
+    // 2. Verificar existência do usuário e profissional
     const [user, professional] = await Promise.all([
       this.usersRepository.findById(request.userId),
       this.professionalsRepository.findById(request.professionalId),
@@ -46,37 +48,54 @@ export class CreateBookingUseCase {
     if (!user) throw new UserNotFoundError();
     if (!professional) throw new ProfessionalNotFoundError();
 
-    // Buscar todos os serviços
-    const services = await Promise.all(
+    // 3. Validar serviços através do ServiceProfessional
+    const serviceProfessionals = await Promise.all(
       request.services.map(async ({ serviceId }) => {
-        const service = await this.servicesRepository.findById(serviceId);
-        if (!service) throw new ServiceNotFoundError();
-        if (service.duracao <= 0) throw new InvalidDurationError();
-        return service;
+        const sp =
+          await this.serviceProfessionalRepository.findByServiceAndProfessional(
+            serviceId,
+            request.professionalId,
+          );
+
+        if (!sp) {
+          throw new ServiceProfessionalNotFoundError();
+        }
+
+        if (sp.duracao <= 0) {
+          throw new InvalidDurationError();
+        }
+
+        return sp;
       }),
     );
 
-    // Somar as durações dos serviços
-    const totalDuration = services.reduce(
-      (sum, service) => sum + service.duracao,
+    // 4. Calcular duração total
+    const totalDuration = serviceProfessionals.reduce(
+      (sum, sp) => sum + sp.duracao,
       0,
     );
+
+    if (totalDuration <= 0) {
+      throw new InvalidDurationError();
+    }
+
     const endDateTime = new Date(
       request.startDateTime.getTime() + totalDuration * 60000,
     );
 
-    // Verificar conflito de horário
+    // 5. Verificar conflitos de horário
     const conflictingBooking =
       await this.bookingsRepository.findOverlappingBooking(
         request.professionalId,
         request.startDateTime,
         endDateTime,
       );
+
     if (conflictingBooking) {
       throw new TimeSlotAlreadyBookedError();
     }
 
-    // Criar o agendamento com múltiplos serviços
+    // 6. Criar o agendamento
     await this.bookingsRepository.create({
       dataHoraInicio: request.startDateTime,
       dataHoraFim: endDateTime,
@@ -84,11 +103,12 @@ export class CreateBookingUseCase {
       user: { connect: { id: request.userId } },
       profissional: { connect: { id: request.professionalId } },
       status: 'PENDENTE',
+      valorFinal: serviceProfessionals.reduce((sum, sp) => sum + sp.preco, 0),
       items: {
-        create: services.map((service) => ({
-          service: { connect: { id: service.id } },
-          preco: service.precoPadrao,
-          duracao: service.duracao,
+        create: serviceProfessionals.map((sp) => ({
+          serviceProfessionalId: sp.id,
+          preco: sp.preco,
+          duracao: sp.duracao,
         })),
       },
     });

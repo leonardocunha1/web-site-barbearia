@@ -4,7 +4,7 @@ import { InvalidBookingStatusError } from '@/use-cases/errors/invalid-booking-st
 import {
   updateBookingStatusBodySchema,
   updateBookingStatusParamsSchema,
-} from '@/dtos/update-booking-status.dto';
+} from '@/dtos/atualizar-status-reserva.dto';
 import { BookingUpdateError } from '@/use-cases/errors/booking-update-error';
 import { z } from 'zod';
 import { makeUpdateBookingStatusUseCase } from '@/use-cases/factories/make-update-booking-status-use-case';
@@ -22,15 +22,15 @@ export async function updateBookingStatus(
 
     const updateBookingStatusUseCase = makeUpdateBookingStatusUseCase();
 
-    const { booking } = await updateBookingStatusUseCase.execute({
+    await updateBookingStatusUseCase.execute({
       bookingId,
       status,
       reason,
+      profissionalId: request.user.profissionalId as string,
     });
 
     return reply.status(200).send({
       message: `Agendamento ${status.toLowerCase()} com sucesso`,
-      booking,
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

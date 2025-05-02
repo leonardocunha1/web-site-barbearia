@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CreateBookingUseCase } from './create-booking-use-case';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
 import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
 import { InvalidDurationError } from '../errors/invalid-duration-error';
+import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
 
 describe('CreateBookingUseCase', () => {
   const bookingsRepository = {
@@ -21,8 +21,8 @@ describe('CreateBookingUseCase', () => {
     findById: vi.fn(),
   };
 
-  const servicesRepository = {
-    findById: vi.fn(),
+  const serviceProfessionalRepository = {
+    findByServiceAndProfessional: vi.fn(),
   };
 
   let sut: CreateBookingUseCase;
@@ -33,7 +33,7 @@ describe('CreateBookingUseCase', () => {
       bookingsRepository as any,
       usersRepository as any,
       professionalsRepository as any,
-      servicesRepository as any,
+      serviceProfessionalRepository as any,
     );
   });
 
@@ -44,11 +44,15 @@ describe('CreateBookingUseCase', () => {
     usersRepository.findById.mockResolvedValue({ id: 'user-1' });
     professionalsRepository.findById.mockResolvedValue({ id: 'pro-1' });
 
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1',
-      duracao: 30,
-      precoPadrao: 100,
-    });
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
+      {
+        id: 'sp-1',
+        serviceId: 'service-1',
+        professionalId: 'pro-1',
+        duracao: 30,
+        preco: 100,
+      },
+    );
 
     bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
@@ -108,11 +112,13 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toBeInstanceOf(ProfessionalNotFoundError);
   });
 
-  it('deve lançar erro se serviço não for encontrado', async () => {
+  it('deve lançar erro se serviço não for encontrado para o profissional', async () => {
     usersRepository.findById.mockResolvedValue({ id: 'user-1' });
     professionalsRepository.findById.mockResolvedValue({ id: 'pro-1' });
 
-    servicesRepository.findById.mockResolvedValue(null);
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
+      null,
+    );
 
     await expect(() =>
       sut.execute({
@@ -121,18 +127,22 @@ describe('CreateBookingUseCase', () => {
         services: [{ serviceId: 'service-1' }],
         startDateTime: new Date(Date.now() + 1000 * 60),
       }),
-    ).rejects.toBeInstanceOf(ServiceNotFoundError);
+    ).rejects.toBeInstanceOf(ServiceProfessionalNotFoundError);
   });
 
   it('deve lançar erro se a duração do serviço for inválida', async () => {
     usersRepository.findById.mockResolvedValue({ id: 'user-1' });
     professionalsRepository.findById.mockResolvedValue({ id: 'pro-1' });
 
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1',
-      duracao: 0,
-      precoPadrao: 100,
-    });
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
+      {
+        id: 'sp-1',
+        serviceId: 'service-1',
+        professionalId: 'pro-1',
+        duracao: 0,
+        preco: 100,
+      },
+    );
 
     await expect(() =>
       sut.execute({
@@ -148,11 +158,15 @@ describe('CreateBookingUseCase', () => {
     usersRepository.findById.mockResolvedValue({ id: 'user-1' });
     professionalsRepository.findById.mockResolvedValue({ id: 'pro-1' });
 
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1',
-      duracao: 30,
-      precoPadrao: 100,
-    });
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
+      {
+        id: 'sp-1',
+        serviceId: 'service-1',
+        professionalId: 'pro-1',
+        duracao: 30,
+        preco: 100,
+      },
+    );
 
     bookingsRepository.findOverlappingBooking.mockResolvedValue({
       id: 'conflict-booking',

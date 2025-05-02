@@ -1,9 +1,8 @@
-// src/dto/schedule.dto.ts
 import { z } from 'zod';
 
 export const getScheduleQuerySchema = z.object({
   professionalId: z.string().uuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // Formato YYYY-MM-DD
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
 export type GetScheduleQuery = z.infer<typeof getScheduleQuerySchema>;

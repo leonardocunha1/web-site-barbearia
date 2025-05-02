@@ -1,16 +1,13 @@
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
-
-interface SortParams {
-  field: 'dataHoraInicio' | 'profissional' | 'status' | 'valorFinal';
-  order: 'asc' | 'desc';
-}
+import { UsuaruioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
+import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 
 interface ListBookingsUseCaseRequest {
   userId: string;
   page?: number;
   limit?: number;
-  sort?: SortParams[];
+  sort?: SortBookingSchema[];
 }
 
 export class ListBookingsUseCase {
@@ -33,6 +30,10 @@ export class ListBookingsUseCase {
 
     if (bookings.length === 0) {
       throw new BookingNotFoundError();
+    }
+
+    if (userId !== bookings[0].usuarioId) {
+      throw new UsuaruioTentandoPegarInformacoesDeOutro();
     }
 
     const totalPages = Math.ceil(total / limit);

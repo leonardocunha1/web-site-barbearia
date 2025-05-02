@@ -1,28 +1,28 @@
-import { User } from '@prisma/client';
+import { User, Role } from '@prisma/client';
 
-export type UserDTO = {
+export interface UserDTO {
   id: string;
   nome: string;
   email: string;
-  telefone: string | null;
-  role: string;
-  emailVerified: boolean | null;
+  telefone?: string | null;
+  role: Role;
+  emailVerified: boolean;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
 export function toUserDTO(user: User): UserDTO {
   return {
     id: user.id,
     nome: user.nome,
     email: user.email,
+    telefone: user.telefone,
     role: user.role,
+    emailVerified: user.emailVerified,
     active: user.active,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
-    telefone: user.telefone,
-    emailVerified: user.emailVerified,
   };
 }
 

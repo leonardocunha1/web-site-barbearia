@@ -11,6 +11,7 @@ const mockBooking = {
   dataHoraInicio: new Date('2025-01-01T10:00:00'),
   dataHoraFim: new Date('2025-01-01T11:00:00'),
   observacoes: 'Agendamento original',
+  profissionalId: 'profissional-id',
 };
 
 const bookingsRepository = {
@@ -38,6 +39,7 @@ describe('UpdateBookingStatusUseCase', () => {
     const response = await useCase.execute({
       bookingId: 'booking-id',
       status: 'CONFIRMADO',
+      profissionalId: 'profissional-id',
     });
 
     expect(response.booking.status).toBe('CONFIRMADO');
@@ -60,6 +62,7 @@ describe('UpdateBookingStatusUseCase', () => {
       useCase.execute({
         bookingId: 'booking-id',
         status: 'CONFIRMADO',
+        profissionalId: 'profissional-id',
       }),
     ).rejects.toBeInstanceOf(InvalidBookingStatusError);
   });
@@ -78,6 +81,7 @@ describe('UpdateBookingStatusUseCase', () => {
       bookingId: 'booking-id',
       status: 'CANCELADO',
       reason: 'Cliente desistiu',
+      profissionalId: 'profissional-id',
     });
 
     expect(response.booking.status).toBe('CANCELADO');
@@ -106,6 +110,7 @@ describe('UpdateBookingStatusUseCase', () => {
       useCase.execute({
         bookingId: 'booking-id',
         status: 'CANCELADO',
+        profissionalId: 'profissional-id',
       }),
     ).rejects.toBeInstanceOf(BookingUpdateError);
   });
@@ -119,6 +124,7 @@ describe('UpdateBookingStatusUseCase', () => {
         bookingId: 'booking-id',
         status: 'CANCELADO',
         reason: longReason,
+        profissionalId: 'profissional-id',
       }),
     ).rejects.toThrow('Motivo do cancelamento muito longo');
   });
@@ -130,6 +136,7 @@ describe('UpdateBookingStatusUseCase', () => {
       useCase.execute({
         bookingId: 'non-existent-id',
         status: 'CONFIRMADO',
+        profissionalId: 'profissional-id',
       }),
     ).rejects.toBeInstanceOf(BookingNotFoundError);
   });
@@ -143,6 +150,19 @@ describe('UpdateBookingStatusUseCase', () => {
         bookingId: 'booking-id',
         status: 'CANCELADO',
         reason: 'Cliente desistiu',
+        profissionalId: 'profissional-id',
+      }),
+    ).rejects.toBeInstanceOf(BookingUpdateError);
+  });
+
+  it('deve lançar erro se profissional não for o dono do agendamento', async () => {
+    bookingsRepository.findById.mockResolvedValueOnce(mockBooking);
+
+    await expect(() =>
+      useCase.execute({
+        bookingId: 'booking-id',
+        status: 'CONFIRMADO',
+        profissionalId: 'outro-profissional-id',
       }),
     ).rejects.toBeInstanceOf(BookingUpdateError);
   });

@@ -3,24 +3,36 @@ import { FastifyReply } from 'fastify';
 interface UserForToken {
   id: string;
   role: string;
+  profissionalId?: string;
 }
 
 interface TokenPayload {
   id: string;
   role: string;
+  profissionalId?: string;
 }
 
 export class TokenService {
   constructor(private reply: FastifyReply) {}
 
   async generateTokens(user: UserForToken) {
+    // Crie um payload base
+    const payload: { role: string; profissionalId?: string } = {
+      role: user.role,
+    };
+
+    // Se for um PROFISSIONAL, adicione o profissionalId ao payload
+    if (user.role === 'PROFISSIONAL' && user.profissionalId) {
+      payload.profissionalId = user.profissionalId;
+    }
+
     const token = await this.reply.jwtSign(
-      { role: user.role },
+      payload, // Use o payload modificado aqui
       { sign: { sub: user.id } },
     );
 
     const refreshToken = await this.reply.jwtSign(
-      { role: user.role },
+      payload, // Use o mesmo payload para o refresh token
       { sign: { sub: user.id, expiresIn: '7d' } },
     );
 
@@ -28,15 +40,21 @@ export class TokenService {
   }
 
   async generateTokensFromPayload(payload: TokenPayload) {
-    const token = await this.reply.jwtSign(
-      { role: payload.role },
-      { sign: { sub: payload.id } },
-    );
+    const tokenPayload: { role: string; profissionalId?: string } = {
+      role: payload.role,
+    };
 
-    const refreshToken = await this.reply.jwtSign(
-      { role: payload.role },
-      { sign: { sub: payload.id, expiresIn: '7d' } },
-    );
+    if (payload.role === 'PROFISSIONAL' && payload.profissionalId) {
+      tokenPayload.profissionalId = payload.profissionalId;
+    }
+
+    const token = await this.reply.jwtSign(tokenPayload, {
+      sign: { sub: payload.id },
+    });
+
+    const refreshToken = await this.reply.jwtSign(tokenPayload, {
+      sign: { sub: payload.id, expiresIn: '7d' },
+    });
 
     return { token, refreshToken };
   }

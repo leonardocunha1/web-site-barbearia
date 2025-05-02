@@ -4,34 +4,58 @@ import {
   BookingItem,
   Prisma,
   Professional,
+  Service,
+  ServiceProfessional,
   Status,
   User,
 } from '@prisma/client';
 
 export type BookingWithRelations = Booking & {
-  items: BookingItem[];
+  items: (BookingItem & {
+    serviceProfessional: ServiceProfessional & {
+      service: Service;
+    };
+  })[];
   profissional: Professional & {
     user: User;
   };
+  user: User;
 };
 
 export interface FindManyByUserIdParams {
   page: number;
   limit: number;
   sort?: SortBookingSchema[];
+  filters?: {
+    status?: Status;
+    startDate?: Date;
+    endDate?: Date;
+  };
+}
+
+export interface FindManyByProfessionalIdParams {
+  page: number;
+  limit: number;
+  sort?: SortBookingSchema[];
+  filters?: {
+    status?: Status;
+    startDate?: Date;
+    endDate?: Date;
+  };
 }
 
 export interface BookingsRepository {
   create(data: Prisma.BookingCreateInput): Promise<void>;
-  findById(id: string): Promise<Booking | null>;
+  findById(id: string): Promise<BookingWithRelations | null>;
   findOverlappingBooking(
     professionalId: string,
     start: Date,
     end: Date,
-  ): Promise<Booking | null>;
+  ): Promise<BookingWithRelations | null>;
 
   findManyByProfessionalId(
     professionalId: string,
+    params: FindManyByProfessionalIdParams,
   ): Promise<BookingWithRelations[]>;
 
   findManyByUserId(
@@ -42,7 +66,7 @@ export interface BookingsRepository {
   update(
     id: string,
     data: Prisma.BookingUpdateInput,
-  ): Promise<BookingWithRelations | null>;
+  ): Promise<BookingWithRelations>;
 
   delete(id: string): Promise<void>;
 
@@ -74,12 +98,6 @@ export interface BookingsRepository {
     end?: Date,
   ): Promise<number>;
 
-  getMonthlyEarnings(
-    professionalId: string,
-    month?: number,
-    year?: number,
-  ): Promise<number>;
-
   findNextAppointments(
     professionalId: string,
     limit: number,
@@ -87,27 +105,19 @@ export interface BookingsRepository {
       startDate?: Date;
       endDate?: Date;
     },
-  ): Promise<
-    Array<{
-      id: string;
-      dataHoraInicio: Date;
-      status: Status;
-      user: { nome: string };
-      items: Array<{ service: { nome: string } }>;
-    }>
-  >;
+  ): Promise<BookingWithRelations[]>;
 
   findByProfessionalAndDate(
     professionalId: string,
     date: Date,
-  ): Promise<
-    Array<{
-      id: string;
-      dataHoraInicio: Date;
-      dataHoraFim: Date;
-      status: string;
-      user: { nome: string };
-      items: Array<{ service: { nome: string } }>;
-    }>
-  >;
+  ): Promise<BookingWithRelations[]>;
+
+  countByProfessionalId(
+    professionalId: string,
+    filters?: {
+      status?: Status;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number>;
 }

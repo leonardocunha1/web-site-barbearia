@@ -8,22 +8,12 @@ import { TimeSlotAlreadyBookedError } from '@/use-cases/errors/time-slot-already
 import { InvalidDateTimeError } from '@/use-cases/errors/invalid-date-time-error';
 import { InvalidDurationError } from '@/use-cases/errors/invalid-duration-error';
 import { formatZodError } from '@/utils/formatZodError';
+import { createBookingBodySchema } from '@/schemas/bookings';
 
 export async function createBooking(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const createBookingBodySchema = z.object({
-    professionalId: z.string().uuid(),
-    services: z.array(
-      z.object({
-        serviceId: z.string().uuid(),
-      }),
-    ),
-    startDateTime: z.string().datetime({ offset: true }),
-    notes: z.string().max(500).optional(),
-  });
-
   try {
     const { professionalId, services, startDateTime, notes } =
       createBookingBodySchema.parse(request.body);

@@ -74,8 +74,6 @@ export class PrismaServiceProfessionalRepository
         id: string;
         nome: string;
         descricao: string | null;
-        precoPadrao: number;
-        duracao: number;
         categoria: string | null;
         ativo: boolean;
       };
@@ -104,8 +102,6 @@ export class PrismaServiceProfessionalRepository
               id: true,
               nome: true,
               descricao: true,
-              precoPadrao: true,
-              duracao: true,
               categoria: true,
               ativo: true,
             },

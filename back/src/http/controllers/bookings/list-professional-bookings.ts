@@ -1,31 +1,38 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { BookingNotFoundError } from '@/use-cases/errors/booking-not-found-error';
-import { makeListUserBookingsUseCase } from '@/use-cases/factories/make-list-user-bookings-use-case';
 import { formatZodError } from '@/utils/formatZodError';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
-import { UsuaruioTentandoPegarInformacoesDeOutro } from '@/use-cases/errors/usuario-pegando-informacao-de-outro-usuario-error';
-import { listUserBookingsQuerySchema } from '@/schemas/bookings';
+import { makeListProfessionalBookingsUseCase } from '@/use-cases/factories/make-list-professional-bookings-use-case';
+import { listBookingsQuerySchema } from '@/schemas/bookings';
 
-export async function listBookings(
+export async function listProfessionalBookings(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
   try {
-    const { page, limit, sort } = listUserBookingsQuerySchema.parse(
-      request.query,
-    );
+    const { page, limit, sort, startDate, endDate, status } =
+      listBookingsQuerySchema.parse(request.query);
 
     const sortCriteria: SortBookingSchema[] = sort?.length
       ? sort
       : [{ field: 'dataHoraInicio', order: 'asc' }];
 
-    const listBookingsUseCase = makeListUserBookingsUseCase();
-    const result = await listBookingsUseCase.execute({
-      userId: request.user.sub,
+    const filters = {
+      ...(status && { status }),
+      ...(startDate && { startDate: new Date(startDate) }),
+      ...(endDate && { endDate: new Date(endDate) }),
+    };
+
+    const listProfessionalBookingsUseCase =
+      makeListProfessionalBookingsUseCase();
+
+    const result = await listProfessionalBookingsUseCase.execute({
+      professionalId: request.user.profissionalId!,
       page,
       limit,
       sort: sortCriteria,
+      filters,
     });
 
     return reply.status(200).send(result);
@@ -36,10 +43,6 @@ export async function listBookings(
 
     if (err instanceof z.ZodError) {
       return reply.status(400).send(formatZodError(err));
-    }
-
-    if (err instanceof UsuaruioTentandoPegarInformacoesDeOutro) {
-      return reply.status(403).send({ message: err.message });
     }
 
     throw err;

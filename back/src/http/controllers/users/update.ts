@@ -22,14 +22,14 @@ export async function updateProfile(
 
     const updateUserProfile = makeUpdateUserProfileUseCase();
 
-    const { user } = await updateUserProfile.execute({
+    await updateUserProfile.execute({
       userId: request.user.sub,
       nome,
       email,
       telefone,
     });
 
-    return reply.status(200).send(user);
+    return reply.status(200).send();
   } catch (error) {
     if (error instanceof UserNotFoundError) {
       return reply.status(404).send({ message: error.message });

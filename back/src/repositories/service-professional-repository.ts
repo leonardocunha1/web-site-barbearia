@@ -22,8 +22,6 @@ export interface ServiceProfessionalRepository {
         id: string;
         nome: string;
         descricao: string | null;
-        precoPadrao: number;
-        duracao: number;
         categoria: string | null;
         ativo: boolean;
       };

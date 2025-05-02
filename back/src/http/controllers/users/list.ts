@@ -1,9 +1,9 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { Role } from '@prisma/client';
-import { ListUsersResponse } from '@/dtos/user-dto';
 import { makeListUsersUseCase } from '@/use-cases/factories/make-list-users-factory-use-case';
 import { paginationSchema } from '@/schemas/pagination-params';
+import { ListUsersResponse } from '@/dtos/user-dto';
 
 export async function listUsers(
   request: FastifyRequest,
