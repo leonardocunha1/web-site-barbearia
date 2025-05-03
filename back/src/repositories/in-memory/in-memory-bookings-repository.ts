@@ -1,89 +1,214 @@
-import { Booking, Prisma, Status } from '@prisma/client';
-import { BookingsRepository } from '../bookings-repository';
+import { Prisma, Status } from '@prisma/client';
+import {
+  BookingsRepository,
+  FindManyByProfessionalIdParams,
+  FindManyByUserIdParams,
+} from '../bookings-repository';
 import { randomUUID } from 'node:crypto';
+import { BookingDTO } from '@/dtos/booking-dto';
 
-interface CompleteBooking extends Booking {
-  user: { nome: string; id: string };
-  items: Array<{
-    service: {
-      id: string;
-      nome: string;
-    };
-  }>;
-}
 export class InMemoryBookingsRepository implements BookingsRepository {
-  public items: CompleteBooking[] = [];
+  public items: BookingDTO[] = [];
 
   async create(data: Prisma.BookingCreateInput): Promise<void> {
-    const booking: CompleteBooking = {
+    const booking: BookingDTO = {
       id: randomUUID(),
-      usuarioId: data.user.connect?.id || '',
-      profissionalId: data.profissional.connect?.id || '',
       dataHoraInicio: new Date(data.dataHoraInicio),
       dataHoraFim: new Date(data.dataHoraFim),
       status: data.status || 'PENDENTE',
       observacoes: data.observacoes || null,
-      valorFinal: data.valorFinal || null,
+      valorFinal: data.valorFinal || 0,
       createdAt: new Date(),
-      updatedAt: new Date(),
       canceledAt: null,
       confirmedAt: null,
-      user: { nome: 'Cliente não especificado', id: 'teste' }, // Valor padrão para user
-      items: [], // Array vazio inicial para items
+      profissionalId: data.profissional.connect?.id || randomUUID(),
+      usuarioId: data.user.connect?.id || randomUUID(),
+      updatedAt: new Date(),
+      user: {
+        id: data.user.connect?.id || randomUUID(),
+        nome: 'Test User',
+      },
+      profissional: {
+        id: data.profissional.connect?.id || randomUUID(),
+        user: {
+          id: randomUUID(),
+          nome: 'Test Professional',
+        },
+      },
+      items: [],
     };
 
     this.items.push(booking);
   }
 
-  async findById(id: string): Promise<Booking | null> {
-    return this.items.find((item) => item.id === id) ?? null;
+  async findById(id: string): Promise<BookingDTO | null> {
+    const booking = this.items.find((item) => item.id === id);
+    if (!booking) return null;
+
+    return this.mapToDTO(booking);
   }
 
   async findOverlappingBooking(
     professionalId: string,
     start: Date,
     end: Date,
-  ): Promise<Booking | null> {
-    return (
-      this.items.find((booking) => {
-        return (
-          booking.profissionalId === professionalId &&
-          booking.canceledAt === null &&
-          booking.dataHoraInicio < end &&
-          booking.dataHoraFim > start
-        );
-      }) ?? null
-    );
+  ): Promise<BookingDTO | null> {
+    const booking = this.items.find((item) => {
+      return (
+        item.profissional.id === professionalId &&
+        item.dataHoraInicio < end &&
+        item.dataHoraFim > start &&
+        item.status !== 'CANCELADO'
+      );
+    });
+
+    return booking ? this.mapToDTO(booking) : null;
   }
 
-  async findManyByProfessionalId(professionalId: string): Promise<Booking[]> {
-    return this.items
-      .filter((item) => item.profissionalId === professionalId)
-      .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
+  async findManyByProfessionalId(
+    professionalId: string,
+    { page, limit, sort = [], filters = {} }: FindManyByProfessionalIdParams,
+  ): Promise<BookingDTO[]> {
+    let filtered = this.items.filter((item) => {
+      const matchesProfessional = item.profissional.id === professionalId;
+      const matchesStatus = filters.status
+        ? item.status === filters.status
+        : true;
+      const matchesStartDate = filters.startDate
+        ? item.dataHoraInicio >= filters.startDate
+        : true;
+      const matchesEndDate = filters.endDate
+        ? item.dataHoraFim <= filters.endDate
+        : true;
+
+      return (
+        matchesProfessional &&
+        matchesStatus &&
+        matchesStartDate &&
+        matchesEndDate
+      );
+    });
+
+    // Simple sorting implementation (would need to be enhanced for complex sorts)
+    if (sort.length > 0) {
+      filtered = filtered.sort((a, b) => {
+        for (const sortItem of sort) {
+          if (sortItem.field === 'dataHoraInicio') {
+            return sortItem.order === 'asc'
+              ? a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime()
+              : b.dataHoraInicio.getTime() - a.dataHoraInicio.getTime();
+          }
+          // Add other sort fields as needed
+        }
+        return 0;
+      });
+    }
+
+    const offset = (page - 1) * limit;
+    return filtered.slice(offset, offset + limit).map(this.mapToDTO);
+  }
+
+  async countByProfessionalId(
+    professionalId: string,
+    filters?: {
+      status?: Status;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number> {
+    return this.items.filter((item) => {
+      const matchesProfessional = item.profissional.id === professionalId;
+      const matchesStatus = filters?.status
+        ? item.status === filters.status
+        : true;
+      const matchesStartDate = filters?.startDate
+        ? item.dataHoraInicio >= filters.startDate
+        : true;
+      const matchesEndDate = filters?.endDate
+        ? item.dataHoraFim <= filters.endDate
+        : true;
+
+      return (
+        matchesProfessional &&
+        matchesStatus &&
+        matchesStartDate &&
+        matchesEndDate
+      );
+    }).length;
   }
 
   async findManyByUserId(
     userId: string,
-    { page, limit }: { page: number; limit: number },
-  ): Promise<Booking[]> {
+    { page, limit, sort = [], filters = {} }: FindManyByUserIdParams,
+  ): Promise<BookingDTO[]> {
+    let filtered = this.items.filter((item) => {
+      const matchesUser = item.user.id === userId;
+      const matchesStatus = filters?.status
+        ? item.status === filters.status
+        : true;
+      const matchesStartDate = filters?.startDate
+        ? item.dataHoraInicio >= filters.startDate
+        : true;
+      const matchesEndDate = filters?.endDate
+        ? item.dataHoraFim <= filters.endDate
+        : true;
+
+      return matchesUser && matchesStatus && matchesStartDate && matchesEndDate;
+    });
+
+    // Simple sorting implementation
+    if (sort.length > 0) {
+      filtered = filtered.sort((a, b) => {
+        for (const sortItem of sort) {
+          if (sortItem.field === 'dataHoraInicio') {
+            return sortItem.order === 'asc'
+              ? a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime()
+              : b.dataHoraInicio.getTime() - a.dataHoraInicio.getTime();
+          }
+        }
+        return 0;
+      });
+    }
+
     const offset = (page - 1) * limit;
-    return this.items
-      .filter((item) => item.usuarioId === userId)
-      .slice(offset, offset + limit)
-      .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
+    return filtered.slice(offset, offset + limit).map(this.mapToDTO);
   }
 
-  async countByUserId(userId: string): Promise<number> {
-    return this.items.filter((item) => item.usuarioId === userId).length;
+  async countByUserId(
+    userId: string,
+    filters?: {
+      status?: Status;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number> {
+    return this.items.filter((item) => {
+      const matchesUser = item.user.id === userId;
+      const matchesStatus = filters?.status
+        ? item.status === filters.status
+        : true;
+      const matchesStartDate = filters?.startDate
+        ? item.dataHoraInicio >= filters.startDate
+        : true;
+      const matchesEndDate = filters?.endDate
+        ? item.dataHoraFim <= filters.endDate
+        : true;
+
+      return matchesUser && matchesStatus && matchesStartDate && matchesEndDate;
+    }).length;
   }
 
-  async update(id: string, data: Prisma.BookingUpdateInput): Promise<void> {
+  async update(
+    id: string,
+    data: Prisma.BookingUpdateInput,
+  ): Promise<BookingDTO> {
     const index = this.items.findIndex((item) => item.id === id);
-    if (index === -1) return null;
+    if (index === -1) {
+      throw new Error('Booking not found');
+    }
 
     const existing = this.items[index];
-
-    const updated: CompleteBooking = {
+    const updated: BookingDTO = {
       ...existing,
       status: (data.status as Status) || existing.status,
       observacoes: (data.observacoes as string | null) ?? existing.observacoes,
@@ -98,6 +223,7 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     };
 
     this.items[index] = updated;
+    return this.mapToDTO(updated);
   }
 
   async delete(id: string): Promise<void> {
@@ -108,20 +234,15 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     serviceId: string,
     professionalId: string,
   ): Promise<number> {
-    return this.items.filter((booking) => {
-      // Verifica se é do profissional correto
-      const isSameProfessional = booking.profissionalId === professionalId;
-
-      // Verifica se tem algum item com o serviço correto
-      const hasServiceItem = booking.items.some(
-        (item) => item.service.id === serviceId,
+    return this.items.filter((item) => {
+      return (
+        item.profissional.id === professionalId &&
+        item.items.some(
+          (i) => i.serviceProfessional.service.id === serviceId,
+        ) &&
+        item.status !== 'CANCELADO' &&
+        item.dataHoraFim > new Date()
       );
-
-      // Verifica se está ativo (não cancelado e data futura)
-      const isActive =
-        booking.status !== 'CANCELADO' && booking.dataHoraFim > new Date();
-
-      return isSameProfessional && hasServiceItem && isActive;
     }).length;
   }
 
@@ -131,12 +252,12 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     end: Date,
     status?: Status,
   ): Promise<number> {
-    return this.items.filter((booking) => {
+    return this.items.filter((item) => {
       return (
-        booking.profissionalId === professionalId &&
-        booking.dataHoraInicio >= start &&
-        booking.dataHoraInicio <= end &&
-        (status ? booking.status === status : true)
+        item.profissional.id === professionalId &&
+        item.dataHoraInicio >= start &&
+        item.dataHoraInicio <= end &&
+        (status ? item.status === status : true)
       );
     }).length;
   }
@@ -148,16 +269,15 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     status?: Status,
   ): Promise<number> {
     return this.items
-      .filter((booking) => {
+      .filter((item) => {
         return (
-          booking.profissionalId === professionalId &&
-          booking.dataHoraInicio >= start &&
-          booking.dataHoraInicio <= end &&
-          (status ? booking.status === status : true) &&
-          booking.valorFinal !== null
+          item.profissional.id === professionalId &&
+          item.dataHoraInicio >= start &&
+          item.dataHoraInicio <= end &&
+          (status ? item.status === status : true)
         );
       })
-      .reduce((sum, booking) => sum + (booking.valorFinal || 0), 0);
+      .reduce((sum, item) => sum + (item.valorFinal || 0), 0);
   }
 
   async countByProfessionalAndStatus(
@@ -166,86 +286,42 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     start?: Date,
     end?: Date,
   ): Promise<number> {
-    return this.items.filter((booking) => {
+    return this.items.filter((item) => {
       return (
-        booking.profissionalId === professionalId &&
-        booking.status === status &&
+        item.profissional.id === professionalId &&
+        item.status === status &&
         (start && end
-          ? booking.dataHoraInicio >= start && booking.dataHoraInicio <= end
+          ? item.dataHoraInicio >= start && item.dataHoraInicio <= end
           : true)
       );
     }).length;
-  }
-
-  async getMonthlyEarnings(
-    professionalId: string,
-    month?: number,
-    year?: number,
-  ): Promise<number> {
-    const date = new Date();
-    const targetMonth = month ?? date.getMonth();
-    const targetYear = year ?? date.getFullYear();
-
-    const start = new Date(targetYear, targetMonth, 1);
-    const end = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59, 999);
-
-    return this.getEarningsByProfessionalAndDate(
-      professionalId,
-      start,
-      end,
-      'CONCLUIDO',
-    );
   }
 
   async findNextAppointments(
     professionalId: string,
     limit: number,
     filters?: { startDate?: Date; endDate?: Date },
-  ): Promise<
-    {
-      id: string;
-      dataHoraInicio: Date;
-      status: Status;
-      user: { nome: string };
-      items: { service: { nome: string } }[];
-    }[]
-  > {
+  ): Promise<BookingDTO[]> {
     const filtered = this.items
-      .filter((booking) => {
+      .filter((item) => {
         return (
-          booking.profissionalId === professionalId &&
-          booking.dataHoraInicio >= (filters?.startDate || new Date()) &&
-          (filters?.endDate
-            ? booking.dataHoraInicio <= filters.endDate
-            : true) &&
-          ['PENDENTE', 'CONFIRMADO'].includes(booking.status)
+          item.profissional.id === professionalId &&
+          item.dataHoraInicio >= (filters?.startDate || new Date()) &&
+          (filters?.endDate ? item.dataHoraInicio <= filters.endDate : true) &&
+          ['PENDENTE', 'CONFIRMADO'].includes(item.status) &&
+          item.canceledAt === null
         );
       })
       .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime())
       .slice(0, limit);
 
-    return filtered.map((booking) => ({
-      id: booking.id,
-      dataHoraInicio: booking.dataHoraInicio,
-      status: booking.status as Status,
-      user: booking.user,
-      items: booking.items,
-    }));
+    return filtered.map(this.mapToDTO);
   }
 
   async findByProfessionalAndDate(
     professionalId: string,
     date: Date,
-  ): Promise<
-    {
-      id: string;
-      dataHoraInicio: Date;
-      dataHoraFim: Date;
-      status: string;
-      user: { nome: string };
-      items: { service: { nome: string } }[];
-    }[]
-  > {
+  ): Promise<BookingDTO[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -253,23 +329,57 @@ export class InMemoryBookingsRepository implements BookingsRepository {
     endOfDay.setHours(23, 59, 59, 999);
 
     const filtered = this.items
-      .filter((booking) => {
+      .filter((item) => {
         return (
-          booking.profissionalId === professionalId &&
-          booking.dataHoraInicio >= startOfDay &&
-          booking.dataHoraInicio <= endOfDay &&
-          booking.status !== 'CANCELADO'
+          item.profissionalId === professionalId &&
+          item.dataHoraInicio >= startOfDay &&
+          item.dataHoraInicio <= endOfDay &&
+          item.status !== 'CANCELADO' &&
+          item.canceledAt === null
         );
       })
       .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
 
-    return filtered.map((booking) => ({
+    return filtered.map(this.mapToDTO);
+  }
+
+  private mapToDTO(booking: BookingDTO): BookingDTO {
+    return {
       id: booking.id,
       dataHoraInicio: booking.dataHoraInicio,
       dataHoraFim: booking.dataHoraFim,
       status: booking.status,
-      user: booking.user,
-      items: booking.items,
-    }));
+      observacoes: booking.observacoes,
+      valorFinal: booking.valorFinal,
+      createdAt: booking.createdAt,
+      canceledAt: booking.canceledAt,
+      confirmedAt: booking.confirmedAt,
+      profissionalId: booking.profissionalId,
+      updatedAt: booking.updatedAt,
+      usuarioId: booking.usuarioId,
+      items: booking.items.map((item) => ({
+        id: item.id,
+        duracao: item.duracao,
+        preco: item.preco,
+        serviceProfessional: {
+          id: item.serviceProfessional.id,
+          service: {
+            id: item.serviceProfessional.service.id,
+            nome: item.serviceProfessional.service.nome,
+          },
+        },
+      })),
+      profissional: {
+        id: booking.profissional.id,
+        user: {
+          id: booking.profissional.user.id,
+          nome: booking.profissional.user.nome,
+        },
+      },
+      user: {
+        id: booking.user.id,
+        nome: booking.user.nome,
+      },
+    };
   }
 }

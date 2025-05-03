@@ -5,37 +5,25 @@ import { InvalidBusinessHoursError } from '@/use-cases/errors/invalid-business-h
 import { InvalidTimeFormatError } from '@/use-cases/errors/invalid-time-format-error';
 import { makeUpdateBusinessHoursUseCase } from '@/use-cases/factories/make-update-business-hours-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import { updateBusinessHoursBodySchema } from '@/schemas/horario-funcionamento';
 
 export async function updateBusinessHours(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const updateBusinessHoursParamsSchema = z.object({
-    professionalId: z.string().uuid(),
-  });
+  const professionalId = request.user.profissionalId!;
 
-  const updateBusinessHoursBodySchema = z.object({
-    diaSemana: z.number().int().min(0).max(6),
-    abreAs: z.string().optional(),
-    fechaAs: z.string().optional(),
-    pausaInicio: z.string().nullable().optional(),
-    pausaFim: z.string().nullable().optional(),
-  });
-
-  const { professionalId } = updateBusinessHoursParamsSchema.parse(
-    request.params,
-  );
   const body = updateBusinessHoursBodySchema.parse(request.body);
 
   try {
     const updateBusinessHoursUseCase = makeUpdateBusinessHoursUseCase();
 
-    const businessHours = await updateBusinessHoursUseCase.execute({
+    await updateBusinessHoursUseCase.execute({
       professionalId,
       ...body,
     });
 
-    return reply.status(200).send({ businessHours });
+    return reply.status(200).send();
   } catch (err) {
     if (err instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: err.message });

@@ -4,17 +4,13 @@ import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { EmailAlreadyExistsError } from '@/use-cases/errors/user-email-already-exists-error';
 import { InvalidDataError } from '@/use-cases/errors/invalid-data-error';
 import { makeUpdateUserProfileUseCase } from '@/use-cases/factories/make-update-user-profile-factory-use-case';
+import { updateProfileBodySchema } from '@/schemas/user';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function updateProfile(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const updateProfileBodySchema = z.object({
-    nome: z.string().min(3).optional(),
-    email: z.string().email().optional(),
-    telefone: z.string().optional().nullable(),
-  });
-
   try {
     const { nome, email, telefone } = updateProfileBodySchema.parse(
       request.body,
@@ -44,10 +40,7 @@ export async function updateProfile(
     }
 
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

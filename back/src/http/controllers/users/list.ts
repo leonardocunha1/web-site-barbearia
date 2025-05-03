@@ -1,19 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { Role } from '@prisma/client';
 import { makeListUsersUseCase } from '@/use-cases/factories/make-list-users-factory-use-case';
-import { paginationSchema } from '@/schemas/pagination-params';
-import { ListUsersResponse } from '@/dtos/user-dto';
+import { listUsersQuerySchema } from '@/schemas/user';
+import { formatZodError } from '@/utils/formatZodError';
 
-export async function listUsers(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<ListUsersResponse> {
-  const listUsersQuerySchema = paginationSchema.extend({
-    role: z.nativeEnum(Role).optional(),
-    name: z.string().optional(),
-  });
-
+export async function listUsers(request: FastifyRequest, reply: FastifyReply) {
   try {
     const { page, limit, role, name } = listUsersQuerySchema.parse(
       request.query,
@@ -27,15 +18,28 @@ export async function listUsers(
       name,
     });
 
-    return reply.status(200).send(response);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+    const usersWithoutPassword = response.users.map((user) => ({
+      id: user.id,
+      email: user.email,
+      nome: user.nome,
+      role: user.role,
+      createdAt: user.createdAt,
+      telefone: user.telefone,
+      emailVerified: user.emailVerified,
+      active: user.active,
+    }));
+
+    response.users = usersWithoutPassword;
+
+    return reply.status(200).send({
+      ...response,
+      users: usersWithoutPassword,
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send(formatZodError(err));
     }
 
-    throw error;
+    throw err;
   }
 }

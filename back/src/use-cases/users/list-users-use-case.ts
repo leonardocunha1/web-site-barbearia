@@ -1,4 +1,4 @@
-import { ListUsersResponse, toUserDTO } from '@/dtos/user-dto';
+import { ListUsersResponse } from '@/dtos/user-dto';
 import { UsersRepository } from '@/repositories/users-repository';
 import { Role } from '@prisma/client';
 
@@ -24,10 +24,10 @@ export class ListUsersUseCase {
     ]);
 
     return {
-      users: users.map(toUserDTO),
-      total,
+      users,
       page,
       limit,
+      total,
       totalPages: Math.ceil(total / limit),
     };
   }

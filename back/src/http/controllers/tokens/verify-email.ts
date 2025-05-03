@@ -4,15 +4,13 @@ import { InvalidTokenError } from '@/use-cases/errors/invalid-token-error';
 import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { makeVerifyEmailUseCase } from '@/use-cases/factories/make-verify-email-use-case';
 import { UserAlreadyVerifiedError } from '@/use-cases/errors/user-already-verified-error';
+import { verifyEmailQuerySchema } from '@/schemas/tokens';
+import { formatZodError } from '@/utils/formatZodError';
 
 export async function verifyEmail(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const verifyEmailQuerySchema = z.object({
-    token: z.string().uuid(),
-  });
-
   const { token } = verifyEmailQuerySchema.parse(request.query);
 
   try {
@@ -25,20 +23,17 @@ export async function verifyEmail(
     return reply.status(200).send({ message: 'E-mail verificado com sucesso' });
   } catch (err) {
     if (err instanceof InvalidTokenError) {
-      return reply.status(400).send({ message: 'Token inválido ou expirado' });
+      return reply.status(400).send({ message: err.message });
     }
     if (err instanceof UserAlreadyVerifiedError) {
-      return reply.status(400).send({ message: 'E-mail já verificado' });
+      return reply.status(400).send({ message: err.message });
     }
     if (err instanceof UserNotFoundError) {
-      return reply.status(404).send({ message: 'Usuário não encontrado' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

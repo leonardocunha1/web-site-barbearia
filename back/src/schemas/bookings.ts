@@ -1,11 +1,56 @@
 import { z } from 'zod';
 import { Status } from '@prisma/client';
-import { userSchema } from './user';
-import { professionalSchema } from './profissional';
-import { bookingItemSchema } from './booking-items';
 import { sortSchema } from '@/schemas/booking-sort-schema';
-import { paginationSchema } from './pagination-params';
+import { paginationSchema } from './pagination';
 
+// schema dos itens de agendamento )
+export const bookingItemSchema = z.object({
+  id: z.string().uuid(),
+  duracao: z.number().int().nonnegative(),
+  preco: z.number().nonnegative(),
+  serviceProfessional: z.object({
+    id: z.string().uuid(),
+    service: z.object({
+      id: z.string().uuid(),
+      nome: z.string(),
+    }),
+  }),
+});
+
+// Schema do agendamento
+export const bookingSchema = z.object({
+  id: z.string().uuid(),
+  usuarioId: z.string().uuid(),
+  dataHoraInicio: z.string().datetime(),
+  dataHoraFim: z.string().datetime(),
+  status: z.nativeEnum(Status),
+  observacoes: z.string().nullable().optional(),
+  valorFinal: z.number().positive().nullable().optional(),
+  canceledAt: z.string().datetime().nullable().optional(),
+  confirmedAt: z.string().datetime().nullable().optional(),
+  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
+
+  // Relacionamento com o profissional
+  profissional: z.object({
+    id: z.string().uuid(),
+    user: z.object({
+      id: z.string().uuid(),
+      nome: z.string(),
+    }),
+  }),
+
+  // Usuário que fez a reserva
+  user: z.object({
+    id: z.string().uuid(),
+    nome: z.string(),
+  }),
+
+  // Itens da reserva
+  items: z.array(bookingItemSchema),
+});
+
+// Schema para criação de agendamento
 export const createBookingBodySchema = z.object({
   professionalId: z.string().uuid(),
   services: z.array(
@@ -17,67 +62,43 @@ export const createBookingBodySchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-export const updateBookingStatusParamsSchema = z.object({
+// Schema para atualização do status da reserva
+export const getOrUpdateBookingStatusParamsSchema = z.object({
   bookingId: z.string().uuid(),
 });
 
 export const updateBookingStatusBodySchema = z.object({
-  status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'REALIZADO']),
+  status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']),
   reason: z.string().max(255).optional(),
 });
 
+// Schema para listagem de reservas do usuário
 export const listUserBookingsQuerySchema = paginationSchema.extend({
   sort: z.array(sortSchema).optional(),
 });
 
-export const bookingSchema = z.object({
-  id: z.string().uuid(),
-  usuarioId: z.string().uuid(),
-  dataHoraInicio: z.string().datetime(),
-  dataHoraFim: z.string().datetime(),
-  status: z.nativeEnum(Status),
-  observacoes: z.string().optional(),
-  valorFinal: z.number().positive().optional(),
-  createdAt: z.string().datetime(),
-  items: z.array(bookingItemSchema),
-  profissional: professionalSchema,
-  user: userSchema,
-});
-
-// Schema simplificado para listagens
-export const bookingListSchema = bookingSchema
-  .pick({
-    id: true,
-    dataHoraInicio: true,
-    dataHoraFim: true,
-    status: true,
-    valorFinal: true,
-  })
-  .extend({
-    profissional: professionalSchema
-      .pick({
-        id: true,
-        especialidade: true,
-      })
-      .extend({
-        user: z.object({ nome: z.string() }),
-      }),
-    usuario: userSchema.pick({ nome: true }),
-  });
-
-// Schema para filtros de listagem
+// Schema para filtros de listagem de reservas do profissional
 export const listBookingsQuerySchema = paginationSchema.extend({
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
-  status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO']).optional(),
+  status: z
+    .enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'])
+    .optional(),
   sort: z.array(sortSchema).optional(),
 });
 
 // Schema para resposta paginada
 export const paginatedBookingResponseSchema = z.object({
-  bookings: z.array(bookingListSchema),
+  bookings: z.array(bookingSchema),
   total: z.number(),
   page: z.number(),
   limit: z.number(),
   totalPages: z.number(),
 });
+
+export type getOrUpdateBookingStatusParams = z.infer<
+  typeof getOrUpdateBookingStatusParamsSchema
+>;
+export type UpdateBookingStatusBody = z.infer<
+  typeof updateBookingStatusBodySchema
+>;

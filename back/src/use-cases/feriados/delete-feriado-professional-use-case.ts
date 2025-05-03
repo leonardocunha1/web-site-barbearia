@@ -4,6 +4,7 @@ import { ProfessionalNotFoundError } from '../errors/professional-not-found-erro
 import { isBefore, startOfToday } from 'date-fns';
 import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { PastHolidayDeletionError } from '../errors/past-holiday-deletion-error';
+import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 
 interface DeleteHolidayUseCaseRequest {
   holidayId: string;
@@ -34,7 +35,7 @@ export class DeleteHolidayUseCase {
     }
 
     if (holiday.profissionalId !== professionalId) {
-      throw new HolidayNotFoundError(); // Não revelar que existe mas pertence a outro
+      throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }
 
     // Validação 3: Não permitir deletar feriados passados

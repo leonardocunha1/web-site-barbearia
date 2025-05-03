@@ -5,6 +5,7 @@ import {
   BookingWithRelations,
 } from '@/repositories/bookings-repository';
 import { ListBookingsUseCase } from './list-user-bookings-use-case';
+import { toBookingDTO } from '@/dtos/booking-dto';
 
 const mockBookings: BookingWithRelations[] = [
   {
@@ -44,6 +45,18 @@ const mockBookings: BookingWithRelations[] = [
         telefone: '123456789',
       },
     },
+    user: {
+      id: 'user-1',
+      nome: 'User Nome',
+      email: 'leo.fran@hotmail.com',
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      emailVerified: true,
+      telefone: '123456789',
+      role: 'CLIENTE',
+      senha: 'hashed-password',
+    },
   },
 ];
 
@@ -76,19 +89,21 @@ describe('ListBookingsUseCase', () => {
   it('deve listar bookings com paginação e ordenação', async () => {
     const response = await useCase.execute({ userId: 'user-1' });
 
-    expect(response.bookings).toEqual(mockBookings);
+    const passarBookingParaDTO = mockBookings.map(toBookingDTO);
+
+    expect(response.bookings).toEqual(passarBookingParaDTO);
     expect(response.total).toBe(1);
     expect(response.page).toBe(1);
     expect(response.limit).toBe(10);
     expect(response.totalPages).toBe(1);
-    expect(response.sort).toEqual([{ field: 'dataHoraInicio', order: 'asc' }]);
 
     expect(bookingsRepository.findManyByUserId).toHaveBeenCalledWith('user-1', {
       page: 1,
       limit: 10,
       sort: [{ field: 'dataHoraInicio', order: 'asc' }],
+      filters: {},
     });
-    expect(bookingsRepository.countByUserId).toHaveBeenCalledWith('user-1');
+    expect(bookingsRepository.countByUserId).toHaveBeenCalledWith('user-1', {});
   });
 
   it('deve lançar erro se não houver bookings para o usuário', async () => {

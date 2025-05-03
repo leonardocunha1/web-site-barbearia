@@ -1,26 +1,6 @@
+import { BookingDTO } from '@/dtos/booking-dto';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
-import {
-  Booking,
-  BookingItem,
-  Prisma,
-  Professional,
-  Service,
-  ServiceProfessional,
-  Status,
-  User,
-} from '@prisma/client';
-
-export type BookingWithRelations = Booking & {
-  items: (BookingItem & {
-    serviceProfessional: ServiceProfessional & {
-      service: Service;
-    };
-  })[];
-  profissional: Professional & {
-    user: User;
-  };
-  user: User;
-};
+import { Prisma, Status } from '@prisma/client';
 
 export interface FindManyByUserIdParams {
   page: number;
@@ -46,27 +26,24 @@ export interface FindManyByProfessionalIdParams {
 
 export interface BookingsRepository {
   create(data: Prisma.BookingCreateInput): Promise<void>;
-  findById(id: string): Promise<BookingWithRelations | null>;
+  findById(id: string): Promise<BookingDTO | null>;
   findOverlappingBooking(
     professionalId: string,
     start: Date,
     end: Date,
-  ): Promise<BookingWithRelations | null>;
+  ): Promise<BookingDTO | null>;
 
   findManyByProfessionalId(
     professionalId: string,
     params: FindManyByProfessionalIdParams,
-  ): Promise<BookingWithRelations[]>;
+  ): Promise<BookingDTO[]>;
 
   findManyByUserId(
     userId: string,
     params: FindManyByUserIdParams,
-  ): Promise<BookingWithRelations[]>;
+  ): Promise<BookingDTO[]>;
 
-  update(
-    id: string,
-    data: Prisma.BookingUpdateInput,
-  ): Promise<BookingWithRelations>;
+  update(id: string, data: Prisma.BookingUpdateInput): Promise<BookingDTO>;
 
   delete(id: string): Promise<void>;
 
@@ -75,7 +52,14 @@ export interface BookingsRepository {
     professionalId: string,
   ): Promise<number>;
 
-  countByUserId(userId: string): Promise<number>;
+  countByUserId(
+    userId: string,
+    filters?: {
+      status?: Status;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number>;
 
   countByProfessionalAndDate(
     professionalId: string,
@@ -105,12 +89,12 @@ export interface BookingsRepository {
       startDate?: Date;
       endDate?: Date;
     },
-  ): Promise<BookingWithRelations[]>;
+  ): Promise<BookingDTO[]>;
 
   findByProfessionalAndDate(
     professionalId: string,
     date: Date,
-  ): Promise<BookingWithRelations[]>;
+  ): Promise<BookingDTO[]>;
 
   countByProfessionalId(
     professionalId: string,

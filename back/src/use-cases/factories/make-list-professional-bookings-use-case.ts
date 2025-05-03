@@ -1,5 +1,5 @@
 import { PrismaBookingsRepository } from '@/repositories/prisma/prisma-bookings-repository';
-import { ListProfessionalBookingsUseCase } from '../bookings/list-professional-bookings';
+import { ListProfessionalBookingsUseCase } from '../bookings/list-professional-bookings-use-case';
 
 export function makeListProfessionalBookingsUseCase() {
   const bookingsRepository = new PrismaBookingsRepository();

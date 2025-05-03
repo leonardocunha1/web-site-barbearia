@@ -122,6 +122,6 @@ export const createMockUsersRepository = () => {
 
   return {
     mockRepository,
-    createMockUser, // Retorna também a função que permite customizar o mock
+    createMockUser,
   };
 };

@@ -53,18 +53,6 @@ export class UpdateUserProfileUseCase {
 
     const updatedUser = await this.usersRepository.update(userId, dataToUpdate);
 
-    const userWithoutPassword: UserDTO = {
-      id: updatedUser.id,
-      nome: updatedUser.nome,
-      email: updatedUser.email,
-      telefone: updatedUser.telefone,
-      role: updatedUser.role,
-      emailVerified: updatedUser.emailVerified,
-      active: updatedUser.active,
-      createdAt: updatedUser.createdAt,
-      updatedAt: updatedUser.updatedAt,
-    };
-
-    return { user: userWithoutPassword };
+    return { user: updatedUser };
   }
 }

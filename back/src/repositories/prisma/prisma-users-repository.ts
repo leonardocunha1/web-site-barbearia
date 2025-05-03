@@ -52,7 +52,7 @@ export class PrismaUsersRepository implements UsersRepository {
     if (name) {
       where.nome = {
         contains: name,
-        mode: 'insensitive', // Busca case-insensitive
+        mode: 'insensitive',
       };
     }
 

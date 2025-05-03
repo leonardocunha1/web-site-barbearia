@@ -6,28 +6,19 @@ import { InvalidHolidayDescriptionError } from '@/use-cases/errors/invalid-holid
 import { DuplicateHolidayError } from '@/use-cases/errors/duplicate-holiday-error';
 import { makeCreateHolidayUseCase } from '@/use-cases/factories/make-create-holiday-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import { createHolidayBodySchema } from '@/schemas/holidays';
 
 export async function createHoliday(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const createHolidayBodySchema = z.object({
-    professionalId: z.string(),
-    date: z.string().refine((date) => !isNaN(Date.parse(date)), {
-      message: 'Data inválida',
-    }),
-    motivo: z.string().min(3).max(100),
-  });
-
-  const { professionalId, date, motivo } = createHolidayBodySchema.parse(
-    request.body,
-  );
+  const { date, motivo } = createHolidayBodySchema.parse(request.body);
 
   try {
     const createHolidayUseCase = makeCreateHolidayUseCase();
 
     await createHolidayUseCase.execute({
-      professionalId,
+      professionalId: request.user.profissionalId!,
       date: new Date(date),
       motivo,
     });

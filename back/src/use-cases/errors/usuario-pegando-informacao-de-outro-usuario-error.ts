@@ -1,6 +1,6 @@
-export class UsuaruioTentandoPegarInformacoesDeOutro extends Error {
+export class UsuarioTentandoPegarInformacoesDeOutro extends Error {
   constructor() {
-    super('Você não pode pegar informações de outro usuário');
+    super('Você não pode pegar/editar informações de outro usuário');
     this.name = 'UsuaruioTentandoPegarInformacoesDeOutro';
   }
 }

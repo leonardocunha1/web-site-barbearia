@@ -24,6 +24,7 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>();
 
+// https://www.youtube.com/watch?v=mULWHLquYP0&list=LL&index=3&t=943s&ab_channel=Rocketseat -> video para entender como que funciona a configuração do swagger
 // essas duas linhas abaixo são para o fastify usar o zod como provider de validação e serialização
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);

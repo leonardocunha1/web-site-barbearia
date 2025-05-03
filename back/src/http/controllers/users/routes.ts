@@ -5,20 +5,138 @@ import { listUsers } from './list';
 import { anonymizeUser } from './anonymize';
 import { updateProfile } from './update';
 import { FastifyTypedInstance } from '@/types';
+import { updatePassword } from './update-password';
+import {
+  anonymizeUserParamsSchema,
+  listUsersQuerySchema,
+  updatePasswordBodySchema,
+  updateProfileBodySchema,
+  userSchema,
+} from '@/schemas/user';
+import { z } from 'zod';
 
 export async function usersRoutes(app: FastifyTypedInstance) {
-  app.get('/me', { onRequest: [verifyJwt] }, profile);
-  app.patch('/me', { onRequest: [verifyJwt] }, updateProfile);
+  app.get(
+    '/users/me',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['users'],
+        description: 'Retorna o perfil do usuário logado.',
+        response: {
+          200: z.object({
+            user: userSchema,
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    profile,
+  );
+  app.patch(
+    '/users/me',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['users'],
+        description: 'Atualiza o perfil do usuário logado.',
+        body: updateProfileBodySchema,
+        response: {
+          200: z.null().describe('Usuário atualizado com sucesso.'),
+          400: z.object({
+            message: z.string(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          409: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    updateProfile,
+  );
 
   app.get(
     '/users',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    {
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
+      schema: {
+        tags: ['users'],
+        description: 'Listar usuários',
+        querystring: listUsersQuerySchema,
+        response: {
+          200: z.object({
+            users: z.array(userSchema),
+            page: z.number(),
+            limit: z.number(),
+            total: z.number(),
+            totalPages: z.number(),
+          }),
+          400: z
+            .object({
+              message: z.string(),
+            })
+            .describe('Erro de validação dos dados de entrada'),
+        },
+      },
+    },
     listUsers,
   );
 
   app.patch(
     '/users/:userId/anonymize',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    {
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'CLIENTE'])],
+      schema: {
+        tags: ['users'],
+        description: 'Anonimiza um usuário.',
+        params: anonymizeUserParamsSchema,
+        response: {
+          204: z.null().describe('Usuário anonimizado com sucesso.'),
+          400: z.object({
+            message: z.string(),
+          }),
+          403: z.object({
+            message: z.string(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
     anonymizeUser,
+  );
+
+  app.patch(
+    '/users/update-password',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['users'],
+        description: 'Atualiza a senha do usuário logado.',
+        body: updatePasswordBodySchema,
+        response: {
+          200: z.null().describe('Senha atualizada com sucesso.'),
+          400: z.object({
+            message: z.string(),
+          }),
+          401: z.object({
+            message: z.string(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          409: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    updatePassword,
   );
 }

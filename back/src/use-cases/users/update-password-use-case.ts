@@ -1,4 +1,4 @@
-import { compare, hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
@@ -28,13 +28,13 @@ export class UpdatePasswordUseCase {
     const user = await this.usersRepository.findById(userId);
     if (!user) throw new UserNotFoundError();
 
-    const doesPasswordMatch = await compare(currentPassword, user.senha);
+    const doesPasswordMatch = await bcrypt.compare(currentPassword, user.senha);
     if (!doesPasswordMatch) throw new InvalidCredentialsError();
 
-    const isSamePassword = await compare(newPassword, user.senha);
+    const isSamePassword = await bcrypt.compare(newPassword, user.senha);
     if (isSamePassword) throw new SamePasswordError();
 
-    const hashedPassword = await hash(newPassword, 6);
+    const hashedPassword = await bcrypt.hash(newPassword, 6);
 
     await this.usersRepository.updatePassword(userId, hashedPassword);
 

@@ -5,6 +5,7 @@ import { HolidayNotFoundError } from '@/use-cases/errors/holiday-not-found-error
 import { PastHolidayDeletionError } from '@/use-cases/errors/past-holiday-deletion-error';
 import { makeDeleteHolidayUseCase } from '@/use-cases/factories/make-delete-holiday-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import { ProfissionalTentandoPegarInformacoesDeOutro } from '@/use-cases/errors/profissional-pegando-informacao-de-outro-usuario-error';
 
 export async function deleteHoliday(
   request: FastifyRequest,
@@ -12,22 +13,19 @@ export async function deleteHoliday(
 ) {
   const deleteHolidayParamsSchema = z.object({
     holidayId: z.string(),
-    professionalId: z.string(),
   });
 
-  const { holidayId, professionalId } = deleteHolidayParamsSchema.parse(
-    request.params,
-  );
+  const { holidayId } = deleteHolidayParamsSchema.parse(request.params);
 
   try {
     const deleteHolidayUseCase = makeDeleteHolidayUseCase();
 
     await deleteHolidayUseCase.execute({
       holidayId,
-      professionalId,
+      professionalId: request.user.profissionalId!,
     });
 
-    return reply.status(204).send(); // 204 sem conteúdo após deletar
+    return reply.status(204).send();
   } catch (err) {
     if (err instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: err.message });
@@ -35,6 +33,10 @@ export async function deleteHoliday(
 
     if (err instanceof HolidayNotFoundError) {
       return reply.status(404).send({ message: err.message });
+    }
+
+    if (err instanceof ProfissionalTentandoPegarInformacoesDeOutro) {
+      return reply.status(403).send({ message: err.message });
     }
 
     if (err instanceof PastHolidayDeletionError) {

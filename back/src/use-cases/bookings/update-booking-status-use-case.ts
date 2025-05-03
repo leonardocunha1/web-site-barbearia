@@ -6,7 +6,7 @@ import { BookingUpdateError } from '../errors/booking-update-error';
 
 interface UpdateBookingStatusUseCaseRequest {
   bookingId: string;
-  status: 'CONFIRMADO' | 'CANCELADO';
+  status: Status;
   reason?: string;
   profissionalId: string;
 }

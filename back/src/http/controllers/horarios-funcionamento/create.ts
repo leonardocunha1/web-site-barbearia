@@ -6,39 +6,19 @@ import { InvalidBusinessHoursError } from '@/use-cases/errors/invalid-business-h
 import { DuplicateBusinessHoursError } from '@/use-cases/errors/duplicate-business-hours-error';
 import { makeCreateBusinessHoursUseCase } from '@/use-cases/factories/make-create-business-hours-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import { createBusinessHoursBodySchema } from '@/schemas/horario-funcionamento';
 
 export async function createBusinessHours(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const createBusinessHoursBodySchema = z.object({
-    professionalId: z.string(),
-    diaSemana: z.number().int().min(0).max(6),
-    abreAs: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-      message: 'Formato de hora inválido. Use "HH:MM".',
-    }),
-    fechaAs: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-      message: 'Formato de hora inválido. Use "HH:MM".',
-    }),
-    pausaInicio: z
-      .string()
-      .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
-      .nullable()
-      .optional(),
-    pausaFim: z
-      .string()
-      .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
-      .nullable()
-      .optional(),
-  });
-
   const { professionalId, diaSemana, abreAs, fechaAs, pausaInicio, pausaFim } =
     createBusinessHoursBodySchema.parse(request.body);
 
   try {
     const createBusinessHoursUseCase = makeCreateBusinessHoursUseCase();
 
-    const businessHours = await createBusinessHoursUseCase.execute({
+    await createBusinessHoursUseCase.execute({
       professionalId,
       diaSemana,
       abreAs,
@@ -47,7 +27,7 @@ export async function createBusinessHours(
       pausaFim,
     });
 
-    return reply.status(201).send(businessHours);
+    return reply.status(201).send();
   } catch (err) {
     if (err instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: err.message });

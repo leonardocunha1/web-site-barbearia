@@ -1,5 +1,5 @@
 import { makeListProfessionalServicesUseCase } from '@/use-cases/factories/make-list-professional-services-use-case';
-import { paginationSchema } from '@/schemas/pagination-params';
+import { paginationSchema } from '@/schemas/pagination';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { formatZodError } from '@/utils/formatZodError';

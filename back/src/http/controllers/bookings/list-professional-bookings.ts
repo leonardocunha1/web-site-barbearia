@@ -5,6 +5,10 @@ import { formatZodError } from '@/utils/formatZodError';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 import { makeListProfessionalBookingsUseCase } from '@/use-cases/factories/make-list-professional-bookings-use-case';
 import { listBookingsQuerySchema } from '@/schemas/bookings';
+import { ProfissionalTentandoPegarInformacoesDeOutro } from '@/use-cases/errors/profissional-pegando-informacao-de-outro-usuario-error';
+import { InvalidPageError } from '@/use-cases/errors/invalid-page-error';
+import { InvalidLimitError } from '@/use-cases/errors/invalid-limit-error';
+import { InvalidPageRangeError } from '@/use-cases/errors/invalid-page-range-error';
 
 export async function listProfessionalBookings(
   request: FastifyRequest,
@@ -41,8 +45,24 @@ export async function listProfessionalBookings(
       return reply.status(404).send({ message: err.message });
     }
 
+    if (err instanceof ProfissionalTentandoPegarInformacoesDeOutro) {
+      return reply.status(403).send({ message: err.message });
+    }
+
     if (err instanceof z.ZodError) {
       return reply.status(400).send(formatZodError(err));
+    }
+
+    if (err instanceof InvalidPageError) {
+      return reply.status(400).send({ message: err.message });
+    }
+
+    if (err instanceof InvalidLimitError) {
+      return reply.status(400).send({ message: err.message });
+    }
+
+    if (err instanceof InvalidPageRangeError) {
+      return reply.status(400).send({ message: err.message });
     }
 
     throw err;

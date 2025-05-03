@@ -1,21 +1,23 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { BookingNotFoundError } from '@/use-cases/errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '@/use-cases/errors/invalid-booking-status-error';
-import {
-  updateBookingStatusBodySchema,
-  updateBookingStatusParamsSchema,
-} from '@/dtos/atualizar-status-reserva.dto';
 import { BookingUpdateError } from '@/use-cases/errors/booking-update-error';
 import { z } from 'zod';
 import { makeUpdateBookingStatusUseCase } from '@/use-cases/factories/make-update-booking-status-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import {
+  getOrUpdateBookingStatusParamsSchema,
+  updateBookingStatusBodySchema,
+} from '@/schemas/bookings';
 
 export async function updateBookingStatus(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
   try {
-    const { bookingId } = updateBookingStatusParamsSchema.parse(request.params);
+    const { bookingId } = getOrUpdateBookingStatusParamsSchema.parse(
+      request.params,
+    );
     const { status, reason } = updateBookingStatusBodySchema.parse(
       request.body,
     );

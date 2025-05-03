@@ -7,6 +7,7 @@ import {
   User,
 } from '@prisma/client';
 import { createMockProfessionalsRepository } from './mock-professionals-repository';
+import { BookingsRepository } from '@/repositories/bookings-repository';
 
 type BookingWithRelations = Booking & {
   items: BookingItem[];
@@ -24,6 +25,7 @@ export const createMockBookingsRepository = () => {
     serviceId: 'service-1',
     preco: 50,
     duracao: 60,
+    serviceProfessionalId: 'service-professional-1',
     ...overrides,
   });
 
@@ -56,7 +58,7 @@ export const createMockBookingsRepository = () => {
     ...overrides,
   });
 
-  const mockRepository = {
+  const mockRepository: BookingsRepository = {
     create: vi.fn().mockResolvedValue(undefined),
     findById: vi.fn().mockResolvedValue(createMockBookingWithRelations()),
     findOverlappingBooking: vi.fn().mockResolvedValue(null),
@@ -73,7 +75,7 @@ export const createMockBookingsRepository = () => {
     countByProfessionalAndDate: vi.fn().mockResolvedValue(1),
     getEarningsByProfessionalAndDate: vi.fn().mockResolvedValue(100),
     countByProfessionalAndStatus: vi.fn().mockResolvedValue(1),
-    getMonthlyEarnings: vi.fn().mockResolvedValue(1000),
+    countByProfessionalId: vi.fn().mockResolvedValue(0),
     findNextAppointments: vi.fn().mockResolvedValue([
       {
         id: 'booking-1',

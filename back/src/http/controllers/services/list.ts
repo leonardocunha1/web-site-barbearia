@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeListServicesUseCase } from '@/use-cases/factories/make-list-services-use-case';
 import { z } from 'zod';
-import { paginationSchema } from '@/schemas/pagination-params';
+import { paginationSchema } from '@/schemas/pagination';
 import { formatZodError } from '@/utils/formatZodError';
 
 export async function listServices(

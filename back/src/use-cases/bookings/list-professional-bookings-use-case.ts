@@ -2,7 +2,11 @@ import { BookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 import { Status } from '@prisma/client';
-import { BookingDTO, toBookingDTO } from '@/dtos/booking-dto';
+import { BookingDTO } from '@/dtos/booking-dto';
+import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
+import { InvalidPageError } from '../errors/invalid-page-error';
+import { InvalidLimitError } from '../errors/invalid-limit-error';
+import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 
 interface ListProfessionalBookingsUseCaseRequest {
   professionalId: string;
@@ -34,6 +38,14 @@ export class ListProfessionalBookingsUseCase {
     sort = [{ field: 'dataHoraInicio', order: 'asc' }],
     filters = {},
   }: ListProfessionalBookingsUseCaseRequest): Promise<ListProfessionalBookingsUseCaseResponse> {
+    if (typeof page !== 'number' || page < 1) {
+      throw new InvalidPageError();
+    }
+
+    if (typeof limit !== 'number' || limit < 1 || limit > 100) {
+      throw new InvalidLimitError();
+    }
+
     const [bookings, total] = await Promise.all([
       this.bookingsRepository.findManyByProfessionalId(professionalId, {
         page,
@@ -44,14 +56,22 @@ export class ListProfessionalBookingsUseCase {
       this.bookingsRepository.countByProfessionalId(professionalId, filters),
     ]);
 
+    if (page > total) {
+      throw new InvalidPageRangeError();
+    }
+
     if (bookings.length === 0) {
       throw new BookingNotFoundError();
+    }
+
+    if (professionalId !== bookings[0].profissionalId) {
+      throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }
 
     const totalPages = Math.ceil(total / limit);
 
     return {
-      bookings: bookings.map(toBookingDTO),
+      bookings,
       total,
       page,
       limit,

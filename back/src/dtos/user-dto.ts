@@ -9,7 +9,6 @@ export interface UserDTO {
   emailVerified: boolean;
   active: boolean;
   createdAt: Date;
-  updatedAt: Date;
 }
 
 export function toUserDTO(user: User): UserDTO {
@@ -22,7 +21,6 @@ export function toUserDTO(user: User): UserDTO {
     emailVerified: user.emailVerified,
     active: user.active,
     createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
   };
 }
 

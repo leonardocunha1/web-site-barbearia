@@ -13,7 +13,7 @@ export type SortField = (typeof sortFields)[number]; // Tipo literal para uso ex
 export const sortFieldSchema = z.enum(sortFields);
 
 export const sortOrderSchema = z.enum(['asc', 'desc']);
-export type SortOrder = z.infer<typeof sortOrderSchema>; // Também útil
+export type SortOrder = z.infer<typeof sortOrderSchema>;
 
 export const sortSchema = z.object({
   field: sortFieldSchema,

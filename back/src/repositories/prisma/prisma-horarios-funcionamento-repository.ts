@@ -5,6 +5,18 @@ import { Prisma } from '@prisma/client';
 export class PrismaHorariosFuncionamentoRepository
   implements HorariosFuncionamentoRepository
 {
+  async findById(id: string) {
+    return prisma.horarioFuncionamento.findUnique({
+      where: { id },
+    });
+  }
+
+  async delete(id: string) {
+    await prisma.horarioFuncionamento.delete({
+      where: { id },
+    });
+  }
+
   async findByProfessionalAndDay(professionalId: string, dayOfWeek: number) {
     return prisma.horarioFuncionamento.findFirst({
       where: {

@@ -12,6 +12,8 @@ export type BusinessHours = {
 };
 
 export interface HorariosFuncionamentoRepository {
+  findById(id: string): Promise<BusinessHours | null>;
+  delete(id: string): Promise<void>;
   findByProfessionalAndDay(
     professionalId: string,
     dayOfWeek: number,

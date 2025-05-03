@@ -3,7 +3,11 @@ import { authenticate } from './authenticate';
 import { logout } from './logout';
 import { refresh } from './refresh';
 import { FastifyTypedInstance } from '@/types';
-import { loginUserSchema, registerUserSchema } from '@/schemas/user';
+import {
+  loginUserSchema,
+  registerUserSchema,
+  userSchema,
+} from '@/schemas/user';
 import { InsufficientPermissionsError } from '@/use-cases/errors/insufficient-permissions-error';
 import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists-error';
 import { z } from 'zod';
@@ -50,12 +54,7 @@ export async function authRoutes(app: FastifyTypedInstance) {
           200: z
             .object({
               token: z.string(),
-              user: z.object({
-                id: z.string(),
-                nome: z.string(),
-                email: z.string(),
-                role: z.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']),
-              }),
+              user: userSchema,
             })
             .describe('Login bem-sucedido'),
           400: z

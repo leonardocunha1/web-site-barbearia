@@ -22,18 +22,6 @@ export class GetUserProfileUseCase {
       throw new UserNotFoundError();
     }
 
-    const userWithoutPassword: UserDTO = {
-      id: user.id,
-      nome: user.nome,
-      email: user.email,
-      telefone: user.telefone,
-      role: user.role,
-      emailVerified: user.emailVerified,
-      active: user.active,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-
-    return { user: userWithoutPassword };
+    return { user };
   }
 }

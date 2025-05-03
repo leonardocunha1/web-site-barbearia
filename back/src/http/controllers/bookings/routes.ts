@@ -1,16 +1,20 @@
 import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createBooking } from './create';
-import { updateBookingStatus } from './update-booking-status';
-import { listBookings } from './list-user-bookings';
+import { updateBookingStatus } from './toggle-status';
+import { listUserBookings } from './list-user-bookings';
 import { FastifyTypedInstance } from '@/types';
 import {
+  bookingSchema,
   createBookingBodySchema,
+  getOrUpdateBookingStatusParamsSchema,
   listBookingsQuerySchema,
+  paginatedBookingResponseSchema,
+  updateBookingStatusBodySchema,
 } from '@/schemas/bookings';
 import { z } from 'zod';
-import { sortSchema } from '@/schemas/booking-sort-schema';
 import { listProfessionalBookings } from './list-professional-bookings';
+import { getBooking } from './get';
 
 export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.post(
@@ -44,13 +48,8 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
         tags: ['bookings'],
         description:
           'Atualiza o status de um agendamento (apenas para profissionais)',
-        params: z.object({
-          bookingId: z.string().uuid().describe('ID do agendamento'),
-        }),
-        body: z.object({
-          status: z.enum(['CONFIRMADO', 'CANCELADO']).describe('Novo status'),
-          reason: z.string().optional().describe('Motivo do cancelamento'),
-        }),
+        params: getOrUpdateBookingStatusParamsSchema,
+        body: updateBookingStatusBodySchema,
         response: {
           200: z.object({ message: z.string() }),
           400: z.object({ message: z.string() }).describe('Bad Request'),
@@ -71,17 +70,14 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
         description: 'Lista os agendamentos do usuário autenticado',
         querystring: listBookingsQuerySchema,
         response: {
-          200: z.object({
-            bookings: z.array(z.any()),
-            total: z.number(),
-          }),
+          200: paginatedBookingResponseSchema,
           400: z.object({ message: z.string() }),
           403: z.object({ message: z.string() }),
           404: z.object({ message: z.string() }),
         },
       },
     },
-    listBookings,
+    listUserBookings,
   );
 
   app.get(
@@ -91,27 +87,34 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
       schema: {
         tags: ['bookings'],
         description: 'Lista os agendamentos do profissional autenticado',
-        querystring: z.object({
-          page: z.number().int().positive().optional().default(1),
-          limit: z.number().int().positive().optional().default(10),
-          sort: z.array(sortSchema).optional(),
-          status: z.string().optional(),
-          startDate: z.string().datetime().optional(),
-          endDate: z.string().datetime().optional(),
-        }),
+        querystring: listBookingsQuerySchema,
         response: {
-          200: z.object({
-            bookings: z.array(z.any()),
-            total: z.number(),
-            page: z.number(),
-            limit: z.number(),
-            totalPages: z.number(),
-          }),
+          200: paginatedBookingResponseSchema,
           400: z.object({ message: z.string() }),
           404: z.object({ message: z.string() }),
         },
       },
     },
     listProfessionalBookings,
+  );
+
+  app.get(
+    '/bookings/:bookingId',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['bookings'],
+        description: 'Busca os detalhes de um agendamento pelo ID.',
+        params: getOrUpdateBookingStatusParamsSchema,
+        response: {
+          200: z.object({
+            booking: bookingSchema,
+          }),
+          400: z.object({ message: z.string() }),
+          404: z.object({ message: z.string() }),
+        },
+      },
+    },
+    getBooking,
   );
 }

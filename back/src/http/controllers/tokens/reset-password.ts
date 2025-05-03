@@ -3,16 +3,13 @@ import { z } from 'zod';
 import { InvalidTokenError } from '@/use-cases/errors/invalid-token-error';
 import { ExpiredTokenError } from '@/use-cases/errors/expired-token-error';
 import { makeResetPasswordUseCase } from '@/use-cases/factories/make-reset-password-use-case';
+import { formatZodError } from '@/utils/formatZodError';
+import { resetPasswordBodySchema } from '@/schemas/tokens';
 
 export async function resetPassword(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const resetPasswordBodySchema = z.object({
-    token: z.string(),
-    newPassword: z.string().min(6),
-  });
-
   try {
     const { token, newPassword } = resetPasswordBodySchema.parse(request.body);
 
@@ -24,18 +21,15 @@ export async function resetPassword(
     });
   } catch (error) {
     if (error instanceof InvalidTokenError) {
-      return reply.status(400).send({ message: error.message });
+      return reply.status(401).send({ message: error.message });
     }
 
     if (error instanceof ExpiredTokenError) {
-      return reply.status(400).send({ message: error.message });
+      return reply.status(401).send({ message: error.message });
     }
 
     if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: error.format(),
-      });
+      return reply.status(400).send(formatZodError(error));
     }
 
     throw error;

@@ -2,28 +2,54 @@ import { Prisma, Status } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import {
   BookingsRepository,
-  BookingWithRelations,
   FindManyByProfessionalIdParams,
   FindManyByUserIdParams,
 } from '../bookings-repository';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
+import { BookingDTO } from '@/dtos/booking-dto';
 
 const bookingInclude = {
   items: {
+    select: {
+      id: true,
+      duracao: true,
+      preco: true,
+    },
     include: {
       serviceProfessional: {
+        select: {
+          id: true,
+        },
         include: {
-          service: true,
+          service: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
         },
       },
     },
   },
   profissional: {
+    select: {
+      id: true,
+    },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          nome: true,
+        },
+      },
     },
   },
-  user: true,
+  user: {
+    select: {
+      id: true,
+      nome: true,
+    },
+  },
 } satisfies Prisma.BookingInclude;
 
 function mapSortToOrderBy(
@@ -44,26 +70,11 @@ export class PrismaBookingsRepository implements BookingsRepository {
     });
   }
 
-  async findById(id: string): Promise<BookingWithRelations | null> {
+  async findById(id: string) {
     return prisma.booking.findUnique({
       where: { id },
-      include: {
-        items: {
-          include: {
-            serviceProfessional: {
-              include: {
-                service: true,
-              },
-            },
-          },
-        },
-        profissional: {
-          include: {
-            user: true,
-          },
-        },
-        user: true,
-      },
+
+      include: bookingInclude,
     });
   }
 
@@ -71,23 +82,24 @@ export class PrismaBookingsRepository implements BookingsRepository {
     professionalId: string,
     start: Date,
     end: Date,
-  ): Promise<BookingWithRelations | null> {
+  ): Promise<BookingDTO | null> {
     return prisma.booking.findFirst({
       where: {
         profissionalId: professionalId,
         canceledAt: null,
         dataHoraInicio: { lt: end },
         dataHoraFim: { gt: start },
-        status: { not: 'CANCELADO' }, // Adicionado filtro para status
+        status: { not: 'CANCELADO' },
       },
-      include: bookingInclude, // Usando o include consistente
+
+      include: bookingInclude,
     });
   }
 
   async findManyByProfessionalId(
     professionalId: string,
     { page, limit, sort = [], filters = {} }: FindManyByProfessionalIdParams,
-  ): Promise<BookingWithRelations[]> {
+  ): Promise<BookingDTO[]> {
     const orderBy = mapSortToOrderBy(sort);
 
     const where: Prisma.BookingWhereInput = {
@@ -99,23 +111,8 @@ export class PrismaBookingsRepository implements BookingsRepository {
 
     return prisma.booking.findMany({
       where,
-      include: {
-        items: {
-          include: {
-            serviceProfessional: {
-              include: {
-                service: true,
-              },
-            },
-          },
-        },
-        profissional: {
-          include: {
-            user: true,
-          },
-        },
-        user: true,
-      },
+
+      include: bookingInclude,
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
@@ -143,7 +140,7 @@ export class PrismaBookingsRepository implements BookingsRepository {
   async findManyByUserId(
     userId: string,
     { page, limit, sort = [], filters = {} }: FindManyByUserIdParams,
-  ): Promise<BookingWithRelations[]> {
+  ): Promise<BookingDTO[]> {
     const orderBy = mapSortToOrderBy(sort);
 
     const where: Prisma.BookingWhereInput = {
@@ -158,56 +155,38 @@ export class PrismaBookingsRepository implements BookingsRepository {
       skip: (page - 1) * limit,
       take: limit,
       orderBy,
-      include: {
-        items: {
-          include: {
-            serviceProfessional: {
-              include: {
-                service: true,
-              },
-            },
-          },
-        },
-        profissional: {
-          include: {
-            user: true,
-          },
-        },
-        user: true,
-      },
+
+      include: bookingInclude,
     });
   }
 
-  async countByUserId(userId: string): Promise<number> {
-    return prisma.booking.count({
-      where: { usuarioId: userId },
-    });
+  async countByUserId(
+    userId: string,
+    filters?: {
+      status?: Status;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number> {
+    const where: Prisma.BookingWhereInput = {
+      usuarioId: userId,
+      ...(filters?.status && { status: filters.status }),
+      ...(filters?.startDate && { dataHoraInicio: { gte: filters.startDate } }),
+      ...(filters?.endDate && { dataHoraFim: { lte: filters.endDate } }),
+    };
+
+    return prisma.booking.count({ where });
   }
 
   async update(
     id: string,
     data: Prisma.BookingUpdateInput,
-  ): Promise<BookingWithRelations> {
+  ): Promise<BookingDTO> {
     return prisma.booking.update({
       where: { id },
       data,
-      include: {
-        items: {
-          include: {
-            serviceProfessional: {
-              include: {
-                service: true,
-              },
-            },
-          },
-        },
-        profissional: {
-          include: {
-            user: true,
-          },
-        },
-        user: true,
-      },
+
+      include: bookingInclude,
     });
   }
 
@@ -288,7 +267,7 @@ export class PrismaBookingsRepository implements BookingsRepository {
     professionalId: string,
     limit: number,
     filters?: { startDate?: Date; endDate?: Date },
-  ): Promise<BookingWithRelations[]> {
+  ): Promise<BookingDTO[]> {
     const where: Prisma.BookingWhereInput = {
       profissionalId: professionalId,
       dataHoraInicio: {
@@ -296,21 +275,22 @@ export class PrismaBookingsRepository implements BookingsRepository {
         ...(filters?.endDate ? { lte: filters.endDate } : {}),
       },
       status: { in: ['PENDENTE', 'CONFIRMADO'] },
-      canceledAt: null, // Garantir que não está cancelado
+      canceledAt: null,
     };
 
     return prisma.booking.findMany({
       where,
       take: limit,
       orderBy: { dataHoraInicio: 'asc' },
-      include: bookingInclude, // Include consistente
+
+      include: bookingInclude,
     });
   }
 
   async findByProfessionalAndDate(
     professionalId: string,
     date: Date,
-  ): Promise<BookingWithRelations[]> {
+  ): Promise<BookingDTO[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -322,9 +302,10 @@ export class PrismaBookingsRepository implements BookingsRepository {
         profissionalId: professionalId,
         dataHoraInicio: { gte: startOfDay, lte: endOfDay },
         status: { not: 'CANCELADO' },
-        canceledAt: null, // Filtro adicional para garantir
+        canceledAt: null,
       },
-      include: bookingInclude, // Include consistente
+
+      include: bookingInclude,
       orderBy: { dataHoraInicio: 'asc' },
     });
   }

@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { ListProfessionalsResponse } from '@/dtos/professional-dto';
 import { makeListProfessionalsUseCase } from '@/use-cases/factories/make-list-professionals-use-case';
-import { paginationSchema } from '@/schemas/pagination-params';
+import { paginationSchema } from '@/schemas/pagination';
 import { formatZodError } from '@/utils/formatZodError';
 
 export async function listProfessionals(

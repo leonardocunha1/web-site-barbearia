@@ -3,6 +3,7 @@ import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
 import { InactiveUserError } from '../errors/inactive-user-error';
 import bcrypt from 'bcryptjs';
 import { EmailNotVerifiedError } from '../errors/user-email-not-verified-error';
+import { User } from '@prisma/client';
 
 interface AuthenticateRequest {
   email: string;
@@ -10,12 +11,7 @@ interface AuthenticateRequest {
 }
 
 interface AuthenticateResponse {
-  user: {
-    id: string;
-    nome: string;
-    email: string;
-    role: string;
-  };
+  user: User;
 }
 
 export class AuthenticateUseCase {
@@ -49,12 +45,7 @@ export class AuthenticateUseCase {
     }
 
     return {
-      user: {
-        id: user.id,
-        nome: user.nome,
-        email: user.email,
-        role: user.role,
-      },
+      user,
     };
   }
 }

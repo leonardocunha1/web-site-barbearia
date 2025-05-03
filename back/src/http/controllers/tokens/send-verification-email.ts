@@ -1,5 +1,7 @@
+import { sendVerificationEmailBodySchema } from '@/schemas/tokens';
 import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
 import { makeSendVerificationEmailUseCase } from '@/use-cases/factories/make-send-verification-email-use-case';
+import { formatZodError } from '@/utils/formatZodError';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
@@ -7,10 +9,6 @@ export async function sendVerificationEmail(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const sendVerificationEmailBodySchema = z.object({
-    email: z.string().email(),
-  });
-
   const { email } = sendVerificationEmailBodySchema.parse(request.body);
 
   try {
@@ -25,14 +23,11 @@ export async function sendVerificationEmail(
     });
   } catch (err) {
     if (err instanceof UserNotFoundError) {
-      return reply.status(404).send({ message: 'Usuário não encontrado' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof z.ZodError) {
-      return reply.status(400).send({
-        message: 'Erro na validação dos dados de entrada',
-        issues: err.format(),
-      });
+      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

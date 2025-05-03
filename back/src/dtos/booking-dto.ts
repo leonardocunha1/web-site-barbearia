@@ -1,28 +1,14 @@
-import { BookingWithRelations } from '@/repositories/bookings-repository';
+import { Booking } from '@prisma/client';
 
-export type BookingDTO = {
-  id: string;
-  usuarioId: string;
-  dataHoraInicio: string;
-  dataHoraFim: string;
-  status: string;
-  observacoes?: string;
-  valorFinal?: number;
-  createdAt: string;
-  profissional: {
-    id: string;
-    nome: string;
-    email: string;
-  };
+export type BookingDTO = Booking & {
   user: {
     id: string;
     nome: string;
-    email: string;
   };
   items: {
     id: string;
-    preco: number;
     duracao: number;
+    preco: number;
     serviceProfessional: {
       id: string;
       service: {
@@ -31,34 +17,46 @@ export type BookingDTO = {
       };
     };
   }[];
+  profissional: {
+    id: string;
+    user: {
+      id: string;
+      nome: string;
+    };
+  };
 };
 
-export function toBookingDTO(booking: BookingWithRelations): BookingDTO {
+export function toBookingDTO(booking: BookingDTO): BookingDTO {
   return {
     id: booking.id,
-    usuarioId: booking.usuarioId,
-    dataHoraInicio: booking.dataHoraInicio.toISOString(),
-    dataHoraFim: booking.dataHoraFim.toISOString(),
+    dataHoraInicio: booking.dataHoraInicio,
+    dataHoraFim: booking.dataHoraFim,
     status: booking.status,
-    observacoes: booking.observacoes ?? undefined,
-    valorFinal: booking.valorFinal ?? undefined,
-    createdAt: booking.createdAt.toISOString(),
+    canceledAt: booking.canceledAt,
+    confirmedAt: booking.confirmedAt,
+    profissionalId: booking.profissionalId,
+    updatedAt: booking.updatedAt,
+    usuarioId: booking.usuarioId,
+    observacoes: booking.observacoes ?? null,
+    valorFinal: booking.valorFinal ?? null,
+    createdAt: booking.createdAt,
     profissional: {
       id: booking.profissional.id,
-      nome: booking.profissional.user.nome,
-      email: booking.profissional.user.email,
+      user: {
+        id: booking.profissional.user.id,
+        nome: booking.profissional.user.nome,
+      },
     },
     user: {
       id: booking.user.id,
       nome: booking.user.nome,
-      email: booking.user.email,
     },
     items: booking.items.map((item) => ({
       id: item.id,
       preco: item.preco,
       duracao: item.duracao,
       serviceProfessional: {
-        id: item.serviceProfessionalId,
+        id: item.serviceProfessional.id,
         service: {
           id: item.serviceProfessional.service.id,
           nome: item.serviceProfessional.service.nome,
