@@ -4,9 +4,8 @@ import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 import { Status } from '@prisma/client';
 import { BookingDTO } from '@/dtos/booking-dto';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
-import { InvalidPageError } from '../errors/invalid-page-error';
-import { InvalidLimitError } from '../errors/invalid-limit-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
+import { validatePagination } from '@/utils/validate-pagination';
 
 interface ListProfessionalBookingsUseCaseRequest {
   professionalId: string;
@@ -38,13 +37,7 @@ export class ListProfessionalBookingsUseCase {
     sort = [{ field: 'dataHoraInicio', order: 'asc' }],
     filters = {},
   }: ListProfessionalBookingsUseCaseRequest): Promise<ListProfessionalBookingsUseCaseResponse> {
-    if (typeof page !== 'number' || page < 1) {
-      throw new InvalidPageError();
-    }
-
-    if (typeof limit !== 'number' || limit < 1 || limit > 100) {
-      throw new InvalidLimitError();
-    }
+    validatePagination(page, limit);
 
     const [bookings, total] = await Promise.all([
       this.bookingsRepository.findManyByProfessionalId(professionalId, {

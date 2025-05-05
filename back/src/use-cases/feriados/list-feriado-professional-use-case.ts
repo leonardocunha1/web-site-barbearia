@@ -1,9 +1,8 @@
 import { FeriadosRepository } from '@/repositories/feriados-repository';
-import { InvalidPageError } from '../errors/invalid-page-error';
-import { InvalidLimitError } from '../errors/invalid-limit-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
+import { validatePagination } from '@/utils/validate-pagination';
 
 interface ListHolidaysUseCaseRequest {
   professionalId: string;
@@ -19,13 +18,7 @@ export class ListHolidaysUseCase {
     page = 1,
     limit = 10,
   }: ListHolidaysUseCaseRequest) {
-    if (typeof page !== 'number' || page < 1) {
-      throw new InvalidPageError();
-    }
-
-    if (typeof limit !== 'number' || limit < 1 || limit > 100) {
-      throw new InvalidLimitError();
-    }
+    validatePagination(page, limit);
 
     const total =
       await this.feriadosRepository.countByProfessionalId(professionalId);

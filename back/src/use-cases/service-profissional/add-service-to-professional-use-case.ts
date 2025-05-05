@@ -4,12 +4,13 @@ import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { ServiceAlreadyAddedError } from '../errors/service-already-added-error';
+import { InvalidServicePriceDurationError } from '../errors/invalid-service-price-duration';
 
 interface AddServiceToProfessionalRequest {
   serviceId: string;
   professionalId: string;
-  preco?: number;
-  duracao?: number;
+  preco: number;
+  duracao: number;
 }
 
 export class AddServiceToProfessionalUseCase {
@@ -46,11 +47,15 @@ export class AddServiceToProfessionalUseCase {
       throw new ServiceAlreadyAddedError();
     }
 
+    if (preco && preco <= 0) {
+      throw new InvalidServicePriceDurationError();
+    }
+
     await this.serviceProfessionalRepository.create({
       service: { connect: { id: serviceId } },
       professional: { connect: { id: professionalId } },
-      preco: preco ?? serviceExists.precoPadrao,
-      duracao: duracao ?? serviceExists.duracao,
+      preco,
+      duracao,
     });
   }
 }

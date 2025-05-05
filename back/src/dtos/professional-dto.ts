@@ -3,18 +3,19 @@ import { Professional, Service, User } from '@prisma/client';
 export type ProfessionalDTO = {
   id: string;
   especialidade: string;
-  bio: string | null;
-  avatarUrl: string | null;
+  bio?: string;
+  avatarUrl?: string;
   ativo: boolean;
   user: {
     id: string;
     nome: string;
     email: string;
+    telefone?: string;
   };
   services: {
     id: string;
     nome: string;
-    descricao: string | null;
+    descricao?: string;
   }[];
 };
 
@@ -27,18 +28,19 @@ export function toProfessionalDTO(
   return {
     id: professional.id,
     especialidade: professional.especialidade,
-    bio: professional.bio,
-    avatarUrl: professional.avatarUrl,
+    bio: professional.bio ?? undefined,
+    avatarUrl: professional.avatarUrl ?? undefined,
     ativo: professional.ativo,
     user: {
       id: professional.user.id,
       nome: professional.user.nome,
       email: professional.user.email,
+      telefone: professional.user.telefone ?? undefined,
     },
     services: professional.services.map((service) => ({
       id: service.id,
       nome: service.nome,
-      descricao: service.descricao,
+      descricao: service.descricao ?? undefined,
     })),
   };
 }

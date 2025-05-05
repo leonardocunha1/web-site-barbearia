@@ -2,43 +2,184 @@ import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createProfessional } from './create';
 import { updateProfessional } from './update';
-import { listProfessionals } from './list';
+import { listOrSearchProfessionals } from './list-search';
 import { toggleProfessionalStatus } from './toggle-status-ativo';
-import { searchProfessionals } from './search-professionals';
 import { dashboard } from './get-dashboard';
 import { getSchedule } from './get-schedule';
 import { FastifyTypedInstance } from '@/types';
+import {
+  createProfessionalBodySchema,
+  dashboardQuerySchema,
+  professionalSchema,
+  searchProfessionalsQuerySchema,
+  toggleProfessionalStatusParamsSchema,
+  updateProfessionalBodySchema,
+  updateProfessionalParamsSchema,
+} from '@/schemas/profissional';
+import { z } from 'zod';
+import { dashboardSchema } from '@/schemas/dashboard-schema';
+import { getScheduleQuerySchema } from '@/dtos/schedule-dto';
 
 export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.post(
     '/professionals',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    {
+      onRequest: [verifyJwt, verifyUserRole('ADMIN')],
+      schema: {
+        tags: ['professionals'],
+        body: createProfessionalBodySchema,
+        response: {
+          201: z.object({
+            message: z.string(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          409: z.object({
+            message: z.string(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
     createProfessional,
   );
+
   app.patch(
     '/professionals/:id',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    {
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
+      schema: {
+        tags: ['professionals'],
+        params: updateProfessionalParamsSchema,
+        body: updateProfessionalBodySchema,
+        response: {
+          200: z.object({
+            message: z.string(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
     updateProfessional,
   );
-  app.get('/professionals', { onRequest: [verifyJwt] }, listProfessionals);
+
   app.patch(
-    '/professionals/:id/toggle-status',
-    { onRequest: [verifyJwt, verifyUserRole('ADMIN')] },
+    '/professionals/:id/status',
+    {
+      onRequest: [verifyJwt, verifyUserRole('ADMIN')],
+      schema: {
+        tags: ['professionals'],
+        params: toggleProfessionalStatusParamsSchema,
+        response: {
+          200: z.object({
+            message: z.string(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
     toggleProfessionalStatus,
   );
+
   app.get(
-    '/professionals/search',
-    { onRequest: [verifyJwt] },
-    searchProfessionals,
+    '/professionals',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['professionals'],
+        querystring: searchProfessionalsQuerySchema,
+        response: {
+          200: z.object({
+            professionals: z.array(professionalSchema),
+            total: z.number(),
+            page: z.number(),
+            limit: z.number(),
+            totalPages: z.number(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    listOrSearchProfessionals,
   );
+
+  // Dashboard do próprio profissional logado
   app.get(
-    '/professionals/dashboard',
-    { onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')] },
+    '/me/professional/dashboard',
+    {
+      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      schema: {
+        tags: ['professionals'],
+        querystring: dashboardQuerySchema,
+        response: {
+          200: dashboardSchema,
+          404: z.object({
+            message: z.string(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
     dashboard,
   );
+
+  // Agenda do próprio profissional logado
   app.get(
-    '/professionals/schedule',
-    { onRequest: verifyUserRole('PROFISSIONAL') },
+    '/me/professional/schedule',
+    {
+      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      schema: {
+        tags: ['professionals'],
+        querystring: getScheduleQuerySchema,
+        response: {
+          200: z.object({
+            date: z.string(),
+            timeSlots: z.array(
+              z.object({
+                time: z.string(), // Formato "HH:MM"
+                available: z.boolean(),
+                booking: z
+                  .object({
+                    id: z.string(),
+                    clientName: z.string(),
+                    services: z.array(z.string()),
+                  })
+                  .optional(),
+              }),
+            ),
+            businessHours: z.object({
+              openAt: z.string(),
+              closeAt: z.string(),
+              breakStart: z.string().optional(),
+              breakEnd: z.string().optional(),
+            }),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
     getSchedule,
   );
 }

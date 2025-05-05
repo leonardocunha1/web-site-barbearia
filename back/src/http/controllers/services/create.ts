@@ -4,21 +4,15 @@ import { InsufficientPermissionsError } from '@/use-cases/errors/insufficient-pe
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeCreateServiceUseCase } from '@/use-cases/factories/make-create-service-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import { createServiceBodySchema } from '@/schemas/services';
 
 export async function createService(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const createServiceBodySchema = z.object({
-    nome: z.string(),
-    descricao: z.string().optional(),
-    precoPadrao: z.number().positive(),
-    duracao: z.number().int().positive(),
-    categoria: z.string().optional(),
-  });
-
-  const { nome, descricao, precoPadrao, duracao, categoria } =
-    createServiceBodySchema.parse(request.body);
+  const { nome, descricao, categoria } = createServiceBodySchema.parse(
+    request.body,
+  );
 
   try {
     const createServiceUseCase = makeCreateServiceUseCase();
@@ -26,8 +20,6 @@ export async function createService(
     await createServiceUseCase.execute({
       nome,
       descricao,
-      precoPadrao,
-      duracao,
       categoria,
     });
 

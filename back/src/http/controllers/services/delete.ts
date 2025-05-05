@@ -3,20 +3,16 @@ import { z } from 'zod';
 import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error';
 import { makeDeleteServiceUseCase } from '@/use-cases/factories/make-delete-service-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import {
+  deleteServiceQuerySchema,
+  updateServiceParamsSchema,
+} from '@/schemas/services';
 
 export async function deleteService(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const deleteServiceParamsSchema = z.object({
-    id: z.string().uuid(),
-  });
-
-  const deleteServiceQuerySchema = z.object({
-    permanent: z.coerce.boolean().default(false),
-  });
-
-  const { id } = deleteServiceParamsSchema.parse(request.params);
+  const { id } = updateServiceParamsSchema.parse(request.params);
   const { permanent } = deleteServiceQuerySchema.parse(request.query);
 
   try {

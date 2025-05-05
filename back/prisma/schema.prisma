@@ -112,7 +112,7 @@ model Service {
 
 model ServiceProfessional {
   id             String        @id @default(uuid())
-  service        Service       @relation(fields: [serviceId], references: [id])
+  service        Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   serviceId      String
   professional   Professional  @relation(fields: [professionalId], references: [id])
   professionalId String
@@ -150,6 +150,7 @@ model BookingItem {
   serviceProfessional   ServiceProfessional @relation(fields: [serviceProfessionalId], references: [id])
   serviceProfessionalId String
 
+  nome      String
   preco     Float
   duracao   Int
   Service   Service? @relation(fields: [serviceId], references: [id])

@@ -1,14 +1,10 @@
+import { dashboardQuerySchema } from '@/schemas/profissional';
+import { InvalidDataError } from '@/use-cases/errors/invalid-data-error';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeProfessionalDashboardUseCase } from '@/use-cases/factories/make-dashboard-use-case';
 import { formatZodError } from '@/utils/formatZodError';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-
-const dashboardQuerySchema = z.object({
-  range: z.enum(['today', 'week', 'month', 'custom']),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
-});
 
 export async function dashboard(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -31,6 +27,10 @@ export async function dashboard(request: FastifyRequest, reply: FastifyReply) {
 
     if (error instanceof z.ZodError) {
       return reply.status(400).send(formatZodError(error));
+    }
+
+    if (error instanceof InvalidDataError) {
+      return reply.status(400).send({ message: error.message });
     }
 
     throw error;

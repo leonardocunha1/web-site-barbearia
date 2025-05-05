@@ -1,9 +1,9 @@
 import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
-import { ListProfessionalsUseCase } from '../professional/list-professionals-use-case';
+import { ListOrSearchProfessionalsUseCase } from '../professional/list-professionals-use-case';
 
 export function makeListProfessionalsUseCase() {
   const professionalsRepository = new PrismaProfessionalsRepository();
-  const useCase = new ListProfessionalsUseCase(professionalsRepository);
+  const useCase = new ListOrSearchProfessionalsUseCase(professionalsRepository);
 
   return useCase;
 }

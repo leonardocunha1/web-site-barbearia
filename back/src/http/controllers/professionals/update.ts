@@ -1,3 +1,7 @@
+import {
+  updateProfessionalBodySchema,
+  updateProfessionalParamsSchema,
+} from '@/schemas/profissional';
 import { InvalidUpdateError } from '@/use-cases/errors/invalid-update-error';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeUpdateProfessionalUseCase } from '@/use-cases/factories/make-update-professional-use-case';
@@ -9,31 +13,17 @@ export async function updateProfessional(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const updateProfessionalParamsSchema = z.object({
-    id: z.string().uuid(),
-  });
-
-  const updateProfessionalBodySchema = z.object({
-    especialidade: z.string().min(3).optional(),
-    bio: z.string().nullable().optional(),
-    documento: z.string().nullable().optional(),
-    registro: z.string().nullable().optional(),
-    ativo: z.boolean().optional(),
-    intervalosAgendamento: z.number().int().min(15).max(120).optional(),
-    avatarUrl: z.string().url().nullable().optional(),
-  });
-
   try {
     const { id } = updateProfessionalParamsSchema.parse(request.params);
     const data = updateProfessionalBodySchema.parse(request.body);
 
     const updateProfessionalUseCase = makeUpdateProfessionalUseCase();
-    const professional = await updateProfessionalUseCase.execute({
+    await updateProfessionalUseCase.execute({
       id,
       ...data,
     });
 
-    return reply.status(200).send(professional);
+    return reply.status(200).send();
   } catch (error) {
     if (error instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: error.message });

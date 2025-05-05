@@ -18,8 +18,6 @@ interface ListProfessionalServicesResponse {
     duracao: number;
     categoria: string | null;
     ativo: boolean;
-    precoPersonalizado: number;
-    duracaoPersonalizada: number;
   }>;
   total: number;
 }
@@ -57,12 +55,10 @@ export class ListProfessionalServicesUseCase {
         id: sp.service.id,
         nome: sp.service.nome,
         descricao: sp.service.descricao,
-        preco: sp.service.precoPadrao,
-        duracao: sp.service.duracao,
         categoria: sp.service.categoria,
         ativo: sp.service.ativo,
-        precoPersonalizado: sp.preco,
-        duracaoPersonalizada: sp.duracao,
+        preco: sp.preco,
+        duracao: sp.duracao,
       })),
       total,
     };

@@ -6,6 +6,8 @@ import {
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { BookingsRepository } from '@/repositories/bookings-repository';
+import { startOfDay, endOfDay, subDays, isAfter, isValid } from 'date-fns';
+import { InvalidDataError } from '../errors/invalid-data-error';
 
 export class GetProfessionalDashboardUseCase {
   constructor(
@@ -15,38 +17,47 @@ export class GetProfessionalDashboardUseCase {
 
   private getDateRange(range: TimeRange, startDate?: Date, endDate?: Date) {
     const now = new Date();
-    const start = new Date(now); // Cria uma cópia
-    const end = new Date(now); // Cria outra cópia
 
     switch (range) {
       case 'today':
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        return { start, end };
+        return {
+          start: startOfDay(now),
+          end: endOfDay(now),
+        };
 
       case 'week':
-        start.setDate(now.getDate() - 6); // 7 dias (incluindo hoje)
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        return { start, end };
+        return {
+          start: startOfDay(subDays(now, 6)), // últimos 7 dias, incluindo hoje
+          end: endOfDay(now),
+        };
 
       case 'month':
-        start.setDate(now.getDate() - 30); // 30 dias (nao inclui hoje)
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        return { start, end };
+        return {
+          start: startOfDay(subDays(now, 30)), // últimos 30 dias
+          end: endOfDay(now),
+        };
 
       case 'custom':
         if (!startDate || !endDate) {
-          throw new Error('Custom range requires start and end dates');
+          throw new InvalidDataError(
+            'Data inicial e final são obrigatórias para o intervalo personalizado',
+          );
         }
-        if (startDate > endDate) {
-          throw new Error('Start date must be before end date');
+        if (!isValid(startDate) || !isValid(endDate)) {
+          throw new InvalidDataError('Data inicial ou final inválida');
         }
-        return { start: startDate, end: endDate };
+        if (isAfter(startDate, endDate)) {
+          throw new InvalidDataError(
+            'A data inicial não pode ser maior que a data final',
+          );
+        }
+        return {
+          start: startOfDay(startDate),
+          end: endOfDay(endDate),
+        };
 
       default:
-        throw new Error('Invalid time range');
+        throw new InvalidDataError('Intervalo de data inválido');
     }
   }
 
@@ -85,7 +96,10 @@ export class GetProfessionalDashboardUseCase {
           dateRange.start,
           dateRange.end,
         ),
-        this.bookingsRepository.findNextAppointments(professionalId, 3),
+        this.bookingsRepository.findNextAppointments(professionalId, 3, {
+          startDate: dateRange.start,
+          endDate: dateRange.end,
+        }),
       ]);
 
     return {
@@ -104,7 +118,9 @@ export class GetProfessionalDashboardUseCase {
         id: appointment.id,
         date: appointment.dataHoraInicio,
         clientName: appointment.user.nome,
-        service: appointment.items[0]?.service.nome || 'Vários serviços',
+        service:
+          appointment.items[0]?.serviceProfessional.service.nome ||
+          'Vários serviços',
         status: appointment.status as 'PENDENTE' | 'CONFIRMADO',
       })),
     };

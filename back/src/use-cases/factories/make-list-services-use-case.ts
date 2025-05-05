@@ -1,7 +1,9 @@
 import { PrismaServicesRepository } from '@/repositories/prisma/prisma-services-repository';
 import { ListServicesUseCase } from '../services-barber/list-services-use-case';
+import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
 
 export function makeListServicesUseCase() {
   const servicesRepository = new PrismaServicesRepository();
-  return new ListServicesUseCase(servicesRepository);
+  const professionalsRepository = new PrismaProfessionalsRepository();
+  return new ListServicesUseCase(servicesRepository, professionalsRepository);
 }

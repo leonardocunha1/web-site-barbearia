@@ -1,14 +1,11 @@
 import { ServicesRepository } from '@/repositories/services-repository';
-import type { Service, Role } from '@prisma/client';
+import type { Service } from '@prisma/client';
 import { ServiceAlreadyExistsError } from '../errors/service-already-exists-error';
 
 interface CreateServiceRequest {
   nome: string;
   descricao?: string;
-  precoPadrao: number;
-  duracao: number;
   categoria?: string;
-  requestRole?: Role;
 }
 
 interface CreateServiceResponse {
@@ -21,8 +18,6 @@ export class CreateServiceUseCase {
   async execute({
     nome,
     descricao,
-    precoPadrao,
-    duracao,
     categoria,
   }: CreateServiceRequest): Promise<CreateServiceResponse> {
     const existingService = await this.servicesRepository.findByName(nome);
@@ -33,8 +28,6 @@ export class CreateServiceUseCase {
     const service = await this.servicesRepository.create({
       nome,
       descricao,
-      precoPadrao,
-      duracao,
       categoria,
     });
 

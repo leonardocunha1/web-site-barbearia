@@ -1,5 +1,6 @@
 import { ListUsersResponse } from '@/dtos/user-dto';
 import { UsersRepository } from '@/repositories/users-repository';
+import { validatePagination } from '@/utils/validate-pagination';
 import { Role } from '@prisma/client';
 
 interface ListUsersUseCaseRequest {
@@ -18,6 +19,8 @@ export class ListUsersUseCase {
     role,
     name,
   }: ListUsersUseCaseRequest): Promise<ListUsersResponse> {
+    validatePagination(page, limit);
+
     const [users, total] = await Promise.all([
       this.usersRepository.listUsers({ page, limit, role, name }),
       this.usersRepository.countUsers({ role, name }),

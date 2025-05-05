@@ -1,5 +1,8 @@
 import { ServicesRepository } from '@/repositories/services-repository';
 import { Service } from '@prisma/client';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { validatePagination } from '@/utils/validate-pagination';
 
 interface ListServicesRequest {
   page: number;
@@ -17,7 +20,10 @@ interface ListServicesResponse {
 }
 
 export class ListServicesUseCase {
-  constructor(private servicesRepository: ServicesRepository) {}
+  constructor(
+    private servicesRepository: ServicesRepository,
+    private professionalRepository: ProfessionalsRepository,
+  ) {}
 
   async execute({
     page,
@@ -27,6 +33,17 @@ export class ListServicesUseCase {
     ativo,
     professionalId,
   }: ListServicesRequest): Promise<ListServicesResponse> {
+    validatePagination(page, limit);
+
+    if (professionalId) {
+      const professionalExists =
+        await this.professionalRepository.findById(professionalId);
+
+      if (!professionalExists) {
+        throw new ProfessionalNotFoundError();
+      }
+    }
+
     const { services, total } = await this.servicesRepository.list({
       page,
       limit,
@@ -35,6 +52,14 @@ export class ListServicesUseCase {
       ativo,
       professionalId,
     });
+
+    if (services.length === 0) {
+      return {
+        services: [],
+        total: 0,
+        totalPages: 0,
+      };
+    }
 
     const totalPages = Math.ceil(total / limit);
 

@@ -5,22 +5,22 @@ import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-f
 import { makeAddServiceToProfessionalUseCase } from '@/use-cases/factories/make-add-service-to-professional-use-case';
 import { ServiceAlreadyAddedError } from '@/use-cases/errors/service-already-added-error';
 import { formatZodError } from '@/utils/formatZodError';
+import { addServiceToProfessionalBodySchema } from '@/schemas/services';
+import { InvalidServicePriceDurationError } from '@/use-cases/errors/invalid-service-price-duration';
+
+const paramsSchema = z.object({
+  professionalId: z.string().uuid(),
+});
 
 export async function addToProfessional(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const addServiceToProfessionalBodySchema = z.object({
-    serviceId: z.string().uuid(),
-    professionalId: z.string().uuid(),
-    preco: z.number().positive().optional(),
-    duracao: z.number().int().positive().optional(),
-  });
-
-  const { serviceId, professionalId, preco, duracao } =
-    addServiceToProfessionalBodySchema.parse(request.body);
-
   try {
+    const { professionalId } = paramsSchema.parse(request.params);
+    const { serviceId, preco, duracao } =
+      addServiceToProfessionalBodySchema.parse(request.body);
+
     const addServiceToProfessionalUseCase =
       makeAddServiceToProfessionalUseCase();
 
@@ -34,17 +34,19 @@ export async function addToProfessional(
     return reply.status(201).send();
   } catch (err) {
     if (err instanceof ServiceNotFoundError) {
-      return reply.status(404).send({ message: 'Service not found' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof ProfessionalNotFoundError) {
-      return reply.status(404).send({ message: 'Professional not found' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof ServiceAlreadyAddedError) {
-      return reply
-        .status(409)
-        .send({ message: 'Service already added to professional' });
+      return reply.status(409).send({ message: err.message });
+    }
+
+    if (err instanceof InvalidServicePriceDurationError) {
+      return reply.status(400).send({ message: err.message });
     }
 
     if (err instanceof z.ZodError) {

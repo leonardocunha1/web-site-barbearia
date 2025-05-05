@@ -1,3 +1,4 @@
+import { removeServiceFromProfessionalParamsSchema } from '@/schemas/services';
 import { ServiceProfessionalNotFoundError } from '@/use-cases/errors/service-professional-not-found-error';
 import { ServiceWithBookingsError } from '@/use-cases/errors/service-with-bookings-error';
 import { makeRemoveServiceFromProfessionalUseCase } from '@/use-cases/factories/make-remove-service-from-professional-use-case';
@@ -9,15 +10,10 @@ export async function removeFromProfessional(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const removeServiceFromProfessionalBodySchema = z.object({
-    serviceId: z.string().uuid(),
-    professionalId: z.string().uuid(),
-  });
-
-  const { serviceId, professionalId } =
-    removeServiceFromProfessionalBodySchema.parse(request.body);
-
   try {
+    const { professionalId, serviceId } =
+      removeServiceFromProfessionalParamsSchema.parse(request.params);
+
     const removeServiceFromProfessionalUseCase =
       makeRemoveServiceFromProfessionalUseCase();
 
@@ -29,14 +25,12 @@ export async function removeFromProfessional(
     return reply.status(204).send();
   } catch (err) {
     if (err instanceof ServiceProfessionalNotFoundError) {
-      return reply
-        .status(404)
-        .send({ message: 'Service not linked to professional' });
+      return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof ServiceWithBookingsError) {
       return reply.status(400).send({
-        message: 'Cannot remove service with active bookings',
+        message: err.message,
       });
     }
 

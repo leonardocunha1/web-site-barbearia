@@ -1,3 +1,4 @@
+import { BookingDTO } from '@/dtos/booking-dto';
 import { TimeSlot } from '@/dtos/schedule-dto';
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { FeriadosRepository } from '@/repositories/feriados-repository';
@@ -79,16 +80,7 @@ export class GetProfessionalScheduleUseCase {
       pausaFim: string | null;
     },
     date: Date,
-    bookings: Array<{
-      id: string;
-      dataHoraInicio: Date;
-      dataHoraFim: Date;
-      status: string;
-      user: { nome: string };
-      items: Array<{
-        service: { nome: string };
-      }>;
-    }>,
+    bookings: BookingDTO[],
   ): TimeSlot[] {
     const slots: TimeSlot[] = [];
     const slotDuration = 15; // 15 minutos por slot
@@ -150,7 +142,9 @@ export class GetProfessionalScheduleUseCase {
             ? {
                 id: booking.id,
                 clientName: booking.user.nome,
-                services: booking.items.map((item) => item.service.nome),
+                services: booking.items.map(
+                  (item) => item.serviceProfessional.service.nome,
+                ),
               }
             : undefined,
         });

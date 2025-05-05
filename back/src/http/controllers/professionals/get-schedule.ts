@@ -10,13 +10,11 @@ export async function getSchedule(
   reply: FastifyReply,
 ) {
   try {
-    const { professionalId, date } = getScheduleQuerySchema.parse(
-      request.query,
-    );
+    const { date } = getScheduleQuerySchema.parse(request.query);
 
     const getProfessionalScheduleUseCase = makeGetProfessionalScheduleUseCase();
     const schedule = await getProfessionalScheduleUseCase.execute({
-      professionalId,
+      professionalId: request.user.profissionalId!,
       date,
     });
 
@@ -30,6 +28,6 @@ export async function getSchedule(
       return reply.status(404).send({ message: error.message });
     }
 
-    return reply.status(500).send({ message: 'Internal server error' });
+    throw error;
   }
 }

@@ -34,17 +34,26 @@ export class PrismaServiceProfessionalRepository
   async findByServiceAndProfessional(
     serviceId: string,
     professionalId: string,
-  ): Promise<{
-    id: string;
-    serviceId: string;
-    professionalId: string;
-    preco: number;
-    duracao: number;
-  } | null> {
+  ) {
     const result = await prisma.serviceProfessional.findFirst({
       where: {
         serviceId,
         professionalId,
+      },
+      select: {
+        id: true,
+        professionalId: true,
+        preco: true,
+        duracao: true,
+        service: {
+          select: {
+            id: true,
+            nome: true,
+            descricao: true,
+            categoria: true,
+            ativo: true,
+          },
+        },
       },
     });
 
@@ -54,8 +63,8 @@ export class PrismaServiceProfessionalRepository
 
     return {
       id: result.id,
-      serviceId: result.serviceId,
       professionalId: result.professionalId,
+      service: result.service,
       preco: result.preco,
       duracao: result.duracao,
     };
@@ -124,5 +133,28 @@ export class PrismaServiceProfessionalRepository
       })),
       total,
     };
+  }
+
+  async updateByServiceAndProfessional({
+    serviceId,
+    professionalId,
+    preco,
+    duracao,
+  }: {
+    serviceId: string;
+    professionalId: string;
+    preco: number;
+    duracao: number;
+  }): Promise<void> {
+    await prisma.serviceProfessional.updateMany({
+      where: {
+        serviceId,
+        professionalId,
+      },
+      data: {
+        preco,
+        duracao,
+      },
+    });
   }
 }

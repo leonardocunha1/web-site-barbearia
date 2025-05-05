@@ -11,6 +11,29 @@ export interface ListServicesParams {
   professionalId?: string;
 }
 
+const includeProfessional = {
+  profissionais: {
+    select: {
+      id: true,
+    },
+    include: {
+      professional: {
+        select: {
+          id: true,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 export class PrismaServicesRepository implements ServicesRepository {
   async create(data: Prisma.ServiceCreateInput): Promise<Service> {
     const service = await prisma.service.create({
@@ -20,30 +43,21 @@ export class PrismaServicesRepository implements ServicesRepository {
     return service;
   }
 
-  async findById(id: string): Promise<Service | null> {
+  async findById(id: string) {
     const service = await prisma.service.findUnique({
       where: { id },
-      include: {
-        profissionais: {
-          include: {
-            professional: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
+      include: includeProfessional,
     });
 
     return service;
   }
 
-  async findByName(name: string): Promise<Service | null> {
+  async findByName(name: string) {
     const service = await prisma.service.findFirst({
       where: {
         nome: name,
       },
+      include: includeProfessional,
     });
 
     return service;
@@ -89,7 +103,7 @@ export class PrismaServicesRepository implements ServicesRepository {
     categoria,
     ativo,
     professionalId,
-  }: ListServicesParams): Promise<{ services: Service[]; total: number }> {
+  }: ListServicesParams) {
     const where: Prisma.ServiceWhereInput = {};
 
     if (nome) {
@@ -117,6 +131,7 @@ export class PrismaServicesRepository implements ServicesRepository {
 
     const services = await prisma.service.findMany({
       where,
+      include: includeProfessional,
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { nome: 'asc' },
@@ -130,5 +145,12 @@ export class PrismaServicesRepository implements ServicesRepository {
       services,
       total,
     };
+  }
+
+  async existsProfessional(professionalId: string): Promise<boolean> {
+    const count = await prisma.professional.count({
+      where: { id: professionalId },
+    });
+    return count > 0;
   }
 }

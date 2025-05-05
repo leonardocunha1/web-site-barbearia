@@ -3,28 +3,19 @@ import { z } from 'zod';
 import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error';
 import { makeToggleServiceStatusUseCase } from '@/use-cases/factories/make-toggle-service-status-use-case';
 import { formatZodError } from '@/utils/formatZodError';
+import { updateServiceParamsSchema } from '@/schemas/services';
 
 export async function toggleServiceStatus(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const toggleServiceStatusParamsSchema = z.object({
-    id: z.string().uuid(),
-  });
-
-  const { id } = toggleServiceStatusParamsSchema.parse(request.params);
+  const { id } = updateServiceParamsSchema.parse(request.params);
 
   try {
     const toggleServiceStatusUseCase = makeToggleServiceStatusUseCase();
-    const { service } = await toggleServiceStatusUseCase.execute({ id });
+    await toggleServiceStatusUseCase.execute({ id });
 
-    return reply.status(200).send({
-      service: {
-        id: service.id,
-        nome: service.nome,
-        ativo: service.ativo,
-      },
-    });
+    return reply.status(200).send();
   } catch (err) {
     if (err instanceof ServiceNotFoundError) {
       return reply.status(404).send({ message: err.message });

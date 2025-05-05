@@ -8,7 +8,19 @@ export interface ServiceProfessionalRepository {
   findByServiceAndProfessional(
     serviceId: string,
     professionalId: string,
-  ): Promise<ServiceProfessional | null>;
+  ): Promise<{
+    id: string;
+    professionalId: string;
+    service: {
+      id: string;
+      nome: string;
+      descricao: string | null;
+      categoria: string | null;
+      ativo: boolean;
+    };
+    preco: number;
+    duracao: number;
+  } | null>;
   findByProfessional(
     professionalId: string,
     options?: {
@@ -30,4 +42,10 @@ export interface ServiceProfessionalRepository {
     }>;
     total: number;
   }>;
+  updateByServiceAndProfessional(data: {
+    serviceId: string;
+    professionalId: string;
+    preco: number;
+    duracao: number;
+  }): Promise<void>;
 }

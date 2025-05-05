@@ -1,21 +1,16 @@
 import { makeListProfessionalServicesUseCase } from '@/use-cases/factories/make-list-professional-services-use-case';
-import { paginationSchema } from '@/schemas/pagination';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { formatZodError } from '@/utils/formatZodError';
+import {
+  listProfessionalServicesParamsSchema,
+  listProfessionalServicesQuerySchema,
+} from '@/schemas/services';
 
 export async function listProfessionalServices(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const listProfessionalServicesQuerySchema = paginationSchema.extend({
-    activeOnly: z.coerce.boolean().optional().default(true),
-  });
-
-  const listProfessionalServicesParamsSchema = z.object({
-    professionalId: z.string().uuid(),
-  });
-
   const { professionalId } = listProfessionalServicesParamsSchema.parse(
     request.params,
   );

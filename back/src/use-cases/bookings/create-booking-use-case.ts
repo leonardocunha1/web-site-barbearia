@@ -108,6 +108,7 @@ export class CreateBookingUseCase {
         create: serviceProfessionals.map((sp) => ({
           serviceProfessionalId: sp.id,
           preco: sp.preco,
+          nome: sp.service.nome,
           duracao: sp.duracao,
         })),
       },

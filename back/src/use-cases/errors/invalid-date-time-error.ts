@@ -1,6 +1,6 @@
 export class InvalidDateTimeError extends Error {
   constructor() {
-    super('Start date/time cannot be in the past');
+    super(' A data/hora de início não pode estar no passado.');
     this.name = 'InvalidDateTimeError';
   }
 }

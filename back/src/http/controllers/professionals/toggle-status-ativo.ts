@@ -1,3 +1,4 @@
+import { toggleProfessionalStatusParamsSchema } from '@/schemas/profissional';
 import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 import { makeToggleProfessionalStatusUseCase } from '@/use-cases/factories/make-toggle-professional-status-use-case';
 import { formatZodError } from '@/utils/formatZodError';
@@ -8,10 +9,6 @@ export async function toggleProfessionalStatus(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const toggleProfessionalStatusParamsSchema = z.object({
-    id: z.string().uuid(),
-  });
-
   try {
     const { id } = toggleProfessionalStatusParamsSchema.parse(request.params);
 
@@ -19,13 +16,8 @@ export async function toggleProfessionalStatus(
       makeToggleProfessionalStatusUseCase();
     const professional = await toggleProfessionalStatusUseCase.execute(id);
 
-    if (!professional) {
-      return reply.status(404).send({ message: 'Professional not found' });
-    }
-
     return reply.status(200).send({
-      message: `Profissional ${professional.ativo ? 'ativado' : 'desativado'} com sucesso`,
-      professional,
+      message: `Profissional ${(professional?.ativo as boolean) ? 'ativado' : 'desativado'} com sucesso`,
     });
   } catch (error) {
     if (error instanceof ProfessionalNotFoundError) {

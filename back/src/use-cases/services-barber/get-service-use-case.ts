@@ -1,13 +1,13 @@
 import { ServicesRepository } from '@/repositories/services-repository';
-import { Service } from '@prisma/client';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
+import { ServiceDTO } from '@/dtos/service-dto';
 
 interface GetServiceRequest {
   id: string;
 }
 
 interface GetServiceResponse {
-  service: Service;
+  service: ServiceDTO;
 }
 
 export class GetServiceUseCase {
