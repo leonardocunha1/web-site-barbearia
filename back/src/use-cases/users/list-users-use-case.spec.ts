@@ -3,6 +3,7 @@ import { ListUsersUseCase } from './list-users-use-case';
 import { UsersRepository } from '@/repositories/users-repository';
 import { Role, User } from '@prisma/client';
 import { ListUsersResponse } from '@/dtos/user-dto';
+import { createMockUsersRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockUsersRepository = UsersRepository & {
@@ -15,16 +16,7 @@ describe('ListUsersUseCase', () => {
   let sut: ListUsersUseCase;
 
   beforeEach(() => {
-    usersRepository = {
-      listUsers: vi.fn(),
-      countUsers: vi.fn(),
-      findById: vi.fn(),
-      findByEmail: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      updatePassword: vi.fn(),
-      anonymize: vi.fn(),
-    };
+    usersRepository = createMockUsersRepository();
 
     sut = new ListUsersUseCase(usersRepository);
   });

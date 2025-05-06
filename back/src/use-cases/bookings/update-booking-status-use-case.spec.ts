@@ -5,6 +5,7 @@ import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '../errors/invalid-booking-status-error';
 import { BookingUpdateError } from '../errors/booking-update-error';
 import { Status } from '@prisma/client';
+import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockBookingsRepository = BookingsRepository & {
@@ -17,28 +18,10 @@ describe('UpdateBookingStatusUseCase', () => {
   let mockBookingsRepository: MockBookingsRepository;
 
   beforeEach(() => {
-    // Criar mock do repositório
-    mockBookingsRepository = {
-      findById: vi.fn(),
-      update: vi.fn(),
-      // Outros métodos podem ser mockados como vazios
-      create: vi.fn(),
-      findOverlappingBooking: vi.fn(),
-      findManyByUserId: vi.fn(),
-      findManyByProfessionalId: vi.fn(),
-      delete: vi.fn(),
-      countActiveByServiceAndProfessional: vi.fn(),
-      countByUserId: vi.fn(),
-      countByProfessionalAndDate: vi.fn(),
-      getEarningsByProfessionalAndDate: vi.fn(),
-      countByProfessionalAndStatus: vi.fn(),
-      findNextAppointments: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-      countByProfessionalId: vi.fn(),
-    };
+    mockBookingsRepository = createMockBookingsRepository();
 
     useCase = new UpdateBookingStatusUseCase(
-      mockBookingsRepository as unknown as BookingsRepository,
+      mockBookingsRepository
     );
   });
 

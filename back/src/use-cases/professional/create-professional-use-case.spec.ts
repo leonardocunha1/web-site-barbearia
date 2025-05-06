@@ -4,6 +4,7 @@ import { ProfessionalsRepository } from '@/repositories/professionals-repository
 import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserAlreadyProfessionalError } from '../errors/user-already-professional-error';
+import { createMockProfessionalsRepository, createMockUsersRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -22,30 +23,8 @@ describe('Create Professional Use Case', () => {
   let mockUsersRepository: MockUsersRepository;
 
   beforeEach(() => {
-    // Criar mocks dos repositórios
-    mockProfessionalsRepository = {
-      findByUserId: vi.fn(),
-      create: vi.fn(),
-      findById: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
-
-    mockUsersRepository = {
-      findById: vi.fn(),
-      update: vi.fn(),
-      findByEmail: vi.fn(),
-      create: vi.fn(),
-      updatePassword: vi.fn(),
-      listUsers: vi.fn(),
-      countUsers: vi.fn(),
-      anonymize: vi.fn(),
-    };
+    mockProfessionalsRepository = createMockProfessionalsRepository()
+    mockUsersRepository = createMockUsersRepository()
 
     useCase = new CreateProfessionalUseCase(
       mockProfessionalsRepository,

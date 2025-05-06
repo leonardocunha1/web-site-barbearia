@@ -6,6 +6,7 @@ import { DuplicateBusinessHoursError } from '../errors/duplicate-business-hours-
 import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { CreateBusinessHoursUseCase } from './create-horario-funcionamento-profissional-use-case';
+import { createMockHorariosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockHorariosRepository = HorariosFuncionamentoRepository & {
@@ -27,28 +28,9 @@ describe('Create Business Hours Use Case', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    // Criar mocks dos repositórios
-    mockHorariosRepository = {
-      findByProfessionalAndDay: vi.fn(),
-      create: vi.fn(),
-      findById: vi.fn(),
-      delete: vi.fn(),
-      update: vi.fn(),
-      listByProfessional: vi.fn(),
-    };
+    mockHorariosRepository = createMockHorariosRepository()
+    mockProfessionalsRepository = createMockProfessionalsRepository()
 
-    mockProfessionalsRepository = {
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
 
     useCase = new CreateBusinessHoursUseCase(
       mockHorariosRepository,

@@ -3,6 +3,7 @@ import { GetBookingUseCase } from './get-booking-use-case';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { BookingDTO } from '@/dtos/booking-dto';
+import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório com métodos do Vitest
 type MockBookingsRepository = BookingsRepository & {
@@ -10,25 +11,6 @@ type MockBookingsRepository = BookingsRepository & {
   create: ReturnType<typeof vi.fn>;
   findOverlappingBooking: ReturnType<typeof vi.fn>;
 };
-
-// Mock do repositório com tipagem correta
-const createMockBookingsRepository = (): MockBookingsRepository => ({
-  findById: vi.fn(),
-  create: vi.fn(),
-  findOverlappingBooking: vi.fn(),
-  findManyByProfessionalId: vi.fn(),
-  findManyByUserId: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  countActiveByServiceAndProfessional: vi.fn(),
-  countByUserId: vi.fn(),
-  countByProfessionalAndDate: vi.fn(),
-  getEarningsByProfessionalAndDate: vi.fn(),
-  countByProfessionalAndStatus: vi.fn(),
-  findNextAppointments: vi.fn(),
-  findByProfessionalAndDate: vi.fn(),
-  countByProfessionalId: vi.fn(),
-});
 
 describe('GetBookingUseCase', () => {
   let useCase: GetBookingUseCase;

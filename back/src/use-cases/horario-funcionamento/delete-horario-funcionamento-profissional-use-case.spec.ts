@@ -3,6 +3,7 @@ import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcion
 import { BusinessHoursNotFoundError } from '../errors/businnes-hours-not-found-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { DeleteBusinessHoursUseCase } from './delete-horario-funcionamento-profissional-use-case';
+import { createMockHorariosRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockHorariosRepository = HorariosFuncionamentoRepository & {
@@ -19,15 +20,7 @@ describe('Delete Business Hours Use Case', () => {
   let mockHorariosRepository: MockHorariosRepository;
 
   beforeEach(() => {
-    // Criar mock do repositório
-    mockHorariosRepository = {
-      findById: vi.fn(),
-      delete: vi.fn(),
-      findByProfessionalAndDay: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      listByProfessional: vi.fn(),
-    };
+    mockHorariosRepository = createMockHorariosRepository()
 
     useCase = new DeleteBusinessHoursUseCase(mockHorariosRepository);
   });

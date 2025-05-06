@@ -5,6 +5,7 @@ import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 import { BookingDTO } from '@/dtos/booking-dto';
 import { ListBookingsUseCase } from './list-user-bookings-use-case';
+import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório com métodos do Vitest
 type MockBookingsRepository = BookingsRepository & {
@@ -17,27 +18,10 @@ describe('ListBookingsUseCase', () => {
   let mockBookingsRepository: MockBookingsRepository;
 
   beforeEach(() => {
-    // Criar mock completo do repositório
-    mockBookingsRepository = {
-      findManyByUserId: vi.fn(),
-      countByUserId: vi.fn(),
-      create: vi.fn(),
-      findById: vi.fn(),
-      findOverlappingBooking: vi.fn(),
-      findManyByProfessionalId: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      countActiveByServiceAndProfessional: vi.fn(),
-      countByProfessionalAndDate: vi.fn(),
-      getEarningsByProfessionalAndDate: vi.fn(),
-      countByProfessionalAndStatus: vi.fn(),
-      findNextAppointments: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-      countByProfessionalId: vi.fn(),
-    };
+    mockBookingsRepository = createMockBookingsRepository();
 
     useCase = new ListBookingsUseCase(
-      mockBookingsRepository as unknown as BookingsRepository,
+      mockBookingsRepository
     );
   });
 

@@ -3,6 +3,7 @@ import { CreateServiceUseCase } from './create-service-use-case';
 import { ServicesRepository } from '@/repositories/services-repository';
 import { ServiceAlreadyExistsError } from '../errors/service-already-exists-error';
 import { Service } from '@prisma/client';
+import { createMockServicesRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = ServicesRepository & {
@@ -15,17 +16,7 @@ describe('CreateServiceUseCase', () => {
   let sut: CreateServiceUseCase;
 
   beforeEach(() => {
-    servicesRepository = {
-      findByName: vi.fn(),
-      create: vi.fn(),
-      findById: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      softDelete: vi.fn(),
-      toggleStatus: vi.fn(),
-      list: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
 
     sut = new CreateServiceUseCase(servicesRepository);
   });

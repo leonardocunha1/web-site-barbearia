@@ -5,44 +5,15 @@ import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { BookingDTO } from '@/dtos/booking-dto';
-
-// Definindo o tipo para o mock do repositório
-type MockBookingsRepository = {
-  [K in keyof BookingsRepository]: BookingsRepository[K] extends (
-    ...args: Parameters<BookingsRepository[K]>
-  ) => ReturnType<BookingsRepository[K]>
-    ? ReturnType<typeof vi.fn>
-    : BookingsRepository[K];
-};
+import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
 describe('ListProfessionalBookingsUseCase', () => {
   let useCase: ListProfessionalBookingsUseCase;
-  let mockBookingsRepository: MockBookingsRepository;
+  let mockBookingsRepository: ReturnType<typeof createMockBookingsRepository>;
 
   beforeEach(() => {
-    // Criando o mock com todas as funções necessárias
-    mockBookingsRepository = {
-      findManyByProfessionalId: vi.fn(),
-      countByProfessionalId: vi.fn(),
-      // Outros métodos podem ser mockados como vazios
-      create: vi.fn(),
-      findById: vi.fn(),
-      findOverlappingBooking: vi.fn(),
-      findManyByUserId: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      countActiveByServiceAndProfessional: vi.fn(),
-      countByUserId: vi.fn(),
-      countByProfessionalAndDate: vi.fn(),
-      getEarningsByProfessionalAndDate: vi.fn(),
-      countByProfessionalAndStatus: vi.fn(),
-      findNextAppointments: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-    };
-
-    useCase = new ListProfessionalBookingsUseCase(
-      mockBookingsRepository as unknown as BookingsRepository,
-    );
+    mockBookingsRepository = createMockBookingsRepository();
+    useCase = new ListProfessionalBookingsUseCase(mockBookingsRepository);
   });
 
   const mockBooking: BookingDTO = {

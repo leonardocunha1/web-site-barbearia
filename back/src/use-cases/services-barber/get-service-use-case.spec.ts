@@ -3,6 +3,7 @@ import { GetServiceUseCase } from './get-service-use-case';
 import { ServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ServiceDTO } from '@/dtos/service-dto';
+import { createMockServicesRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = ServicesRepository & {
@@ -14,17 +15,7 @@ describe('GetServiceUseCase', () => {
   let sut: GetServiceUseCase;
 
   beforeEach(() => {
-    servicesRepository = {
-      findById: vi.fn(),
-      findByName: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      softDelete: vi.fn(),
-      toggleStatus: vi.fn(),
-      list: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
 
     sut = new GetServiceUseCase(servicesRepository);
   });

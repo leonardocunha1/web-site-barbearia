@@ -4,6 +4,7 @@ import { ListHolidaysUseCase } from './list-feriado-professional-use-case';
 import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
+import { createMockFeriadosRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockFeriadosRepository = FeriadosRepository & {
@@ -17,17 +18,7 @@ describe('ListHolidaysUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Criar mock do repositório
-    mockFeriadosRepository = {
-      findManyByProfessionalId: vi.fn(),
-      countByProfessionalId: vi.fn(),
-      isProfessionalHoliday: vi.fn(),
-      addHoliday: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-      findById: vi.fn(),
-      delete: vi.fn(),
-    };
+    mockFeriadosRepository = createMockFeriadosRepository()
 
     useCase = new ListHolidaysUseCase(mockFeriadosRepository);
   });

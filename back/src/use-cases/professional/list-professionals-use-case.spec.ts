@@ -3,6 +3,7 @@ import { ProfessionalsRepository } from '@/repositories/professionals-repository
 import { InvalidPageError } from '../errors/invalid-page-error';
 import { InvalidLimitError } from '../errors/invalid-limit-error';
 import { ListOrSearchProfessionalsUseCase } from './list-professionals-use-case';
+import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -17,19 +18,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    // Criar mock do repositório
-    mockProfessionalsRepository = {
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
+    mockProfessionalsRepository = createMockProfessionalsRepository()
 
     useCase = new ListOrSearchProfessionalsUseCase(mockProfessionalsRepository);
   });

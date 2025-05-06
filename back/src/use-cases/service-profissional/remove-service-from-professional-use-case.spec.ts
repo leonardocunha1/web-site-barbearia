@@ -4,6 +4,10 @@ import { ServiceProfessionalRepository } from '@/repositories/service-profession
 import { BookingsRepository } from '@/repositories/bookings-repository';
 import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
 import { ServiceWithBookingsError } from '../errors/service-with-bookings-error';
+import {
+  createMockBookingsRepository,
+  createMockServiceProfessionalRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockServiceProfessionalRepository = ServiceProfessionalRepository & {
@@ -21,31 +25,8 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
   let sut: RemoveServiceFromProfessionalUseCase;
 
   beforeEach(() => {
-    serviceProfessionalRepository = {
-      findByServiceAndProfessional: vi.fn(),
-      delete: vi.fn(),
-      create: vi.fn(),
-      findByProfessional: vi.fn(),
-      updateByServiceAndProfessional: vi.fn(),
-    };
-
-    bookingsRepository = {
-      countActiveByServiceAndProfessional: vi.fn(),
-      create: vi.fn(),
-      findById: vi.fn(),
-      findOverlappingBooking: vi.fn(),
-      findManyByProfessionalId: vi.fn(),
-      findManyByUserId: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      countByUserId: vi.fn(),
-      countByProfessionalAndDate: vi.fn(),
-      getEarningsByProfessionalAndDate: vi.fn(),
-      countByProfessionalAndStatus: vi.fn(),
-      findNextAppointments: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-      countByProfessionalId: vi.fn(),
-    };
+    serviceProfessionalRepository = createMockServiceProfessionalRepository();
+    bookingsRepository = createMockBookingsRepository();
 
     sut = new RemoveServiceFromProfessionalUseCase(
       serviceProfessionalRepository,

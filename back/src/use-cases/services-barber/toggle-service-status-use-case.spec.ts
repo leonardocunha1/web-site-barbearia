@@ -3,6 +3,7 @@ import { ToggleServiceStatusUseCase } from './toggle-service-status-use-case';
 import { ServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { Service } from '@prisma/client';
+import { createMockServicesRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = ServicesRepository & {
@@ -31,18 +32,7 @@ describe('ToggleServiceStatusUseCase', () => {
   };
 
   beforeEach(() => {
-    servicesRepository = {
-      findById: vi.fn(),
-      toggleStatus: vi.fn(),
-      // Outras funções do repositório que não são usadas neste use case
-      findByName: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      softDelete: vi.fn(),
-      list: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
 
     sut = new ToggleServiceStatusUseCase(servicesRepository);
   });

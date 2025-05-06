@@ -6,57 +6,8 @@ import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
 import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
 import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
 import { InvalidDurationError } from '../errors/invalid-duration-error';
+import { createMockBookingsRepository, createMockProfessionalsRepository, createMockServiceProfessionalRepository, createMockUsersRepository } from '@/mock/mock-repositories';
 
-// Mock dos repositórios com tipagem
-const createMockBookingsRepository = () => ({
-  create: vi.fn(),
-  findOverlappingBooking: vi.fn(),
-  findById: vi.fn(),
-  findManyByProfessionalId: vi.fn(),
-  findManyByUserId: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  countActiveByServiceAndProfessional: vi.fn(),
-  countByUserId: vi.fn(),
-  countByProfessionalAndDate: vi.fn(),
-  getEarningsByProfessionalAndDate: vi.fn(),
-  countByProfessionalAndStatus: vi.fn(),
-  findNextAppointments: vi.fn(),
-  findByProfessionalAndDate: vi.fn(),
-  countByProfessionalId: vi.fn(),
-});
-
-const createMockUsersRepository = () => ({
-  findById: vi.fn(),
-  findByEmail: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  updatePassword: vi.fn(),
-  listUsers: vi.fn(),
-  countUsers: vi.fn(),
-  anonymize: vi.fn(),
-});
-
-const createMockProfessionalsRepository = () => ({
-  findById: vi.fn(),
-  findByUserId: vi.fn(),
-  findByProfessionalId: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  list: vi.fn(),
-  count: vi.fn(),
-  search: vi.fn(),
-  countSearch: vi.fn(),
-});
-
-const createMockServiceProfessionalRepository = () => ({
-  create: vi.fn(),
-  delete: vi.fn(),
-  findByServiceAndProfessional: vi.fn(),
-  findByProfessional: vi.fn(),
-  updateByServiceAndProfessional: vi.fn(),
-});
 
 // Função para criar todos os mocks
 const createMockRepositories = () => ({

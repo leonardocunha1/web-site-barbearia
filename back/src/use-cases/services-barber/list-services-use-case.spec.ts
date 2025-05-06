@@ -4,6 +4,10 @@ import { ServicesRepository } from '@/repositories/services-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { Service } from '@prisma/client';
+import {
+  createMockProfessionalsRepository,
+  createMockServicesRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks dos repositórios
 type MockServicesRepository = ServicesRepository & {
@@ -20,30 +24,8 @@ describe('ListServicesUseCase', () => {
   let sut: ListServicesUseCase;
 
   beforeEach(() => {
-    servicesRepository = {
-      list: vi.fn(),
-      findById: vi.fn(),
-      findByName: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      softDelete: vi.fn(),
-      toggleStatus: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
-
-    professionalsRepository = {
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
+    professionalsRepository = createMockProfessionalsRepository();
 
     sut = new ListServicesUseCase(servicesRepository, professionalsRepository);
   });

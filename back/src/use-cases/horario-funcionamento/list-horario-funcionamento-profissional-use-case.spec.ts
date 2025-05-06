@@ -3,6 +3,7 @@ import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcion
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { ListBusinessHoursUseCase } from './list-horario-funcionamento-profissional-use-case';
+import { createMockHorariosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockHorariosRepository = HorariosFuncionamentoRepository & {
@@ -25,7 +26,6 @@ type MockProfessionalsRepository = ProfessionalsRepository & {
   count: ReturnType<typeof vi.fn>;
   search: ReturnType<typeof vi.fn>;
   countSearch: ReturnType<typeof vi.fn>;
-  countActiveByServiceAndProfessional: ReturnType<typeof vi.fn>;
 };
 
 describe('List Business Hours Use Case', () => {
@@ -34,29 +34,8 @@ describe('List Business Hours Use Case', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    // Criar mocks dos repositórios
-    mockHorariosRepository = {
-      listByProfessional: vi.fn(),
-      findById: vi.fn(),
-      delete: vi.fn(),
-      findByProfessionalAndDay: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-    };
-
-    mockProfessionalsRepository = {
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-      countActiveByServiceAndProfessional: vi.fn(),
-    };
+     mockHorariosRepository = createMockHorariosRepository()
+    mockProfessionalsRepository = createMockProfessionalsRepository()
 
     useCase = new ListBusinessHoursUseCase(
       mockHorariosRepository,

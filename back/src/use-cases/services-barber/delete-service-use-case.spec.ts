@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { DeleteServiceUseCase } from './delete-service-use-case';
 import { ServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
+import { createMockServicesRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = ServicesRepository & {
@@ -15,17 +16,7 @@ describe('DeleteServiceUseCase', () => {
   let sut: DeleteServiceUseCase;
 
   beforeEach(() => {
-    servicesRepository = {
-      findById: vi.fn(),
-      softDelete: vi.fn(),
-      delete: vi.fn(),
-      create: vi.fn(),
-      findByName: vi.fn(),
-      update: vi.fn(),
-      toggleStatus: vi.fn(),
-      list: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
 
     sut = new DeleteServiceUseCase(servicesRepository);
   });

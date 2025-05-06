@@ -4,6 +4,7 @@ import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 import { User, Role } from '@prisma/client';
+import { createMockUsersRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockUsersRepository = UsersRepository & {
@@ -16,16 +17,7 @@ describe('AnonymizeUserUseCase', () => {
   let sut: AnonymizeUserUseCase;
 
   beforeEach(() => {
-    usersRepository = {
-      findById: vi.fn(),
-      anonymize: vi.fn(),
-      findByEmail: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      updatePassword: vi.fn(),
-      listUsers: vi.fn(),
-      countUsers: vi.fn(),
-    };
+    usersRepository = createMockUsersRepository();
 
     sut = new AnonymizeUserUseCase(usersRepository);
   });

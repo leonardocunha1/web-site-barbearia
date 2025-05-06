@@ -7,6 +7,11 @@ import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { ServiceAlreadyAddedError } from '../errors/service-already-added-error';
 import { InvalidServicePriceDurationError } from '../errors/invalid-service-price-duration';
+import {
+  createMockProfessionalsRepository,
+  createMockServiceProfessionalRepository,
+  createMockServicesRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockServicesRepository = ServicesRepository & {
@@ -29,38 +34,9 @@ describe('AddServiceToProfessionalUseCase', () => {
   let sut: AddServiceToProfessionalUseCase;
 
   beforeEach(() => {
-    servicesRepository = {
-      findById: vi.fn(),
-      create: vi.fn(),
-      findByName: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      softDelete: vi.fn(),
-      toggleStatus: vi.fn(),
-      list: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
-
-    professionalsRepository = {
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
-
-    serviceProfessionalRepository = {
-      findByServiceAndProfessional: vi.fn(),
-      create: vi.fn(),
-      delete: vi.fn(),
-      findByProfessional: vi.fn(),
-      updateByServiceAndProfessional: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
+    professionalsRepository = createMockProfessionalsRepository();
+    serviceProfessionalRepository = createMockServiceProfessionalRepository();
 
     sut = new AddServiceToProfessionalUseCase(
       servicesRepository,

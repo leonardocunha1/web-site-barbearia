@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UpdateProfessionalUseCase } from './update-professional-use-case';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
+import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -14,19 +15,7 @@ describe('UpdateProfessionalUseCase', () => {
   let sut: UpdateProfessionalUseCase;
 
   beforeEach(() => {
-    // Criar mock do repositório
-    professionalsRepository = {
-      findById: vi.fn(),
-      update: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
+    professionalsRepository = createMockProfessionalsRepository()
 
     sut = new UpdateProfessionalUseCase(professionalsRepository);
   });

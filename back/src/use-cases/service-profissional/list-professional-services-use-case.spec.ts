@@ -3,6 +3,10 @@ import { ListProfessionalServicesUseCase } from './list-professional-services-us
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
+import {
+  createMockProfessionalsRepository,
+  createMockServiceProfessionalRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -19,26 +23,8 @@ describe('ListProfessionalServicesUseCase', () => {
   let sut: ListProfessionalServicesUseCase;
 
   beforeEach(() => {
-    professionalsRepository = {
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
-
-    serviceProfessionalRepository = {
-      findByProfessional: vi.fn(),
-      create: vi.fn(),
-      delete: vi.fn(),
-      findByServiceAndProfessional: vi.fn(),
-      updateByServiceAndProfessional: vi.fn(),
-    };
+    professionalsRepository = createMockProfessionalsRepository();
+    serviceProfessionalRepository = createMockServiceProfessionalRepository();
 
     sut = new ListProfessionalServicesUseCase(
       serviceProfessionalRepository,

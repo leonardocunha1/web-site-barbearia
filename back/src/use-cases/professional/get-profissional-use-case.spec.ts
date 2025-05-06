@@ -5,6 +5,7 @@ import { ProfessionalNotFoundError } from '../errors/professional-not-found-erro
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { GetProfessionalDashboardUseCase } from './get-profissional-use-case';
+import { createMockBookingsRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -24,37 +25,9 @@ describe('Get Professional Dashboard Use Case', () => {
   let mockBookingsRepository: MockBookingsRepository;
 
   beforeEach(() => {
-    // Criar mocks dos repositórios
-    mockProfessionalsRepository = {
-      findByProfessionalId: vi.fn(),
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
-
-    mockBookingsRepository = {
-      countByProfessionalAndDate: vi.fn(),
-      getEarningsByProfessionalAndDate: vi.fn(),
-      countByProfessionalAndStatus: vi.fn(),
-      findNextAppointments: vi.fn(),
-      create: vi.fn(),
-      findById: vi.fn(),
-      findOverlappingBooking: vi.fn(),
-      findManyByProfessionalId: vi.fn(),
-      findManyByUserId: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      countActiveByServiceAndProfessional: vi.fn(),
-      countByUserId: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-      countByProfessionalId: vi.fn(),
-    };
+    mockProfessionalsRepository = createMockProfessionalsRepository()
+    mockBookingsRepository = createMockBookingsRepository()
+    
 
     useCase = new GetProfessionalDashboardUseCase(
       mockProfessionalsRepository,

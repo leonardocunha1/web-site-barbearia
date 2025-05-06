@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UpdateServiceProfessionalUseCase } from './update-service-professional-use-case';
 import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { InvalidServicePriceDurationError } from '../errors/invalid-service-price-duration';
+import { createMockServiceProfessionalRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockServiceProfessionalRepository = ServiceProfessionalRepository & {
@@ -14,13 +15,7 @@ describe('UpdateServiceProfessionalUseCase', () => {
   let sut: UpdateServiceProfessionalUseCase;
 
   beforeEach(() => {
-    serviceProfessionalRepository = {
-      findByServiceAndProfessional: vi.fn(),
-      updateByServiceAndProfessional: vi.fn(),
-      create: vi.fn(),
-      delete: vi.fn(),
-      findByProfessional: vi.fn(),
-    };
+    serviceProfessionalRepository = createMockServiceProfessionalRepository();
 
     sut = new UpdateServiceProfessionalUseCase(serviceProfessionalRepository);
   });

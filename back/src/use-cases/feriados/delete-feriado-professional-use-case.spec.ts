@@ -8,6 +8,7 @@ import { ProfessionalNotFoundError } from '../errors/professional-not-found-erro
 import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { PastHolidayDeletionError } from '../errors/past-holiday-deletion-error';
+import { createMockFeriadosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockFeriadosRepository = FeriadosRepository & {
@@ -27,29 +28,8 @@ describe('DeleteHolidayUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Criar mocks
-    mockFeriadosRepository = {
-      findById: vi.fn(),
-      delete: vi.fn(),
-      isProfessionalHoliday: vi.fn(),
-      addHoliday: vi.fn(),
-      findByProfessionalAndDate: vi.fn(),
-      findManyByProfessionalId: vi.fn(),
-      countByProfessionalId: vi.fn(),
-    };
-
-    mockProfessionalsRepository = {
-      findById: vi.fn(),
-      findByUserId: vi.fn(),
-      findByProfessionalId: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      list: vi.fn(),
-      count: vi.fn(),
-      search: vi.fn(),
-      countSearch: vi.fn(),
-    };
+    mockFeriadosRepository = createMockFeriadosRepository()
+    mockProfessionalsRepository = createMockProfessionalsRepository()
 
     useCase = new DeleteHolidayUseCase(
       mockFeriadosRepository,

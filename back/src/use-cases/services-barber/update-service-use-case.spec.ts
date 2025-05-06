@@ -3,6 +3,7 @@ import { UpdateServiceUseCase } from './update-service-use-case';
 import { ServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { Service, Prisma } from '@prisma/client';
+import { createMockServicesRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = ServicesRepository & {
@@ -33,18 +34,7 @@ describe('UpdateServiceUseCase', () => {
   };
 
   beforeEach(() => {
-    servicesRepository = {
-      findById: vi.fn(),
-      update: vi.fn(),
-      // Outras funções do repositório que não são usadas neste use case
-      findByName: vi.fn(),
-      create: vi.fn(),
-      delete: vi.fn(),
-      softDelete: vi.fn(),
-      toggleStatus: vi.fn(),
-      list: vi.fn(),
-      existsProfessional: vi.fn(),
-    };
+    servicesRepository = createMockServicesRepository();
 
     sut = new UpdateServiceUseCase(servicesRepository);
   });
