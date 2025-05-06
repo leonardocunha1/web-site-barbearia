@@ -83,9 +83,9 @@ export class GetProfessionalScheduleUseCase {
     bookings: BookingDTO[],
   ): TimeSlot[] {
     const slots: TimeSlot[] = [];
-    const slotDuration = 15; // 15 minutos por slot
+    const slotDuration = 10; // 15 minutos por slot
 
-    let currentTime = startOfDay(date); // Zera hora/minuto/segundo para o início do dia
+    let currentTime = startOfDay(date);
     const [openHour, openMinute] = businessHours.abreAs.split(':').map(Number);
     currentTime.setHours(openHour, openMinute, 0, 0);
 
@@ -127,17 +127,26 @@ export class GetProfessionalScheduleUseCase {
         currentTime < breakEnd;
 
       if (!isDuringBreak) {
-        // Verificar se há um agendamento neste horário
-        const booking = bookings.find((b) => {
+        // Verificar se há um agendamento que se sobrepõe a este slot
+        const isBooked = bookings.some((booking) => {
+          const bookingStart = booking.dataHoraInicio;
+          const bookingEnd = booking.dataHoraFim;
           return (
-            isSameDay(b.dataHoraInicio, date) &&
-            format(b.dataHoraInicio, 'HH:mm') === timeStr
+            isSameDay(bookingStart, date) &&
+            currentTime < bookingEnd &&
+            slotEnd > bookingStart
           );
         });
 
+        const booking = bookings.find(
+          (b) =>
+            isSameDay(b.dataHoraInicio, date) &&
+            format(b.dataHoraInicio, 'HH:mm') === timeStr,
+        );
+
         slots.push({
           time: timeStr,
-          available: !booking,
+          available: !isBooked,
           booking: booking
             ? {
                 id: booking.id,

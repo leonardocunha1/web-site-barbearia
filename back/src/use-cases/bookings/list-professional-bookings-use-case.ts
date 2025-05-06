@@ -49,19 +49,21 @@ export class ListProfessionalBookingsUseCase {
       this.bookingsRepository.countByProfessionalId(professionalId, filters),
     ]);
 
-    if (page > total) {
-      throw new InvalidPageRangeError();
-    }
-
+    // Primeiro verifica se há bookings
     if (bookings.length === 0) {
       throw new BookingNotFoundError();
     }
 
+    // Depois verifica se o profissional é o dono
     if (professionalId !== bookings[0].profissionalId) {
       throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }
 
+    // Por último verifica a paginação
     const totalPages = Math.ceil(total / limit);
+    if (page > totalPages) {
+      throw new InvalidPageRangeError();
+    }
 
     return {
       bookings,

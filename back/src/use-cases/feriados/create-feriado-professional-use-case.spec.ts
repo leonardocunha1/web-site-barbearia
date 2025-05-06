@@ -1,159 +1,188 @@
-import { InMemoryFeriadosRepository } from '@/repositories/in-memory/in-memory-feriados-repository';
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { FeriadosRepository } from '@/repositories/feriados-repository';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+
+import { startOfToday } from 'date-fns';
+import { CreateHolidayUseCase } from './create-feriado-professional-use-case';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { PastDateError } from '../errors/past-date-error';
 import { InvalidHolidayDescriptionError } from '../errors/invalid-holiday-description-error';
 import { DuplicateHolidayError } from '../errors/duplicate-holiday-error';
-import { addDays } from 'date-fns';
-import { CreateHolidayUseCase } from './create-feriado-professional-use-case';
-import { describe, it, expect, beforeEach } from 'vitest';
 
-describe('Create Holiday Use Case', () => {
-  let feriadosRepository: InMemoryFeriadosRepository;
-  let professionalsRepository: InMemoryProfessionalsRepository;
-  let sut: CreateHolidayUseCase;
+// Tipos para os mocks
+type MockFeriadosRepository = FeriadosRepository & {
+  findByProfessionalAndDate: ReturnType<typeof vi.fn>;
+  addHoliday: ReturnType<typeof vi.fn>;
+};
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = addDays(today, 1);
-  const yesterday = addDays(today, -1);
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findById: ReturnType<typeof vi.fn>;
+};
+
+describe('CreateHolidayUseCase', () => {
+  let useCase: CreateHolidayUseCase;
+  let mockFeriadosRepository: MockFeriadosRepository;
+  let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    feriadosRepository = new InMemoryFeriadosRepository();
-    professionalsRepository = new InMemoryProfessionalsRepository();
-    sut = new CreateHolidayUseCase(feriadosRepository, professionalsRepository);
+    vi.clearAllMocks();
 
-    // Adiciona um profissional para testes
-    professionalsRepository.items.push({
-      id: 'valid-professional-id',
-      userId: 'user-1',
-      especialidade: 'Dermatologista',
-      bio: 'Especialista em pele',
-      avatarUrl: 'http://example.com/avatar1.jpg',
-      documento: '123456',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-  });
+    // Criar mocks
+    mockFeriadosRepository = {
+      findByProfessionalAndDate: vi.fn(),
+      addHoliday: vi.fn(),
+      isProfessionalHoliday: vi.fn(),
+      findById: vi.fn(),
+      delete: vi.fn(),
+      findManyByProfessionalId: vi.fn(),
+      countByProfessionalId: vi.fn(),
+    };
 
-  it('should be able to create a holiday', async () => {
-    await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        date: tomorrow,
-        motivo: 'Feriado municipal',
-      }),
-    ).resolves.not.toThrow();
+    mockProfessionalsRepository = {
+      findById: vi.fn(),
+      findByUserId: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
 
-    expect(feriadosRepository.items).toHaveLength(1);
-    expect(feriadosRepository.items[0]).toEqual(
-      expect.objectContaining({
-        profissionalId: 'valid-professional-id',
-        motivo: 'Feriado municipal',
-      }),
+    useCase = new CreateHolidayUseCase(
+      mockFeriadosRepository,
+      mockProfessionalsRepository,
     );
   });
 
-  it('should not create holiday for non-existent professional', async () => {
+  const today = startOfToday();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  it('deve criar um feriado com sucesso', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findByProfessionalAndDate.mockResolvedValue(null);
+
+    // Executar
+    await useCase.execute({
+      professionalId: 'pro-123',
+      date: tomorrow,
+      motivo: 'Feriado teste',
+    });
+
+    // Verificar
+    expect(mockFeriadosRepository.addHoliday).toHaveBeenCalledWith(
+      'pro-123',
+      tomorrow,
+      'Feriado teste',
+    );
+  });
+
+  it('deve lançar erro quando profissional não existe', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(null);
+
     await expect(
-      sut.execute({
-        professionalId: 'non-existent-professional',
+      useCase.execute({
+        professionalId: 'pro-123',
         date: tomorrow,
         motivo: 'Feriado teste',
       }),
-    ).rejects.toBeInstanceOf(ProfessionalNotFoundError);
+    ).rejects.toThrow(ProfessionalNotFoundError);
   });
 
-  it('should not create holiday with past date', async () => {
+  it('deve lançar erro quando data é no passado', async () => {
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        professionalId: 'pro-123',
         date: yesterday,
         motivo: 'Feriado teste',
       }),
-    ).rejects.toBeInstanceOf(PastDateError);
+    ).rejects.toThrow(PastDateError);
   });
 
-  it('should not create holiday with invalid description (too short)', async () => {
+  it('deve lançar erro quando motivo é muito curto', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        professionalId: 'pro-123',
         date: tomorrow,
-        motivo: 'A',
+        motivo: 'a', // Muito curto
       }),
-    ).rejects.toBeInstanceOf(InvalidHolidayDescriptionError);
+    ).rejects.toThrow(InvalidHolidayDescriptionError);
   });
 
-  it('should not create holiday with invalid description (too long)', async () => {
-    const longDescription = 'a'.repeat(101);
+  it('deve lançar erro quando motivo é muito longo', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        professionalId: 'pro-123',
         date: tomorrow,
-        motivo: longDescription,
+        motivo: 'a'.repeat(101), // 101 caracteres (limite é 100)
       }),
-    ).rejects.toBeInstanceOf(InvalidHolidayDescriptionError);
+    ).rejects.toThrow(InvalidHolidayDescriptionError);
   });
 
-  it('should not create holiday with empty description', async () => {
+  it('deve lançar erro quando motivo está vazio', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        professionalId: 'pro-123',
         date: tomorrow,
-        motivo: '',
+        motivo: '', // Vazio
       }),
-    ).rejects.toBeInstanceOf(InvalidHolidayDescriptionError);
+    ).rejects.toThrow(InvalidHolidayDescriptionError);
   });
 
-  it('should not create duplicate holiday for same professional and date', async () => {
-    // Cria o primeiro feriado
-    await sut.execute({
-      professionalId: 'valid-professional-id',
-      date: tomorrow,
+  it('deve lançar erro quando já existe feriado na mesma data', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findByProfessionalAndDate.mockResolvedValue({
+      id: 'feriado-123',
       motivo: 'Feriado existente',
     });
 
-    // Tenta criar o mesmo feriado novamente
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        professionalId: 'pro-123',
         date: tomorrow,
-        motivo: 'Novo motivo',
+        motivo: 'Novo feriado',
       }),
-    ).rejects.toBeInstanceOf(DuplicateHolidayError);
+    ).rejects.toThrow(DuplicateHolidayError);
   });
 
-  it('should allow different professionals to have holidays on same date', async () => {
-    // Adiciona um segundo profissional
-    professionalsRepository.items.push({
-      id: 'another-professional-id',
-      userId: 'user-2',
-      especialidade: 'Cardiologista',
-      bio: 'Especialista em coração',
-      avatarUrl: 'http://example.com/avatar2.jpg',
-      documento: '654321',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+  it('deve aceitar motivo com tamanho mínimo (3 caracteres)', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findByProfessionalAndDate.mockResolvedValue(null);
 
-    // Cria feriado para o primeiro profissional
-    await sut.execute({
-      professionalId: 'valid-professional-id',
+    await useCase.execute({
+      professionalId: 'pro-123',
       date: tomorrow,
-      motivo: 'Feriado 1',
+      motivo: 'abc', // 3 caracteres (mínimo)
     });
 
-    // Cria feriado para o segundo profissional na mesma data
-    await expect(
-      sut.execute({
-        professionalId: 'another-professional-id',
-        date: tomorrow,
-        motivo: 'Feriado 2',
-      }),
-    ).resolves.not.toThrow();
+    expect(mockFeriadosRepository.addHoliday).toHaveBeenCalled();
+  });
 
-    expect(feriadosRepository.items).toHaveLength(2);
+  it('deve aceitar motivo com tamanho máximo (100 caracteres)', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findByProfessionalAndDate.mockResolvedValue(null);
+
+    await useCase.execute({
+      professionalId: 'pro-123',
+      date: tomorrow,
+      motivo: 'a'.repeat(100), // 100 caracteres (máximo)
+    });
+
+    expect(mockFeriadosRepository.addHoliday).toHaveBeenCalled();
   });
 });

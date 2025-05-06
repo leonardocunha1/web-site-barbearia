@@ -1,117 +1,155 @@
-import { InMemoryFeriadosRepository } from '@/repositories/in-memory/in-memory-feriados-repository';
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { FeriadosRepository } from '@/repositories/feriados-repository';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+
+import { startOfToday } from 'date-fns';
+import { DeleteHolidayUseCase } from './delete-feriado-professional-use-case';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
+import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { PastHolidayDeletionError } from '../errors/past-holiday-deletion-error';
-import { addDays, subDays } from 'date-fns';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { DeleteHolidayUseCase } from './delete-feriado-professional-use-case';
 
-describe('Delete Holiday Use Case', () => {
-  let feriadosRepository: InMemoryFeriadosRepository;
-  let professionalsRepository: InMemoryProfessionalsRepository;
-  let sut: DeleteHolidayUseCase;
+// Tipos para os mocks
+type MockFeriadosRepository = FeriadosRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+};
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = addDays(today, 1);
-  const yesterday = subDays(today, 1);
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findById: ReturnType<typeof vi.fn>;
+};
+
+describe('DeleteHolidayUseCase', () => {
+  let useCase: DeleteHolidayUseCase;
+  let mockFeriadosRepository: MockFeriadosRepository;
+  let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    feriadosRepository = new InMemoryFeriadosRepository();
-    professionalsRepository = new InMemoryProfessionalsRepository();
-    sut = new DeleteHolidayUseCase(feriadosRepository, professionalsRepository);
+    vi.clearAllMocks();
 
-    // Adiciona um profissional para testes
-    professionalsRepository.items.push({
-      id: 'valid-professional-id',
-      userId: 'user-1',
-      especialidade: 'Dermatologista',
-      bio: 'Especialista em pele',
-      avatarUrl: 'http://example.com/avatar1.jpg',
-      documento: '123456',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    // Criar mocks
+    mockFeriadosRepository = {
+      findById: vi.fn(),
+      delete: vi.fn(),
+      isProfessionalHoliday: vi.fn(),
+      addHoliday: vi.fn(),
+      findByProfessionalAndDate: vi.fn(),
+      findManyByProfessionalId: vi.fn(),
+      countByProfessionalId: vi.fn(),
+    };
 
-    // Adiciona alguns feriados para testes
-    feriadosRepository.items.push(
-      {
-        id: 'future-holiday',
-        profissionalId: 'valid-professional-id',
-        data: tomorrow,
-        motivo: 'Feriado futuro',
-        createdAt: new Date(),
-      },
-      {
-        id: 'past-holiday',
-        profissionalId: 'valid-professional-id',
-        data: yesterday,
-        motivo: 'Feriado passado',
-        createdAt: new Date(),
-      },
+    mockProfessionalsRepository = {
+      findById: vi.fn(),
+      findByUserId: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
+
+    useCase = new DeleteHolidayUseCase(
+      mockFeriadosRepository,
+      mockProfessionalsRepository,
     );
   });
 
-  it('should be able to delete a future holiday', async () => {
-    await sut.execute({
-      holidayId: 'future-holiday',
-      professionalId: 'valid-professional-id',
+  const today = startOfToday();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const mockHoliday = {
+    id: 'feriado-123',
+    profissionalId: 'pro-123',
+    data: tomorrow,
+    motivo: 'Feriado teste',
+  };
+
+  it('deve deletar um feriado com sucesso', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findById.mockResolvedValue(mockHoliday);
+
+    // Executar
+    await useCase.execute({
+      holidayId: 'feriado-123',
+      professionalId: 'pro-123',
     });
 
-    expect(feriadosRepository.items).toHaveLength(1);
-    expect(
-      feriadosRepository.items.find((h) => h.id === 'future-holiday'),
-    ).toBeUndefined();
+    // Verificar
+    expect(mockFeriadosRepository.delete).toHaveBeenCalledWith('feriado-123');
   });
 
-  it('should not delete holiday for non-existent professional', async () => {
+  it('deve lançar erro quando profissional não existe', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(null);
+
     await expect(
-      sut.execute({
-        holidayId: 'future-holiday',
-        professionalId: 'non-existent-professional',
+      useCase.execute({
+        holidayId: 'feriado-123',
+        professionalId: 'pro-123',
       }),
-    ).rejects.toBeInstanceOf(ProfessionalNotFoundError);
+    ).rejects.toThrow(ProfessionalNotFoundError);
   });
 
-  it('should not delete non-existent holiday', async () => {
+  it('deve lançar erro quando feriado não existe', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findById.mockResolvedValue(null);
+
     await expect(
-      sut.execute({
-        holidayId: 'non-existent-holiday',
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        holidayId: 'feriado-123',
+        professionalId: 'pro-123',
       }),
-    ).rejects.toBeInstanceOf(HolidayNotFoundError);
+    ).rejects.toThrow(HolidayNotFoundError);
   });
 
-  it('should not delete holiday that belongs to another professional', async () => {
-    // Adiciona outro profissional
-    professionalsRepository.items.push({
-      id: 'another-professional-id',
-      userId: 'user-2',
-      especialidade: 'Cardiologista',
-      bio: 'Especialista em coração',
-      avatarUrl: 'http://example.com/avatar2.jpg',
-      documento: '654321',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  it('deve lançar erro quando profissional não é o dono do feriado', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findById.mockResolvedValue({
+      ...mockHoliday,
+      profissionalId: 'pro-456', // ID diferente
     });
 
     await expect(
-      sut.execute({
-        holidayId: 'future-holiday',
-        professionalId: 'another-professional-id',
+      useCase.execute({
+        holidayId: 'feriado-123',
+        professionalId: 'pro-123',
       }),
-    ).rejects.toBeInstanceOf(HolidayNotFoundError);
+    ).rejects.toThrow(ProfissionalTentandoPegarInformacoesDeOutro);
   });
 
-  it('should not delete past holidays', async () => {
+  it('deve lançar erro quando tentar deletar feriado passado', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findById.mockResolvedValue({
+      ...mockHoliday,
+      data: yesterday, // Data no passado
+    });
+
     await expect(
-      sut.execute({
-        holidayId: 'past-holiday',
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        holidayId: 'feriado-123',
+        professionalId: 'pro-123',
       }),
-    ).rejects.toBeInstanceOf(PastHolidayDeletionError);
+    ).rejects.toThrow(PastHolidayDeletionError);
+  });
+
+  it('não deve lançar erro quando data do feriado é hoje', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockFeriadosRepository.findById.mockResolvedValue({
+      ...mockHoliday,
+      data: today, // Data é hoje
+    });
+
+    await useCase.execute({
+      holidayId: 'feriado-123',
+      professionalId: 'pro-123',
+    });
+
+    expect(mockFeriadosRepository.delete).toHaveBeenCalled();
   });
 });

@@ -47,7 +47,11 @@ export class AddServiceToProfessionalUseCase {
       throw new ServiceAlreadyAddedError();
     }
 
-    if (preco && preco <= 0) {
+    if (preco <= 0) {
+      throw new InvalidServicePriceDurationError();
+    }
+
+    if (duracao <= 0) {
       throw new InvalidServicePriceDurationError();
     }
 

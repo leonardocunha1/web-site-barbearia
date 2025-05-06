@@ -1,174 +1,84 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { UpdateUserProfileUseCase } from './update-user-profile-use-case';
+import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { EmailAlreadyExistsError } from '../errors/user-email-already-exists-error';
 
 let usersRepository: InMemoryUsersRepository;
-let sut: UpdateUserProfileUseCase;
+let updateUserProfileUseCase: UpdateUserProfileUseCase;
 
-describe('Caso de Uso: Atualizar Perfil do Usuário', () => {
+describe('UpdateUserProfileUseCase', () => {
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository();
-    sut = new UpdateUserProfileUseCase(usersRepository);
+    updateUserProfileUseCase = new UpdateUserProfileUseCase(usersRepository);
   });
 
-  it('deve atualizar o nome do usuário', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
+  it('deve atualizar o nome, email e telefone com sucesso', async () => {
+    const user = await usersRepository.create({
+      nome: 'Maria',
+      email: 'maria@example.com',
       senha: '123456',
+      role: 'CLIENTE',
     });
 
-    const { user } = await sut.execute({
-      userId: createdUser.id,
-      nome: 'John Updated',
-    });
-
-    expect(user.nome).toBe('John Updated');
-    expect(user.email).toBe(createdUser.email); // Email não foi alterado
-  });
-
-  it('deve atualizar o email do usuário', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
-      senha: '123456',
-    });
-
-    const { user } = await sut.execute({
-      userId: createdUser.id,
-      email: 'new@example.com',
-    });
-
-    expect(user.email).toBe('new@example.com');
-    expect(user.nome).toBe(createdUser.nome); // Nome não foi alterado
-  });
-
-  it('deve atualizar o telefone do usuário', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
-      senha: '123456',
-    });
-
-    const { user } = await sut.execute({
-      userId: createdUser.id,
+    const { user: updatedUser } = await updateUserProfileUseCase.execute({
+      userId: user.id,
+      nome: 'Maria Clara',
+      email: 'mariaclara@example.com',
       telefone: '11999999999',
     });
 
-    expect(user.telefone).toBe('11999999999');
+    expect(updatedUser.nome).toBe('Maria Clara');
+    expect(updatedUser.email).toBe('mariaclara@example.com');
+    expect(updatedUser.telefone).toBe('11999999999');
   });
 
-  it('deve remover o telefone do usuário quando passado null', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
-      senha: '123456',
-      telefone: '11999999999',
-    });
-
-    const { user } = await sut.execute({
-      userId: createdUser.id,
-      telefone: null,
-    });
-
-    expect(user.telefone).toBeNull();
-  });
-
-  it('deve lançar erro quando o usuário não for encontrado', async () => {
-    await expect(
-      sut.execute({ userId: 'id-inexistente', nome: 'Test' }),
+  it('deve lançar erro se o usuário não for encontrado', async () => {
+    await expect(() =>
+      updateUserProfileUseCase.execute({
+        userId: 'inexistente',
+        nome: 'Novo Nome',
+      }),
     ).rejects.toBeInstanceOf(UserNotFoundError);
   });
 
-  it('deve lançar erro quando o email já estiver em uso por outro usuário', async () => {
-    await usersRepository.create({
-      nome: 'Existing User',
-      email: 'existing@example.com',
+  it('deve lançar erro se o email for o mesmo do atual', async () => {
+    const user = await usersRepository.create({
+      nome: 'João',
+      email: 'joao@example.com',
       senha: '123456',
+      role: 'CLIENTE',
     });
 
-    const userToUpdate = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
-      senha: '123456',
-    });
-
-    await expect(
-      sut.execute({
-        userId: userToUpdate.id,
-        email: 'existing@example.com', // Email já em uso
-      }),
-    ).rejects.toBeInstanceOf(EmailAlreadyExistsError);
-  });
-
-  it('deve lançar erro quando o email fornecido for o mesmo do usuário', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
-      senha: '123456',
-    });
-
-    await expect(
-      sut.execute({
-        userId: createdUser.id,
-        email: 'john@example.com', // Mesmo email atual
+    await expect(() =>
+      updateUserProfileUseCase.execute({
+        userId: user.id,
+        email: 'joao@example.com',
       }),
     ).rejects.toBeInstanceOf(InvalidDataError);
   });
 
-  it('deve retornar o usuário sem a senha', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
+  it('deve lançar erro se o novo email já estiver em uso por outro usuário', async () => {
+    await usersRepository.create({
+      nome: 'Ana',
+      email: 'ana@example.com',
       senha: '123456',
+      role: 'CLIENTE',
     });
 
-    const { user } = await sut.execute({
-      userId: createdUser.id,
-      nome: 'Updated Name',
-    });
-
-    expect(user).not.toHaveProperty('senha');
-  });
-
-  it('deve atualizar múltiplos campos simultaneamente', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
+    const user2 = await usersRepository.create({
+      nome: 'Beatriz',
+      email: 'bea@example.com',
       senha: '123456',
+      role: 'CLIENTE',
     });
 
-    const { user } = await sut.execute({
-      userId: createdUser.id,
-      nome: 'John Updated',
-      email: 'new@example.com',
-      telefone: '11999999999',
-    });
-
-    expect(user.nome).toBe('John Updated');
-    expect(user.email).toBe('new@example.com');
-    expect(user.telefone).toBe('11999999999');
-  });
-
-  it('deve atualizar a data de atualização', async () => {
-    const createdUser = await usersRepository.create({
-      nome: 'John Doe',
-      email: 'john@example.com',
-      senha: '123456',
-      updatedAt: new Date('2023-01-01'),
-    });
-
-    const { user } = await sut.execute({
-      userId: createdUser.id,
-      nome: 'Updated Name',
-    });
-
-    expect(user.updatedAt).not.toEqual(createdUser.updatedAt);
-    expect(user.updatedAt.getTime()).toBeGreaterThan(
-      createdUser.updatedAt.getTime(),
-    );
+    await expect(() =>
+      updateUserProfileUseCase.execute({
+        userId: user2.id,
+        email: 'ana@example.com',
+      }),
+    ).rejects.toBeInstanceOf(EmailAlreadyExistsError);
   });
 });

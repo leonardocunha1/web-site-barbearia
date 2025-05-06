@@ -1,46 +1,190 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
-import { randomUUID } from 'node:crypto';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UpdateProfessionalUseCase } from './update-professional-use-case';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 
-let professionalsRepository: InMemoryProfessionalsRepository;
-let sut: UpdateProfessionalUseCase;
+// Tipo para o mock do repositório
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+};
 
 describe('UpdateProfessionalUseCase', () => {
+  let professionalsRepository: MockProfessionalsRepository;
+  let sut: UpdateProfessionalUseCase;
+
   beforeEach(() => {
-    professionalsRepository = new InMemoryProfessionalsRepository();
+    // Criar mock do repositório
+    professionalsRepository = {
+      findById: vi.fn(),
+      update: vi.fn(),
+      findByUserId: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
+
     sut = new UpdateProfessionalUseCase(professionalsRepository);
   });
 
-  it('deve atualizar um profissional com sucesso', async () => {
-    const created = await professionalsRepository.create({
-      especialidade: 'Dermatologia',
-      bio: 'Especialista em pele',
-      documento: '12345678900',
+  it('deve atualizar um profissional com todos os campos', async () => {
+    // Mock do profissional existente
+    const mockProfessional = {
+      id: 'prof-123',
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      bio: 'Bio antiga',
+      documento: '12345',
       ativo: true,
-      avatarUrl: null,
-      user: { connect: { id: randomUUID() } },
-    });
+      avatarUrl: 'old-avatar.jpg',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    const updated = await sut.execute({
-      id: created.id,
-      especialidade: 'Cardiologia',
-      bio: 'Atualizado para cardiologista',
-      avatarUrl: 'https://imagem.com/foto.jpg',
-    });
+    // Mock da atualização
+    const updatedProfessional = {
+      ...mockProfessional,
+      especialidade: 'Ortodontista',
+      bio: 'Nova bio',
+      documento: '54321',
+      ativo: false,
+      avatarUrl: 'new-avatar.jpg',
+      updatedAt: new Date(),
+    };
 
-    expect(updated?.especialidade).toBe('Cardiologia');
-    expect(updated?.bio).toBe('Atualizado para cardiologista');
-    expect(updated?.avatarUrl).toBe('https://imagem.com/foto.jpg');
+    professionalsRepository.findById.mockResolvedValue(mockProfessional);
+    professionalsRepository.update.mockResolvedValue(updatedProfessional);
+
+    // Dados para atualização
+    const updateData = {
+      id: 'prof-123',
+      especialidade: 'Ortodontista',
+      bio: 'Nova bio',
+      documento: '54321',
+      ativo: false,
+      avatarUrl: 'new-avatar.jpg',
+    };
+
+    // Executar
+    const result = await sut.execute(updateData);
+
+    // Verificar
+    expect(result).toEqual(updatedProfessional);
+    expect(professionalsRepository.findById).toHaveBeenCalledWith('prof-123');
+    expect(professionalsRepository.update).toHaveBeenCalledWith('prof-123', {
+      especialidade: 'Ortodontista',
+      bio: 'Nova bio',
+      documento: '54321',
+      ativo: false,
+      avatarUrl: 'new-avatar.jpg',
+      updatedAt: expect.any(Date),
+    });
   });
 
-  it('deve lançar erro se o profissional não existir', async () => {
-    await expect(() =>
+  it('deve atualizar apenas campos específicos quando outros são undefined', async () => {
+    const mockProfessional = {
+      id: 'prof-123',
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      bio: 'Bio antiga',
+      documento: '12345',
+      ativo: true,
+      avatarUrl: 'old-avatar.jpg',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    professionalsRepository.findById.mockResolvedValue(mockProfessional);
+    professionalsRepository.update.mockResolvedValue({
+      ...mockProfessional,
+      especialidade: 'Ortodontista',
+      updatedAt: new Date(),
+    });
+
+    const result = await sut.execute({
+      id: 'prof-123',
+      especialidade: 'Ortodontista',
+    });
+
+    expect(result?.especialidade).toBe('Ortodontista');
+    expect(result?.bio).toBe('Bio antiga'); // Deve manter o valor antigo
+    expect(professionalsRepository.update).toHaveBeenCalledWith('prof-123', {
+      especialidade: 'Ortodontista',
+      updatedAt: expect.any(Date),
+    });
+  });
+
+  it('deve permitir definir campos como null', async () => {
+    const mockProfessional = {
+      id: 'prof-123',
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      bio: 'Bio antiga',
+      documento: '12345',
+      ativo: true,
+      avatarUrl: 'old-avatar.jpg',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    professionalsRepository.findById.mockResolvedValue(mockProfessional);
+    professionalsRepository.update.mockResolvedValue({
+      ...mockProfessional,
+      bio: null,
+      documento: null,
+      updatedAt: new Date(),
+    });
+
+    const result = await sut.execute({
+      id: 'prof-123',
+      bio: null,
+      documento: null,
+    });
+
+    expect(result?.bio).toBeNull();
+    expect(result?.documento).toBeNull();
+  });
+
+  it('deve lançar erro quando profissional não for encontrado', async () => {
+    professionalsRepository.findById.mockResolvedValue(null);
+
+    await expect(
       sut.execute({
-        id: 'non-existing-id',
-        bio: 'Novo bio',
+        id: 'prof-inexistente',
+        especialidade: 'Dentista',
       }),
-    ).rejects.toBeInstanceOf(ProfessionalNotFoundError);
+    ).rejects.toThrow(ProfessionalNotFoundError);
+
+    expect(professionalsRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('deve atualizar a data de atualização mesmo quando outros campos não mudam', async () => {
+    const mockProfessional = {
+      id: 'prof-123',
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      bio: 'Bio existente',
+      createdAt: new Date(),
+      updatedAt: new Date('2023-01-01'),
+    };
+
+    professionalsRepository.findById.mockResolvedValue(mockProfessional);
+    professionalsRepository.update.mockImplementation(async (id, data) => ({
+      ...mockProfessional,
+      ...data,
+    }));
+
+    const oldUpdatedAt = mockProfessional.updatedAt;
+    const result = await sut.execute({
+      id: 'prof-123',
+      bio: 'Bio existente', // Mesmo valor
+    });
+
+    expect(result?.updatedAt).not.toEqual(oldUpdatedAt);
+    expect(result?.updatedAt).toEqual(expect.any(Date));
   });
 });

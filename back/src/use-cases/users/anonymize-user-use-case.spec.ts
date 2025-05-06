@@ -1,90 +1,164 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { AnonymizeUserUseCase } from './anonymize-user-use-case';
+import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
+import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
+import { User, Role } from '@prisma/client';
 
-let usersRepository: InMemoryUsersRepository;
-let sut: AnonymizeUserUseCase;
+// Tipo para o mock do repositório
+type MockUsersRepository = UsersRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  anonymize: ReturnType<typeof vi.fn>;
+};
 
-describe('Caso de Uso: Anonimizar Usuário', () => {
+describe('AnonymizeUserUseCase', () => {
+  let usersRepository: MockUsersRepository;
+  let sut: AnonymizeUserUseCase;
+
   beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
+    usersRepository = {
+      findById: vi.fn(),
+      anonymize: vi.fn(),
+      findByEmail: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      updatePassword: vi.fn(),
+      listUsers: vi.fn(),
+      countUsers: vi.fn(),
+    };
+
     sut = new AnonymizeUserUseCase(usersRepository);
   });
 
-  it('deve anonimizar um usuário existente', async () => {
-    // Cria um usuário para teste
-    const user = await usersRepository.create({
+  it('deve anonimizar um usuário com sucesso (ADMIN)', async () => {
+    const mockUser: User = {
+      id: 'user-1',
       nome: 'John Doe',
       email: 'john@example.com',
-      senha: '123456',
-      telefone: '11999999999',
-      role: 'CLIENTE',
+      senha: 'hashed-password',
+      telefone: '123456789',
+      role: Role.CLIENTE,
+      emailVerified: true,
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    usersRepository.findById.mockResolvedValue(mockUser);
+    usersRepository.anonymize.mockResolvedValue(undefined);
+
+    await sut.execute({
+      userIdToAnonymize: 'user-1',
+      userId: 'admin-1',
+      role: Role.ADMIN,
     });
 
-    // Executa o caso de uso
-    await sut.execute(user.id);
-
-    // Busca o usuário anonimizado
-    const anonymizedUser = await usersRepository.findById(user.id);
-
-    // Verificações
-    expect(anonymizedUser).toBeDefined();
-    expect(anonymizedUser?.email).toMatch(/^anon-\d+@deleted\.com$/);
-    expect(anonymizedUser?.telefone).toMatch(/^deleted-[a-z0-9]+$/);
-    expect(anonymizedUser?.active).toBe(false);
-    expect(anonymizedUser?.senha).not.toBe('123456'); // Senha deve estar hasheada
-    expect(anonymizedUser?.updatedAt).toBeInstanceOf(Date);
+    expect(usersRepository.findById).toHaveBeenCalledWith('user-1');
+    expect(usersRepository.anonymize).toHaveBeenCalledWith('user-1');
   });
 
-  it('não deve anonimizar um usuário inexistente', async () => {
-    await expect(sut.execute('id-inexistente')).rejects.toBeInstanceOf(
-      UserNotFoundError,
-    );
+  it('deve anonimizar o próprio usuário (CLIENTE)', async () => {
+    const mockUser: User = {
+      id: 'user-1',
+      nome: 'John Doe',
+      email: 'john@example.com',
+      senha: 'hashed-password',
+      telefone: '123456789',
+      role: Role.CLIENTE,
+      emailVerified: true,
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    usersRepository.findById.mockResolvedValue(mockUser);
+    usersRepository.anonymize.mockResolvedValue(undefined);
+
+    await sut.execute({
+      userIdToAnonymize: 'user-1',
+      userId: 'user-1',
+      role: Role.CLIENTE,
+    });
+
+    expect(usersRepository.findById).toHaveBeenCalledWith('user-1');
+    expect(usersRepository.anonymize).toHaveBeenCalledWith('user-1');
   });
 
-  it('deve garantir que os dados anonimizados são únicos', async () => {
-    // Cria dois usuários para teste
-    const user1 = await usersRepository.create({
-      nome: 'User 1',
-      email: 'user1@example.com',
-      senha: '123456',
-      telefone: '11999999991',
-    });
+  it('deve lançar erro quando o usuário não existe', async () => {
+    usersRepository.findById.mockResolvedValue(null);
 
-    const user2 = await usersRepository.create({
-      nome: 'User 2',
-      email: 'user2@example.com',
-      senha: '123456',
-      telefone: '11999999992',
-    });
+    await expect(
+      sut.execute({
+        userIdToAnonymize: 'non-existent-user',
+        userId: 'admin-1',
+        role: Role.ADMIN,
+      }),
+    ).rejects.toThrow(UserNotFoundError);
 
-    // Anonimiza ambos os usuários
-    await sut.execute(user1.id);
-    await sut.execute(user2.id);
-
-    // Busca os usuários anonimizados
-    const anonymizedUser1 = await usersRepository.findById(user1.id);
-    const anonymizedUser2 = await usersRepository.findById(user2.id);
-
-    // Verifica se os dados anonimizados são diferentes
-    expect(anonymizedUser1?.email).not.toBe(anonymizedUser2?.email);
-    expect(anonymizedUser1?.telefone).not.toBe(anonymizedUser2?.telefone);
+    expect(usersRepository.anonymize).not.toHaveBeenCalled();
   });
 
-  it('deve manter a senha hasheada após anonimização', async () => {
-    const user = await usersRepository.create({
-      nome: 'Test User',
-      email: 'test@example.com',
-      senha: '123456',
+  it('deve lançar erro quando CLIENTE tenta anonimizar outro usuário', async () => {
+    const mockUser: User = {
+      id: 'user-1',
+      nome: 'John Doe',
+      email: 'john@example.com',
+      senha: 'hashed-password',
+      telefone: '123456789',
+      role: Role.CLIENTE,
+      emailVerified: true,
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    usersRepository.findById.mockResolvedValue(mockUser);
+
+    await expect(
+      sut.execute({
+        userIdToAnonymize: 'user-1',
+        userId: 'another-user',
+        role: Role.CLIENTE,
+      }),
+    ).rejects.toThrow(UsuarioTentandoPegarInformacoesDeOutro);
+
+    expect(usersRepository.anonymize).not.toHaveBeenCalled();
+  });
+
+  it('deve permitir PROFISSIONAL anonimizar outro usuário', async () => {
+    const mockUser: User = {
+      id: 'user-1',
+      nome: 'John Doe',
+      email: 'john@example.com',
+      senha: 'hashed-password',
+      telefone: '123456789',
+      role: Role.CLIENTE,
+      emailVerified: true,
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    usersRepository.findById.mockResolvedValue(mockUser);
+    usersRepository.anonymize.mockResolvedValue(undefined);
+
+    await sut.execute({
+      userIdToAnonymize: 'user-1',
+      userId: 'professional-1',
+      role: Role.PROFISSIONAL,
     });
 
-    await sut.execute(user.id);
-    const anonymizedUser = await usersRepository.findById(user.id);
+    expect(usersRepository.findById).toHaveBeenCalledWith('user-1');
+    expect(usersRepository.anonymize).toHaveBeenCalledWith('user-1');
+  });
 
-    // Verifica se a senha foi alterada e está hasheada
-    expect(anonymizedUser?.senha).not.toBe('123456');
-    expect(anonymizedUser?.senha).not.toBe('deleted-account'); // Deve estar hasheada
-    expect(anonymizedUser?.senha.length).toBeGreaterThan(30); // Tamanho típico de hash
+  it('deve lançar erro quando userIdToAnonymize não é fornecido', async () => {
+    await expect(
+      sut.execute({
+        userIdToAnonymize: '',
+        userId: 'admin-1',
+        role: Role.ADMIN,
+      }),
+    ).rejects.toThrow(UserNotFoundError);
   });
 });

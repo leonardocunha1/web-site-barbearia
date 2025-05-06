@@ -1,58 +1,141 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryServicesRepository } from '@/repositories/in-memory/in-memory-services-repository';
-import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ToggleServiceStatusUseCase } from './toggle-service-status-use-case';
+import { ServicesRepository } from '@/repositories/services-repository';
+import { ServiceNotFoundError } from '../errors/service-not-found-error';
+import { Service } from '@prisma/client';
 
-let servicesRepository: InMemoryServicesRepository;
-let toggleServiceStatusUseCase: ToggleServiceStatusUseCase;
+// Tipo para o mock do repositório
+type MockServicesRepository = ServicesRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  toggleStatus: ReturnType<typeof vi.fn>;
+};
 
 describe('ToggleServiceStatusUseCase', () => {
+  let servicesRepository: MockServicesRepository;
+  let sut: ToggleServiceStatusUseCase;
+
+  // Dados mockados para os testes
+  const mockActiveService: Service = {
+    id: 'service-1',
+    nome: 'Corte de Cabelo',
+    descricao: 'Corte básico',
+    categoria: 'Cabelo',
+    ativo: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockInactiveService: Service = {
+    ...mockActiveService,
+    ativo: false,
+  };
+
   beforeEach(() => {
-    servicesRepository = new InMemoryServicesRepository();
-    toggleServiceStatusUseCase = new ToggleServiceStatusUseCase(
-      servicesRepository,
+    servicesRepository = {
+      findById: vi.fn(),
+      toggleStatus: vi.fn(),
+      // Outras funções do repositório que não são usadas neste use case
+      findByName: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      softDelete: vi.fn(),
+      list: vi.fn(),
+      existsProfessional: vi.fn(),
+    };
+
+    sut = new ToggleServiceStatusUseCase(servicesRepository);
+  });
+
+  it('deve alternar o status de ativo para inativo', async () => {
+    // Configura o mock para retornar um serviço ativo
+    servicesRepository.findById.mockResolvedValue(mockActiveService);
+    // Configura o mock para retornar o serviço como inativo após o toggle
+    servicesRepository.toggleStatus.mockResolvedValue(mockInactiveService);
+
+    const result = await sut.execute({ id: 'service-1' });
+
+    // Verifica se o serviço retornado está inativo
+    expect(result.service.ativo).toBe(false);
+    // Verifica se findById foi chamado com o ID correto
+    expect(servicesRepository.findById).toHaveBeenCalledWith('service-1');
+    // Verifica se toggleStatus foi chamado com os parâmetros corretos
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
+      'service-1',
+      false,
     );
   });
 
-  it('deve alternar o status do serviço de ativo para inativo', async () => {
-    const service = await servicesRepository.create({
-      nome: 'Corte Masculino',
-      precoPadrao: 30,
-      duracao: 20,
-      categoria: 'Cabelo',
-      ativo: true,
-    });
+  it('deve alternar o status de inativo para ativo', async () => {
+    // Configura o mock para retornar um serviço inativo
+    servicesRepository.findById.mockResolvedValue(mockInactiveService);
+    // Configura o mock para retornar o serviço como ativo após o toggle
+    servicesRepository.toggleStatus.mockResolvedValue(mockActiveService);
 
-    const { service: updatedService } =
-      await toggleServiceStatusUseCase.execute({
-        id: service.id,
-      });
+    const result = await sut.execute({ id: 'service-1' });
 
-    expect(updatedService.ativo).toBe(false);
+    // Verifica se o serviço retornado está ativo
+    expect(result.service.ativo).toBe(true);
+    // Verifica se toggleStatus foi chamado com os parâmetros corretos
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
+      'service-1',
+      true,
+    );
   });
 
-  it('deve alternar o status do serviço de inativo para ativo', async () => {
-    const service = await servicesRepository.create({
-      nome: 'Corte Feminino',
-      precoPadrao: 50,
-      duracao: 30,
-      categoria: 'Cabelo',
-      ativo: false,
-    });
+  it('deve lançar erro quando o serviço não existe', async () => {
+    // Configura o mock para retornar null (serviço não encontrado)
+    servicesRepository.findById.mockResolvedValue(null);
 
-    const { service: updatedService } =
-      await toggleServiceStatusUseCase.execute({
-        id: service.id,
-      });
+    await expect(sut.execute({ id: 'non-existent-id' })).rejects.toThrow(
+      ServiceNotFoundError,
+    );
 
-    expect(updatedService.ativo).toBe(true);
+    // Verifica se findById foi chamado com o ID correto
+    expect(servicesRepository.findById).toHaveBeenCalledWith('non-existent-id');
+    // Verifica se toggleStatus não foi chamado
+    expect(servicesRepository.toggleStatus).not.toHaveBeenCalled();
   });
 
-  it('deve lançar erro se o serviço não existir', async () => {
-    await expect(() =>
-      toggleServiceStatusUseCase.execute({
-        id: 'non-existent-id',
-      }),
-    ).rejects.toBeInstanceOf(ServiceNotFoundError);
+  it('deve manter outras propriedades do serviço inalteradas', async () => {
+    // Configura o mock para retornar um serviço ativo
+    servicesRepository.findById.mockResolvedValue(mockActiveService);
+    // Configura o mock para retornar o serviço como inativo após o toggle
+    servicesRepository.toggleStatus.mockResolvedValue(mockInactiveService);
+
+    const result = await sut.execute({ id: 'service-1' });
+
+    // Verifica se as outras propriedades permanecem iguais
+    expect(result.service.id).toBe(mockActiveService.id);
+    expect(result.service.nome).toBe(mockActiveService.nome);
+    expect(result.service.descricao).toBe(mockActiveService.descricao);
+    expect(result.service.categoria).toBe(mockActiveService.categoria);
+    // Apenas o status ativo deve ter mudado
+    expect(result.service.ativo).not.toBe(mockActiveService.ativo);
+  });
+
+  it('deve chamar o repositório com o novo status invertido', async () => {
+    // Testa a lógica de inversão do status
+    servicesRepository.findById.mockResolvedValueOnce(mockActiveService);
+    servicesRepository.toggleStatus.mockResolvedValueOnce(mockInactiveService);
+
+    await sut.execute({ id: 'service-1' });
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
+      'service-1',
+      false,
+    );
+
+    // Limpa os mocks para o próximo teste
+    vi.clearAllMocks();
+
+    // Testa com serviço inativo
+    servicesRepository.findById.mockResolvedValueOnce(mockInactiveService);
+    servicesRepository.toggleStatus.mockResolvedValueOnce(mockActiveService);
+
+    await sut.execute({ id: 'service-1' });
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
+      'service-1',
+      true,
+    );
   });
 });

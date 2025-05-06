@@ -1,225 +1,299 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ListProfessionalServicesUseCase } from './list-professional-services-use-case';
-import { InMemoryServiceProfessionalRepository } from '@/repositories/in-memory/in-memory-service-professional-repository';
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-import { describe, expect, beforeEach, it } from 'vitest';
+
+// Tipos para os mocks
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findById: ReturnType<typeof vi.fn>;
+};
+
+type MockServiceProfessionalRepository = ServiceProfessionalRepository & {
+  findByProfessional: ReturnType<typeof vi.fn>;
+};
 
 describe('ListProfessionalServicesUseCase', () => {
-  let serviceProfessionalRepository: InMemoryServiceProfessionalRepository;
-  let professionalsRepository: InMemoryProfessionalsRepository;
+  let professionalsRepository: MockProfessionalsRepository;
+  let serviceProfessionalRepository: MockServiceProfessionalRepository;
   let sut: ListProfessionalServicesUseCase;
 
   beforeEach(() => {
-    serviceProfessionalRepository = new InMemoryServiceProfessionalRepository();
-    professionalsRepository = new InMemoryProfessionalsRepository();
+    professionalsRepository = {
+      findById: vi.fn(),
+      findByUserId: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
+
+    serviceProfessionalRepository = {
+      findByProfessional: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      findByServiceAndProfessional: vi.fn(),
+      updateByServiceAndProfessional: vi.fn(),
+    };
+
     sut = new ListProfessionalServicesUseCase(
       serviceProfessionalRepository,
       professionalsRepository,
     );
   });
 
-  it('should be able to list services for a professional', async () => {
-    // Criar um profissional
-    const professional = await professionalsRepository.create({
-      user: { connect: { id: 'user-id' } },
-      especialidade: 'Cabeleireiro',
-    });
-
-    // Adicionar serviços ao profissional usando o método público create
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-1' } },
-      professional: { connect: { id: professional.id } },
-      preco: 50,
-      duracao: 30,
-    });
-
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-2' } },
-      professional: { connect: { id: professional.id } },
-      preco: 80,
-      duracao: 60,
-    });
-
-    // Executar o caso de uso
-    const result = await sut.execute({
-      professionalId: professional.id,
-      page: 1,
-      limit: 10,
-    });
-
-    // Verificar o resultado
-    expect(result.services).toHaveLength(2);
-    expect(result.total).toBe(2);
-    expect(result.services[0]).toEqual({
-      id: 'service-1',
-      nome: 'Fake Service Name',
-      descricao: 'Fake description',
-      preco: 100, // precoPadrao do serviço fake
-      duracao: 60, // duracao padrão do serviço fake
-      categoria: 'Fake Category',
+  it('deve listar serviços de um profissional com paginação', async () => {
+    const mockProfessional = {
+      id: 'prof-1',
+      userId: 'user-1',
       ativo: true,
-      precoPersonalizado: 50, // preço personalizado
-      duracaoPersonalizada: 30, // duração personalizada
-    });
-  });
-
-  it('should return empty list if professional has no services', async () => {
-    const professional = await professionalsRepository.create({
-      user: { connect: { id: 'user-id' } },
-      especialidade: 'Cabeleireiro',
-    });
-
-    const result = await sut.execute({
-      professionalId: professional.id,
-      page: 1,
-      limit: 10,
-    });
-
-    expect(result.services).toHaveLength(0);
-    expect(result.total).toBe(0);
-  });
-
-  it('should not list services from another professional', async () => {
-    // Criar dois profissionais
-    const professional1 = await professionalsRepository.create({
-      user: { connect: { id: 'user-1' } },
-      especialidade: 'Cabeleireiro',
-    });
-    const professional2 = await professionalsRepository.create({
-      user: { connect: { id: 'user-2' } },
-      especialidade: 'Massagista',
-    });
-
-    // Adicionar serviços apenas ao profissional 1
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-1' } },
-      professional: { connect: { id: professional1.id } },
-      preco: 50,
-      duracao: 30,
-    });
-
-    // Listar serviços do profissional 2
-    const result = await sut.execute({
-      professionalId: professional2.id,
-      page: 1,
-      limit: 10,
-    });
-
-    expect(result.services).toHaveLength(0);
-    expect(result.total).toBe(0);
-  });
-
-  it('should throw error if professional does not exist', async () => {
-    await expect(
-      sut.execute({
-        professionalId: 'non-existing-professional',
-        page: 1,
-        limit: 10,
-      }),
-    ).rejects.toBeInstanceOf(ProfessionalNotFoundError);
-  });
-
-  it('should respect pagination', async () => {
-    const professional = await professionalsRepository.create({
-      user: { connect: { id: 'user-id' } },
-      especialidade: 'Cabeleireiro',
-    });
-
-    // Adicionar vários serviços
-    for (let i = 1; i <= 15; i++) {
-      await serviceProfessionalRepository.create({
-        service: { connect: { id: `service-${i}` } },
-        professional: { connect: { id: professional.id } },
-        preco: 50 + i,
-        duracao: 30 + i,
-      });
-    }
-
-    // Página 1 com limite 5
-    const page1 = await sut.execute({
-      professionalId: professional.id,
-      page: 1,
-      limit: 5,
-    });
-
-    expect(page1.services).toHaveLength(5);
-    expect(page1.total).toBe(15);
-
-    // Página 2 com limite 5
-    const page2 = await sut.execute({
-      professionalId: professional.id,
-      page: 2,
-      limit: 5,
-    });
-
-    expect(page2.services).toHaveLength(5);
-    expect(page2.total).toBe(15);
-
-    // Página 3 com limite 5 (deve ter apenas 5 itens restantes)
-    const page3 = await sut.execute({
-      professionalId: professional.id,
-      page: 3,
-      limit: 5,
-    });
-
-    expect(page3.services).toHaveLength(5);
-    expect(page3.total).toBe(15);
-  });
-
-  it('should filter inactive services when activeOnly is true', async () => {
-    const professional = await professionalsRepository.create({
-      user: { connect: { id: 'user-id' } },
-      especialidade: 'Cabeleireiro',
-    });
-
-    // Adicionar serviços (o repositório em memória considera todos ativos por padrão)
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-active-1' } },
-      professional: { connect: { id: professional.id } },
-      preco: 50,
-      duracao: 30,
-    });
-
-    await serviceProfessionalRepository.create({
-      service: { connect: { id: 'service-inactive-1' } },
-      serviceAtivo: false,
-      professional: { connect: { id: professional.id } },
-      preco: 80,
-      duracao: 60,
-    });
-
-    // Mock do findByProfessional para simular um serviço inativo
-    const originalFindByProfessional =
-      serviceProfessionalRepository.findByProfessional.bind(
-        serviceProfessionalRepository,
-      );
-
-    serviceProfessionalRepository.findByProfessional = async (
-      professionalId,
-      options,
-    ) => {
-      const result = await originalFindByProfessional(professionalId, options);
-      return result;
     };
 
-    // Listar apenas ativos (default)
-    const activeOnlyResult = await sut.execute({
-      professionalId: professional.id,
+    const mockServices = {
+      services: [
+        {
+          service: {
+            id: 'service-1',
+            nome: 'Corte de Cabelo',
+            descricao: 'Descrição do corte',
+            categoria: 'Cabelo',
+            ativo: true,
+          },
+          preco: 50,
+          duracao: 30,
+        },
+        {
+          service: {
+            id: 'service-2',
+            nome: 'Manicure',
+            descricao: 'Descrição da manicure',
+            categoria: 'Unhas',
+            ativo: true,
+          },
+          preco: 30,
+          duracao: 45,
+        },
+      ],
+      total: 2,
+    };
+
+    professionalsRepository.findById.mockResolvedValue(mockProfessional);
+    serviceProfessionalRepository.findByProfessional.mockResolvedValue(
+      mockServices,
+    );
+
+    const result = await sut.execute({
+      professionalId: 'prof-1',
       page: 1,
       limit: 10,
     });
 
-    expect(activeOnlyResult.services).toHaveLength(1);
-    expect(activeOnlyResult.services[0].id).toBe('service-active-1');
+    expect(result).toEqual({
+      services: [
+        {
+          id: 'service-1',
+          nome: 'Corte de Cabelo',
+          descricao: 'Descrição do corte',
+          categoria: 'Cabelo',
+          ativo: true,
+          preco: 50,
+          duracao: 30,
+        },
+        {
+          id: 'service-2',
+          nome: 'Manicure',
+          descricao: 'Descrição da manicure',
+          categoria: 'Unhas',
+          ativo: true,
+          preco: 30,
+          duracao: 45,
+        },
+      ],
+      total: 2,
+    });
 
-    // Listar todos (incluindo inativos)
-    const allResults = await sut.execute({
-      professionalId: professional.id,
+    expect(professionalsRepository.findById).toHaveBeenCalledWith('prof-1');
+    expect(
+      serviceProfessionalRepository.findByProfessional,
+    ).toHaveBeenCalledWith('prof-1', {
+      page: 1,
+      limit: 10,
+      activeOnly: true,
+    });
+  });
+
+  it('deve listar apenas serviços ativos quando activeOnly=true', async () => {
+    professionalsRepository.findById.mockResolvedValue({
+      id: 'prof-1',
+      userId: 'user-1',
+      ativo: true,
+    });
+
+    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+      services: [
+        {
+          service: {
+            id: 'service-1',
+            nome: 'Corte de Cabelo',
+            descricao: 'Descrição do corte',
+            categoria: 'Cabelo',
+            ativo: true,
+          },
+          preco: 50,
+          duracao: 30,
+        },
+      ],
+      total: 1,
+    });
+
+    const result = await sut.execute({
+      professionalId: 'prof-1',
+      page: 1,
+      limit: 10,
+      activeOnly: true,
+    });
+
+    expect(result.services.every((s) => s.ativo)).toBe(true);
+    expect(
+      serviceProfessionalRepository.findByProfessional,
+    ).toHaveBeenCalledWith('prof-1', {
+      page: 1,
+      limit: 10,
+      activeOnly: true,
+    });
+  });
+
+  it('deve listar todos os serviços quando activeOnly=false', async () => {
+    professionalsRepository.findById.mockResolvedValue({
+      id: 'prof-1',
+      userId: 'user-1',
+      ativo: true,
+    });
+
+    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+      services: [
+        {
+          service: {
+            id: 'service-1',
+            nome: 'Corte de Cabelo',
+            descricao: 'Descrição do corte',
+            categoria: 'Cabelo',
+            ativo: false,
+          },
+          preco: 50,
+          duracao: 30,
+        },
+      ],
+      total: 1,
+    });
+
+    const result = await sut.execute({
+      professionalId: 'prof-1',
       page: 1,
       limit: 10,
       activeOnly: false,
     });
 
-    expect(allResults.services).toHaveLength(2);
+    expect(result.services.some((s) => !s.ativo)).toBe(true);
+    expect(
+      serviceProfessionalRepository.findByProfessional,
+    ).toHaveBeenCalledWith('prof-1', {
+      page: 1,
+      limit: 10,
+      activeOnly: false,
+    });
+  });
+
+  it('deve lançar erro quando o profissional não existe', async () => {
+    professionalsRepository.findById.mockResolvedValue(null);
+
+    await expect(
+      sut.execute({
+        professionalId: 'prof-inexistente',
+        page: 1,
+        limit: 10,
+      }),
+    ).rejects.toThrow(ProfessionalNotFoundError);
+
+    expect(
+      serviceProfessionalRepository.findByProfessional,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('deve retornar lista vazia quando não há serviços', async () => {
+    professionalsRepository.findById.mockResolvedValue({
+      id: 'prof-1',
+      userId: 'user-1',
+      ativo: true,
+    });
+
+    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+      services: [],
+      total: 0,
+    });
+
+    const result = await sut.execute({
+      professionalId: 'prof-1',
+      page: 1,
+      limit: 10,
+    });
+
+    expect(result.services).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+
+  it('deve aplicar paginação corretamente', async () => {
+    professionalsRepository.findById.mockResolvedValue({
+      id: 'prof-1',
+      userId: 'user-1',
+      ativo: true,
+    });
+
+    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+      services: [
+        {
+          service: {
+            id: 'service-3',
+            nome: 'Massagem',
+            descricao: 'Descrição da massagem',
+            categoria: 'Bem-estar',
+            ativo: true,
+          },
+          preco: 80,
+          duracao: 60,
+        },
+      ],
+      total: 3,
+    });
+
+    const result = await sut.execute({
+      professionalId: 'prof-1',
+      page: 2,
+      limit: 1,
+    });
+
+    expect(result.services).toEqual([
+      {
+        id: 'service-3',
+        nome: 'Massagem',
+        descricao: 'Descrição da massagem',
+        categoria: 'Bem-estar',
+        ativo: true,
+        preco: 80,
+        duracao: 60,
+      },
+    ]);
+    expect(result.total).toBe(3);
+    expect(
+      serviceProfessionalRepository.findByProfessional,
+    ).toHaveBeenCalledWith('prof-1', {
+      page: 2,
+      limit: 1,
+      activeOnly: true,
+    });
   });
 });

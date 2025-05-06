@@ -1,56 +1,140 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryServicesRepository } from '@/repositories/in-memory/in-memory-services-repository';
-import { ServiceNotFoundError } from '@/use-cases/errors/service-not-found-error';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { DeleteServiceUseCase } from './delete-service-use-case';
+import { ServicesRepository } from '@/repositories/services-repository';
+import { ServiceNotFoundError } from '../errors/service-not-found-error';
 
-let servicesRepository: InMemoryServicesRepository;
-let deleteServiceUseCase: DeleteServiceUseCase;
+// Tipo para o mock do repositório
+type MockServicesRepository = ServicesRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  softDelete: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+};
 
 describe('DeleteServiceUseCase', () => {
+  let servicesRepository: MockServicesRepository;
+  let sut: DeleteServiceUseCase;
+
   beforeEach(() => {
-    servicesRepository = new InMemoryServicesRepository();
-    deleteServiceUseCase = new DeleteServiceUseCase(servicesRepository);
+    servicesRepository = {
+      findById: vi.fn(),
+      softDelete: vi.fn(),
+      delete: vi.fn(),
+      create: vi.fn(),
+      findByName: vi.fn(),
+      update: vi.fn(),
+      toggleStatus: vi.fn(),
+      list: vi.fn(),
+      existsProfessional: vi.fn(),
+    };
+
+    sut = new DeleteServiceUseCase(servicesRepository);
   });
 
-  it('deve fazer soft delete de um serviço existente', async () => {
-    const service = await servicesRepository.create({
-      nome: 'Depilação',
-      descricao: 'Serviço de depilação',
-      precoPadrao: 80,
-      duracao: 60,
-      categoria: 'Estética',
+  describe('executeSoft (soft delete)', () => {
+    it('deve desativar um serviço existente', async () => {
+      const mockService = {
+        id: 'service-1',
+        nome: 'Corte de Cabelo',
+        ativo: true,
+      };
+
+      servicesRepository.findById.mockResolvedValue(mockService);
+      servicesRepository.softDelete.mockResolvedValue(undefined);
+
+      await sut.executeSoft('service-1');
+
+      expect(servicesRepository.findById).toHaveBeenCalledWith('service-1');
+      expect(servicesRepository.softDelete).toHaveBeenCalledWith('service-1');
+      expect(servicesRepository.delete).not.toHaveBeenCalled();
     });
 
-    await deleteServiceUseCase.executeSoft(service.id);
+    it('deve lançar erro quando o serviço não existe', async () => {
+      servicesRepository.findById.mockResolvedValue(null);
 
-    const updatedService = await servicesRepository.findById(service.id);
-    expect(updatedService?.ativo).toBe(false);
-  });
+      await expect(sut.executeSoft('service-inexistente')).rejects.toThrow(
+        ServiceNotFoundError,
+      );
 
-  it('deve lançar erro ao fazer soft delete de serviço inexistente', async () => {
-    await expect(() =>
-      deleteServiceUseCase.executeSoft('serviço-inexistente'),
-    ).rejects.toBeInstanceOf(ServiceNotFoundError);
-  });
-
-  it('deve deletar permanentemente um serviço existente', async () => {
-    const service = await servicesRepository.create({
-      nome: 'Massagem Relaxante',
-      descricao: 'Massagem para relaxamento',
-      precoPadrao: 100,
-      duracao: 90,
-      categoria: 'Bem-estar',
+      expect(servicesRepository.softDelete).not.toHaveBeenCalled();
     });
 
-    await deleteServiceUseCase.executePermanent(service.id);
+    it('deve garantir que apenas serviços ativos podem ser desativados', async () => {
+      const mockService = {
+        id: 'service-1',
+        nome: 'Corte de Cabelo',
+        ativo: false, // Já está desativado
+      };
 
-    const deletedService = await servicesRepository.findById(service.id);
-    expect(deletedService).toBeNull();
+      servicesRepository.findById.mockResolvedValue(mockService);
+
+      await sut.executeSoft('service-1');
+
+      // Ainda deve chamar softDelete mesmo já estando desativado
+      expect(servicesRepository.softDelete).toHaveBeenCalled();
+    });
   });
 
-  it('deve lançar erro ao tentar deletar permanentemente um serviço inexistente', async () => {
-    await expect(() =>
-      deleteServiceUseCase.executePermanent('serviço-inexistente'),
-    ).rejects.toBeInstanceOf(ServiceNotFoundError);
+  describe('executePermanent (hard delete)', () => {
+    it('deve excluir permanentemente um serviço existente', async () => {
+      const mockService = {
+        id: 'service-1',
+        nome: 'Corte de Cabelo',
+        ativo: true,
+      };
+
+      servicesRepository.findById.mockResolvedValue(mockService);
+      servicesRepository.delete.mockResolvedValue(undefined);
+
+      await sut.executePermanent('service-1');
+
+      expect(servicesRepository.findById).toHaveBeenCalledWith('service-1');
+      expect(servicesRepository.delete).toHaveBeenCalledWith('service-1');
+      expect(servicesRepository.softDelete).not.toHaveBeenCalled();
+    });
+
+    it('deve lançar erro quando o serviço não existe', async () => {
+      servicesRepository.findById.mockResolvedValue(null);
+
+      await expect(sut.executePermanent('service-inexistente')).rejects.toThrow(
+        ServiceNotFoundError,
+      );
+
+      expect(servicesRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('deve permitir exclusão mesmo para serviços inativos', async () => {
+      const mockService = {
+        id: 'service-1',
+        nome: 'Corte de Cabelo',
+        ativo: false,
+      };
+
+      servicesRepository.findById.mockResolvedValue(mockService);
+      servicesRepository.delete.mockResolvedValue(undefined);
+
+      await sut.executePermanent('service-1');
+
+      expect(servicesRepository.delete).toHaveBeenCalled();
+    });
+  });
+
+  it('deve diferenciar corretamente entre soft delete e hard delete', async () => {
+    const mockService = {
+      id: 'service-1',
+      nome: 'Corte de Cabelo',
+      ativo: true,
+    };
+
+    servicesRepository.findById.mockResolvedValue(mockService);
+    servicesRepository.softDelete.mockResolvedValue(undefined);
+    servicesRepository.delete.mockResolvedValue(undefined);
+
+    // Executar ambos
+    await sut.executeSoft('service-1');
+    await sut.executePermanent('service-1');
+
+    // Verificar chamadas
+    expect(servicesRepository.softDelete).toHaveBeenCalledTimes(1);
+    expect(servicesRepository.delete).toHaveBeenCalledTimes(1);
   });
 });

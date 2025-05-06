@@ -1,72 +1,208 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CreateProfessionalUseCase } from './create-professional-use-case';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserAlreadyProfessionalError } from '../errors/user-already-professional-error';
 
-let usersRepository: InMemoryUsersRepository;
-let professionalsRepository: InMemoryProfessionalsRepository;
-let sut: CreateProfessionalUseCase;
+// Tipos para os mocks
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findByUserId: ReturnType<typeof vi.fn>;
+  create: ReturnType<typeof vi.fn>;
+};
 
-describe('CreateProfessionalUseCase', () => {
+type MockUsersRepository = UsersRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+};
+
+describe('Create Professional Use Case', () => {
+  let useCase: CreateProfessionalUseCase;
+  let mockProfessionalsRepository: MockProfessionalsRepository;
+  let mockUsersRepository: MockUsersRepository;
+
   beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
-    professionalsRepository = new InMemoryProfessionalsRepository();
-    sut = new CreateProfessionalUseCase(
-      professionalsRepository,
-      usersRepository,
+    // Criar mocks dos repositórios
+    mockProfessionalsRepository = {
+      findByUserId: vi.fn(),
+      create: vi.fn(),
+      findById: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
+
+    mockUsersRepository = {
+      findById: vi.fn(),
+      update: vi.fn(),
+      findByEmail: vi.fn(),
+      create: vi.fn(),
+      updatePassword: vi.fn(),
+      listUsers: vi.fn(),
+      countUsers: vi.fn(),
+      anonymize: vi.fn(),
+    };
+
+    useCase = new CreateProfessionalUseCase(
+      mockProfessionalsRepository,
+      mockUsersRepository,
     );
   });
 
+  const mockUser = {
+    id: 'user-123',
+    nome: 'John Doe',
+    email: 'john@example.com',
+    role: 'CLIENTE',
+    active: true,
+  };
+
+  const mockProfessional = {
+    id: 'prof-123',
+    userId: 'user-123',
+    especialidade: 'Dentista',
+    bio: 'Especialista em odontologia',
+    documento: '123456',
+    ativo: true,
+  };
+
   it('deve criar um profissional com sucesso', async () => {
-    const user = await usersRepository.create({
-      nome: 'João Silva',
-      email: 'joao@example.com',
-      senha: 'senha123',
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      role: 'PROFISSIONAL',
+    });
+    mockProfessionalsRepository.create.mockResolvedValue(mockProfessional);
+
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      bio: 'Especialista em odontologia',
+      documento: '123456',
     });
 
-    const result = await sut.execute({
-      userId: user.id,
-      especialidade: 'Psicologia',
-      bio: 'Experiente em psicologia clínica.',
-      documento: '123.456.789-00',
-      registro: 'CRP-0001',
+    // Verificar
+    expect(result).toEqual(mockProfessional);
+    expect(mockUsersRepository.findById).toHaveBeenCalledWith('user-123');
+    expect(mockProfessionalsRepository.findByUserId).toHaveBeenCalledWith(
+      'user-123',
+    );
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      role: 'PROFISSIONAL',
     });
-
-    expect(result).toHaveProperty('id');
-    expect(result.userId).toBe(user.id);
-
-    const updatedUser = await usersRepository.findById(user.id);
-    expect(updatedUser?.role).toBe('PROFISSIONAL');
+    expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      bio: 'Especialista em odontologia',
+      documento: '123456',
+      user: { connect: { id: 'user-123' } },
+    });
   });
 
-  it('deve lançar erro se o usuário não existir', async () => {
-    await expect(() =>
-      sut.execute({
-        userId: 'user-invalido',
-        especialidade: 'Psicologia',
+  it('deve lançar erro quando usuário não existe', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(null);
+
+    // Executar e verificar
+    await expect(
+      useCase.execute({
+        userId: 'non-existent-user',
+        especialidade: 'Dentista',
       }),
-    ).rejects.toBeInstanceOf(UserNotFoundError);
+    ).rejects.toThrow(UserNotFoundError);
   });
 
-  it('deve lançar erro se o usuário já for um profissional', async () => {
-    const user = await usersRepository.create({
-      nome: 'Maria',
-      email: 'maria@example.com',
-      senha: 'senha456',
-    });
+  it('deve lançar erro quando usuário já é profissional', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockProfessionalsRepository.findByUserId.mockResolvedValue(
+      mockProfessional,
+    );
 
-    await professionalsRepository.create({
-      especialidade: 'Fisioterapia',
-      user: { connect: { id: user.id } },
-    });
-
-    await expect(() =>
-      sut.execute({
-        userId: user.id,
-        especialidade: 'Nutrição',
+    // Executar e verificar
+    await expect(
+      useCase.execute({
+        userId: 'user-123',
+        especialidade: 'Dentista',
       }),
-    ).rejects.toBeInstanceOf(UserAlreadyProfessionalError);
+    ).rejects.toThrow(UserAlreadyProfessionalError);
+  });
+
+  it('deve criar profissional com dados mínimos', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      role: 'PROFISSIONAL',
+    });
+    mockProfessionalsRepository.create.mockResolvedValue({
+      ...mockProfessional,
+      bio: null,
+      documento: null,
+    });
+
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+      especialidade: 'Dentista',
+    });
+
+    // Verificar
+    expect(result).toEqual({
+      ...mockProfessional,
+      bio: null,
+      documento: null,
+    });
+    expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
+      userId: 'user-123',
+      especialidade: 'Dentista',
+      user: { connect: { id: 'user-123' } },
+    });
+  });
+
+  it('deve atualizar role do usuário para PROFISSIONAL', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      role: 'PROFISSIONAL',
+    });
+    mockProfessionalsRepository.create.mockResolvedValue(mockProfessional);
+
+    // Executar
+    await useCase.execute({
+      userId: 'user-123',
+      especialidade: 'Dentista',
+    });
+
+    // Verificar se a role foi atualizada
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      role: 'PROFISSIONAL',
+    });
+  });
+
+  it('não deve chamar create se validações falharem', async () => {
+    // Configurar mocks para simular usuário não encontrado
+    mockUsersRepository.findById.mockResolvedValue(null);
+
+    // Executar e verificar
+    await expect(
+      useCase.execute({
+        userId: 'user-123',
+        especialidade: 'Dentista',
+      }),
+    ).rejects.toThrow();
+
+    // Verificar que create não foi chamado
+    expect(mockProfessionalsRepository.create).not.toHaveBeenCalled();
   });
 });

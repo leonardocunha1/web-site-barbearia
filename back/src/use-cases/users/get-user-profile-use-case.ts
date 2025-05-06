@@ -1,13 +1,13 @@
 import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
-import { UserDTO } from '@/dtos/user-dto';
+import { User } from '@prisma/client';
 
 interface GetUserProfileUseCaseRequest {
   userId: string;
 }
 
 interface GetUserProfileUseCaseResponse {
-  user: UserDTO;
+  user: User;
 }
 
 export class GetUserProfileUseCase {

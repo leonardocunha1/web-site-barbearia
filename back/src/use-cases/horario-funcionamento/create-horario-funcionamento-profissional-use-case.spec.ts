@@ -1,169 +1,208 @@
-import { InMemoryHorariosFuncionamentoRepository } from '@/repositories/in-memory/in-memory-horarios-funcionamento-repository';
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-import { DuplicateBusinessHoursError } from '../errors/duplicate-business-hours-error';
-import { InvalidBusinessHoursError } from '../errors/invalid-business-hours-error';
 import { InvalidTimeFormatError } from '../errors/invalid-time-format-error';
-import { describe, expect, beforeEach, it } from 'vitest';
+import { InvalidBusinessHoursError } from '../errors/invalid-business-hours-error';
+import { DuplicateBusinessHoursError } from '../errors/duplicate-business-hours-error';
+import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { CreateBusinessHoursUseCase } from './create-horario-funcionamento-profissional-use-case';
 
+// Tipos para os mocks
+type MockHorariosRepository = HorariosFuncionamentoRepository & {
+  findByProfessionalAndDay: ReturnType<typeof vi.fn>;
+  create: ReturnType<typeof vi.fn>;
+  findById: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+  listByProfessional: ReturnType<typeof vi.fn>;
+};
+
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findById: ReturnType<typeof vi.fn>;
+};
+
 describe('Create Business Hours Use Case', () => {
-  let horariosRepository: InMemoryHorariosFuncionamentoRepository;
-  let professionalsRepository: InMemoryProfessionalsRepository;
-  let sut: CreateBusinessHoursUseCase;
+  let useCase: CreateBusinessHoursUseCase;
+  let mockHorariosRepository: MockHorariosRepository;
+  let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    horariosRepository = new InMemoryHorariosFuncionamentoRepository();
-    professionalsRepository = new InMemoryProfessionalsRepository();
-    sut = new CreateBusinessHoursUseCase(
-      horariosRepository,
-      professionalsRepository,
-    );
+    // Criar mocks dos repositórios
+    mockHorariosRepository = {
+      findByProfessionalAndDay: vi.fn(),
+      create: vi.fn(),
+      findById: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      listByProfessional: vi.fn(),
+    };
 
-    // Adiciona um profissional para testes
-    professionalsRepository.items.push({
-      id: 'valid-professional-id',
-      userId: 'user-1',
-      especialidade: 'Dermatologista',
-      bio: 'Especialista em pele',
-      avatarUrl: 'http://example.com/avatar1.jpg',
-      documento: '123456',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    mockProfessionalsRepository = {
+      findById: vi.fn(),
+      findByUserId: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
+
+    useCase = new CreateBusinessHoursUseCase(
+      mockHorariosRepository,
+      mockProfessionalsRepository,
+    );
   });
 
-  it('should be able to create business hours', async () => {
-    const result = await sut.execute({
-      professionalId: 'valid-professional-id',
-      diaSemana: 1, // Segunda-feira
+  const mockProfessional = {
+    id: 'prof-123',
+    userId: 'user-123',
+    especialidade: 'Especialidade Teste',
+    ativo: true,
+  };
+
+  const mockBusinessHours = {
+    id: 'hours-123',
+    profissionalId: 'prof-123',
+    diaSemana: 1,
+    abreAs: '08:00',
+    fechaAs: '18:00',
+    pausaInicio: '12:00',
+    pausaFim: '13:00',
+    ativo: true,
+  };
+
+  it('deve criar horários de funcionamento com sucesso', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
+    mockHorariosRepository.findByProfessionalAndDay.mockResolvedValue(null);
+    mockHorariosRepository.create.mockResolvedValue(mockBusinessHours);
+
+    // Executar
+    const result = await useCase.execute({
+      professionalId: 'prof-123',
+      diaSemana: 1,
       abreAs: '08:00',
       fechaAs: '18:00',
-    });
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        profissionalId: 'valid-professional-id',
-        diaSemana: 1,
-        abreAs: '08:00',
-        fechaAs: '18:00',
-        ativo: true,
-      }),
-    );
-    expect(horariosRepository.items).toHaveLength(1);
-  });
-
-  it('should be able to create business hours with break time', async () => {
-    const result = await sut.execute({
-      professionalId: 'valid-professional-id',
-      diaSemana: 2, // Terça-feira
-      abreAs: '09:00',
-      fechaAs: '17:00',
       pausaInicio: '12:00',
       pausaFim: '13:00',
     });
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        pausaInicio: '12:00',
-        pausaFim: '13:00',
-      }),
+    // Verificar
+    expect(result).toEqual(mockBusinessHours);
+    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith(
+      'prof-123',
     );
+    expect(
+      mockHorariosRepository.findByProfessionalAndDay,
+    ).toHaveBeenCalledWith('prof-123', 1);
+    expect(mockHorariosRepository.create).toHaveBeenCalledWith({
+      profissional: { connect: { id: 'prof-123' } },
+      diaSemana: 1,
+      abreAs: '08:00',
+      fechaAs: '18:00',
+      pausaInicio: '12:00',
+      pausaFim: '13:00',
+      ativo: true,
+    });
   });
 
-  it('should not create business hours for non-existent professional', async () => {
+  it('deve lançar erro quando profissional não existe', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(null);
+
     await expect(
-      sut.execute({
-        professionalId: 'non-existent-professional',
+      useCase.execute({
+        professionalId: 'non-existent-prof',
         diaSemana: 1,
         abreAs: '08:00',
         fechaAs: '18:00',
       }),
-    ).rejects.toBeInstanceOf(ProfessionalNotFoundError);
+    ).rejects.toThrow(ProfessionalNotFoundError);
   });
 
-  it('should not create duplicate business hours for same day', async () => {
-    await sut.execute({
-      professionalId: 'valid-professional-id',
-      diaSemana: 3, // Quarta-feira
-      abreAs: '08:00',
-      fechaAs: '18:00',
-    });
+  it('deve lançar erro para formato de horário inválido', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
 
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        diaSemana: 3,
-        abreAs: '10:00',
-        fechaAs: '19:00',
-      }),
-    ).rejects.toBeInstanceOf(DuplicateBusinessHoursError);
-  });
-
-  it('should not create business hours with invalid time format', async () => {
-    await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        diaSemana: 4,
+      useCase.execute({
+        professionalId: 'prof-123',
+        diaSemana: 1,
         abreAs: '25:00', // Hora inválida
         fechaAs: '18:00',
       }),
-    ).rejects.toBeInstanceOf(InvalidTimeFormatError);
-
-    await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        diaSemana: 4,
-        abreAs: '08:00',
-        fechaAs: '18:60', // Minuto inválido
-      }),
-    ).rejects.toBeInstanceOf(InvalidTimeFormatError);
+    ).rejects.toThrow(InvalidTimeFormatError);
   });
 
-  it('should not create business hours with invalid logic', async () => {
-    // Abertura depois do fechamento
-    await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        diaSemana: 5,
-        abreAs: '18:00',
-        fechaAs: '08:00',
-      }),
-    ).rejects.toBeInstanceOf(InvalidBusinessHoursError);
+  it('deve lançar erro quando horário de abertura é após fechamento', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
 
-    // Pausa incompleta
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        diaSemana: 5,
-        abreAs: '08:00',
-        fechaAs: '18:00',
-        pausaInicio: '12:00',
+      useCase.execute({
+        professionalId: 'prof-123',
+        diaSemana: 1,
+        abreAs: '19:00',
+        fechaAs: '09:00', // Fecha antes de abrir
       }),
-    ).rejects.toBeInstanceOf(InvalidBusinessHoursError);
-
-    // Pausa fora do horário
-    await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
-        diaSemana: 5,
-        abreAs: '08:00',
-        fechaAs: '18:00',
-        pausaInicio: '07:00',
-        pausaFim: '19:00',
-      }),
-    ).rejects.toBeInstanceOf(InvalidBusinessHoursError);
+    ).rejects.toThrow(InvalidBusinessHoursError);
   });
 
-  it('should not create business hours with invalid day of week', async () => {
+  it('deve lançar erro quando já existe horário para o mesmo dia', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
+    mockHorariosRepository.findByProfessionalAndDay.mockResolvedValue(
+      mockBusinessHours,
+    );
+
     await expect(
-      sut.execute({
-        professionalId: 'valid-professional-id',
+      useCase.execute({
+        professionalId: 'prof-123',
+        diaSemana: 1, // Dia com horário já existente
+        abreAs: '09:00',
+        fechaAs: '17:00',
+      }),
+    ).rejects.toThrow(DuplicateBusinessHoursError);
+  });
+
+  it('deve lançar erro para dia da semana inválido', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
+
+    await expect(
+      useCase.execute({
+        professionalId: 'prof-123',
         diaSemana: 7, // Dia inválido
-        abreAs: '08:00',
-        fechaAs: '18:00',
+        abreAs: '09:00',
+        fechaAs: '17:00',
       }),
-    ).rejects.toBeInstanceOf(InvalidBusinessHoursError);
+    ).rejects.toThrow(InvalidBusinessHoursError);
+  });
+
+  it('deve lançar erro quando pausa está fora do horário de funcionamento', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
+
+    await expect(
+      useCase.execute({
+        professionalId: 'prof-123',
+        diaSemana: 1,
+        abreAs: '09:00',
+        fechaAs: '18:00',
+        pausaInicio: '08:00', // Antes da abertura
+        pausaFim: '09:30',
+      }),
+    ).rejects.toThrow(InvalidBusinessHoursError);
+  });
+
+  it('deve lançar erro quando apenas um dos horários de pausa é fornecido', async () => {
+    mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
+
+    await expect(
+      useCase.execute({
+        professionalId: 'prof-123',
+        diaSemana: 1,
+        abreAs: '09:00',
+        fechaAs: '18:00',
+        pausaInicio: '12:00', // Sem pausaFim
+      }),
+    ).rejects.toThrow(InvalidBusinessHoursError);
   });
 });

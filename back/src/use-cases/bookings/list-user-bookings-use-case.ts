@@ -49,19 +49,21 @@ export class ListBookingsUseCase {
       this.bookingsRepository.countByUserId(userId, filters),
     ]);
 
-    if (page > total) {
-      throw new InvalidPageRangeError();
-    }
-
+    // 1. Primeiro verifica se há bookings
     if (bookings.length === 0) {
       throw new BookingNotFoundError();
     }
 
+    // 2. Depois verifica se o usuário é o dono
     if (userId !== bookings[0].usuarioId) {
       throw new UsuarioTentandoPegarInformacoesDeOutro();
     }
 
+    // 3. Por último verifica a paginação
     const totalPages = Math.ceil(total / limit);
+    if (page > totalPages) {
+      throw new InvalidPageRangeError();
+    }
 
     return {
       bookings,

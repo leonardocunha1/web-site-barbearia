@@ -14,6 +14,10 @@ export class GetBookingUseCase {
   constructor(private bookingsRepository: BookingsRepository) {}
 
   async execute({ bookingId }: GetBookingRequest): Promise<GetBookingResponse> {
+    if (!bookingId) {
+      throw new BookingNotFoundError();
+    }
+
     const booking = await this.bookingsRepository.findById(bookingId);
 
     if (!booking) {

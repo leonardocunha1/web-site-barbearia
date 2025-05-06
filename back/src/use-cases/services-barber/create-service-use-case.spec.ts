@@ -1,56 +1,175 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryServicesRepository } from '@/repositories/in-memory/in-memory-services-repository';
-import { ServiceAlreadyExistsError } from '@/use-cases/errors/service-already-exists-error';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { CreateServiceUseCase } from './create-service-use-case';
+import { ServicesRepository } from '@/repositories/services-repository';
+import { ServiceAlreadyExistsError } from '../errors/service-already-exists-error';
+import { Service } from '@prisma/client';
 
-let servicesRepository: InMemoryServicesRepository;
-let createServiceUseCase: CreateServiceUseCase;
+// Tipo para o mock do repositório
+type MockServicesRepository = ServicesRepository & {
+  findByName: ReturnType<typeof vi.fn>;
+  create: ReturnType<typeof vi.fn>;
+};
 
 describe('CreateServiceUseCase', () => {
+  let servicesRepository: MockServicesRepository;
+  let sut: CreateServiceUseCase;
+
   beforeEach(() => {
-    servicesRepository = new InMemoryServicesRepository();
-    createServiceUseCase = new CreateServiceUseCase(servicesRepository);
+    servicesRepository = {
+      findByName: vi.fn(),
+      create: vi.fn(),
+      findById: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      softDelete: vi.fn(),
+      toggleStatus: vi.fn(),
+      list: vi.fn(),
+      existsProfessional: vi.fn(),
+    };
+
+    sut = new CreateServiceUseCase(servicesRepository);
   });
 
   it('deve criar um novo serviço com sucesso', async () => {
-    const result = await createServiceUseCase.execute({
+    // Mock do serviço criado
+    const mockService: Service = {
+      id: 'service-1',
       nome: 'Corte de Cabelo',
-      descricao: 'Um corte clássico',
-      precoPadrao: 50,
-      duracao: 30,
+      descricao: 'Corte básico',
+      categoria: 'Cabelo',
+      ativo: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    servicesRepository.findByName.mockResolvedValue(null);
+    servicesRepository.create.mockResolvedValue(mockService);
+
+    // Executar
+    const result = await sut.execute({
+      nome: 'Corte de Cabelo',
+      descricao: 'Corte básico',
       categoria: 'Cabelo',
     });
 
-    expect(result.service).toEqual(
-      expect.objectContaining({
-        id: expect.any(String),
-        nome: 'Corte de Cabelo',
-        descricao: 'Um corte clássico',
-        precoPadrao: 50,
-        duracao: 30,
-        categoria: 'Cabelo',
-        ativo: true,
-      }),
+    // Verificar
+    expect(result.service).toEqual(mockService);
+    expect(servicesRepository.findByName).toHaveBeenCalledWith(
+      'Corte de Cabelo',
     );
+    expect(servicesRepository.create).toHaveBeenCalledWith({
+      nome: 'Corte de Cabelo',
+      descricao: 'Corte básico',
+      categoria: 'Cabelo',
+    });
   });
 
-  it('não deve permitir criar um serviço com nome duplicado', async () => {
-    await createServiceUseCase.execute({
+  it('deve criar um serviço com dados mínimos', async () => {
+    const mockService: Service = {
+      id: 'service-1',
       nome: 'Corte de Cabelo',
-      descricao: 'Um corte clássico',
-      precoPadrao: 50,
-      duracao: 30,
+      descricao: null,
+      categoria: null,
+      ativo: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    servicesRepository.findByName.mockResolvedValue(null);
+    servicesRepository.create.mockResolvedValue(mockService);
+
+    const result = await sut.execute({
+      nome: 'Corte de Cabelo',
+    });
+
+    expect(result.service).toEqual(mockService);
+    expect(servicesRepository.create).toHaveBeenCalledWith({
+      nome: 'Corte de Cabelo',
+      descricao: undefined,
+      categoria: undefined,
+    });
+  });
+
+  it('deve lançar erro quando o serviço já existe', async () => {
+    const existingService = {
+      id: 'service-1',
+      nome: 'Corte de Cabelo',
+      descricao: 'Corte básico',
+      categoria: 'Cabelo',
+      ativo: true,
+    };
+
+    servicesRepository.findByName.mockResolvedValue(existingService);
+
+    await expect(
+      sut.execute({
+        nome: 'Corte de Cabelo',
+        descricao: 'Corte básico',
+        categoria: 'Cabelo',
+      }),
+    ).rejects.toThrow(ServiceAlreadyExistsError);
+
+    expect(servicesRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('deve permitir criar serviços com nomes diferentes', async () => {
+    const mockService: Service = {
+      id: 'service-1',
+      nome: 'Corte de Cabelo Premium',
+      descricao: 'Corte completo',
+      categoria: 'Cabelo',
+      ativo: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    servicesRepository.findByName.mockImplementation((name) =>
+      name === 'Corte de Cabelo'
+        ? {
+            id: 'service-2',
+            nome: 'Corte de Cabelo',
+            descricao: 'Corte básico',
+            categoria: 'Cabelo',
+            ativo: true,
+          }
+        : null,
+    );
+
+    servicesRepository.create.mockResolvedValue(mockService);
+
+    const result = await sut.execute({
+      nome: 'Corte de Cabelo Premium',
+      descricao: 'Corte completo',
       categoria: 'Cabelo',
     });
 
-    await expect(() =>
-      createServiceUseCase.execute({
-        nome: 'Corte de Cabelo',
-        descricao: 'Outro corte',
-        precoPadrao: 60,
-        duracao: 45,
-        categoria: 'Cabelo',
-      }),
-    ).rejects.toBeInstanceOf(ServiceAlreadyExistsError);
+    expect(result.service.nome).toBe('Corte de Cabelo Premium');
+    expect(servicesRepository.create).toHaveBeenCalled();
+  });
+
+  it('deve criar serviço com descrição e categoria opcionais', async () => {
+    const mockService: Service = {
+      id: 'service-1',
+      nome: 'Manicure',
+      descricao: null,
+      categoria: null,
+      ativo: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    servicesRepository.findByName.mockResolvedValue(null);
+    servicesRepository.create.mockResolvedValue(mockService);
+
+    const result = await sut.execute({
+      nome: 'Manicure',
+    });
+
+    expect(result.service).toEqual(mockService);
+    expect(servicesRepository.create).toHaveBeenCalledWith({
+      nome: 'Manicure',
+      descricao: undefined,
+      categoria: undefined,
+    });
   });
 });

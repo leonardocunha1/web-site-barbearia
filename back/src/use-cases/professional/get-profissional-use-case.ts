@@ -119,8 +119,10 @@ export class GetProfessionalDashboardUseCase {
         date: appointment.dataHoraInicio,
         clientName: appointment.user.nome,
         service:
-          appointment.items[0]?.serviceProfessional.service.nome ||
-          'Vários serviços',
+          appointment.items.length > 1
+            ? 'Vários serviços'
+            : appointment.items[0]?.serviceProfessional.service.nome ||
+              'Serviço não especificado',
         status: appointment.status as 'PENDENTE' | 'CONFIRMADO',
       })),
     };

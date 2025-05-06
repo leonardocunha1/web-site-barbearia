@@ -1,29 +1,60 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { BookingsRepository } from '@/repositories/bookings-repository';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
+import { InvalidDataError } from '../errors/invalid-data-error';
+import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { GetProfessionalDashboardUseCase } from './get-profissional-use-case';
-import { createMockBookingsRepository } from '@/mock/mock-bookings-repository';
-import { createMockProfessionalsRepository } from '@/mock/mock-professionals-repository';
-import bcrypt from 'bcryptjs';
-import { createMockUsersRepository } from '@/mock/mock-users-repository';
 
-describe('GetProfessionalDashboardUseCase', () => {
-  const { mockRepository: mockBookingsRepository } =
-    createMockBookingsRepository();
+// Tipos para os mocks
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  findByProfessionalId: ReturnType<typeof vi.fn>;
+};
 
-  const {
-    mockRepository: mockProfessionalsRepository,
-    createMockProfessionalWithRelations,
-  } = createMockProfessionalsRepository();
+type MockBookingsRepository = BookingsRepository & {
+  countByProfessionalAndDate: ReturnType<typeof vi.fn>;
+  getEarningsByProfessionalAndDate: ReturnType<typeof vi.fn>;
+  countByProfessionalAndStatus: ReturnType<typeof vi.fn>;
+  findNextAppointments: ReturnType<typeof vi.fn>;
+};
 
+describe('Get Professional Dashboard Use Case', () => {
   let useCase: GetProfessionalDashboardUseCase;
+  let mockProfessionalsRepository: MockProfessionalsRepository;
+  let mockBookingsRepository: MockBookingsRepository;
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2023-06-15T12:00:00'));
+    // Criar mocks dos repositórios
+    mockProfessionalsRepository = {
+      findByProfessionalId: vi.fn(),
+      findById: vi.fn(),
+      findByUserId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+    };
 
-    // Configuração padrão dos mocks
-    mockProfessionalsRepository.findByProfessionalId.mockImplementation((id) =>
-      Promise.resolve(createMockProfessionalWithRelations({ id })),
-    );
+    mockBookingsRepository = {
+      countByProfessionalAndDate: vi.fn(),
+      getEarningsByProfessionalAndDate: vi.fn(),
+      countByProfessionalAndStatus: vi.fn(),
+      findNextAppointments: vi.fn(),
+      create: vi.fn(),
+      findById: vi.fn(),
+      findOverlappingBooking: vi.fn(),
+      findManyByProfessionalId: vi.fn(),
+      findManyByUserId: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      countActiveByServiceAndProfessional: vi.fn(),
+      countByUserId: vi.fn(),
+      findByProfessionalAndDate: vi.fn(),
+      countByProfessionalId: vi.fn(),
+    };
 
     useCase = new GetProfessionalDashboardUseCase(
       mockProfessionalsRepository,
@@ -31,128 +62,408 @@ describe('GetProfessionalDashboardUseCase', () => {
     );
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.clearAllMocks();
-  });
+  const mockProfessional = {
+    id: 'prof-123',
+    userId: 'user-123',
+    especialidade: 'Dentista',
+    avatarUrl: 'avatar.jpg',
+    user: {
+      id: 'user-123',
+      nome: 'Dr. Smith',
+      email: 'dr.smith@example.com',
+    },
+  };
 
-  it('should return correct dashboard structure', async () => {
-    // Arrange
-    const { createMockUser } = createMockUsersRepository();
-    const user = createMockUser({
-      nome: 'Custom Name',
-    });
-
-    const professional = createMockProfessionalWithRelations({
-      id: 'prof-1',
-      especialidade: 'Corte de Cabelo',
-      user,
-    });
-
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValueOnce(
-      professional,
-    );
-
-    mockBookingsRepository.findNextAppointments.mockResolvedValueOnce([
-      {
-        id: 'booking-1',
-        dataHoraInicio: new Date('2023-06-15T10:00:00'),
-        status: 'CONFIRMADO',
-        user: { nome: 'Cliente Teste' },
-        items: [{ service: { nome: 'Corte de Cabelo' } }],
+  const mockNextAppointments = [
+    {
+      id: 'booking-1',
+      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      user: {
+        id: 'user-1',
+        nome: 'Client 1',
       },
-    ]);
-
-    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValueOnce(1);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValueOnce(
-      50,
-    );
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      1,
-    );
-
-    // Act
-    const dashboard = await useCase.execute('prof-1', { range: 'today' });
-
-    // Assert
-    expect(
-      mockProfessionalsRepository.findByProfessionalId,
-    ).toHaveBeenCalledWith('prof-1');
-    expect(dashboard).toMatchObject({
-      professional: {
-        name: 'Custom Name',
-        specialty: 'Corte de Cabelo',
-        avatarUrl: null,
-      },
-      metrics: {
-        appointments: 1,
-        earnings: 50,
-        canceled: 1,
-        completed: 1,
-      },
-      nextAppointments: [
+      items: [
         {
-          id: 'booking-1',
-          date: expect.any(Date),
-          clientName: 'Cliente Teste',
-          service: 'Corte de Cabelo',
-          status: 'CONFIRMADO',
+          serviceProfessional: {
+            service: {
+              nome: 'Limpeza',
+            },
+          },
         },
       ],
-    });
+      status: 'CONFIRMADO',
+    },
+  ];
+
+  const mockDashboardData = {
+    professional: {
+      name: mockProfessional.user.nome,
+      specialty: mockProfessional.especialidade,
+      avatarUrl: mockProfessional.avatarUrl,
+    },
+    metrics: {
+      appointments: 10,
+      earnings: 2500,
+      canceled: 2,
+      completed: 8,
+    },
+    nextAppointments: [
+      {
+        id: 'booking-1',
+        date: new Date('2023-01-01T10:00:00'),
+        clientName: 'Client 1',
+        service: 'Limpeza',
+        status: 'CONFIRMADO',
+      },
+    ],
+  };
+
+  it('deve retornar dashboard para intervalo "today"', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(10);
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      2500,
+    );
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
+      2,
+    ); // canceled
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
+      8,
+    ); // completed
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(
+      mockNextAppointments,
+    );
+
+    // Executar
+    const result = await useCase.execute('prof-123', { range: 'today' });
+
+    // Verificar
+    expect(result).toEqual(mockDashboardData);
+
+    // Verificar datas (hoje)
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+    expect(
+      mockBookingsRepository.countByProfessionalAndDate,
+    ).toHaveBeenCalledWith('prof-123', todayStart, todayEnd);
   });
 
-  it('should return professional dashboard with metrics and next appointments', async () => {
-    // Arrange
-    const { createMockUser } = createMockUsersRepository();
-    const user = createMockUser({
-      nome: 'João Barber',
-      email: 'teste@teste.com',
-      senha: bcrypt.hashSync('123456', 8),
-      role: 'PROFISSIONAL',
-    });
-
-    const professional = createMockProfessionalWithRelations({
-      id: 'prof-1',
-      especialidade: 'Barbeiro',
-      avatarUrl: 'http://example.com/avatar.jpg',
-      user,
-    });
-
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValueOnce(
-      professional,
+  it('deve retornar dashboard para intervalo "week"', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(15);
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      3500,
+    );
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
+      3,
+    ); // canceled
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
+      12,
+    ); // completed
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(
+      mockNextAppointments,
     );
 
-    mockBookingsRepository.findNextAppointments.mockResolvedValueOnce([
-      {
-        id: 'booking-3',
-        dataHoraInicio: new Date('2023-06-16T10:00:00'),
-        status: 'PENDENTE',
-        user: { nome: 'Cliente 3' },
-        items: [{ service: { nome: 'Corte e Barba' } }],
-      },
-    ]);
+    // Executar
+    await useCase.execute('prof-123', { range: 'week' });
 
-    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValueOnce(2);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValueOnce(
-      50,
+    // Verificar datas (últimos 7 dias)
+    const now = new Date();
+    const weekStart = startOfDay(subDays(now, 6));
+    const weekEnd = endOfDay(now);
+    expect(
+      mockBookingsRepository.countByProfessionalAndDate,
+    ).toHaveBeenCalledWith('prof-123', weekStart, weekEnd);
+  });
+
+  it('deve retornar dashboard para intervalo "month"', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(50);
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      12000,
+    );
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
+      5,
+    ); // canceled
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
+      45,
+    ); // completed
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(
+      mockNextAppointments,
+    );
+
+    // Executar
+    await useCase.execute('prof-123', { range: 'month' });
+
+    // Verificar datas (últimos 30 dias)
+    const now = new Date();
+    const monthStart = startOfDay(subDays(now, 30));
+    const monthEnd = endOfDay(now);
+    expect(
+      mockBookingsRepository.countByProfessionalAndDate,
+    ).toHaveBeenCalledWith('prof-123', monthStart, monthEnd);
+  });
+
+  it('deve retornar dashboard para intervalo "custom" com datas válidas', async () => {
+    // Configurar mocks com valores consistentes
+    const customMetrics = {
+      appointments: 5,
+      earnings: 1500,
+      canceled: 1,
+      completed: 4,
+    };
+
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(
+      customMetrics.appointments,
+    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      customMetrics.earnings,
     );
     mockBookingsRepository.countByProfessionalAndStatus
-      .mockResolvedValueOnce(1) // canceled
-      .mockResolvedValueOnce(1); // completed
+      .mockResolvedValueOnce(customMetrics.canceled)
+      .mockResolvedValueOnce(customMetrics.completed);
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(
+      mockNextAppointments,
+    );
 
-    // Act
-    const dashboard = await useCase.execute('prof-1', { range: 'today' });
+    const startDate = new Date('2023-01-01');
+    const endDate = new Date('2023-01-31');
 
-    // Assert
+    // Executar
+    const result = await useCase.execute('prof-123', {
+      range: 'custom',
+      startDate,
+      endDate,
+    });
+
+    // Criar objeto de expectativa específico para este teste
+    const expectedResponse = {
+      professional: {
+        name: mockProfessional.user.nome,
+        specialty: mockProfessional.especialidade,
+        avatarUrl: mockProfessional.avatarUrl,
+      },
+      metrics: customMetrics,
+      nextAppointments: mockNextAppointments.map((appointment) => ({
+        id: appointment.id,
+        date: appointment.dataHoraInicio,
+        clientName: appointment.user.nome,
+        service:
+          appointment.items[0]?.serviceProfessional.service.nome ||
+          'Vários serviços',
+        status: appointment.status as 'PENDENTE' | 'CONFIRMADO',
+      })),
+    };
+
+    // Verificar
+    expect(result).toEqual(expectedResponse);
     expect(
-      mockProfessionalsRepository.findByProfessionalId,
-    ).toHaveBeenCalledWith('prof-1');
-    expect(dashboard.nextAppointments).toHaveLength(1);
-    expect(dashboard.metrics.earnings).toBe(50);
-    expect(dashboard.nextAppointments[0].service).toBe('Corte e Barba');
-    expect(dashboard.nextAppointments[0].status).toBe('PENDENTE');
-    expect(dashboard.professional.name).toBe('João Barber');
-    expect(dashboard.professional.specialty).toBe('Barbeiro');
+      mockBookingsRepository.countByProfessionalAndDate,
+    ).toHaveBeenCalledWith(
+      'prof-123',
+      startOfDay(startDate),
+      endOfDay(endDate),
+    );
+  });
+
+  it('deve lançar erro quando profissional não existe', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(null);
+
+    // Executar e verificar
+    await expect(
+      useCase.execute('non-existent-prof', { range: 'today' }),
+    ).rejects.toThrow(ProfessionalNotFoundError);
+  });
+
+  it('deve lançar erro para intervalo "custom" sem datas', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+
+    // Executar e verificar
+    await expect(
+      useCase.execute('prof-123', { range: 'custom' }),
+    ).rejects.toThrow(InvalidDataError);
+  });
+
+  it('deve lançar erro para intervalo "custom" com datas inválidas', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+
+    // Executar e verificar - datas inválidas
+    await expect(
+      useCase.execute('prof-123', {
+        range: 'custom',
+        startDate: new Date('invalid'),
+        endDate: new Date('2023-01-01'),
+      }),
+    ).rejects.toThrow(InvalidDataError);
+
+    // Executar e verificar - data inicial após data final
+    await expect(
+      useCase.execute('prof-123', {
+        range: 'custom',
+        startDate: new Date('2023-01-02'),
+        endDate: new Date('2023-01-01'),
+      }),
+    ).rejects.toThrow(InvalidDataError);
+  });
+
+  it('deve lançar erro para intervalo inválido', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+
+    // Executar e verificar
+    await expect(
+      useCase.execute('prof-123', {
+        range: 'invalid' as 'today' | 'week' | 'month' | 'custom',
+      }),
+    ).rejects.toThrow(InvalidDataError);
+  });
+
+  it('deve retornar "Vários serviços" quando há múltiplos itens', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(1);
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      100,
+    );
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValue(0);
+
+    // Criar mock com múltiplos itens (2 serviços)
+    const multiServiceAppointment = {
+      id: 'booking-multi',
+      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      user: {
+        id: 'user-1',
+        nome: 'Client 1',
+      },
+      items: [
+        {
+          serviceProfessional: {
+            service: {
+              nome: 'Limpeza',
+            },
+          },
+        },
+        {
+          serviceProfessional: {
+            service: {
+              nome: 'Clareamento',
+            },
+          },
+        },
+      ],
+      status: 'CONFIRMADO',
+    };
+
+    mockBookingsRepository.findNextAppointments.mockResolvedValue([
+      multiServiceAppointment,
+    ]);
+
+    // Executar
+    const result = await useCase.execute('prof-123', { range: 'today' });
+
+    // Verificar
+    expect(result.nextAppointments).toHaveLength(1);
+    expect(result.nextAppointments[0].service).toBe('Vários serviços');
+  });
+
+  it('deve retornar nome do serviço quando há apenas um item', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(1);
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      100,
+    );
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValue(0);
+
+    // Criar mock com um único item
+    const singleServiceAppointment = {
+      id: 'booking-single',
+      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      user: {
+        id: 'user-1',
+        nome: 'Client 1',
+      },
+      items: [
+        {
+          serviceProfessional: {
+            service: {
+              nome: 'Limpeza',
+            },
+          },
+        },
+      ],
+      status: 'CONFIRMADO',
+    };
+
+    mockBookingsRepository.findNextAppointments.mockResolvedValue([
+      singleServiceAppointment,
+    ]);
+
+    // Executar
+    const result = await useCase.execute('prof-123', { range: 'today' });
+
+    // Verificar
+    expect(result.nextAppointments).toHaveLength(1);
+    expect(result.nextAppointments[0].service).toBe('Limpeza');
+  });
+
+  it('deve retornar "Serviço não especificado" quando não há itens', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
+      mockProfessional,
+    );
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(1);
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
+      100,
+    );
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValue(0);
+
+    // Criar mock sem itens
+    const noServiceAppointment = {
+      id: 'booking-no-service',
+      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      user: {
+        id: 'user-1',
+        nome: 'Client 1',
+      },
+      items: [],
+      status: 'CONFIRMADO',
+    };
+
+    mockBookingsRepository.findNextAppointments.mockResolvedValue([
+      noServiceAppointment,
+    ]);
+
+    // Executar
+    const result = await useCase.execute('prof-123', { range: 'today' });
+
+    // Verificar
+    expect(result.nextAppointments).toHaveLength(1);
+    expect(result.nextAppointments[0].service).toBe('Serviço não especificado');
   });
 });

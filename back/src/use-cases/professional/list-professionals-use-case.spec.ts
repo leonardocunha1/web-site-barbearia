@@ -1,183 +1,312 @@
-import { InMemoryProfessionalsRepository } from '@/repositories/in-memory/in-memory-professionals-repository';
-import { User } from '@prisma/client';
-import { toProfessionalDTO } from '@/dtos/professional-dto';
-import { ListProfessionalsUseCase } from './list-professionals-use-case';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { InvalidPageError } from '../errors/invalid-page-error';
+import { InvalidLimitError } from '../errors/invalid-limit-error';
+import { ListOrSearchProfessionalsUseCase } from './list-professionals-use-case';
 
-describe('List Professionals Use Case', () => {
-  let professionalsRepository: InMemoryProfessionalsRepository;
-  let sut: ListProfessionalsUseCase;
+// Tipos para os mocks
+type MockProfessionalsRepository = ProfessionalsRepository & {
+  list: ReturnType<typeof vi.fn>;
+  count: ReturnType<typeof vi.fn>;
+  search: ReturnType<typeof vi.fn>;
+  countSearch: ReturnType<typeof vi.fn>;
+};
 
-  const testUser1: User = {
-    id: 'user-1',
-    nome: 'John Doe',
-    email: 'john@example.com',
-    senha: 'hashed-password',
-    telefone: '123456789',
-    role: 'PROFISSIONAL',
-    emailVerified: true,
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const testUser2: User = {
-    id: 'user-2',
-    nome: 'Jane Smith',
-    email: 'jane@example.com',
-    senha: 'hashed-password',
-    telefone: '987654321',
-    role: 'PROFISSIONAL',
-    emailVerified: true,
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const testUser3: User = {
-    id: 'user-3',
-    nome: 'Bob Barber',
-    email: 'bob@example.com',
-    senha: 'hashed-password',
-    telefone: '111111111',
-    role: 'PROFISSIONAL',
-    emailVerified: true,
-    active: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+describe('ListOrSearchProfessionalsUseCase', () => {
+  let useCase: ListOrSearchProfessionalsUseCase;
+  let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    professionalsRepository = new InMemoryProfessionalsRepository();
-    sut = new ListProfessionalsUseCase(professionalsRepository);
+    // Criar mock do repositório
+    mockProfessionalsRepository = {
+      list: vi.fn(),
+      count: vi.fn(),
+      search: vi.fn(),
+      countSearch: vi.fn(),
+      findById: vi.fn(),
+      findByUserId: vi.fn(),
+      findByProfessionalId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
 
-    professionalsRepository.addUser(testUser1);
-    professionalsRepository.addUser(testUser2);
-    professionalsRepository.addUser(testUser3);
-
-    professionalsRepository.items.push(
-      {
-        id: 'professional-1',
-        userId: 'user-1',
-        especialidade: 'Cabelo',
-        bio: 'Especialista em cabelos',
-        avatarUrl: 'http://example.com/avatar1.jpg',
-        documento: '123456',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 'professional-2',
-        userId: 'user-2',
-        especialidade: 'Dermatologista',
-        bio: 'Especialista em pele',
-        avatarUrl: 'http://example.com/avatar2.jpg',
-        documento: '654321',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 'professional-3',
-        userId: 'user-3',
-        especialidade: 'Ortopedista',
-        bio: 'Especialista em ossos',
-        avatarUrl: 'http://example.com/avatar3.jpg',
-        documento: '789012',
-        ativo: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    );
+    useCase = new ListOrSearchProfessionalsUseCase(mockProfessionalsRepository);
   });
 
-  it('should list all active professionals with pagination', async () => {
-    const result = await sut.execute({ page: 1, limit: 2, ativo: true });
+  const mockProfessional = (id: string) => ({
+    id: `prof-${id}`,
+    userId: `user-${id}`,
+    especialidade: 'Dentista',
+    bio: `Bio do profissional ${id}`,
+    documento: `doc-${id}`,
+    ativo: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    user: {
+      id: `user-${id}`,
+      nome: `Professional ${id}`,
+      email: `professional${id}@example.com`,
+      telefone: null,
+      role: 'PROFISSIONAL',
+      emailVerified: true,
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      senha: 'hashed-password',
+    },
+    services: [
+      {
+        id: `service-${id}`,
+        nome: 'Consulta Odontológica',
+        descricao: 'Descrição do serviço',
+        categoria: 'Odontologia',
+        ativo: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+  });
 
+  it('deve listar profissionais com paginação padrão', async () => {
+    // Configurar mocks
+    const mockProfessionals = [mockProfessional('1'), mockProfessional('2')];
+    mockProfessionalsRepository.list.mockResolvedValue(mockProfessionals);
+    mockProfessionalsRepository.count.mockResolvedValue(20);
+
+    // Executar
+    const result = await useCase.execute({});
+
+    // Verificar estrutura básica
+    expect(result).toEqual({
+      professionals: expect.any(Array),
+      total: 20,
+      page: 1,
+      limit: 10,
+      totalPages: 2,
+    });
+
+    // Verificar detalhes dos profissionais
     expect(result.professionals).toHaveLength(2);
-    expect(result.total).toBe(2);
-    expect(result.page).toBe(1);
-    expect(result.limit).toBe(2);
-    expect(result.totalPages).toBe(1);
+    expect(result.professionals[0]).toEqual({
+      id: 'prof-1',
+      especialidade: 'Dentista',
+      bio: 'Bio do profissional 1',
+      ativo: true,
+      user: {
+        id: 'user-1',
+        nome: 'Professional 1',
+        email: 'professional1@example.com',
+        telefone: undefined,
+      },
+      services: [
+        {
+          id: 'service-1',
+          nome: 'Consulta Odontológica',
+          descricao: 'Descrição do serviço',
+        },
+      ],
+      avatarUrl: undefined,
+    });
 
-    expect(result.professionals[0]).toEqual(
-      toProfessionalDTO({
-        ...professionalsRepository.items[0],
-        user: testUser1,
-        services: [],
+    expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
+      page: 1,
+      limit: 10,
+      ativo: true,
+    });
+    expect(mockProfessionalsRepository.count).toHaveBeenCalledWith({
+      ativo: true,
+    });
+  });
+
+  it('deve permitir customizar paginação', async () => {
+    // Configurar mocks
+    const mockProfessionals = [mockProfessional('1')];
+    mockProfessionalsRepository.list.mockResolvedValue(mockProfessionals);
+    mockProfessionalsRepository.count.mockResolvedValue(5);
+
+    // Executar
+    const result = await useCase.execute({
+      page: 2,
+      limit: 5,
+    });
+
+    // Verificar
+    expect(result).toEqual({
+      professionals: expect.arrayContaining([
+        expect.objectContaining({
+          id: 'prof-1',
+        }),
+      ]),
+      total: 5,
+      page: 2,
+      limit: 5,
+      totalPages: 1,
+    });
+    expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
+      page: 2,
+      limit: 5,
+      ativo: true,
+    });
+  });
+
+  it('deve lançar erro quando página for inválida', async () => {
+    await expect(
+      useCase.execute({
+        page: 0,
       }),
-    );
-    expect(result.professionals[1]).toEqual(
-      toProfessionalDTO({
-        ...professionalsRepository.items[1],
-        user: testUser2,
-        services: [],
+    ).rejects.toThrow(InvalidPageError);
+
+    await expect(
+      useCase.execute({
+        page: -1,
       }),
-    );
+    ).rejects.toThrow(InvalidPageError);
   });
 
-  it('should filter professionals by specialty', async () => {
-    const result = await sut.execute({ especialidade: 'Dermato' });
+  it('deve lançar erro quando limite for inválido', async () => {
+    await expect(
+      useCase.execute({
+        limit: 0,
+      }),
+    ).rejects.toThrow(InvalidLimitError);
 
-    expect(result.professionals).toHaveLength(1);
-    expect(result.professionals[0].especialidade).toBe('Dermatologista');
+    await expect(
+      useCase.execute({
+        limit: 101,
+      }),
+    ).rejects.toThrow(InvalidLimitError);
   });
 
-  it('should filter inactive professionals', async () => {
-    const result = await sut.execute({ ativo: false });
+  it('deve filtrar por especialidade', async () => {
+    // Configurar mocks
+    const mockProfessionals = [mockProfessional('1')];
+    mockProfessionalsRepository.list.mockResolvedValue(mockProfessionals);
+    mockProfessionalsRepository.count.mockResolvedValue(1);
 
-    expect(result.professionals).toHaveLength(1);
-    expect(result.professionals[0].especialidade).toBe('Ortopedista');
-    expect(result.professionals[0].ativo).toBe(false);
+    // Executar
+    const result = await useCase.execute({
+      especialidade: 'Dentista',
+    });
+
+    // Verificar
+    expect(result.professionals.length).toBe(1);
+    expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
+      page: 1,
+      limit: 10,
+      especialidade: 'Dentista',
+      ativo: true,
+    });
   });
 
-  it('should return empty list when no professionals match filters', async () => {
-    const result = await sut.execute({ especialidade: 'Neurologista' });
+  it('deve permitir listar profissionais inativos', async () => {
+    // Configurar mocks
+    const mockProfessionals = [mockProfessional('1')];
+    mockProfessionalsRepository.list.mockResolvedValue(mockProfessionals);
+    mockProfessionalsRepository.count.mockResolvedValue(1);
 
-    expect(result.professionals).toHaveLength(0);
-    expect(result.total).toBe(0);
+    // Executar
+    const result = await useCase.execute({
+      ativo: false,
+    });
+
+    // Verificar
+    expect(result.professionals.length).toBe(1);
+    expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
+      page: 1,
+      limit: 10,
+      ativo: false,
+    });
   });
 
-  it('should handle pagination correctly', async () => {
-    for (let i = 4; i <= 15; i++) {
-      professionalsRepository.items.push({
-        id: `professional-${i}`,
-        userId: `user-${i}`,
-        especialidade: `Especialidade ${i}`,
-        bio: `Bio ${i}`,
-        avatarUrl: `http://example.com/avatar${i}.jpg`,
-        documento: `doc-${i}`,
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+  it('deve retornar lista vazia quando não houver profissionais', async () => {
+    // Configurar mocks
+    mockProfessionalsRepository.list.mockResolvedValue([]);
+    mockProfessionalsRepository.count.mockResolvedValue(0);
+
+    // Executar
+    const result = await useCase.execute({});
+
+    // Verificar
+    expect(result).toEqual({
+      professionals: [],
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 0,
+    });
+  });
+
+  it('deve realizar busca quando query for fornecida', async () => {
+    // Configurar mocks
+    const mockProfessionals = [mockProfessional('1')];
+    mockProfessionalsRepository.search.mockResolvedValue(mockProfessionals);
+    mockProfessionalsRepository.countSearch.mockResolvedValue(1);
+
+    // Executar
+    const result = await useCase.execute({
+      query: 'Dentista',
+    });
+
+    // Verificar
+    expect(result.professionals.length).toBe(1);
+    expect(mockProfessionalsRepository.search).toHaveBeenCalledWith({
+      query: 'Dentista',
+      page: 1,
+      limit: 10,
+      ativo: true,
+    });
+    expect(mockProfessionalsRepository.countSearch).toHaveBeenCalledWith({
+      query: 'Dentista',
+      ativo: true,
+    });
+  });
+
+  it('deve combinar busca com outros filtros', async () => {
+    // Configurar mocks
+    const mockProfessionals = [mockProfessional('1')];
+    mockProfessionalsRepository.search.mockResolvedValue(mockProfessionals);
+    mockProfessionalsRepository.countSearch.mockResolvedValue(1);
+
+    // Executar
+    const result = await useCase.execute({
+      query: 'Dentista',
+      especialidade: 'Ortodontia',
+      ativo: false,
+      page: 3,
+      limit: 20,
+    });
+
+    // Verificar
+    expect(result.professionals.length).toBe(1);
+    expect(mockProfessionalsRepository.search).toHaveBeenCalledWith({
+      query: 'Dentista',
+      page: 3,
+      limit: 20,
+      ativo: false,
+    });
+    // Nota: A especialidade não é usada na busca, apenas na listagem normal
+  });
+
+  it('deve calcular corretamente o total de páginas', async () => {
+    // Testar diferentes cenários de paginação
+    const testCases = [
+      { total: 100, limit: 10, expected: 10 },
+      { total: 101, limit: 10, expected: 11 },
+      { total: 99, limit: 10, expected: 10 },
+      { total: 0, limit: 10, expected: 0 },
+      { total: 5, limit: 5, expected: 1 },
+    ];
+
+    for (const testCase of testCases) {
+      mockProfessionalsRepository.list.mockResolvedValue([]);
+      mockProfessionalsRepository.count.mockResolvedValue(testCase.total);
+
+      const result = await useCase.execute({
+        limit: testCase.limit,
       });
-      professionalsRepository.addUser({
-        id: `user-${i}`,
-        nome: `User ${i}`,
-        email: `user${i}@example.com`,
-        senha: 'hashed-password',
-        telefone: '123456789',
-        role: 'PROFISSIONAL',
-        emailVerified: true,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+
+      expect(result.totalPages).toBe(testCase.expected);
     }
-
-    const page1 = await sut.execute({ page: 1, limit: 5 });
-    expect(page1.professionals).toHaveLength(5);
-    expect(page1.total).toBe(15); // Corrigido para 15
-    expect(page1.page).toBe(1);
-    expect(page1.totalPages).toBe(3);
-
-    const page2 = await sut.execute({ page: 2, limit: 5 });
-    expect(page2.professionals).toHaveLength(5);
-    expect(page2.page).toBe(2);
-
-    const page3 = await sut.execute({ page: 3, limit: 5 });
-    expect(page3.professionals).toHaveLength(5);
-    expect(page3.page).toBe(3);
   });
 });

@@ -1,61 +1,65 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { UpdatePasswordUseCase } from './update-password-use-case';
-import { hash } from 'bcryptjs';
+import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
 import { SamePasswordError } from '../errors/same-password-error';
+import bcrypt from 'bcryptjs';
 
 let usersRepository: InMemoryUsersRepository;
-let sut: UpdatePasswordUseCase;
+let updatePasswordUseCase: UpdatePasswordUseCase;
 
 describe('UpdatePasswordUseCase', () => {
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository();
-    sut = new UpdatePasswordUseCase(usersRepository);
+    updatePasswordUseCase = new UpdatePasswordUseCase(usersRepository);
   });
 
   it('deve atualizar a senha com sucesso', async () => {
-    const password = await hash('old-password', 6);
+    const senhaOriginal = await bcrypt.hash('senha-atual', 6);
     const user = await usersRepository.create({
-      nome: 'Usuário Teste',
-      email: 'user@example.com',
-      senha: password,
+      nome: 'João',
+      email: 'joao@example.com',
+      senha: senhaOriginal,
+      role: 'CLIENTE',
     });
 
-    const response = await sut.execute({
+    await updatePasswordUseCase.execute({
       userId: user.id,
-      currentPassword: 'old-password',
-      newPassword: 'new-password',
+      currentPassword: 'senha-atual',
+      newPassword: 'nova-senha',
     });
-
-    expect(response.user.id).toBe(user.id);
-    expect(response.user.email).toBe(user.email);
 
     const updatedUser = await usersRepository.findById(user.id);
-    expect(updatedUser?.senha).not.toBe(password); // a senha foi alterada
+    const senhaAtualizadaCorreta = await bcrypt.compare(
+      'nova-senha',
+      updatedUser!.senha,
+    );
+
+    expect(senhaAtualizadaCorreta).toBe(true);
   });
 
   it('deve lançar erro se o usuário não existir', async () => {
     await expect(() =>
-      sut.execute({
-        userId: 'non-existent-id',
-        currentPassword: '123',
-        newPassword: '456',
+      updatePasswordUseCase.execute({
+        userId: 'usuario-inexistente',
+        currentPassword: 'qualquer',
+        newPassword: 'nova',
       }),
     ).rejects.toBeInstanceOf(UserNotFoundError);
   });
 
   it('deve lançar erro se a senha atual estiver incorreta', async () => {
-    const password = await hash('senha-correta', 6);
+    const senhaHash = await bcrypt.hash('senha-correta', 6);
     const user = await usersRepository.create({
-      nome: 'João',
-      email: 'joao@email.com',
-      senha: password,
+      nome: 'Maria',
+      email: 'maria@example.com',
+      senha: senhaHash,
+      role: 'CLIENTE',
     });
 
     await expect(() =>
-      sut.execute({
+      updatePasswordUseCase.execute({
         userId: user.id,
         currentPassword: 'senha-errada',
         newPassword: 'nova-senha',
@@ -63,16 +67,17 @@ describe('UpdatePasswordUseCase', () => {
     ).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 
-  it('deve lançar erro se a nova senha for igual à antiga', async () => {
-    const password = await hash('mesma-senha', 6);
+  it('deve lançar erro se a nova senha for igual à senha atual', async () => {
+    const senhaHash = await bcrypt.hash('mesma-senha', 6);
     const user = await usersRepository.create({
-      nome: 'Maria',
-      email: 'maria@email.com',
-      senha: password,
+      nome: 'Carlos',
+      email: 'carlos@example.com',
+      senha: senhaHash,
+      role: 'CLIENTE',
     });
 
     await expect(() =>
-      sut.execute({
+      updatePasswordUseCase.execute({
         userId: user.id,
         currentPassword: 'mesma-senha',
         newPassword: 'mesma-senha',
