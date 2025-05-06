@@ -15,7 +15,7 @@ describe('ToggleProfessionalStatusUseCase', () => {
   let sut: ToggleProfessionalStatusUseCase;
 
   beforeEach(() => {
-    professionalsRepository = createMockProfessionalsRepository()
+    professionalsRepository = createMockProfessionalsRepository();
 
     sut = new ToggleProfessionalStatusUseCase(professionalsRepository);
   });

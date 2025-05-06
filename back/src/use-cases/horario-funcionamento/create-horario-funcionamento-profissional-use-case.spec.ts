@@ -6,7 +6,10 @@ import { DuplicateBusinessHoursError } from '../errors/duplicate-business-hours-
 import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { CreateBusinessHoursUseCase } from './create-horario-funcionamento-profissional-use-case';
-import { createMockHorariosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import {
+  createMockHorariosRepository,
+  createMockProfessionalsRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockHorariosRepository = HorariosFuncionamentoRepository & {
@@ -28,9 +31,8 @@ describe('Create Business Hours Use Case', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    mockHorariosRepository = createMockHorariosRepository()
-    mockProfessionalsRepository = createMockProfessionalsRepository()
-
+    mockHorariosRepository = createMockHorariosRepository();
+    mockProfessionalsRepository = createMockProfessionalsRepository();
 
     useCase = new CreateBusinessHoursUseCase(
       mockHorariosRepository,

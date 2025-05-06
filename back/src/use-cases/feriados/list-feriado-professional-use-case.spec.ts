@@ -18,7 +18,7 @@ describe('ListHolidaysUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFeriadosRepository = createMockFeriadosRepository()
+    mockFeriadosRepository = createMockFeriadosRepository();
 
     useCase = new ListHolidaysUseCase(mockFeriadosRepository);
   });

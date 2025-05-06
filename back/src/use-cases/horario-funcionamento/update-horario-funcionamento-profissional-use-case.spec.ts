@@ -5,7 +5,10 @@ import { ProfessionalNotFoundError } from '../errors/professional-not-found-erro
 import { InvalidTimeFormatError } from '../errors/invalid-time-format-error';
 import { InvalidBusinessHoursError } from '../errors/invalid-business-hours-error';
 import { UpdateBusinessHoursUseCase } from './update-horario-funcionamento-profissional-use-case';
-import { createMockHorariosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import {
+  createMockHorariosRepository,
+  createMockProfessionalsRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockHorariosRepository = HorariosFuncionamentoRepository & {
@@ -27,8 +30,8 @@ describe('Update Business Hours Use Case', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-      mockHorariosRepository = createMockHorariosRepository()
-      mockProfessionalsRepository = createMockProfessionalsRepository()
+    mockHorariosRepository = createMockHorariosRepository();
+    mockProfessionalsRepository = createMockProfessionalsRepository();
 
     useCase = new UpdateBusinessHoursUseCase(
       mockHorariosRepository,

@@ -8,7 +8,10 @@ import { ProfessionalNotFoundError } from '../errors/professional-not-found-erro
 import { PastDateError } from '../errors/past-date-error';
 import { InvalidHolidayDescriptionError } from '../errors/invalid-holiday-description-error';
 import { DuplicateHolidayError } from '../errors/duplicate-holiday-error';
-import { createMockFeriadosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import {
+  createMockFeriadosRepository,
+  createMockProfessionalsRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockFeriadosRepository = FeriadosRepository & {
@@ -27,8 +30,8 @@ describe('CreateHolidayUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFeriadosRepository = createMockFeriadosRepository()
-    mockProfessionalsRepository = createMockProfessionalsRepository()
+    mockFeriadosRepository = createMockFeriadosRepository();
+    mockProfessionalsRepository = createMockProfessionalsRepository();
 
     useCase = new CreateHolidayUseCase(
       mockFeriadosRepository,

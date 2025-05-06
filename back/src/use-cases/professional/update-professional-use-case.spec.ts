@@ -15,7 +15,7 @@ describe('UpdateProfessionalUseCase', () => {
   let sut: UpdateProfessionalUseCase;
 
   beforeEach(() => {
-    professionalsRepository = createMockProfessionalsRepository()
+    professionalsRepository = createMockProfessionalsRepository();
 
     sut = new UpdateProfessionalUseCase(professionalsRepository);
   });

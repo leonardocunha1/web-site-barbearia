@@ -5,7 +5,10 @@ import { ProfessionalNotFoundError } from '../errors/professional-not-found-erro
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { GetProfessionalDashboardUseCase } from './get-profissional-use-case';
-import { createMockBookingsRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import {
+  createMockBookingsRepository,
+  createMockProfessionalsRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -25,9 +28,8 @@ describe('Get Professional Dashboard Use Case', () => {
   let mockBookingsRepository: MockBookingsRepository;
 
   beforeEach(() => {
-    mockProfessionalsRepository = createMockProfessionalsRepository()
-    mockBookingsRepository = createMockBookingsRepository()
-    
+    mockProfessionalsRepository = createMockProfessionalsRepository();
+    mockBookingsRepository = createMockBookingsRepository();
 
     useCase = new GetProfessionalDashboardUseCase(
       mockProfessionalsRepository,

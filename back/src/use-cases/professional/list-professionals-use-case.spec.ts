@@ -18,7 +18,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-    mockProfessionalsRepository = createMockProfessionalsRepository()
+    mockProfessionalsRepository = createMockProfessionalsRepository();
 
     useCase = new ListOrSearchProfessionalsUseCase(mockProfessionalsRepository);
   });

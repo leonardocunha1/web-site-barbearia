@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { CreateBookingUseCase } from './create-booking-use-case';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
@@ -6,8 +6,12 @@ import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
 import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
 import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
 import { InvalidDurationError } from '../errors/invalid-duration-error';
-import { createMockBookingsRepository, createMockProfessionalsRepository, createMockServiceProfessionalRepository, createMockUsersRepository } from '@/mock/mock-repositories';
-
+import {
+  createMockBookingsRepository,
+  createMockProfessionalsRepository,
+  createMockServiceProfessionalRepository,
+  createMockUsersRepository,
+} from '@/mock/mock-repositories';
 
 // Função para criar todos os mocks
 const createMockRepositories = () => ({

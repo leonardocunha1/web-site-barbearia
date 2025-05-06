@@ -3,7 +3,10 @@ import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcion
 import { ProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { ListBusinessHoursUseCase } from './list-horario-funcionamento-profissional-use-case';
-import { createMockHorariosRepository, createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import {
+  createMockHorariosRepository,
+  createMockProfessionalsRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockHorariosRepository = HorariosFuncionamentoRepository & {
@@ -34,8 +37,8 @@ describe('List Business Hours Use Case', () => {
   let mockProfessionalsRepository: MockProfessionalsRepository;
 
   beforeEach(() => {
-     mockHorariosRepository = createMockHorariosRepository()
-    mockProfessionalsRepository = createMockProfessionalsRepository()
+    mockHorariosRepository = createMockHorariosRepository();
+    mockProfessionalsRepository = createMockProfessionalsRepository();
 
     useCase = new ListBusinessHoursUseCase(
       mockHorariosRepository,

@@ -20,9 +20,7 @@ describe('ListBookingsUseCase', () => {
   beforeEach(() => {
     mockBookingsRepository = createMockBookingsRepository();
 
-    useCase = new ListBookingsUseCase(
-      mockBookingsRepository
-    );
+    useCase = new ListBookingsUseCase(mockBookingsRepository);
   });
 
   const mockBooking: BookingDTO = {

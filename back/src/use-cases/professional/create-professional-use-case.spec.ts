@@ -4,7 +4,10 @@ import { ProfessionalsRepository } from '@/repositories/professionals-repository
 import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserAlreadyProfessionalError } from '../errors/user-already-professional-error';
-import { createMockProfessionalsRepository, createMockUsersRepository } from '@/mock/mock-repositories';
+import {
+  createMockProfessionalsRepository,
+  createMockUsersRepository,
+} from '@/mock/mock-repositories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
@@ -23,8 +26,8 @@ describe('Create Professional Use Case', () => {
   let mockUsersRepository: MockUsersRepository;
 
   beforeEach(() => {
-    mockProfessionalsRepository = createMockProfessionalsRepository()
-    mockUsersRepository = createMockUsersRepository()
+    mockProfessionalsRepository = createMockProfessionalsRepository();
+    mockUsersRepository = createMockUsersRepository();
 
     useCase = new CreateProfessionalUseCase(
       mockProfessionalsRepository,

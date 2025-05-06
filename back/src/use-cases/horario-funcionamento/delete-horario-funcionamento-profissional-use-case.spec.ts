@@ -20,7 +20,7 @@ describe('Delete Business Hours Use Case', () => {
   let mockHorariosRepository: MockHorariosRepository;
 
   beforeEach(() => {
-    mockHorariosRepository = createMockHorariosRepository()
+    mockHorariosRepository = createMockHorariosRepository();
 
     useCase = new DeleteBusinessHoursUseCase(mockHorariosRepository);
   });

@@ -1,11 +1,16 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { FeriadosRepository } from '@/repositories/feriados-repository';
 import { GetProfessionalScheduleUseCase } from './get-schedule-use-case';
-import { createMockBookingsRepository, createMockFeriadosRepository, createMockHorariosRepository } from '@/mock/mock-repositories';
+import {
+  createMockBookingsRepository,
+  createMockFeriadosRepository,
+  createMockHorariosRepository,
+} from '@/mock/mock-repositories';
 
 describe('GetProfessionalScheduleUseCase', () => {
   let bookingsRepository: ReturnType<typeof createMockBookingsRepository>;
-  let horariosFuncionamentoRepository: ReturnType<typeof createMockHorariosRepository>;
+  let horariosFuncionamentoRepository: ReturnType<
+    typeof createMockHorariosRepository
+  >;
   let feriadosRepository: ReturnType<typeof createMockFeriadosRepository>;
   let sut: GetProfessionalScheduleUseCase;
 
@@ -13,18 +18,20 @@ describe('GetProfessionalScheduleUseCase', () => {
     bookingsRepository = createMockBookingsRepository();
     horariosFuncionamentoRepository = createMockHorariosRepository();
     feriadosRepository = createMockFeriadosRepository();
-    
+
     // Configuração padrão dos mocks
-    horariosFuncionamentoRepository.findByProfessionalAndDay = vi.fn().mockResolvedValue({
-      id: '1',
-      profissionalId: 'prof-1',
-      diaSemana: 3, // Quarta-feira (para o teste padrão)
-      abreAs: '08:00',
-      fechaAs: '17:00',
-      pausaInicio: '12:00',
-      pausaFim: '13:00',
-      ativo: true,
-    });
+    horariosFuncionamentoRepository.findByProfessionalAndDay = vi
+      .fn()
+      .mockResolvedValue({
+        id: '1',
+        profissionalId: 'prof-1',
+        diaSemana: 3, // Quarta-feira (para o teste padrão)
+        abreAs: '08:00',
+        fechaAs: '17:00',
+        pausaInicio: '12:00',
+        pausaFim: '13:00',
+        ativo: true,
+      });
 
     feriadosRepository.isProfessionalHoliday = vi.fn().mockResolvedValue(null);
 
@@ -56,10 +63,13 @@ describe('GetProfessionalScheduleUseCase', () => {
 
   it('deve retornar slots vazios quando o horário de funcionamento estiver inativo', async () => {
     const testDate = '2023-05-02';
-    horariosFuncionamentoRepository.findByProfessionalAndDay = vi.fn().mockResolvedValue({
-      ...horariosFuncionamentoRepository.findByProfessionalAndDay.mock.results[0].value,
-      ativo: false,
-    });
+    horariosFuncionamentoRepository.findByProfessionalAndDay = vi
+      .fn()
+      .mockResolvedValue({
+        ...horariosFuncionamentoRepository.findByProfessionalAndDay.mock
+          .results[0].value,
+        ativo: false,
+      });
 
     const result = await sut.execute({
       professionalId: 'prof-1',
@@ -75,7 +85,9 @@ describe('GetProfessionalScheduleUseCase', () => {
 
   it('deve gerar slots de tempo corretamente sem agendamentos', async () => {
     const testDate = '2023-05-03';
-    bookingsRepository.findByProfessionalAndDate = vi.fn().mockResolvedValue([]);
+    bookingsRepository.findByProfessionalAndDate = vi
+      .fn()
+      .mockResolvedValue([]);
 
     const result = await sut.execute({
       professionalId: 'prof-1',
@@ -95,19 +107,23 @@ describe('GetProfessionalScheduleUseCase', () => {
       dataHoraFim: new Date(`${testDate}T10:30:00`),
       status: 'CONFIRMADO',
       user: { id: 'user-1', nome: 'Cliente Teste' },
-      items: [{
-        serviceProfessional: { service: { nome: 'Corte de Cabelo' } }
-      }],
+      items: [
+        {
+          serviceProfessional: { service: { nome: 'Corte de Cabelo' } },
+        },
+      ],
     };
 
-    bookingsRepository.findByProfessionalAndDate = vi.fn().mockResolvedValue([mockBooking]);
+    bookingsRepository.findByProfessionalAndDate = vi
+      .fn()
+      .mockResolvedValue([mockBooking]);
 
     const result = await sut.execute({
       professionalId: 'prof-1',
       date: testDate,
     });
 
-    const bookedSlots = result.timeSlots.filter(s => !s.available);
+    const bookedSlots = result.timeSlots.filter((s) => !s.available);
     expect(bookedSlots).toHaveLength(3); // 10:00, 10:10, 10:20
     expect(bookedSlots[0].booking).toEqual({
       id: 'booking-1',
@@ -118,12 +134,15 @@ describe('GetProfessionalScheduleUseCase', () => {
 
   it('deve lidar corretamente com dias sem pausa', async () => {
     const testDate = '2023-05-05';
-    horariosFuncionamentoRepository.findByProfessionalAndDay = vi.fn().mockResolvedValue({
-      ...horariosFuncionamentoRepository.findByProfessionalAndDay.mock.results[0].value,
-      diaSemana: 5,
-      pausaInicio: null,
-      pausaFim: null,
-    });
+    horariosFuncionamentoRepository.findByProfessionalAndDay = vi
+      .fn()
+      .mockResolvedValue({
+        ...horariosFuncionamentoRepository.findByProfessionalAndDay.mock
+          .results[0].value,
+        diaSemana: 5,
+        pausaInicio: null,
+        pausaFim: null,
+      });
 
     const result = await sut.execute({
       professionalId: 'prof-1',

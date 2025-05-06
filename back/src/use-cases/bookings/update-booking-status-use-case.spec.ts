@@ -20,9 +20,7 @@ describe('UpdateBookingStatusUseCase', () => {
   beforeEach(() => {
     mockBookingsRepository = createMockBookingsRepository();
 
-    useCase = new UpdateBookingStatusUseCase(
-      mockBookingsRepository
-    );
+    useCase = new UpdateBookingStatusUseCase(mockBookingsRepository);
   });
 
   const mockBooking = {
