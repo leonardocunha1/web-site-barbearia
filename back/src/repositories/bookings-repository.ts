@@ -1,6 +1,6 @@
 import { BookingDTO } from '@/dtos/booking-dto';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
-import { Prisma, Status } from '@prisma/client';
+import { Booking, Prisma, Status } from '@prisma/client';
 
 export interface FindManyByUserIdParams {
   page: number;
@@ -25,7 +25,7 @@ export interface FindManyByProfessionalIdParams {
 }
 
 export interface BookingsRepository {
-  create(data: Prisma.BookingCreateInput): Promise<void>;
+  create(data: Prisma.BookingCreateInput): Promise<Booking>;
   findById(id: string): Promise<BookingDTO | null>;
   findOverlappingBooking(
     professionalId: string,
@@ -104,4 +104,6 @@ export interface BookingsRepository {
       endDate?: Date;
     },
   ): Promise<number>;
+
+  countByUserIdAndStatus(userId: string, status: Status): Promise<number>;
 }

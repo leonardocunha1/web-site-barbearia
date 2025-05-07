@@ -9,13 +9,15 @@ import { InvalidDateTimeError } from '@/use-cases/errors/invalid-date-time-error
 import { InvalidDurationError } from '@/use-cases/errors/invalid-duration-error';
 import { formatZodError } from '@/utils/formatZodError';
 import { createBookingBodySchema } from '@/schemas/bookings';
+import { InsufficientBonusPointsError } from '@/use-cases/errors/insufficient-bonus-points-error';
+import { InvalidBonusRedemptionError } from '@/use-cases/errors/invalid-bonus-redemption-error';
 
 export async function createBooking(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
   try {
-    const { professionalId, services, startDateTime, notes } =
+    const { professionalId, services, startDateTime, notes, useBonusPoints } =
       createBookingBodySchema.parse(request.body);
 
     const createBookingUseCase = makeCreateBookingUseCase();
@@ -26,6 +28,7 @@ export async function createBooking(
       services,
       startDateTime: new Date(startDateTime),
       notes,
+      useBonusPoints,
     });
 
     return reply.status(201).send();
@@ -55,6 +58,13 @@ export async function createBooking(
     }
 
     if (err instanceof InvalidDurationError) {
+      return reply.status(400).send({ message: err.message });
+    }
+    if (err instanceof InsufficientBonusPointsError) {
+      return reply.status(400).send({ message: err.message });
+    }
+
+    if (err instanceof InvalidBonusRedemptionError) {
       return reply.status(400).send({ message: err.message });
     }
 

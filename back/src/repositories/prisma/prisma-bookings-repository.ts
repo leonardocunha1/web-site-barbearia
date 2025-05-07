@@ -64,8 +64,8 @@ function mapSortToOrderBy(
 }
 
 export class PrismaBookingsRepository implements BookingsRepository {
-  async create(data: Prisma.BookingCreateInput): Promise<void> {
-    await prisma.booking.create({
+  async create(data: Prisma.BookingCreateInput) {
+    return await prisma.booking.create({
       data,
     });
   }
@@ -308,5 +308,17 @@ export class PrismaBookingsRepository implements BookingsRepository {
       include: bookingInclude,
       orderBy: { dataHoraInicio: 'asc' },
     });
+  }
+
+  async countByUserIdAndStatus(
+    userId: string,
+    status: Status,
+  ): Promise<number> {
+    const where: Prisma.BookingWhereInput = {
+      usuarioId: userId,
+      status,
+    };
+
+    return prisma.booking.count({ where });
   }
 }

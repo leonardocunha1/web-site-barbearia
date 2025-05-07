@@ -1,67 +1,37 @@
 import { Prisma, Role, User } from '@prisma/client';
 import { UsersRepository } from '@/repositories/users-repository';
-import { randomUUID } from 'crypto';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
-export class InMemoryUsersRepository implements UsersRepository {
-  private users: User[] = [];
+export class PrismaUsersRepository implements UsersRepository {
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    return await prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 
   async findById(id: string): Promise<User | null> {
-    return this.users.find((user) => user.id === id) || null;
+    return await prisma.user.findUnique({
+      where: { id },
+    });
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.users.find((user) => user.email === email) || null;
+    return await prisma.user.findUnique({
+      where: { email },
+    });
   }
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
-    const user: User = {
-      id: randomUUID(),
-      nome: data.nome,
-      email: data.email,
-      senha: data.senha,
-      telefone: data.telefone ?? null,
-      role: data.role ?? Role.CLIENTE,
-      emailVerified: data.emailVerified ?? false,
-      active: data.active ?? true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.users.push(user);
-    return user;
-  }
-
-  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex === -1) throw new Error('User not found');
-
-    const existing = this.users[userIndex];
-
-    const updatedUser: User = {
-      ...existing,
-      nome: (data.nome as string) ?? existing.nome,
-      email: (data.email as string) ?? existing.email,
-      senha: (data.senha as string) ?? existing.senha,
-      telefone: (data.telefone as string | null) ?? existing.telefone,
-      role: (data.role as Role) ?? existing.role,
-      emailVerified: (data.emailVerified as boolean) ?? existing.emailVerified,
-      active: (data.active as boolean) ?? existing.active,
-      updatedAt: new Date(),
-    };
-
-    this.users[userIndex] = updatedUser;
-    return updatedUser;
+    return await prisma.user.create({ data });
   }
 
   async updatePassword(id: string, password: string): Promise<User> {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex === -1) throw new Error('User not found');
-
-    this.users[userIndex].senha = password;
-    this.users[userIndex].updatedAt = new Date();
-
-    return this.users[userIndex];
+    return prisma.user.update({
+      where: { id },
+      data: { senha: password },
+    });
   }
 
   async listUsers({
@@ -75,17 +45,23 @@ export class InMemoryUsersRepository implements UsersRepository {
     role?: Role;
     name?: string;
   }): Promise<User[]> {
-    let filtered = this.users;
+    const skip = (page - 1) * limit;
 
-    if (role) filtered = filtered.filter((user) => user.role === role);
-    if (name)
-      filtered = filtered.filter((user) =>
-        user.nome.toLowerCase().includes(name.toLowerCase()),
-      );
+    const where: Prisma.UserWhereInput = {};
+    if (role) where.role = role;
+    if (name) {
+      where.nome = {
+        contains: name,
+        mode: 'insensitive', // Busca case-insensitive
+      };
+    }
 
-    return filtered
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice((page - 1) * limit, page * limit);
+    return prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async countUsers({
@@ -95,31 +71,30 @@ export class InMemoryUsersRepository implements UsersRepository {
     role?: Role;
     name?: string;
   }): Promise<number> {
-    let filtered = this.users;
+    const where: Prisma.UserWhereInput = {};
+    if (role) where.role = role;
+    if (name) {
+      where.nome = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
 
-    if (role) filtered = filtered.filter((user) => user.role === role);
-    if (name)
-      filtered = filtered.filter((user) =>
-        user.nome.toLowerCase().includes(name.toLowerCase()),
-      );
-
-    return filtered.length;
+    return prisma.user.count({ where });
   }
 
   async anonymize(userId: string): Promise<void> {
-    const index = this.users.findIndex((user) => user.id === userId);
-    if (index === -1) throw new Error('User not found');
-
-    const anonymizedEmail = `anon-${Date.now()}-${Math.random().toString(36).substring(2)}@deleted.com`;
+    const anonymizedEmail = `anon-${Date.now()}-${bcrypt.hash(userId, 6)}@deleted.com`;
     const anonymizedPhone = `deleted-${Math.random().toString(36).substring(2, 10)}`;
 
-    this.users[index] = {
-      ...this.users[index],
-      email: anonymizedEmail,
-      telefone: anonymizedPhone,
-      senha: await bcrypt.hash('deleted-account', 6),
-      active: false,
-      updatedAt: new Date(),
-    };
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        email: anonymizedEmail,
+        telefone: anonymizedPhone,
+        active: false,
+        senha: await bcrypt.hash('deleted-account', 6), // Senha padrão para conta deletada
+      },
+    });
   }
 }

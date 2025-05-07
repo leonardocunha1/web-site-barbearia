@@ -16,6 +16,7 @@ export const createMockBookingsRepository = () => ({
   findNextAppointments: vi.fn(),
   findByProfessionalAndDate: vi.fn(),
   countByProfessionalId: vi.fn(),
+  countByUserIdAndStatus: vi.fn(),
 });
 
 export const createMockUsersRepository = () => ({
@@ -79,4 +80,17 @@ export const createMockServicesRepository = () => ({
   toggleStatus: vi.fn(),
   list: vi.fn(),
   existsProfessional: vi.fn(),
+});
+
+export const createMockBonusRedemptionRepository = () => ({
+  create: vi.fn(),
+});
+
+export const createMockUserBonusRepository = () => ({
+  upsert: vi.fn(),
+  findByUserIdAndType: vi.fn(),
+  getPointsByType: vi.fn(),
+  getValidPointsByType: vi.fn(),
+  getValidPointsWithExpiration: vi.fn(),
+  consumePoints: vi.fn(),
 });

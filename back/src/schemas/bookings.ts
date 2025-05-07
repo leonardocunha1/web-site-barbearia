@@ -60,6 +60,7 @@ export const createBookingBodySchema = z.object({
   ),
   startDateTime: z.string().datetime({ offset: true }),
   notes: z.string().max(500).optional(),
+  useBonusPoints: z.boolean().optional().default(false),
 });
 
 // Schema para atualização do status da reserva
