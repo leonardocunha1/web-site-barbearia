@@ -1,67 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BookingsRepository } from '@/repositories/bookings-repository';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
-import { BookingDTO } from '@/dtos/booking-dto';
+import { mockBooking } from '@/dtos/booking-dto';
 import { ListBookingsUseCase } from './list-user-bookings-use-case';
 import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
-// Tipo para o mock do repositório com métodos do Vitest
-type MockBookingsRepository = BookingsRepository & {
-  findManyByUserId: ReturnType<typeof vi.fn>;
-  countByUserId: ReturnType<typeof vi.fn>;
-};
-
 describe('ListBookingsUseCase', () => {
   let useCase: ListBookingsUseCase;
-  let mockBookingsRepository: MockBookingsRepository;
+  let mockBookingsRepository: ReturnType<typeof createMockBookingsRepository>;
 
   beforeEach(() => {
     mockBookingsRepository = createMockBookingsRepository();
 
     useCase = new ListBookingsUseCase(mockBookingsRepository);
   });
-
-  const mockBooking: BookingDTO = {
-    id: 'booking-123',
-    canceledAt: null,
-    confirmedAt: null,
-    createdAt: new Date('2023-01-01T09:00:00'),
-    updatedAt: new Date('2023-01-01T09:00:00'),
-    profissionalId: 'pro-123',
-    usuarioId: 'user-123',
-    dataHoraInicio: new Date('2023-01-01T10:00:00'),
-    dataHoraFim: new Date('2023-01-01T11:00:00'),
-    observacoes: 'Test booking',
-    status: 'CONFIRMADO',
-    valorFinal: 100,
-    user: {
-      id: 'user-123',
-      nome: 'John Doe',
-    },
-    profissional: {
-      id: 'pro-123',
-      user: {
-        id: 'pro-user-123',
-        nome: 'Professional User',
-      },
-    },
-    items: [
-      {
-        id: 'item-123',
-        serviceProfessional: {
-          id: 'sp-123',
-          service: {
-            id: 'service-123',
-            nome: 'Service Name',
-          },
-        },
-        preco: 100,
-        duracao: 60,
-      },
-    ],
-  };
 
   it('deve retornar agendamentos com paginação', async () => {
     // Configurar mocks

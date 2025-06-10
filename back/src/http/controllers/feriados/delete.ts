@@ -11,13 +11,13 @@ export async function deleteHoliday(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const deleteHolidayParamsSchema = z.object({
-    holidayId: z.string(),
-  });
-
-  const { holidayId } = deleteHolidayParamsSchema.parse(request.params);
-
   try {
+    const deleteHolidayParamsSchema = z.object({
+      holidayId: z.string(),
+    });
+
+    const { holidayId } = deleteHolidayParamsSchema.parse(request.params);
+
     const deleteHolidayUseCase = makeDeleteHolidayUseCase();
 
     await deleteHolidayUseCase.execute({
@@ -27,11 +27,14 @@ export async function deleteHoliday(
 
     return reply.status(204).send();
   } catch (err) {
-    if (err instanceof ProfessionalNotFoundError) {
-      return reply.status(404).send({ message: err.message });
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send(formatZodError(err));
     }
 
-    if (err instanceof HolidayNotFoundError) {
+    if (
+      err instanceof ProfessionalNotFoundError ||
+      err instanceof HolidayNotFoundError
+    ) {
       return reply.status(404).send({ message: err.message });
     }
 
@@ -40,11 +43,7 @@ export async function deleteHoliday(
     }
 
     if (err instanceof PastHolidayDeletionError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof z.ZodError) {
-      return reply.status(400).send(formatZodError(err));
+      return reply.status(422).send({ message: err.message });
     }
 
     throw err;

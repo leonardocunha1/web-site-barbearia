@@ -5,19 +5,24 @@ import { ServiceProfessionalRepository } from '@/repositories/service-profession
 import { UserBonusRepository } from '@/repositories/user-bonus-repository';
 import { BonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
 import { Booking } from '@prisma/client';
-import { InvalidDateTimeError } from '@/use-cases/errors/invalid-date-time-error';
-import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
-import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
-import { ServiceProfessionalNotFoundError } from '@/use-cases/errors/service-professional-not-found-error';
-import { InvalidDurationError } from '@/use-cases/errors/invalid-duration-error';
-import { TimeSlotAlreadyBookedError } from '@/use-cases/errors/time-slot-already-booked-error';
-import { InsufficientBonusPointsError } from '@/use-cases/errors/insufficient-bonus-points-error';
-import { InvalidBonusRedemptionError } from '@/use-cases/errors/invalid-bonus-redemption-error';
+
 import {
   MIN_BOOKING_VALUE_AFTER_DISCOUNT,
   MIN_POINTS_TO_REDEEM,
   VALUE_PER_POINT,
 } from '@/consts/const';
+import { InvalidDateTimeError } from '../errors/invalid-date-time-error';
+import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { ServiceProfessionalNotFoundError } from '../errors/service-professional-not-found-error';
+import { InvalidDurationError } from '../errors/invalid-duration-error';
+import { TimeSlotAlreadyBookedError } from '../errors/time-slot-already-booked-error';
+import { InvalidBonusRedemptionError } from '../errors/invalid-bonus-redemption-error';
+import { InsufficientBonusPointsError } from '../errors/insufficient-bonus-points-error';
+import { CouponBonusConflictError } from '../errors/coupon-bonus-conflict-error';
+import { InvalidCouponError } from './invalid-coupon-error';
+import { CouponNotApplicableError } from '../errors/coupon-not-applicable-error';
+import { CouponRepository } from '@/repositories/coupon-repository';
 
 export interface BookingRequest {
   userId: string;
@@ -26,6 +31,7 @@ export interface BookingRequest {
   startDateTime: Date;
   notes?: string;
   useBonusPoints?: boolean;
+  couponCode?: string;
 }
 
 export class CreateBookingUseCase {
@@ -36,160 +42,68 @@ export class CreateBookingUseCase {
     private serviceProfessionalRepository: ServiceProfessionalRepository,
     private userBonusRepository: UserBonusRepository,
     private bonusRedemptionRepository: BonusRedemptionRepository,
+    private couponRepository: CouponRepository,
   ) {}
 
   async execute(request: BookingRequest): Promise<Booking> {
-    // 1. Validação básica da data/hora
-    const now = new Date();
-    if (request.startDateTime < now) {
-      throw new InvalidDateTimeError();
-    }
+    this.validateDate(request.startDateTime);
 
-    // 2. Verifica existência do usuário e profissional
-    const [user, professional] = await Promise.all([
-      this.usersRepository.findById(request.userId),
-      this.professionalsRepository.findById(request.professionalId),
-    ]);
+    await this.loadEntities(request.userId, request.professionalId);
 
-    if (!user) throw new UserNotFoundError();
-    if (!professional) throw new ProfessionalNotFoundError();
-
-    // 3. Valida serviços e calcula duração total
-    const serviceProfessionals = await Promise.all(
-      request.services.map(async ({ serviceId }) => {
-        const sp =
-          await this.serviceProfessionalRepository.findByServiceAndProfessional(
-            serviceId,
-            request.professionalId,
-          );
-
-        if (!sp) throw new ServiceProfessionalNotFoundError();
-        if (sp.duracao <= 0) throw new InvalidDurationError();
-
-        return sp;
-      }),
+    const services = await this.loadAndValidateServices(
+      request.services,
+      request.professionalId,
     );
 
-    const totalDuration = serviceProfessionals.reduce(
-      (sum, sp) => sum + sp.duracao,
-      0,
-    );
-    if (totalDuration <= 0) throw new InvalidDurationError();
-
-    // 4. Verifica conflitos de agendamento
+    const totalDuration = services.reduce((sum, s) => sum + s.duracao, 0);
     const endDateTime = new Date(
       request.startDateTime.getTime() + totalDuration * 60000,
     );
 
-    const conflictingBooking =
-      await this.bookingsRepository.findOverlappingBooking(
-        request.professionalId,
-        request.startDateTime,
-        endDateTime,
-      );
-    if (conflictingBooking) throw new TimeSlotAlreadyBookedError();
-
-    // 5. Calcula valor total
-    const valorTotal = serviceProfessionals.reduce(
-      (sum, sp) => sum + sp.preco,
-      0,
+    await this.ensureNoConflict(
+      request.professionalId,
+      request.startDateTime,
+      endDateTime,
     );
 
-    // 6. Lógica de aplicação de bônus (CORRIGIDA)
-    let valorFinal = valorTotal;
-    let pontosUsados = 0;
-    let descontoAplicadoReal = 0;
+    const totalValue = services.reduce((sum, s) => sum + s.preco, 0);
 
-    if (request.useBonusPoints) {
-      if (valorTotal <= 0) {
-        throw new InvalidBonusRedemptionError(); // Não se pode aplicar bônus em serviço gratuito
-      }
-
-      const { points: availablePoints } =
-        await this.userBonusRepository.getValidPointsWithExpiration(
-          request.userId,
-          'BOOKING_POINTS', // Considerar se este é o tipo de bônus correto para resgate
-          new Date(),
-        );
-
-      if (availablePoints < MIN_POINTS_TO_REDEEM) {
-        throw new InsufficientBonusPointsError();
-      }
-
-      // Calcula o desconto máximo que pode ser dado, respeitando o valor mínimo do agendamento
-      const maxPossibleDiscountValue =
-        valorTotal - MIN_BOOKING_VALUE_AFTER_DISCOUNT;
-
-      // Calcula quantos pontos seriam necessários para cobrir esse desconto máximo.
-      // Usamos Math.ceil porque se, por exemplo, 199.98 pontos forem necessários,
-      // o usuário deve gastar 200 pontos inteiros.
-      const pointsNeededForMaxDiscount = Math.ceil(
-        maxPossibleDiscountValue / VALUE_PER_POINT,
-      );
-
-      // Calcula o valor de desconto que os pontos disponíveis podem oferecer
-      const discountValueFromAvailablePoints =
-        availablePoints * VALUE_PER_POINT;
-
-      // O desconto real a ser aplicado é o menor entre:
-      // 1. O desconto que os pontos disponíveis podem dar (discountValueFromAvailablePoints)
-      // 2. O desconto máximo possível para atingir o valor mínimo do agendamento (maxPossibleDiscountValue)
-      descontoAplicadoReal = Math.min(
-        discountValueFromAvailablePoints,
-        maxPossibleDiscountValue,
-      );
-
-      // Ajusta os pontos a serem efetivamente consumidos
-      if (
-        availablePoints >= pointsNeededForMaxDiscount &&
-        maxPossibleDiscountValue > 0
-      ) {
-        // Se o usuário tem pontos suficientes para o desconto máximo (que leva ao valor mínimo do booking)
-        // e há de fato um desconto a ser aplicado.
-        pontosUsados = pointsNeededForMaxDiscount;
-      } else {
-        // Caso contrário, usa os pontos disponíveis (ou o equivalente ao desconto que eles podem dar)
-        // Isso cobre o caso onde os pontos disponíveis são menores que os necessários para o desconto máximo,
-        // ou o caso onde o desconto máximo é zero ou negativo (embora `valorTotal <= 0` já trate parte disso).
-        pontosUsados = Math.floor(descontoAplicadoReal / VALUE_PER_POINT);
-        // Se após o Math.min, o descontoAplicadoReal for menor que o valor dos availablePoints,
-        // recalculamos os pontos usados para refletir o descontoAplicadoReal.
-        // Ex: availablePoints = 300 (R$150), maxPossibleDiscountValue = R$50.
-        // descontoAplicadoReal = R$50. pontosUsados = Math.floor(50 / 0.5) = 100.
-      }
-
-      // Garante que não usamos mais pontos do que o disponível.
-      // Esta linha é uma segurança adicional, a lógica anterior deve tender a respeitar availablePoints.
-      pontosUsados = Math.min(pontosUsados, availablePoints);
-
-      // Recalcula o desconto aplicado com base nos pontos que serão efetivamente usados, para garantir consistência.
-      descontoAplicadoReal = pontosUsados * VALUE_PER_POINT;
-      // Limita novamente pelo desconto máximo possível, caso o arredondamento de pontos tenha alterado o valor.
-      descontoAplicadoReal = Math.min(
-        descontoAplicadoReal,
-        maxPossibleDiscountValue,
-      );
-
-      // Ajusta o valor final do agendamento
-      valorFinal = valorTotal - descontoAplicadoReal;
-      // Garante que o valor final não seja menor que o mínimo permitido.
-      valorFinal = Math.max(valorFinal, MIN_BOOKING_VALUE_AFTER_DISCOUNT);
-      // Se valorTotal já for igual ou menor que MIN_BOOKING_VALUE_AFTER_DISCOUNT, e useBonusPoints=true,
-      // o descontoAplicadoReal será 0, pontosUsados 0, valorFinal = valorTotal.
-      // A exceção InvalidBonusRedemptionError no início trata valorTotal <= 0.
-      // Se valorTotal > 0 mas valorTotal <= MIN_BOOKING_VALUE_AFTER_DISCOUNT, maxPossibleDiscountValue <=0.
-      // Nesse caso, descontoAplicadoReal será 0, pontosUsados 0.
-
-      // Consome pontos se efetivamente utilizados
-      if (pontosUsados > 0) {
-        await this.userBonusRepository.consumePoints(
-          request.userId,
-          pontosUsados,
-        );
-      }
+    // Verificar conflito entre cupom e pontos de bônus
+    if (request.couponCode && request.useBonusPoints) {
+      throw new CouponBonusConflictError();
     }
 
-    // 7. Cria o agendamento
+    let couponDiscount = 0;
+    let couponId: string | undefined;
+
+    // Aplicar cupom de desconto se existir
+    if (request.couponCode) {
+      const couponValidation = await this.validateAndApplyCoupon(
+        request.couponCode,
+        request.userId,
+        request.professionalId,
+        request.services,
+        totalValue,
+      );
+
+      couponDiscount = couponValidation.discount;
+      couponId = couponValidation.couponId;
+    }
+
+    // Calcular valor após desconto do cupom
+    const valueAfterCoupon = totalValue - couponDiscount;
+
+    // Aplicar pontos de bônus (apenas se não tiver cupom)
+    const bonusResult =
+      !request.couponCode && request.useBonusPoints
+        ? await this.applyBonusPoints(request.userId, valueAfterCoupon)
+        : {
+            finalValue: valueAfterCoupon,
+            pointsUsed: 0,
+            discount: 0,
+            details: [],
+          };
+
     const booking = await this.bookingsRepository.create({
       dataHoraInicio: request.startDateTime,
       dataHoraFim: endDateTime,
@@ -197,29 +111,231 @@ export class CreateBookingUseCase {
       user: { connect: { id: request.userId } },
       profissional: { connect: { id: request.professionalId } },
       status: 'PENDENTE',
-      valorFinal: parseFloat(valorFinal.toFixed(2)),
-      pontosUtilizados: pontosUsados,
+      valorFinal: parseFloat(bonusResult.finalValue.toFixed(2)),
+      pontosUtilizados: bonusResult.pointsUsed,
+      coupon: couponId ? { connect: { id: couponId } } : undefined,
+      couponDiscount,
       items: {
-        create: serviceProfessionals.map((sp) => ({
-          serviceProfessionalId: sp.id,
-          preco: sp.preco,
-          nome: sp.service.nome,
-          duracao: sp.duracao,
-          serviceId: sp.service.id,
+        create: services.map((s) => ({
+          serviceProfessionalId: s.id,
+          preco: s.preco,
+          nome: s.service.nome,
+          duracao: s.duracao,
+          serviceId: s.service.id,
         })),
       },
     });
 
-    // 8. Registra o resgate de bônus (se aplicável)
-    if (pontosUsados > 0 && descontoAplicadoReal > 0) {
-      await this.bonusRedemptionRepository.create({
-        user: { connect: { id: request.userId } },
-        booking: { connect: { id: booking.id } },
-        pointsUsed: pontosUsados,
-        discount: parseFloat(descontoAplicadoReal.toFixed(2)),
+    // Registrar resgate de pontos (se aplicável)
+    if (bonusResult.pointsUsed > 0 && bonusResult.discount > 0) {
+      await this.registerBonusRedemptions(
+        request.userId,
+        booking.id,
+        bonusResult.pointsUsed,
+        bonusResult.discount,
+        bonusResult.details,
+      );
+    }
+
+    // Registrar resgate de cupom (se aplicável)
+    if (couponId && couponDiscount > 0) {
+      await this.couponRepository.registerRedemption({
+        couponId,
+        userId: request.userId,
+        bookingId: booking.id,
+        discount: couponDiscount,
       });
     }
 
     return booking;
+  }
+
+  private async validateAndApplyCoupon(
+    code: string,
+    userId: string,
+    professionalId: string,
+    services: Array<{ serviceId: string }>,
+    totalValue: number,
+  ) {
+    const coupon = await this.couponRepository.findByCode(code);
+
+    if (!coupon || !coupon.active) {
+      throw new InvalidCouponError();
+    }
+
+    // Verificar validade
+    if (coupon.endDate && coupon.endDate < new Date()) {
+      throw new InvalidCouponError('Cupom expirado');
+    }
+
+    // Verificar usos máximos
+    if (coupon.maxUses && coupon.uses >= coupon.maxUses) {
+      throw new InvalidCouponError('Limite de usos do cupom atingido');
+    }
+
+    // Verificar escopo
+    switch (coupon.scope) {
+      case 'PROFESSIONAL':
+        if (coupon.professionalId !== professionalId) {
+          throw new CouponNotApplicableError();
+        }
+        break;
+      case 'SERVICE': {
+        const serviceIds = services.map((s) => s.serviceId);
+        if (!coupon.serviceId || !serviceIds.includes(coupon.serviceId)) {
+          throw new CouponNotApplicableError();
+        }
+        break;
+      }
+    }
+
+    // Verificar valor mínimo
+    if (coupon.minBookingValue && totalValue < coupon.minBookingValue) {
+      throw new CouponNotApplicableError(
+        `Valor mínimo para este cupom: R$ ${coupon.minBookingValue.toFixed(2)}`,
+      );
+    }
+
+    // Calcular desconto
+    let discount = 0;
+    switch (coupon.type) {
+      case 'PERCENTAGE':
+        discount = totalValue * (coupon.value / 100);
+        break;
+      case 'FIXED':
+        discount = Math.min(coupon.value, totalValue);
+        break;
+      case 'FREE':
+        discount = totalValue;
+        break;
+    }
+
+    return {
+      couponId: coupon.id,
+      discount,
+    };
+  }
+
+  private validateDate(start: Date) {
+    if (start < new Date()) throw new InvalidDateTimeError();
+  }
+
+  private async loadEntities(userId: string, professionalId: string) {
+    const [user, professional] = await Promise.all([
+      this.usersRepository.findById(userId),
+      this.professionalsRepository.findById(professionalId),
+    ]);
+    if (!user) throw new UserNotFoundError();
+    if (!professional) throw new ProfessionalNotFoundError();
+    return [user, professional];
+  }
+
+  private async loadAndValidateServices(
+    services: BookingRequest['services'],
+    professionalId: string,
+  ) {
+    const result = await Promise.all(
+      services.map(async ({ serviceId }) => {
+        const sp =
+          await this.serviceProfessionalRepository.findByServiceAndProfessional(
+            serviceId,
+            professionalId,
+          );
+        if (!sp) throw new ServiceProfessionalNotFoundError();
+        if (sp.duracao <= 0) throw new InvalidDurationError();
+        return sp;
+      }),
+    );
+    if (result.length === 0) throw new InvalidDurationError();
+    return result;
+  }
+
+  private async ensureNoConflict(
+    professionalId: string,
+    start: Date,
+    end: Date,
+  ) {
+    const conflicting = await this.bookingsRepository.findOverlappingBooking(
+      professionalId,
+      start,
+      end,
+    );
+    if (conflicting) throw new TimeSlotAlreadyBookedError();
+  }
+
+  private async applyBonusPoints(userId: string, totalValue: number) {
+    if (totalValue <= 0) throw new InvalidBonusRedemptionError();
+
+    const allBonuses =
+      await this.userBonusRepository.getValidPointsWithExpiration(
+        userId,
+        new Date(),
+      );
+    const totalPoints = allBonuses.reduce((sum, b) => sum + b.points, 0);
+
+    if (totalPoints < MIN_POINTS_TO_REDEEM)
+      throw new InsufficientBonusPointsError();
+
+    const maxDiscount = totalValue - MIN_BOOKING_VALUE_AFTER_DISCOUNT;
+    const maxPoints = Math.ceil(maxDiscount / VALUE_PER_POINT);
+    const pointsToUse = Math.min(totalPoints, maxPoints);
+    const discount = pointsToUse * VALUE_PER_POINT;
+    const finalValue = Math.max(
+      totalValue - discount,
+      MIN_BOOKING_VALUE_AFTER_DISCOUNT,
+    );
+
+    const details: Array<{ type: string; pointsUsed: number }> = [];
+
+    let remaining = pointsToUse;
+    const bonusesSorted = [...allBonuses].sort((a, b) => {
+      if (!a.expiresAt) return 1;
+      if (!b.expiresAt) return -1;
+      return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
+    });
+
+    for (const bonus of bonusesSorted) {
+      if (remaining <= 0) break;
+
+      const toConsume = Math.min(remaining, bonus.points);
+      await this.userBonusRepository.consumePoints(
+        userId,
+        toConsume,
+        bonus.type,
+      );
+      details.push({ type: bonus.type, pointsUsed: toConsume });
+      remaining -= toConsume;
+    }
+
+    return {
+      finalValue,
+      pointsUsed: pointsToUse,
+      discount,
+      details,
+    };
+  }
+
+  private async registerBonusRedemptions(
+    userId: string,
+    bookingId: string,
+    totalPoints: number,
+    discount: number,
+    details: Array<{ type: string; pointsUsed: number }>,
+  ) {
+    await this.bonusRedemptionRepository.create({
+      user: { connect: { id: userId } },
+      booking: { connect: { id: bookingId } },
+      pointsUsed: totalPoints,
+      discount: parseFloat(discount.toFixed(2)),
+    });
+
+    for (const detail of details) {
+      await this.bonusRedemptionRepository.create({
+        user: { connect: { id: userId } },
+        booking: { connect: { id: bookingId } },
+        pointsUsed: detail.pointsUsed,
+        discount: parseFloat(discount.toFixed(2)),
+      });
+    }
   }
 }

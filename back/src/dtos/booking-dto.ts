@@ -39,6 +39,9 @@ export function toBookingDTO(booking: BookingDTO): BookingDTO {
     usuarioId: booking.usuarioId,
     observacoes: booking.observacoes ?? null,
     valorFinal: booking.valorFinal ?? null,
+    pontosUtilizados: booking.pontosUtilizados ?? null,
+    couponId: booking.couponId ?? null,
+    couponDiscount: booking.couponDiscount ?? null,
     createdAt: booking.createdAt,
     profissional: {
       id: booking.profissional.id,
@@ -65,3 +68,46 @@ export function toBookingDTO(booking: BookingDTO): BookingDTO {
     })),
   };
 }
+
+export const mockBooking: BookingDTO = {
+  id: 'booking-123',
+  usuarioId: 'user-123',
+  profissionalId: 'pro-123',
+  canceledAt: null,
+  confirmedAt: null,
+  createdAt: new Date('2023-01-01T09:00:00'),
+  updatedAt: new Date('2023-01-01T09:00:00'),
+  dataHoraInicio: new Date('2023-01-01T10:00:00'),
+  dataHoraFim: new Date('2023-01-01T11:00:00'),
+  observacoes: 'Test booking',
+  status: 'CONFIRMADO',
+  valorFinal: 100,
+  pontosUtilizados: 0,
+  couponId: null,
+  couponDiscount: null,
+  user: {
+    id: 'user-123',
+    nome: 'John Doe',
+  },
+  profissional: {
+    id: 'pro-123',
+    user: {
+      id: 'pro-user-123',
+      nome: 'Professional User',
+    },
+  },
+  items: [
+    {
+      id: 'item-123',
+      serviceProfessional: {
+        id: 'sp-123',
+        service: {
+          id: 'service-123',
+          nome: 'Service Name',
+        },
+      },
+      preco: 100,
+      duracao: 60,
+    },
+  ],
+};

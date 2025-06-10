@@ -1,116 +1,128 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
-import { UserNotFoundError } from '@/use-cases/errors/user-not-found-error';
-import { UserAlreadyVerifiedError } from '@/use-cases/errors/user-already-verified-error';
-import { InMemoryVerificationTokensRepository } from '@/repositories/in-memory/in-memory-tokens-repository';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { VerifyEmailUseCase } from './verify-email-use-case';
-import { InvalidTokenError } from '@/use-cases/errors/invalid-token-error';
+import { InvalidTokenError } from '../errors/invalid-token-error';
+import { UserNotFoundError } from '../errors/user-not-found-error';
+import { UserAlreadyVerifiedError } from '../errors/user-already-verified-error';
+import { createMockUsersRepository } from '@/mock/mock-repositories';
 
-let usersRepository: InMemoryUsersRepository;
-let tokensRepository: InMemoryVerificationTokensRepository;
-let sut: VerifyEmailUseCase;
+const createMockVerificationTokensRepository = () => ({
+  findByToken: vi.fn(),
+  delete: vi.fn(),
+  create: vi.fn(),
+});
 
 describe('VerifyEmailUseCase', () => {
+  let verifyEmailUseCase: VerifyEmailUseCase;
+  let mockVerificationTokensRepository: ReturnType<
+    typeof createMockVerificationTokensRepository
+  >;
+  let mockUsersRepository: ReturnType<typeof createMockUsersRepository>;
+
+  const verificationToken = 'valid-token';
+  const userId = 'user-id-123';
+
   beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
-    tokensRepository = new InMemoryVerificationTokensRepository();
-    sut = new VerifyEmailUseCase(tokensRepository, usersRepository);
+    vi.clearAllMocks();
+
+    mockVerificationTokensRepository = createMockVerificationTokensRepository();
+    mockUsersRepository = createMockUsersRepository();
+
+    verifyEmailUseCase = new VerifyEmailUseCase(
+      mockVerificationTokensRepository,
+      mockUsersRepository,
+    );
   });
 
-  it('deve verificar o e-mail com token válido dentro de 24h', async () => {
-    const user = await usersRepository.create({
-      id: 'user-1',
-      nome: 'Jane Doe',
-      email: 'jane@example.com',
-      senha: 'hashed-password',
-      telefone: null,
-      role: 'CLIENTE',
-      emailVerified: false,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  it('deve verificar o e-mail com sucesso', async () => {
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1h no futuro
+
+    mockVerificationTokensRepository.findByToken.mockResolvedValue({
+      id: 'token-id',
+      token: verificationToken,
+      userId,
+      expiresAt,
     });
 
-    await tokensRepository.create(
-      'valid-token',
-      user.id,
-      new Date(Date.now() + 1000 * 60 * 60 * 2), // 2 horas no futuro
+    mockUsersRepository.findById.mockResolvedValue({
+      id: userId,
+      emailVerified: false,
+    });
+
+    await verifyEmailUseCase.execute({ verificationToken });
+
+    expect(mockUsersRepository.update).toHaveBeenCalledWith(userId, {
+      emailVerified: true,
+    });
+
+    expect(mockVerificationTokensRepository.delete).toHaveBeenCalledWith(
+      'token-id',
     );
-
-    await sut.execute({ verificationToken: 'valid-token' });
-
-    const updatedUser = await usersRepository.findById(user.id);
-    expect(updatedUser?.emailVerified).toBeTruthy();
   });
 
-  it('deve lançar erro se o token não existir', async () => {
-    await expect(() =>
-      sut.execute({ verificationToken: 'nonexistent-token' }),
-    ).rejects.toBeInstanceOf(InvalidTokenError);
+  it('deve lançar erro se o token não for encontrado', async () => {
+    mockVerificationTokensRepository.findByToken.mockResolvedValue(null);
+
+    await expect(
+      verifyEmailUseCase.execute({ verificationToken }),
+    ).rejects.toThrow(InvalidTokenError);
+
+    expect(mockUsersRepository.findById).not.toHaveBeenCalled();
   });
 
   it('deve lançar erro se o usuário não for encontrado', async () => {
-    await tokensRepository.create(
-      'orphan-token',
-      'nonexistent-user-id',
-      new Date(Date.now() + 1000 * 60 * 60),
-    );
-
-    await expect(() =>
-      sut.execute({ verificationToken: 'orphan-token' }),
-    ).rejects.toBeInstanceOf(UserNotFoundError);
-  });
-
-  it('deve lançar erro se o usuário já tiver o email verificado', async () => {
-    const user = await usersRepository.create({
-      id: 'user-2',
-      nome: 'Already Verified',
-      email: 'verified@example.com',
-      senha: 'hashed-password',
-      telefone: null,
-      role: 'CLIENTE',
-      emailVerified: true, // já verificado
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    mockVerificationTokensRepository.findByToken.mockResolvedValue({
+      id: 'token-id',
+      token: verificationToken,
+      userId,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60),
     });
 
-    await tokensRepository.create(
-      'already-verified-token',
-      user.id,
-      new Date(Date.now() + 1000 * 60 * 60),
-    );
+    mockUsersRepository.findById.mockResolvedValue(null);
 
-    await expect(() =>
-      sut.execute({ verificationToken: 'already-verified-token' }),
-    ).rejects.toBeInstanceOf(UserAlreadyVerifiedError);
+    await expect(
+      verifyEmailUseCase.execute({ verificationToken }),
+    ).rejects.toThrow(UserNotFoundError);
   });
 
-  it('deve lançar erro se o token estiver expirado (mais de 24h)', async () => {
-    const user = await usersRepository.create({
-      id: 'user-3',
-      nome: 'Expired Token User',
-      email: 'expired@example.com',
-      senha: 'hashed-password',
-      telefone: null,
-      role: 'CLIENTE',
+  it('deve lançar erro se o usuário já estiver verificado', async () => {
+    mockVerificationTokensRepository.findByToken.mockResolvedValue({
+      id: 'token-id',
+      token: verificationToken,
+      userId,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+    });
+
+    mockUsersRepository.findById.mockResolvedValue({
+      id: userId,
+      emailVerified: true,
+    });
+
+    await expect(
+      verifyEmailUseCase.execute({ verificationToken }),
+    ).rejects.toThrow(UserAlreadyVerifiedError);
+  });
+
+  it('deve lançar erro se o token estiver expirado e deletar o token', async () => {
+    const expiredDate = new Date(Date.now() - 1000 * 60 * 60); // 1h atrás
+
+    mockVerificationTokensRepository.findByToken.mockResolvedValue({
+      id: 'token-id',
+      token: verificationToken,
+      userId,
+      expiresAt: expiredDate,
+    });
+
+    mockUsersRepository.findById.mockResolvedValue({
+      id: userId,
       emailVerified: false,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
-    const expiredDate = new Date(Date.now() - 1000 * 60 * 60 * 25); // 25h atrás
+    await expect(
+      verifyEmailUseCase.execute({ verificationToken }),
+    ).rejects.toThrow(InvalidTokenError);
 
-    await tokensRepository.create('expired-token', user.id, expiredDate);
-
-    await expect(() =>
-      sut.execute({ verificationToken: 'expired-token' }),
-    ).rejects.toBeInstanceOf(InvalidTokenError);
-
-    // Verifica se o token foi removido após expirar
-    const tokenStillExists =
-      await tokensRepository.findByToken('expired-token');
-    expect(tokenStillExists).toBeNull();
+    expect(mockVerificationTokensRepository.delete).toHaveBeenCalledWith(
+      'token-id',
+    );
   });
 });

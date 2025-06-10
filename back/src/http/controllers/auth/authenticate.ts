@@ -29,7 +29,6 @@ export async function authenticate(
       nome: user.nome,
       role: user.role,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
       telefone: user.telefone,
       emailVerified: user.emailVerified,
       active: user.active,
@@ -41,14 +40,13 @@ export async function authenticate(
       .send({ token, user: userWithoutPassword });
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
-      return reply.status(401).send({ message: 'Credenciais inválidas' });
+      return reply.status(401).send({ message: err.message });
     }
-    if (err instanceof InactiveUserError) {
-      return reply.status(403).send({ message: 'Conta desativada' });
-    }
-
-    if (err instanceof EmailNotVerifiedError) {
-      return reply.status(403).send({ message: 'Email não verificado' });
+    if (
+      err instanceof InactiveUserError ||
+      err instanceof EmailNotVerifiedError
+    ) {
+      return reply.status(403).send({ message: err.message });
     }
 
     if (err instanceof z.ZodError) {

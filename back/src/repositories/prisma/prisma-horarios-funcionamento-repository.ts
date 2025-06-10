@@ -50,10 +50,10 @@ export class PrismaHorariosFuncionamentoRepository
     return prisma.horarioFuncionamento.findMany({
       where: {
         profissionalId: professionalId,
-        ativo: true, // Filtra apenas horários ativos (opcional)
+        ativo: true,
       },
       orderBy: {
-        diaSemana: 'asc', // Ordena de domingo (0) a sábado (6)
+        diaSemana: 'asc',
       },
     });
   }

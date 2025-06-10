@@ -9,7 +9,6 @@ import {
   createMockUsersRepository,
 } from '@/mock/mock-repositories';
 
-// Tipos para os mocks
 type MockProfessionalsRepository = ProfessionalsRepository & {
   findByUserId: ReturnType<typeof vi.fn>;
   create: ReturnType<typeof vi.fn>;
@@ -80,9 +79,10 @@ describe('Create Professional Use Case', () => {
       role: 'PROFISSIONAL',
     });
     expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
-      userId: 'user-123',
       especialidade: 'Dentista',
       bio: 'Especialista em odontologia',
+      ativo: true,
+      avatarUrl: undefined,
       documento: '123456',
       user: { connect: { id: 'user-123' } },
     });
@@ -144,8 +144,11 @@ describe('Create Professional Use Case', () => {
       documento: null,
     });
     expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
-      userId: 'user-123',
       especialidade: 'Dentista',
+      bio: undefined,
+      documento: undefined,
+      ativo: true,
+      avatarUrl: undefined,
       user: { connect: { id: 'user-123' } },
     });
   });

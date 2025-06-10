@@ -29,29 +29,22 @@ export async function listHolidays(
       return reply.status(400).send(formatZodError(err));
     }
 
-    if (err instanceof InvalidPageError) {
+    if (
+      err instanceof InvalidPageError ||
+      err instanceof InvalidLimitError ||
+      err instanceof InvalidPageRangeError
+    ) {
       return reply.status(400).send({ message: err.message });
     }
 
-    if (err instanceof InvalidLimitError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof InvalidPageRangeError) {
-      return reply.status(400).send({ message: err.message });
+    if (err instanceof ProfissionalTentandoPegarInformacoesDeOutro) {
+      return reply.status(403).send({ message: err.message });
     }
 
     if (err instanceof HolidayNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
 
-    if (err instanceof ProfissionalTentandoPegarInformacoesDeOutro) {
-      return reply.status(403).send({
-        message: err.message,
-      });
-    }
-
-    // Caso seja um erro desconhecido, relança
     throw err;
   }
 }

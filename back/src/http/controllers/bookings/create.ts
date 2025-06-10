@@ -11,14 +11,23 @@ import { formatZodError } from '@/utils/formatZodError';
 import { createBookingBodySchema } from '@/schemas/bookings';
 import { InsufficientBonusPointsError } from '@/use-cases/errors/insufficient-bonus-points-error';
 import { InvalidBonusRedemptionError } from '@/use-cases/errors/invalid-bonus-redemption-error';
+import { CouponBonusConflictError } from '@/use-cases/errors/coupon-bonus-conflict-error';
+import { CouponNotApplicableError } from '@/use-cases/errors/coupon-not-applicable-error';
+import { InvalidCouponError } from '@/use-cases/bookings/invalid-coupon-error';
 
 export async function createBooking(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
   try {
-    const { professionalId, services, startDateTime, notes, useBonusPoints } =
-      createBookingBodySchema.parse(request.body);
+    const {
+      professionalId,
+      services,
+      startDateTime,
+      notes,
+      useBonusPoints,
+      couponCode,
+    } = createBookingBodySchema.parse(request.body);
 
     const createBookingUseCase = makeCreateBookingUseCase();
 
@@ -29,6 +38,7 @@ export async function createBooking(
       startDateTime: new Date(startDateTime),
       notes,
       useBonusPoints,
+      couponCode,
     });
 
     return reply.status(201).send();
@@ -37,15 +47,11 @@ export async function createBooking(
       return reply.status(400).send(formatZodError(err));
     }
 
-    if (err instanceof UserNotFoundError) {
-      return reply.status(404).send({ message: err.message });
-    }
-
-    if (err instanceof ProfessionalNotFoundError) {
-      return reply.status(404).send({ message: err.message });
-    }
-
-    if (err instanceof ServiceNotFoundError) {
+    if (
+      err instanceof UserNotFoundError ||
+      err instanceof ProfessionalNotFoundError ||
+      err instanceof ServiceNotFoundError
+    ) {
       return reply.status(404).send({ message: err.message });
     }
 
@@ -53,18 +59,15 @@ export async function createBooking(
       return reply.status(409).send({ message: err.message });
     }
 
-    if (err instanceof InvalidDateTimeError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof InvalidDurationError) {
-      return reply.status(400).send({ message: err.message });
-    }
-    if (err instanceof InsufficientBonusPointsError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof InvalidBonusRedemptionError) {
+    if (
+      err instanceof InvalidDateTimeError ||
+      err instanceof InvalidDurationError ||
+      err instanceof InsufficientBonusPointsError ||
+      err instanceof InvalidBonusRedemptionError ||
+      err instanceof CouponBonusConflictError ||
+      err instanceof InvalidCouponError ||
+      err instanceof CouponNotApplicableError
+    ) {
       return reply.status(400).send({ message: err.message });
     }
 

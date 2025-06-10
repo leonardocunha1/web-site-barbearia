@@ -18,12 +18,11 @@ export const userSchema = z.object({
   id: z.string().uuid(),
   nome: z.string(),
   email: z.string().email().optional(),
-  telefone: z.string().optional(),
+  telefone: z.string().nullable().optional(),
   role: z.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
   emailVerified: z.boolean(),
   active: z.boolean(),
   createdAt: z.date(),
-  updatedAt: z.date().nullable(),
 });
 
 export const updateProfileBodySchema = z.object({

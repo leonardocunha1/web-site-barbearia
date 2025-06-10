@@ -1,87 +1,163 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UpdatePasswordUseCase } from './update-password-use-case';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
+import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
 import { SamePasswordError } from '../errors/same-password-error';
+import { createMockUsersRepository } from '@/mock/mock-repositories';
+
 import bcrypt from 'bcryptjs';
 
-let usersRepository: InMemoryUsersRepository;
-let updatePasswordUseCase: UpdatePasswordUseCase;
+vi.mock('bcryptjs', () => {
+  return {
+    default: {
+      compare: vi.fn(),
+      hash: vi.fn(),
+    },
+  };
+}); // Importar depois do vi.mock
+const bcryptCompare = bcrypt.compare as ReturnType<typeof vi.fn>;
+const bcryptHash = bcrypt.hash as ReturnType<typeof vi.fn>;
 
-describe('UpdatePasswordUseCase', () => {
+type MockUsersRepository = UsersRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  updatePassword: ReturnType<typeof vi.fn>;
+};
+
+describe('Update Password Use Case', () => {
+  let useCase: UpdatePasswordUseCase;
+  let mockUsersRepository: MockUsersRepository;
+
   beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
-    updatePasswordUseCase = new UpdatePasswordUseCase(usersRepository);
+    vi.clearAllMocks();
+
+    mockUsersRepository = {
+      ...createMockUsersRepository(),
+      findById: vi.fn(),
+      updatePassword: vi.fn(),
+    };
+
+    useCase = new UpdatePasswordUseCase(mockUsersRepository);
   });
+
+  const mockUser = {
+    id: 'user-123',
+    email: 'john@example.com',
+    senha: 'hashed-current-password',
+    nome: 'John Doe',
+    telefone: '123456789',
+    role: 'CLIENTE',
+    active: true,
+  };
 
   it('deve atualizar a senha com sucesso', async () => {
-    const senhaOriginal = await bcrypt.hash('senha-atual', 6);
-    const user = await usersRepository.create({
-      nome: 'João',
-      email: 'joao@example.com',
-      senha: senhaOriginal,
-      role: 'CLIENTE',
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    bcryptCompare
+      .mockResolvedValueOnce(true) // currentPassword confere
+      .mockResolvedValueOnce(false); // newPassword diferente da atual
+    bcryptHash.mockResolvedValue('hashed-new-password');
+    mockUsersRepository.updatePassword.mockResolvedValue({
+      ...mockUser,
+      senha: 'hashed-new-password',
     });
 
-    await updatePasswordUseCase.execute({
-      userId: user.id,
-      currentPassword: 'senha-atual',
-      newPassword: 'nova-senha',
+    const result = await useCase.execute({
+      userId: 'user-123',
+      currentPassword: 'current-password',
+      newPassword: 'new-password',
     });
 
-    const updatedUser = await usersRepository.findById(user.id);
-    const senhaAtualizadaCorreta = await bcrypt.compare(
-      'nova-senha',
-      updatedUser!.senha,
+    expect(result.user.id).toBe('user-123');
+    expect(result.user.email).toBe('john@example.com');
+    expect(bcryptCompare).toHaveBeenCalledWith(
+      'current-password',
+      'hashed-current-password',
     );
-
-    expect(senhaAtualizadaCorreta).toBe(true);
+    expect(bcryptCompare).toHaveBeenCalledWith(
+      'new-password',
+      'hashed-current-password',
+    );
+    expect(bcryptHash).toHaveBeenCalledWith('new-password', 6);
+    expect(mockUsersRepository.updatePassword).toHaveBeenCalledWith(
+      'user-123',
+      'hashed-new-password',
+    );
   });
 
-  it('deve lançar erro se o usuário não existir', async () => {
-    await expect(() =>
-      updatePasswordUseCase.execute({
-        userId: 'usuario-inexistente',
-        currentPassword: 'qualquer',
-        newPassword: 'nova',
+  it('deve lançar erro quando usuário não existe', async () => {
+    mockUsersRepository.findById.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute({
+        userId: 'non-existent-user',
+        currentPassword: 'current-password',
+        newPassword: 'new-password',
       }),
-    ).rejects.toBeInstanceOf(UserNotFoundError);
+    ).rejects.toThrow(UserNotFoundError);
+    expect(mockUsersRepository.updatePassword).not.toHaveBeenCalled();
   });
 
-  it('deve lançar erro se a senha atual estiver incorreta', async () => {
-    const senhaHash = await bcrypt.hash('senha-correta', 6);
-    const user = await usersRepository.create({
-      nome: 'Maria',
-      email: 'maria@example.com',
-      senha: senhaHash,
-      role: 'CLIENTE',
+  it('deve lançar erro quando a senha atual está incorreta', async () => {
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    bcryptCompare.mockResolvedValue(false); // senha incorreta
+
+    await expect(
+      useCase.execute({
+        userId: 'user-123',
+        currentPassword: 'wrong-password',
+        newPassword: 'new-password',
+      }),
+    ).rejects.toThrow(InvalidCredentialsError);
+    expect(mockUsersRepository.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it('deve lançar erro quando a nova senha é igual à atual', async () => {
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    bcryptCompare
+      .mockResolvedValueOnce(true) // senha atual confere
+      .mockResolvedValueOnce(true); // nova senha igual à atual
+
+    await expect(
+      useCase.execute({
+        userId: 'user-123',
+        currentPassword: 'current-password',
+        newPassword: 'same-as-current',
+      }),
+    ).rejects.toThrow(SamePasswordError);
+    expect(mockUsersRepository.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it('deve chamar bcrypt.hash com o custo 6', async () => {
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    bcryptCompare.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    bcryptHash.mockResolvedValue('hashed-new-password');
+    mockUsersRepository.updatePassword.mockResolvedValue(mockUser);
+
+    await useCase.execute({
+      userId: 'user-123',
+      currentPassword: 'current-password',
+      newPassword: 'new-password',
     });
 
-    await expect(() =>
-      updatePasswordUseCase.execute({
-        userId: user.id,
-        currentPassword: 'senha-errada',
-        newPassword: 'nova-senha',
-      }),
-    ).rejects.toBeInstanceOf(InvalidCredentialsError);
+    expect(bcryptHash).toHaveBeenCalledWith('new-password', 6);
   });
 
-  it('deve lançar erro se a nova senha for igual à senha atual', async () => {
-    const senhaHash = await bcrypt.hash('mesma-senha', 6);
-    const user = await usersRepository.create({
-      nome: 'Carlos',
-      email: 'carlos@example.com',
-      senha: senhaHash,
-      role: 'CLIENTE',
+  it('deve retornar apenas id e email do usuário após atualização', async () => {
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    bcryptCompare.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    bcryptHash.mockResolvedValue('hashed-new-password');
+    mockUsersRepository.updatePassword.mockResolvedValue(mockUser);
+
+    const result = await useCase.execute({
+      userId: 'user-123',
+      currentPassword: 'current-password',
+      newPassword: 'new-password',
     });
 
-    await expect(() =>
-      updatePasswordUseCase.execute({
-        userId: user.id,
-        currentPassword: 'mesma-senha',
-        newPassword: 'mesma-senha',
-      }),
-    ).rejects.toBeInstanceOf(SamePasswordError);
+    expect(result.user).toEqual({
+      id: 'user-123',
+      email: 'john@example.com',
+    });
+    expect(Object.keys(result.user)).toEqual(['id', 'email']);
   });
 });

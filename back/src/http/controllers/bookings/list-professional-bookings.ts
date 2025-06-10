@@ -41,6 +41,10 @@ export async function listProfessionalBookings(
 
     return reply.status(200).send(result);
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send(formatZodError(err));
+    }
+
     if (err instanceof BookingNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
@@ -49,19 +53,11 @@ export async function listProfessionalBookings(
       return reply.status(403).send({ message: err.message });
     }
 
-    if (err instanceof z.ZodError) {
-      return reply.status(400).send(formatZodError(err));
-    }
-
-    if (err instanceof InvalidPageError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof InvalidLimitError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof InvalidPageRangeError) {
+    if (
+      err instanceof InvalidPageError ||
+      err instanceof InvalidLimitError ||
+      err instanceof InvalidPageRangeError
+    ) {
       return reply.status(400).send({ message: err.message });
     }
 

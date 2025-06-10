@@ -6,6 +6,7 @@ import {
   listProfessionalServicesParamsSchema,
   listProfessionalServicesQuerySchema,
 } from '@/schemas/services';
+import { ProfessionalNotFoundError } from '@/use-cases/errors/professional-not-found-error';
 
 export async function listProfessionalServices(
   request: FastifyRequest,
@@ -42,6 +43,11 @@ export async function listProfessionalServices(
     if (err instanceof z.ZodError) {
       return reply.status(400).send(formatZodError(err));
     }
+
+    if (err instanceof ProfessionalNotFoundError) {
+      return reply.status(404).send({ message: err.message });
+    }
+
     throw err;
   }
 }

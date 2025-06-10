@@ -12,9 +12,9 @@ export async function createHoliday(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { date, motivo } = createHolidayBodySchema.parse(request.body);
-
   try {
+    const { date, motivo } = createHolidayBodySchema.parse(request.body);
+
     const createHolidayUseCase = makeCreateHolidayUseCase();
 
     await createHolidayUseCase.execute({
@@ -25,12 +25,16 @@ export async function createHoliday(
 
     return reply.status(201).send();
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send(formatZodError(err));
+    }
+
     if (err instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
 
     if (err instanceof PastDateError) {
-      return reply.status(400).send({ message: err.message });
+      return reply.status(422).send({ message: err.message });
     }
 
     if (err instanceof InvalidHolidayDescriptionError) {
@@ -39,10 +43,6 @@ export async function createHoliday(
 
     if (err instanceof DuplicateHolidayError) {
       return reply.status(409).send({ message: err.message });
-    }
-
-    if (err instanceof z.ZodError) {
-      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

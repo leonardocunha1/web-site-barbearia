@@ -76,7 +76,7 @@ export class GetBalanceUseCase {
         loyaltyValue,
         totalValue,
       },
-      expiresAt: nextExpiration, // Mostra quando os próximos pontos irão expirar
+      expiresAt: nextExpiration,
     };
   }
 
@@ -85,7 +85,7 @@ export class GetBalanceUseCase {
   }
 
   private getNearestExpirationDate(
-    dates: (Date | null | undefined)[],
+    dates: (Date | undefined)[],
   ): Date | undefined {
     const validDates = dates.filter((d): d is Date => d instanceof Date);
     if (validDates.length === 0) return undefined;

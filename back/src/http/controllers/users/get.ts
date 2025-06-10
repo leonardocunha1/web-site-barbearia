@@ -22,7 +22,7 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
       active: user.active,
     };
 
-    return reply.status(200).send(userWithoutPassword);
+    return reply.status(200).send({ user: userWithoutPassword });
   } catch (error) {
     if (error instanceof UserNotFoundError) {
       return reply.status(404).send({ message: error.message });

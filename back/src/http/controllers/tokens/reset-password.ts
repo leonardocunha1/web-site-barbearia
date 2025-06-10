@@ -20,11 +20,10 @@ export async function resetPassword(
       message: 'Senha redefinida com sucesso',
     });
   } catch (error) {
-    if (error instanceof InvalidTokenError) {
-      return reply.status(401).send({ message: error.message });
-    }
-
-    if (error instanceof ExpiredTokenError) {
+    if (
+      error instanceof InvalidTokenError ||
+      error instanceof ExpiredTokenError
+    ) {
       return reply.status(401).send({ message: error.message });
     }
 

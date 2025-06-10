@@ -1,84 +1,183 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UpdateUserProfileUseCase } from './update-user-profile-use-case';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
+import { UsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { EmailAlreadyExistsError } from '../errors/user-email-already-exists-error';
+import { createMockUsersRepository } from '@/mock/mock-repositories';
 
-let usersRepository: InMemoryUsersRepository;
-let updateUserProfileUseCase: UpdateUserProfileUseCase;
+type MockUsersRepository = UsersRepository & {
+  findById: ReturnType<typeof vi.fn>;
+  findByEmail: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+};
 
-describe('UpdateUserProfileUseCase', () => {
+describe('Update User Profile Use Case', () => {
+  let useCase: UpdateUserProfileUseCase;
+  let mockUsersRepository: MockUsersRepository;
+
   beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
-    updateUserProfileUseCase = new UpdateUserProfileUseCase(usersRepository);
+    mockUsersRepository = createMockUsersRepository();
+    useCase = new UpdateUserProfileUseCase(mockUsersRepository);
   });
 
-  it('deve atualizar o nome, email e telefone com sucesso', async () => {
-    const user = await usersRepository.create({
-      nome: 'Maria',
-      email: 'maria@example.com',
-      senha: '123456',
-      role: 'CLIENTE',
+  const mockUser = {
+    id: 'user-123',
+    nome: 'John Doe',
+    email: 'john@example.com',
+    telefone: '123456789',
+    role: 'CLIENTE',
+    active: true,
+  };
+
+  it('deve atualizar o perfil do usuário com sucesso', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      nome: 'John Updated',
     });
 
-    const { user: updatedUser } = await updateUserProfileUseCase.execute({
-      userId: user.id,
-      nome: 'Maria Clara',
-      email: 'mariaclara@example.com',
-      telefone: '11999999999',
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+      nome: 'John Updated',
     });
 
-    expect(updatedUser.nome).toBe('Maria Clara');
-    expect(updatedUser.email).toBe('mariaclara@example.com');
-    expect(updatedUser.telefone).toBe('11999999999');
+    // Verificar
+    expect(result.user.nome).toBe('John Updated');
+    expect(mockUsersRepository.findById).toHaveBeenCalledWith('user-123');
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      nome: 'John Updated',
+    });
   });
 
-  it('deve lançar erro se o usuário não for encontrado', async () => {
-    await expect(() =>
-      updateUserProfileUseCase.execute({
-        userId: 'inexistente',
-        nome: 'Novo Nome',
+  it('deve lançar erro quando usuário não existe', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(null);
+
+    // Executar e verificar
+    await expect(
+      useCase.execute({
+        userId: 'non-existent-user',
+        nome: 'John Updated',
       }),
-    ).rejects.toBeInstanceOf(UserNotFoundError);
+    ).rejects.toThrow(UserNotFoundError);
   });
 
-  it('deve lançar erro se o email for o mesmo do atual', async () => {
-    const user = await usersRepository.create({
-      nome: 'João',
-      email: 'joao@example.com',
-      senha: '123456',
-      role: 'CLIENTE',
+  it('deve lançar erro quando email já está em uso por outro usuário', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.findByEmail.mockResolvedValue({
+      ...mockUser,
+      id: 'other-user-456',
     });
 
-    await expect(() =>
-      updateUserProfileUseCase.execute({
-        userId: user.id,
-        email: 'joao@example.com',
+    // Executar e verificar
+    await expect(
+      useCase.execute({
+        userId: 'user-123',
+        email: 'existing@example.com',
       }),
-    ).rejects.toBeInstanceOf(InvalidDataError);
+    ).rejects.toThrow(EmailAlreadyExistsError);
   });
 
-  it('deve lançar erro se o novo email já estiver em uso por outro usuário', async () => {
-    await usersRepository.create({
-      nome: 'Ana',
-      email: 'ana@example.com',
-      senha: '123456',
-      role: 'CLIENTE',
-    });
+  it('deve lançar erro quando email fornecido é o mesmo que o atual', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
 
-    const user2 = await usersRepository.create({
-      nome: 'Beatriz',
-      email: 'bea@example.com',
-      senha: '123456',
-      role: 'CLIENTE',
-    });
-
-    await expect(() =>
-      updateUserProfileUseCase.execute({
-        userId: user2.id,
-        email: 'ana@example.com',
+    // Executar e verificar
+    await expect(
+      useCase.execute({
+        userId: 'user-123',
+        email: 'john@example.com', // mesmo email atual
       }),
-    ).rejects.toBeInstanceOf(EmailAlreadyExistsError);
+    ).rejects.toThrow(InvalidDataError);
+  });
+
+  it('deve atualizar apenas o telefone quando fornecido', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      telefone: '987654321',
+    });
+
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+      telefone: '987654321',
+    });
+
+    // Verificar
+    expect(result.user.telefone).toBe('987654321');
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      telefone: '987654321',
+    });
+  });
+
+  it('deve atualizar múltiplos campos simultaneamente', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.findByEmail.mockResolvedValue(null);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      nome: 'John Updated',
+      email: 'updated@example.com',
+      telefone: '987654321',
+    });
+
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+      nome: 'John Updated',
+      email: 'updated@example.com',
+      telefone: '987654321',
+    });
+
+    // Verificar
+    expect(result.user.nome).toBe('John Updated');
+    expect(result.user.email).toBe('updated@example.com');
+    expect(result.user.telefone).toBe('987654321');
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      nome: 'John Updated',
+      email: 'updated@example.com',
+      telefone: '987654321',
+    });
+  });
+
+  it('não deve chamar update se nenhum campo for fornecido', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+    });
+
+    // Verificar
+    expect(result.user).toEqual(mockUser);
+    expect(mockUsersRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('deve permitir atualizar para telefone null', async () => {
+    // Configurar mocks
+    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.update.mockResolvedValue({
+      ...mockUser,
+      telefone: null,
+    });
+
+    // Executar
+    const result = await useCase.execute({
+      userId: 'user-123',
+      telefone: null,
+    });
+
+    // Verificar
+    expect(result.user.telefone).toBeNull();
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      telefone: null,
+    });
   });
 });

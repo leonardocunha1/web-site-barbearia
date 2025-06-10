@@ -22,11 +22,10 @@ export async function listBusinessHours(
 
     return reply.status(200).send({ businessHours });
   } catch (err) {
-    if (err instanceof ProfessionalNotFoundError) {
-      return reply.status(404).send({ message: err.message });
-    }
-
-    if (err instanceof BusinessHoursNotFoundError) {
+    if (
+      err instanceof ProfessionalNotFoundError ||
+      err instanceof BusinessHoursNotFoundError
+    ) {
       return reply.status(404).send({ message: err.message });
     }
 

@@ -14,7 +14,7 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
     });
 
     const newExpiresAt = new Date();
-    newExpiresAt.setMonth(newExpiresAt.getMonth() + 6); // define nova validade para 6 meses a partir de hoje
+    newExpiresAt.setMonth(newExpiresAt.getMonth() + 6);
 
     if (
       !existingBonus ||
@@ -109,9 +109,9 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
 
   async getValidPointsWithExpiration(
     userId: string,
-    type: 'BOOKING_POINTS' | 'LOYALTY',
+    type: BonusType,
     currentDate: Date,
-  ): Promise<{ points: number; expiresAt: Date | null }> {
+  ): Promise<{ points: number; expiresAt?: Date }> {
     const userBonus = await prisma.userBonus.findUnique({
       where: {
         userId_type: {
@@ -121,27 +121,31 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
       },
     });
 
-    if (!userBonus) return { points: 0, expiresAt: null };
-
-    // Verifica se os pontos estão expirados
-    if (userBonus.expiresAt && userBonus.expiresAt < currentDate) {
-      return { points: 0, expiresAt: null };
+    if (
+      userBonus &&
+      (!userBonus.expiresAt || userBonus.expiresAt >= currentDate)
+    ) {
+      return {
+        points: userBonus.points,
+        expiresAt: userBonus.expiresAt ?? undefined,
+      };
     }
 
-    return {
-      points: userBonus.points,
-      expiresAt: userBonus.expiresAt,
-    };
+    return { points: 0, expiresAt: undefined };
   }
 
-  async consumePoints(userId: string, quantity: number): Promise<void> {
+  async consumePoints(
+    userId: string,
+    quantity: number,
+    type: 'BOOKING_POINTS' | 'LOYALTY',
+  ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const updated = await tx.userBonus.updateMany({
         where: {
           userId,
-          type: 'BOOKING_POINTS',
+          type,
           points: {
-            gte: quantity, // garante que só atualiza se houver pontos suficientes
+            gte: quantity,
           },
         },
         data: {
@@ -152,7 +156,9 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
       });
 
       if (updated.count === 0) {
-        throw new Error('Pontos insuficientes ou não encontrados');
+        throw new Error(
+          `Pontos insuficientes do tipo ${type} ou não encontrados`,
+        );
       }
     });
   }

@@ -36,6 +36,10 @@ export class UpdateUserProfileUseCase {
       );
     }
 
+    if (nome === undefined && email === undefined && telefone === undefined) {
+      return { user };
+    }
+
     if (email) {
       const userWithSameEmail = await this.usersRepository.findByEmail(email);
 

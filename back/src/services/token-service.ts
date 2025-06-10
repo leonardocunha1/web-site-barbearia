@@ -16,23 +16,23 @@ export class TokenService {
   constructor(private reply: FastifyReply) {}
 
   async generateTokens(user: UserForToken) {
-    // Crie um payload base
+    // payload base
     const payload: { role: string; profissionalId?: string } = {
       role: user.role,
     };
 
-    // Se for um PROFISSIONAL, adicione o profissionalId ao payload
+    // Se for um PROFISSIONAL, e adicionado o profissionalId ao payload
     if (user.role === 'PROFISSIONAL' && user.profissionalId) {
       payload.profissionalId = user.profissionalId;
     }
 
     const token = await this.reply.jwtSign(
-      payload, // Use o payload modificado aqui
+      payload, // payload modificado aqui
       { sign: { sub: user.id } },
     );
 
     const refreshToken = await this.reply.jwtSign(
-      payload, // Use o mesmo payload para o refresh token
+      payload, // Usar o mesmo payload para o refresh token
       { sign: { sub: user.id, expiresIn: '7d' } },
     );
 

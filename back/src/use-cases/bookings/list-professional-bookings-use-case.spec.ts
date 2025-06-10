@@ -3,7 +3,7 @@ import { ListProfessionalBookingsUseCase } from './list-professional-bookings-us
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
-import { BookingDTO } from '@/dtos/booking-dto';
+import { mockBooking } from '@/dtos/booking-dto';
 import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
 describe('ListProfessionalBookingsUseCase', () => {
@@ -14,46 +14,6 @@ describe('ListProfessionalBookingsUseCase', () => {
     mockBookingsRepository = createMockBookingsRepository();
     useCase = new ListProfessionalBookingsUseCase(mockBookingsRepository);
   });
-
-  const mockBooking: BookingDTO = {
-    id: 'booking-123',
-    canceledAt: null,
-    confirmedAt: null,
-    createdAt: new Date('2023-01-01T09:00:00'),
-    updatedAt: new Date('2023-01-01T09:00:00'),
-    profissionalId: 'pro-123',
-    usuarioId: 'user-123',
-    dataHoraInicio: new Date('2023-01-01T10:00:00'),
-    dataHoraFim: new Date('2023-01-01T11:00:00'),
-    observacoes: 'Test booking',
-    status: 'CONFIRMADO',
-    valorFinal: 100,
-    user: {
-      id: 'user-123',
-      nome: 'John Doe',
-    },
-    profissional: {
-      id: 'pro-123',
-      user: {
-        id: 'pro-user-123',
-        nome: 'Professional User',
-      },
-    },
-    items: [
-      {
-        id: 'item-123',
-        serviceProfessional: {
-          id: 'sp-123',
-          service: {
-            id: 'service-123',
-            nome: 'Service Name',
-          },
-        },
-        preco: 100,
-        duracao: 60,
-      },
-    ],
-  };
 
   it('deve retornar agendamentos com paginação', async () => {
     // Configurar mocks

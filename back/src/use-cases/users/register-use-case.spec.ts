@@ -1,80 +1,122 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
 import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository';
-import { RegisterUserUseCase } from './register-use-case';
-import { MockEmailService } from '@/mock/mock-email-service';
+import { UsersRepository } from '@/repositories/users-repository';
+import { createMockUsersRepository } from '@/mock/mock-repositories';
 
-let usersRepository: InMemoryUsersRepository;
-let emailService: MockEmailService;
-let sut: RegisterUserUseCase;
+import bcrypt from 'bcryptjs';
+import { RegisterUserUseCase } from './register-use-case';
+
+// Mock do bcryptjs antes do import
+vi.mock('bcryptjs', () => {
+  return {
+    default: {
+      hash: vi.fn(),
+    },
+  };
+}); // Import após vi.mock
+const bcryptHash = bcrypt.hash as ReturnType<typeof vi.fn>;
+
+type MockUsersRepository = UsersRepository & {
+  findByEmail: ReturnType<typeof vi.fn>;
+  create: ReturnType<typeof vi.fn>;
+};
 
 describe('Register User Use Case', () => {
+  let useCase: RegisterUserUseCase;
+  let mockUsersRepository: MockUsersRepository;
+  let sendVerificationEmail: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
-    usersRepository = new InMemoryUsersRepository();
-    emailService = new MockEmailService();
+    vi.clearAllMocks();
 
-    sut = new RegisterUserUseCase({
-      usersRepository,
-      sendVerificationEmail:
-        emailService.sendVerificationEmail.bind(emailService),
+    mockUsersRepository = {
+      ...createMockUsersRepository(),
+      findByEmail: vi.fn(),
+      create: vi.fn(),
+    };
+
+    sendVerificationEmail = vi.fn();
+
+    useCase = new RegisterUserUseCase({
+      usersRepository: mockUsersRepository,
+      sendVerificationEmail,
     });
   });
 
-  it('deve cadastrar um novo usuário', async () => {
-    await sut.execute({
-      nome: 'João Silva',
-      email: 'joao@example.com',
-      senha: '123456',
+  const userInput = {
+    nome: 'Alice',
+    email: 'alice@example.com',
+    senha: 'secure-password',
+  };
+
+  it('deve registrar um usuário com sucesso', async () => {
+    mockUsersRepository.findByEmail.mockResolvedValue(null);
+    bcryptHash.mockResolvedValue('hashed-password');
+    mockUsersRepository.create.mockResolvedValue({
+      ...userInput,
+      id: 'user-1',
+      senha: 'hashed-password',
+      role: 'CLIENTE',
     });
 
-    // Verifica se o usuário foi criado buscando diretamente no repositório
-    const user = await usersRepository.findByEmail('joao@example.com');
+    await useCase.execute(userInput);
 
-    expect(user).toBeDefined();
-    expect(user?.id).toBeDefined();
-    expect(user?.email).toBe('joao@example.com');
-  });
-
-  it('não deve permitir cadastrar com email já existente', async () => {
-    await sut.execute({
-      nome: 'Maria',
-      email: 'maria@example.com',
-      senha: '123456',
+    expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(
+      'alice@example.com',
+    );
+    expect(bcryptHash).toHaveBeenCalledWith('secure-password', 6);
+    expect(mockUsersRepository.create).toHaveBeenCalledWith({
+      nome: 'Alice',
+      email: 'alice@example.com',
+      senha: 'hashed-password',
+      role: 'CLIENTE',
     });
-
-    await expect(() =>
-      sut.execute({
-        nome: 'Maria 2',
-        email: 'maria@example.com',
-        senha: '123456',
-      }),
-    ).rejects.toBeInstanceOf(UserAlreadyExistsError);
+    expect(sendVerificationEmail).toHaveBeenCalledWith('alice@example.com');
   });
 
-  it('não deve permitir criar ADMIN ou PROFISSIONAL se não for ADMIN', async () => {
-    await expect(() =>
-      sut.execute({
-        nome: 'Hacker',
-        email: 'admin-fake@example.com',
-        senha: '123456',
+  it('não deve permitir registro se o e-mail já estiver em uso', async () => {
+    mockUsersRepository.findByEmail.mockResolvedValue({ id: 'existing-id' });
+
+    await expect(useCase.execute(userInput)).rejects.toThrow(
+      UserAlreadyExistsError,
+    );
+    expect(mockUsersRepository.create).not.toHaveBeenCalled();
+    expect(sendVerificationEmail).not.toHaveBeenCalled();
+  });
+
+  it('não deve permitir criação de ADMIN por usuários não admins', async () => {
+    await expect(
+      useCase.execute({
+        ...userInput,
         role: 'ADMIN',
-        requestRole: 'CLIENTE',
+        requestRole: 'CLIENTE', // ou undefined
       }),
-    ).rejects.toBeInstanceOf(InsufficientPermissionsError);
+    ).rejects.toThrow(InsufficientPermissionsError);
+
+    expect(mockUsersRepository.findByEmail).not.toHaveBeenCalled();
+    expect(sendVerificationEmail).not.toHaveBeenCalled();
   });
 
-  it('deve permitir ADMIN criar outro ADMIN', async () => {
-    await sut.execute({
-      nome: 'Admin Master',
-      email: 'admin@example.com',
-      senha: '123456',
+  it('deve permitir criação de ADMIN se o requestRole for ADMIN', async () => {
+    mockUsersRepository.findByEmail.mockResolvedValue(null);
+    bcryptHash.mockResolvedValue('hashed-password');
+    mockUsersRepository.create.mockResolvedValue({
+      ...userInput,
+      id: 'admin-1',
+      senha: 'hashed-password',
+      role: 'ADMIN',
+    });
+
+    await useCase.execute({
+      ...userInput,
       role: 'ADMIN',
       requestRole: 'ADMIN',
     });
 
-    // Verifica se o usuário ADMIN foi criado corretamente
-    const adminUser = await usersRepository.findByEmail('admin@example.com');
-    expect(adminUser?.role).toBe('ADMIN');
+    expect(mockUsersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ role: 'ADMIN' }),
+    );
+    expect(sendVerificationEmail).toHaveBeenCalledWith('alice@example.com');
   });
 });

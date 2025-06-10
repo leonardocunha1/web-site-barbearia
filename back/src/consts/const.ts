@@ -6,4 +6,4 @@ export const LOYALTY_POINTS = 2;
 export const BONUS_EXPIRATION_MONTHS = 6;
 
 export const MIN_POINTS_TO_REDEEM = 10;
-export const MIN_BOOKING_VALUE_AFTER_DISCOUNT = 0.01; // Valor mínimo após desconto (R$ 0,01)
+export const MIN_BOOKING_VALUE_AFTER_DISCOUNT = 0;

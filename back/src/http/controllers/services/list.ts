@@ -40,11 +40,10 @@ export async function listServices(
       return reply.status(400).send(formatZodError(error));
     }
 
-    if (error instanceof InvalidPageError) {
-      return reply.status(400).send({ message: error.message });
-    }
-
-    if (error instanceof InvalidLimitError) {
+    if (
+      error instanceof InvalidPageError ||
+      error instanceof InvalidLimitError
+    ) {
       return reply.status(400).send({ message: error.message });
     }
 

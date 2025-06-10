@@ -4,15 +4,15 @@ import { FeriadosRepository } from '../feriados-repository';
 
 export class PrismaFeriadosRepository implements FeriadosRepository {
   async isProfessionalHoliday(professionalId: string, date: Date) {
-    const startOfDayDate = startOfDay(date); // Início do dia
-    const endOfDayDate = endOfDay(date); // Fim do dia
+    const startOfDayDate = startOfDay(date);
+    const endOfDayDate = endOfDay(date);
 
     return prisma.feriado.findFirst({
       where: {
         profissionalId: professionalId,
         data: {
-          gte: startOfDayDate, // Maior ou igual ao início do dia
-          lte: endOfDayDate, // Menor ou igual ao fim do dia
+          gte: startOfDayDate,
+          lte: endOfDayDate,
         },
       },
       select: {

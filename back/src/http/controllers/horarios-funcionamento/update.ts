@@ -11,11 +11,10 @@ export async function updateBusinessHours(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const professionalId = request.user.profissionalId!;
-
-  const body = updateBusinessHoursBodySchema.parse(request.body);
-
   try {
+    const professionalId = request.user.profissionalId!;
+    const body = updateBusinessHoursBodySchema.parse(request.body);
+
     const updateBusinessHoursUseCase = makeUpdateBusinessHoursUseCase();
 
     await updateBusinessHoursUseCase.execute({
@@ -25,19 +24,19 @@ export async function updateBusinessHours(
 
     return reply.status(200).send();
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send(formatZodError(err));
+    }
+
     if (err instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
 
     if (
-      err instanceof InvalidBusinessHoursError ||
-      err instanceof InvalidTimeFormatError
+      err instanceof InvalidTimeFormatError ||
+      err instanceof InvalidBusinessHoursError
     ) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof z.ZodError) {
-      return reply.status(400).send(formatZodError(err));
+      return reply.status(422).send({ message: err.message });
     }
 
     throw err;

@@ -94,3 +94,16 @@ export const createMockUserBonusRepository = () => ({
   getValidPointsWithExpiration: vi.fn(),
   consumePoints: vi.fn(),
 });
+
+export const createMockCouponsRepository = () => ({
+  findByCode: vi.fn(),
+  registerRedemption: vi.fn(),
+  incrementUses: vi.fn(),
+  findById: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  listValidCoupons: vi.fn(),
+  delete: vi.fn(),
+  findMany: vi.fn(),
+  count: vi.fn(),
+});

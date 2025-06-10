@@ -38,6 +38,6 @@ export async function updateServiceProfessional(
       return reply.status(400).send(formatZodError(err));
     }
 
-    return reply.status(500).send({ message: 'Erro interno.' });
+    throw err;
   }
 }

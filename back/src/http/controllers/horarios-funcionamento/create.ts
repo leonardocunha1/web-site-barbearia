@@ -12,10 +12,16 @@ export async function createBusinessHours(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { professionalId, diaSemana, abreAs, fechaAs, pausaInicio, pausaFim } =
-    createBusinessHoursBodySchema.parse(request.body);
-
   try {
+    const {
+      professionalId,
+      diaSemana,
+      abreAs,
+      fechaAs,
+      pausaInicio,
+      pausaFim,
+    } = createBusinessHoursBodySchema.parse(request.body);
+
     const createBusinessHoursUseCase = makeCreateBusinessHoursUseCase();
 
     await createBusinessHoursUseCase.execute({
@@ -29,24 +35,23 @@ export async function createBusinessHours(
 
     return reply.status(201).send();
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send(formatZodError(err));
+    }
+
     if (err instanceof ProfessionalNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
 
-    if (err instanceof InvalidTimeFormatError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
-    if (err instanceof InvalidBusinessHoursError) {
-      return reply.status(400).send({ message: err.message });
+    if (
+      err instanceof InvalidTimeFormatError ||
+      err instanceof InvalidBusinessHoursError
+    ) {
+      return reply.status(422).send({ message: err.message });
     }
 
     if (err instanceof DuplicateBusinessHoursError) {
       return reply.status(409).send({ message: err.message });
-    }
-
-    if (err instanceof z.ZodError) {
-      return reply.status(400).send(formatZodError(err));
     }
 
     throw err;

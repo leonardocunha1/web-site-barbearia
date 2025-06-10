@@ -33,11 +33,10 @@ export async function addToProfessional(
 
     return reply.status(201).send();
   } catch (err) {
-    if (err instanceof ServiceNotFoundError) {
-      return reply.status(404).send({ message: err.message });
-    }
-
-    if (err instanceof ProfessionalNotFoundError) {
+    if (
+      err instanceof ServiceNotFoundError ||
+      err instanceof ProfessionalNotFoundError
+    ) {
       return reply.status(404).send({ message: err.message });
     }
 

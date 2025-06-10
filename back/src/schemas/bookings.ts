@@ -3,7 +3,7 @@ import { Status } from '@prisma/client';
 import { sortSchema } from '@/schemas/booking-sort-schema';
 import { paginationSchema } from './pagination';
 
-// schema dos itens de agendamento )
+// schema dos itens de agendamento
 export const bookingItemSchema = z.object({
   id: z.string().uuid(),
   duracao: z.number().int().nonnegative(),
@@ -61,6 +61,7 @@ export const createBookingBodySchema = z.object({
   startDateTime: z.string().datetime({ offset: true }),
   notes: z.string().max(500).optional(),
   useBonusPoints: z.boolean().optional().default(false),
+  couponCode: z.string().max(50).optional(),
 });
 
 // Schema para atualização do status da reserva

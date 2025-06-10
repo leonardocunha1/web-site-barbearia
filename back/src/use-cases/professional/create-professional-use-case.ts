@@ -9,6 +9,7 @@ interface CreateProfessionalUseCaseRequest {
   bio?: string;
   documento?: string;
   registro?: string;
+  avatarUrl?: string;
 }
 
 export class CreateProfessionalUseCase {
@@ -33,7 +34,11 @@ export class CreateProfessionalUseCase {
     await this.usersRepository.update(data.userId, { role: 'PROFISSIONAL' });
 
     return this.professionalsRepository.create({
-      ...data,
+      especialidade: data.especialidade,
+      bio: data.bio,
+      documento: data.documento,
+      ativo: true,
+      avatarUrl: data.avatarUrl,
       user: { connect: { id: data.userId } },
     });
   }

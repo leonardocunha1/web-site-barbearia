@@ -23,10 +23,10 @@ export async function verifyEmail(
     return reply.status(200).send({ message: 'E-mail verificado com sucesso' });
   } catch (err) {
     if (err instanceof InvalidTokenError) {
-      return reply.status(400).send({ message: err.message });
+      return reply.status(403).send({ message: err.message });
     }
     if (err instanceof UserAlreadyVerifiedError) {
-      return reply.status(400).send({ message: err.message });
+      return reply.status(409).send({ message: err.message });
     }
     if (err instanceof UserNotFoundError) {
       return reply.status(404).send({ message: err.message });

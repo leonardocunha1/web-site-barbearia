@@ -32,6 +32,18 @@ enum BonusType {
   LOYALTY // Fidelidade (ex.: após X agendamentos)
 }
 
+enum CouponType {
+  PERCENTAGE // Desconto percentual (ex: 10%)
+  FIXED // Desconto fixo (ex: R$ 50)
+  FREE // Cupom 100% de desconto
+}
+
+enum CouponScope {
+  GLOBAL // Válido para todos
+  SERVICE // Válido para um serviço específico
+  PROFESSIONAL // Válido para um profissional específico
+}
+
 // Tabelas principais
 model User {
   id            String   @id @default(uuid())
@@ -54,6 +66,8 @@ model User {
   UserBonus          UserBonus[]
   BonusTransaction   BonusTransaction[]
   BonusRedemption    BonusRedemption[]
+  Coupon             Coupon[]
+  CouponRedemption   CouponRedemption[]
 
   @@map("users")
 }
@@ -73,6 +87,7 @@ model Professional {
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   ServiceProfessional   ServiceProfessional[]
+  Coupon                Coupon[]
 
   @@map("professionals")
 }
@@ -96,7 +111,7 @@ model Feriado {
   id             String       @id @default(uuid())
   profissional   Professional @relation(fields: [profissionalId], references: [id])
   profissionalId String
-  data           DateTime // Data específica
+  data           DateTime
   motivo         String
   createdAt      DateTime     @default(now())
 
@@ -114,6 +129,7 @@ model Service {
   BookingItem   BookingItem[]
   updatedAt     DateTime              @updatedAt
   createdAt     DateTime              @default(now())
+  Coupon        Coupon[]
 
   @@map("services")
 }
@@ -142,14 +158,18 @@ model Booking {
   status           Status             @default(PENDENTE)
   observacoes      String?
   valorFinal       Float
-  pontosUtilizados Int                @default(0) // Novo campo
+  pontosUtilizados Int                @default(0)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   canceledAt       DateTime?
   confirmedAt      DateTime?
+  coupon           Coupon?            @relation(fields: [couponId], references: [id])
+  couponId         String?
+  couponDiscount   Float?             @default(0)
   items            BookingItem[]
   BonusTransaction BonusTransaction[]
   BonusRedemption  BonusRedemption[]
+  CouponRedemption CouponRedemption[]
 
   @@map("bookings")
 }
@@ -253,4 +273,54 @@ model BonusRedemption {
   @@index([userId])
   @@index([bookingId])
   @@map("bonus_redemptions")
+}
+
+// Tabela para armazenar os cupons
+model Coupon {
+  id              String      @id @default(uuid())
+  code            String      @unique
+  description     String?
+  type            CouponType
+  value           Float // Percentual ou valor fixo, dependendo do type
+  scope           CouponScope @default(GLOBAL)
+  maxUses         Int? // Número máximo de usos (null = ilimitado)
+  uses            Int         @default(0) // Número de vezes já usado
+  startDate       DateTime    @default(now())
+  endDate         DateTime? // Data de expiração (null = sem expiração)
+  minBookingValue Float? // Valor mínimo do agendamento para aplicar
+  active          Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relações para cupons com escopo específico
+  service        Service?      @relation(fields: [serviceId], references: [id])
+  serviceId      String?
+  professional   Professional? @relation(fields: [professionalId], references: [id])
+  professionalId String?
+
+  // Relação com os resgates
+  redemptions CouponRedemption[]
+  Booking     Booking[]
+  User        User?              @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@index([code, active])
+  @@map("coupons")
+}
+
+// Tabela para registrar os resgates de cupons
+model CouponRedemption {
+  id         String   @id @default(uuid())
+  coupon     Coupon   @relation(fields: [couponId], references: [id])
+  couponId   String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  booking    Booking? @relation(fields: [bookingId], references: [id])
+  bookingId  String?
+  discount   Float // Valor do desconto aplicado
+  redeemedAt DateTime @default(now())
+
+  @@index([couponId, userId])
+  @@index([bookingId])
+  @@map("coupon_redemptions")
 }
