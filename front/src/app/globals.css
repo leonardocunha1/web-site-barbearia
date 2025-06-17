@@ -44,19 +44,19 @@
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
   @keyframes marquee {
-  from {
-    transform: translateX(0);
+    from {
+      transform: translateX(0);
     }
-  to {
-    transform: translateX(calc(-100% - var(--gap)));
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
     }
   }
   @keyframes marquee-vertical {
-  from {
-    transform: translateY(0);
+    from {
+      transform: translateY(0);
     }
-  to {
-    transform: translateY(calc(-100% - var(--gap)));
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
     }
   }
 }
@@ -73,7 +73,7 @@
   --color-principal-800: #8b3c21;
   --color-principal-900: #70331e;
   --color-principal-950: #3c180e;
-  --color-secondary-50: ##f9f9f0;
+  --color-secondary-50: #f9f9f0;
   --color-secondary-500: #f5fce9;
   --color-secondary-600: #e6f2c7;
   --color-secondary-700: #d9e8a6;
@@ -158,3 +158,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* body {
+  font-family: var(--font-poppins-sans);
+} */

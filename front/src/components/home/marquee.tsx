@@ -52,16 +52,13 @@ const FraseCard = ({
       className={cn(
         "relative h-full w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
         "border-stone-900/[.1] bg-stone-900",
-        "dark:border-white/[.1] dark:bg-white/[.05] dark:hover:bg-white/[.1]",
       )}
     >
       <div className="flex flex-col gap-1">
-        <figcaption className="text-principal-50 text-sm font-semibold dark:text-white">
+        <figcaption className="text-principal-50 text-sm font-semibold">
           {title}
         </figcaption>
-        <p className="text-principal-500 text-xs dark:text-white/40">
-          {destaque}
-        </p>
+        <p className="text-principal-500 text-xs">{destaque}</p>
       </div>
       <blockquote className="text-principal-100 mt-2 text-sm dark:text-white">
         {body}
