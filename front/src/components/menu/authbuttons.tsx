@@ -9,7 +9,11 @@ export function AuthButtons({ user }: { user: unknown | null }) {
     return (
       <div className="flex items-center space-x-2">
         <Link href="/login">
-          <Button variant="default" size="sm" className="cursor-pointer">
+          <Button
+            variant="default"
+            size="sm"
+            className="text-principal-100 border-principal-900 cursor-pointer border"
+          >
             Entrar
             <SignInIcon className="size-4" />
           </Button>

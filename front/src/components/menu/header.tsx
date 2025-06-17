@@ -8,8 +8,8 @@ export default async function Header() {
   const user = false;
 
   return (
-    <header className="mx-auto w-full max-w-7xl px-4 py-2">
-      <nav className="flex items-center justify-between rounded-2xl bg-stone-50 px-4 py-2 font-medium shadow-md">
+    <header className="z-10 mx-auto w-full max-w-7xl px-6 py-4 xl:px-0">
+      <nav className="text-principal-100 flex items-center justify-between rounded-2xl bg-stone-900 px-4 py-2 font-medium shadow-lg">
         {/* Logo */}
         <Link href="/">
           <Image
