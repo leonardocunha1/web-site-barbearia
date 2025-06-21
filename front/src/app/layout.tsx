@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Spectral, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/menu/header";
+import { ApplicationProviders } from "./providers"; // Importe o provider
 
 const poppins = Poppins({
   variable: "--font-poppins-sans",
@@ -33,10 +34,12 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${type_second.variable} antialiased`}
       >
-        <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
-          <Header />
-          {children}
-        </div>
+        <ApplicationProviders>
+          <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
+            <Header />
+            {children}
+          </div>
+        </ApplicationProviders>
       </body>
     </html>
   );

@@ -44,7 +44,7 @@ export default async function Servicos() {
   ];
 
   return (
-    <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+    <section className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Cabeçalho */}
         <div className="mb-12 text-center md:mb-16">
@@ -75,8 +75,8 @@ export default async function Servicos() {
               >
                 <div className="relative h-full w-full">
                   {/* Fundo escurecido e gradiente */}
-                  <div className="absolute inset-0 z-0 bg-black/30">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 z-10 bg-black/20">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
                   </div>
 
                   {/* Imagem com posição personalizada */}
@@ -92,7 +92,7 @@ export default async function Servicos() {
                   />
 
                   {/* Texto */}
-                  <div className="text-principal-100 absolute inset-x-0 bottom-0 z-10 p-6">
+                  <div className="text-principal-100 absolute inset-x-0 bottom-0 z-20 p-6">
                     <h3 className="text-principal-400 font-serif text-xl font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                       {service.title}
                     </h3>
