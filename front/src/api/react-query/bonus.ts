@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,13 +19,13 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AssignBonusToUser201,
+  AssignBonusToUser400,
+  AssignBonusToUser404,
+  AssignBonusToUserBody,
   GetBonusBalance200,
   GetBonusBalance401,
   GetBonusBalance404,
-  PostBonusAssign201,
-  PostBonusAssign400,
-  PostBonusAssign404,
-  PostBonusAssignBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -26,36 +33,36 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Atribuir bônus a um usuário.
  */
-export const postBonusAssign = (
-  postBonusAssignBody: PostBonusAssignBody,
+export const assignBonusToUser = (
+  assignBonusToUserBody: AssignBonusToUserBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostBonusAssign201>({
+  return axiosInstance<AssignBonusToUser201>({
     url: `/bonus/assign`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postBonusAssignBody,
+    data: assignBonusToUserBody,
     signal,
   });
 };
 
-export const getPostBonusAssignMutationOptions = <
-  TError = PostBonusAssign400 | PostBonusAssign404,
+export const getAssignBonusToUserMutationOptions = <
+  TError = AssignBonusToUser400 | AssignBonusToUser404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postBonusAssign>>,
+    Awaited<ReturnType<typeof assignBonusToUser>>,
     TError,
-    { data: PostBonusAssignBody },
+    { data: AssignBonusToUserBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postBonusAssign>>,
+  Awaited<ReturnType<typeof assignBonusToUser>>,
   TError,
-  { data: PostBonusAssignBody },
+  { data: AssignBonusToUserBody },
   TContext
 > => {
-  const mutationKey = ["postBonusAssign"];
+  const mutationKey = ["assignBonusToUser"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -65,44 +72,47 @@ export const getPostBonusAssignMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postBonusAssign>>,
-    { data: PostBonusAssignBody }
+    Awaited<ReturnType<typeof assignBonusToUser>>,
+    { data: AssignBonusToUserBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postBonusAssign(data);
+    return assignBonusToUser(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostBonusAssignMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postBonusAssign>>
+export type AssignBonusToUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof assignBonusToUser>>
 >;
-export type PostBonusAssignMutationBody = PostBonusAssignBody;
-export type PostBonusAssignMutationError =
-  | PostBonusAssign400
-  | PostBonusAssign404;
+export type AssignBonusToUserMutationBody = AssignBonusToUserBody;
+export type AssignBonusToUserMutationError =
+  | AssignBonusToUser400
+  | AssignBonusToUser404;
 
-export const usePostBonusAssign = <
-  TError = PostBonusAssign400 | PostBonusAssign404,
+export const useAssignBonusToUser = <
+  TError = AssignBonusToUser400 | AssignBonusToUser404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postBonusAssign>>,
-    TError,
-    { data: PostBonusAssignBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postBonusAssign>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof assignBonusToUser>>,
+      TError,
+      { data: AssignBonusToUserBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof assignBonusToUser>>,
   TError,
-  { data: PostBonusAssignBody },
+  { data: AssignBonusToUserBody },
   TContext
 > => {
-  const mutationOptions = getPostBonusAssignMutationOptions(options);
+  const mutationOptions = getAssignBonusToUserMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Obter o saldo de bônus (pontos e valor em R$) do usuário autenticado.
@@ -120,13 +130,15 @@ export const getGetBonusBalanceQueryKey = () => {
 };
 
 export const getGetBonusBalanceInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBonusBalance>>,
+  TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
   TError = GetBonusBalance401 | GetBonusBalance404,
 >(options?: {
-  query?: UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getBonusBalance>>,
-    TError,
-    TData
+  query?: Partial<
+    UseInfiniteQueryOptions<
+      Awaited<ReturnType<typeof getBonusBalance>>,
+      TError,
+      TData
+    >
   >;
 }) => {
   const { query: queryOptions } = options ?? {};
@@ -141,7 +153,7 @@ export const getGetBonusBalanceInfiniteQueryOptions = <
     Awaited<ReturnType<typeof getBonusBalance>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetBonusBalanceInfiniteQueryResult = NonNullable<
@@ -152,21 +164,98 @@ export type GetBonusBalanceInfiniteQueryError =
   | GetBonusBalance404;
 
 export function useGetBonusBalanceInfinite<
-  TData = Awaited<ReturnType<typeof getBonusBalance>>,
+  TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
   TError = GetBonusBalance401 | GetBonusBalance404,
->(options?: {
-  query?: UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getBonusBalance>>,
-    TError,
-    TData
-  >;
-}): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBonusBalance>>,
+          TError,
+          Awaited<ReturnType<typeof getBonusBalance>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBonusBalanceInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
+  TError = GetBonusBalance401 | GetBonusBalance404,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBonusBalance>>,
+          TError,
+          Awaited<ReturnType<typeof getBonusBalance>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBonusBalanceInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
+  TError = GetBonusBalance401 | GetBonusBalance404,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetBonusBalanceInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
+  TError = GetBonusBalance401 | GetBonusBalance404,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
   const queryOptions = getGetBonusBalanceInfiniteQueryOptions(options);
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -177,10 +266,8 @@ export const getGetBonusBalanceQueryOptions = <
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
   TError = GetBonusBalance401 | GetBonusBalance404,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getBonusBalance>>,
-    TError,
-    TData
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getBonusBalance>>, TError, TData>
   >;
 }) => {
   const { query: queryOptions } = options ?? {};
@@ -195,7 +282,7 @@ export const getGetBonusBalanceQueryOptions = <
     Awaited<ReturnType<typeof getBonusBalance>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetBonusBalanceQueryResult = NonNullable<
@@ -206,18 +293,94 @@ export type GetBonusBalanceQueryError = GetBonusBalance401 | GetBonusBalance404;
 export function useGetBonusBalance<
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
   TError = GetBonusBalance401 | GetBonusBalance404,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getBonusBalance>>,
-    TError,
-    TData
-  >;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBonusBalance>>,
+          TError,
+          Awaited<ReturnType<typeof getBonusBalance>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBonusBalance<
+  TData = Awaited<ReturnType<typeof getBonusBalance>>,
+  TError = GetBonusBalance401 | GetBonusBalance404,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBonusBalance>>,
+          TError,
+          Awaited<ReturnType<typeof getBonusBalance>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBonusBalance<
+  TData = Awaited<ReturnType<typeof getBonusBalance>>,
+  TError = GetBonusBalance401 | GetBonusBalance404,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetBonusBalance<
+  TData = Awaited<ReturnType<typeof getBonusBalance>>,
+  TError = GetBonusBalance401 | GetBonusBalance404,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getBonusBalance>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
   const queryOptions = getGetBonusBalanceQueryOptions(options);
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 

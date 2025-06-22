@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,19 +19,19 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  DeleteHolidaysHolidayId204,
-  DeleteHolidaysHolidayId400,
-  DeleteHolidaysHolidayId403,
-  DeleteHolidaysHolidayId404,
-  GetHolidays200,
-  GetHolidays400,
-  GetHolidays403,
-  GetHolidaysParams,
-  PostHolidays201,
-  PostHolidays400,
-  PostHolidays404,
-  PostHolidays409,
-  PostHolidaysBody,
+  CreateHoliday201,
+  CreateHoliday400,
+  CreateHoliday404,
+  CreateHoliday409,
+  CreateHolidayBody,
+  DeleteHoliday204,
+  DeleteHoliday400,
+  DeleteHoliday403,
+  DeleteHoliday404,
+  ListHolidays200,
+  ListHolidays400,
+  ListHolidays403,
+  ListHolidaysParams,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -32,36 +39,36 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Criação de um novo feriado.
  */
-export const postHolidays = (
-  postHolidaysBody: PostHolidaysBody,
+export const createHoliday = (
+  createHolidayBody: CreateHolidayBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostHolidays201>({
+  return axiosInstance<CreateHoliday201>({
     url: `/holidays`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postHolidaysBody,
+    data: createHolidayBody,
     signal,
   });
 };
 
-export const getPostHolidaysMutationOptions = <
-  TError = PostHolidays400 | PostHolidays404 | PostHolidays409,
+export const getCreateHolidayMutationOptions = <
+  TError = CreateHoliday400 | CreateHoliday404 | CreateHoliday409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postHolidays>>,
+    Awaited<ReturnType<typeof createHoliday>>,
     TError,
-    { data: PostHolidaysBody },
+    { data: CreateHolidayBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postHolidays>>,
+  Awaited<ReturnType<typeof createHoliday>>,
   TError,
-  { data: PostHolidaysBody },
+  { data: CreateHolidayBody },
   TContext
 > => {
-  const mutationKey = ["postHolidays"];
+  const mutationKey = ["createHoliday"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -71,54 +78,57 @@ export const getPostHolidaysMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postHolidays>>,
-    { data: PostHolidaysBody }
+    Awaited<ReturnType<typeof createHoliday>>,
+    { data: CreateHolidayBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postHolidays(data);
+    return createHoliday(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostHolidaysMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postHolidays>>
+export type CreateHolidayMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createHoliday>>
 >;
-export type PostHolidaysMutationBody = PostHolidaysBody;
-export type PostHolidaysMutationError =
-  | PostHolidays400
-  | PostHolidays404
-  | PostHolidays409;
+export type CreateHolidayMutationBody = CreateHolidayBody;
+export type CreateHolidayMutationError =
+  | CreateHoliday400
+  | CreateHoliday404
+  | CreateHoliday409;
 
-export const usePostHolidays = <
-  TError = PostHolidays400 | PostHolidays404 | PostHolidays409,
+export const useCreateHoliday = <
+  TError = CreateHoliday400 | CreateHoliday404 | CreateHoliday409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postHolidays>>,
-    TError,
-    { data: PostHolidaysBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postHolidays>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createHoliday>>,
+      TError,
+      { data: CreateHolidayBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createHoliday>>,
   TError,
-  { data: PostHolidaysBody },
+  { data: CreateHolidayBody },
   TContext
 > => {
-  const mutationOptions = getPostHolidaysMutationOptions(options);
+  const mutationOptions = getCreateHolidayMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Listar feriados.
  */
-export const getHolidays = (
-  params?: GetHolidaysParams,
+export const listHolidays = (
+  params?: ListHolidaysParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetHolidays200>({
+  return axiosInstance<ListHolidays200>({
     url: `/holidays`,
     method: "GET",
     params,
@@ -126,119 +136,258 @@ export const getHolidays = (
   });
 };
 
-export const getGetHolidaysQueryKey = (params?: GetHolidaysParams) => {
+export const getListHolidaysQueryKey = (params?: ListHolidaysParams) => {
   return [`/holidays`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetHolidaysInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getHolidays>>,
-  TError = GetHolidays400 | GetHolidays403,
+export const getListHolidaysInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listHolidays>>>,
+  TError = ListHolidays400 | ListHolidays403,
 >(
-  params?: GetHolidaysParams,
+  params?: ListHolidaysParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getHolidays>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listHolidays>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetHolidaysQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListHolidaysQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getHolidays>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listHolidays>>> = ({
     signal,
-  }) => getHolidays(params, signal);
+  }) => listHolidays(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getHolidays>>,
+    Awaited<ReturnType<typeof listHolidays>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetHolidaysInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getHolidays>>
+export type ListHolidaysInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listHolidays>>
 >;
-export type GetHolidaysInfiniteQueryError = GetHolidays400 | GetHolidays403;
+export type ListHolidaysInfiniteQueryError = ListHolidays400 | ListHolidays403;
 
-export function useGetHolidaysInfinite<
-  TData = Awaited<ReturnType<typeof getHolidays>>,
-  TError = GetHolidays400 | GetHolidays403,
+export function useListHolidaysInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listHolidays>>>,
+  TError = ListHolidays400 | ListHolidays403,
 >(
-  params?: GetHolidaysParams,
+  params: undefined | ListHolidaysParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listHolidays>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listHolidays>>,
+          TError,
+          Awaited<ReturnType<typeof listHolidays>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListHolidaysInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listHolidays>>>,
+  TError = ListHolidays400 | ListHolidays403,
+>(
+  params?: ListHolidaysParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getHolidays>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listHolidays>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listHolidays>>,
+          TError,
+          Awaited<ReturnType<typeof listHolidays>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListHolidaysInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listHolidays>>>,
+  TError = ListHolidays400 | ListHolidays403,
+>(
+  params?: ListHolidaysParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listHolidays>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetHolidaysInfiniteQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useListHolidaysInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listHolidays>>>,
+  TError = ListHolidays400 | ListHolidays403,
+>(
+  params?: ListHolidaysParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listHolidays>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListHolidaysInfiniteQueryOptions(params, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetHolidaysQueryOptions = <
-  TData = Awaited<ReturnType<typeof getHolidays>>,
-  TError = GetHolidays400 | GetHolidays403,
+export const getListHolidaysQueryOptions = <
+  TData = Awaited<ReturnType<typeof listHolidays>>,
+  TError = ListHolidays400 | ListHolidays403,
 >(
-  params?: GetHolidaysParams,
+  params?: ListHolidaysParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getHolidays>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listHolidays>>, TError, TData>
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetHolidaysQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListHolidaysQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getHolidays>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listHolidays>>> = ({
     signal,
-  }) => getHolidays(params, signal);
+  }) => listHolidays(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getHolidays>>,
+    Awaited<ReturnType<typeof listHolidays>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetHolidaysQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getHolidays>>
+export type ListHolidaysQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listHolidays>>
 >;
-export type GetHolidaysQueryError = GetHolidays400 | GetHolidays403;
+export type ListHolidaysQueryError = ListHolidays400 | ListHolidays403;
 
-export function useGetHolidays<
-  TData = Awaited<ReturnType<typeof getHolidays>>,
-  TError = GetHolidays400 | GetHolidays403,
+export function useListHolidays<
+  TData = Awaited<ReturnType<typeof listHolidays>>,
+  TError = ListHolidays400 | ListHolidays403,
 >(
-  params?: GetHolidaysParams,
+  params: undefined | ListHolidaysParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listHolidays>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listHolidays>>,
+          TError,
+          Awaited<ReturnType<typeof listHolidays>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListHolidays<
+  TData = Awaited<ReturnType<typeof listHolidays>>,
+  TError = ListHolidays400 | ListHolidays403,
+>(
+  params?: ListHolidaysParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getHolidays>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listHolidays>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listHolidays>>,
+          TError,
+          Awaited<ReturnType<typeof listHolidays>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListHolidays<
+  TData = Awaited<ReturnType<typeof listHolidays>>,
+  TError = ListHolidays400 | ListHolidays403,
+>(
+  params?: ListHolidaysParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listHolidays>>, TError, TData>
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetHolidaysQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useListHolidays<
+  TData = Awaited<ReturnType<typeof listHolidays>>,
+  TError = ListHolidays400 | ListHolidays403,
+>(
+  params?: ListHolidaysParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listHolidays>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListHolidaysQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -248,33 +397,30 @@ export function useGetHolidays<
 /**
  * Deletar um feriado.
  */
-export const deleteHolidaysHolidayId = (holidayId: string) => {
-  return axiosInstance<DeleteHolidaysHolidayId204>({
+export const deleteHoliday = (holidayId: string) => {
+  return axiosInstance<DeleteHoliday204>({
     url: `/holidays/${holidayId}`,
     method: "DELETE",
   });
 };
 
-export const getDeleteHolidaysHolidayIdMutationOptions = <
-  TError =
-    | DeleteHolidaysHolidayId400
-    | DeleteHolidaysHolidayId403
-    | DeleteHolidaysHolidayId404,
+export const getDeleteHolidayMutationOptions = <
+  TError = DeleteHoliday400 | DeleteHoliday403 | DeleteHoliday404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteHolidaysHolidayId>>,
+    Awaited<ReturnType<typeof deleteHoliday>>,
     TError,
     { holidayId: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteHolidaysHolidayId>>,
+  Awaited<ReturnType<typeof deleteHoliday>>,
   TError,
   { holidayId: string },
   TContext
 > => {
-  const mutationKey = ["deleteHolidaysHolidayId"];
+  const mutationKey = ["deleteHoliday"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -284,46 +430,46 @@ export const getDeleteHolidaysHolidayIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteHolidaysHolidayId>>,
+    Awaited<ReturnType<typeof deleteHoliday>>,
     { holidayId: string }
   > = (props) => {
     const { holidayId } = props ?? {};
 
-    return deleteHolidaysHolidayId(holidayId);
+    return deleteHoliday(holidayId);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteHolidaysHolidayIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteHolidaysHolidayId>>
+export type DeleteHolidayMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteHoliday>>
 >;
 
-export type DeleteHolidaysHolidayIdMutationError =
-  | DeleteHolidaysHolidayId400
-  | DeleteHolidaysHolidayId403
-  | DeleteHolidaysHolidayId404;
+export type DeleteHolidayMutationError =
+  | DeleteHoliday400
+  | DeleteHoliday403
+  | DeleteHoliday404;
 
-export const useDeleteHolidaysHolidayId = <
-  TError =
-    | DeleteHolidaysHolidayId400
-    | DeleteHolidaysHolidayId403
-    | DeleteHolidaysHolidayId404,
+export const useDeleteHoliday = <
+  TError = DeleteHoliday400 | DeleteHoliday403 | DeleteHoliday404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteHolidaysHolidayId>>,
-    TError,
-    { holidayId: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteHolidaysHolidayId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteHoliday>>,
+      TError,
+      { holidayId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteHoliday>>,
   TError,
   { holidayId: string },
   TContext
 > => {
-  const mutationOptions = getDeleteHolidaysHolidayIdMutationOptions(options);
+  const mutationOptions = getDeleteHolidayMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };

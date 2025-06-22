@@ -58,12 +58,12 @@ const config = {
         },
         zod: {
           generate: {
-            body: true,
-            header: false,
-            param: false,
-            query: false,
-            response: false,
-          },
+          body: true,
+          param: true,
+          query: true,
+          response: true,
+          header: false,
+        },
         },
       },
     },

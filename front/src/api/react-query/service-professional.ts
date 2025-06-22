@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,62 +19,59 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  DeleteProfessionalsProfessionalIdServicesServiceId204,
-  DeleteProfessionalsProfessionalIdServicesServiceId400,
-  DeleteProfessionalsProfessionalIdServicesServiceId404,
-  GetProfessionalsProfessionalIdServices200,
-  GetProfessionalsProfessionalIdServices400,
-  GetProfessionalsProfessionalIdServicesParams,
-  PostProfessionalsProfessionalIdServices201,
-  PostProfessionalsProfessionalIdServices400,
-  PostProfessionalsProfessionalIdServices404,
-  PostProfessionalsProfessionalIdServices409,
-  PostProfessionalsProfessionalIdServicesBody,
-  PutProfessionalsProfessionalIdServicesServiceId204,
-  PutProfessionalsProfessionalIdServicesServiceId400,
-  PutProfessionalsProfessionalIdServicesServiceId500,
-  PutProfessionalsProfessionalIdServicesServiceIdBody,
+  AddServiceToProfessional201,
+  AddServiceToProfessional400,
+  AddServiceToProfessional404,
+  AddServiceToProfessional409,
+  AddServiceToProfessionalBody,
+  ListProfessionalServices200,
+  ListProfessionalServices400,
+  ListProfessionalServicesParams,
+  RemoveServiceFromProfessional204,
+  RemoveServiceFromProfessional400,
+  RemoveServiceFromProfessional404,
+  UpdateServiceProfessional204,
+  UpdateServiceProfessional400,
+  UpdateServiceProfessional500,
+  UpdateServiceProfessionalBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
 
-export const postProfessionalsProfessionalIdServices = (
+export const addServiceToProfessional = (
   professionalId: string,
-  postProfessionalsProfessionalIdServicesBody: PostProfessionalsProfessionalIdServicesBody,
+  addServiceToProfessionalBody: AddServiceToProfessionalBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostProfessionalsProfessionalIdServices201>({
+  return axiosInstance<AddServiceToProfessional201>({
     url: `/professionals/${professionalId}/services`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postProfessionalsProfessionalIdServicesBody,
+    data: addServiceToProfessionalBody,
     signal,
   });
 };
 
-export const getPostProfessionalsProfessionalIdServicesMutationOptions = <
+export const getAddServiceToProfessionalMutationOptions = <
   TError =
-    | PostProfessionalsProfessionalIdServices400
-    | PostProfessionalsProfessionalIdServices404
-    | PostProfessionalsProfessionalIdServices409,
+    | AddServiceToProfessional400
+    | AddServiceToProfessional404
+    | AddServiceToProfessional409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postProfessionalsProfessionalIdServices>>,
+    Awaited<ReturnType<typeof addServiceToProfessional>>,
     TError,
-    {
-      professionalId: string;
-      data: PostProfessionalsProfessionalIdServicesBody;
-    },
+    { professionalId: string; data: AddServiceToProfessionalBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postProfessionalsProfessionalIdServices>>,
+  Awaited<ReturnType<typeof addServiceToProfessional>>,
   TError,
-  { professionalId: string; data: PostProfessionalsProfessionalIdServicesBody },
+  { professionalId: string; data: AddServiceToProfessionalBody },
   TContext
 > => {
-  const mutationKey = ["postProfessionalsProfessionalIdServices"];
+  const mutationKey = ["addServiceToProfessional"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -77,63 +81,58 @@ export const getPostProfessionalsProfessionalIdServicesMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postProfessionalsProfessionalIdServices>>,
-    {
-      professionalId: string;
-      data: PostProfessionalsProfessionalIdServicesBody;
-    }
+    Awaited<ReturnType<typeof addServiceToProfessional>>,
+    { professionalId: string; data: AddServiceToProfessionalBody }
   > = (props) => {
     const { professionalId, data } = props ?? {};
 
-    return postProfessionalsProfessionalIdServices(professionalId, data);
+    return addServiceToProfessional(professionalId, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostProfessionalsProfessionalIdServicesMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postProfessionalsProfessionalIdServices>>
+export type AddServiceToProfessionalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof addServiceToProfessional>>
 >;
-export type PostProfessionalsProfessionalIdServicesMutationBody =
-  PostProfessionalsProfessionalIdServicesBody;
-export type PostProfessionalsProfessionalIdServicesMutationError =
-  | PostProfessionalsProfessionalIdServices400
-  | PostProfessionalsProfessionalIdServices404
-  | PostProfessionalsProfessionalIdServices409;
+export type AddServiceToProfessionalMutationBody = AddServiceToProfessionalBody;
+export type AddServiceToProfessionalMutationError =
+  | AddServiceToProfessional400
+  | AddServiceToProfessional404
+  | AddServiceToProfessional409;
 
-export const usePostProfessionalsProfessionalIdServices = <
+export const useAddServiceToProfessional = <
   TError =
-    | PostProfessionalsProfessionalIdServices400
-    | PostProfessionalsProfessionalIdServices404
-    | PostProfessionalsProfessionalIdServices409,
+    | AddServiceToProfessional400
+    | AddServiceToProfessional404
+    | AddServiceToProfessional409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postProfessionalsProfessionalIdServices>>,
-    TError,
-    {
-      professionalId: string;
-      data: PostProfessionalsProfessionalIdServicesBody;
-    },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postProfessionalsProfessionalIdServices>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof addServiceToProfessional>>,
+      TError,
+      { professionalId: string; data: AddServiceToProfessionalBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof addServiceToProfessional>>,
   TError,
-  { professionalId: string; data: PostProfessionalsProfessionalIdServicesBody },
+  { professionalId: string; data: AddServiceToProfessionalBody },
   TContext
 > => {
-  const mutationOptions =
-    getPostProfessionalsProfessionalIdServicesMutationOptions(options);
+  const mutationOptions = getAddServiceToProfessionalMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const getProfessionalsProfessionalIdServices = (
+export const listProfessionalServices = (
   professionalId: string,
-  params?: GetProfessionalsProfessionalIdServicesParams,
+  params?: ListProfessionalServicesParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetProfessionalsProfessionalIdServices200>({
+  return axiosInstance<ListProfessionalServices200>({
     url: `/professionals/${professionalId}/services`,
     method: "GET",
     params,
@@ -141,9 +140,9 @@ export const getProfessionalsProfessionalIdServices = (
   });
 };
 
-export const getGetProfessionalsProfessionalIdServicesQueryKey = (
+export const getListProfessionalServicesQueryKey = (
   professionalId: string,
-  params?: GetProfessionalsProfessionalIdServicesParams,
+  params?: ListProfessionalServicesParams,
 ) => {
   return [
     `/professionals/${professionalId}/services`,
@@ -151,17 +150,19 @@ export const getGetProfessionalsProfessionalIdServicesQueryKey = (
   ] as const;
 };
 
-export const getGetProfessionalsProfessionalIdServicesInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-  TError = GetProfessionalsProfessionalIdServices400,
+export const getListProfessionalServicesInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalServices>>>,
+  TError = ListProfessionalServices400,
 >(
   professionalId: string,
-  params?: GetProfessionalsProfessionalIdServicesParams,
+  params?: ListProfessionalServicesParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
@@ -169,12 +170,11 @@ export const getGetProfessionalsProfessionalIdServicesInfiniteQueryOptions = <
 
   const queryKey =
     queryOptions?.queryKey ??
-    getGetProfessionalsProfessionalIdServicesQueryKey(professionalId, params);
+    getListProfessionalServicesQueryKey(professionalId, params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>
-  > = ({ signal }) =>
-    getProfessionalsProfessionalIdServices(professionalId, params, signal);
+    Awaited<ReturnType<typeof listProfessionalServices>>
+  > = ({ signal }) => listProfessionalServices(professionalId, params, signal);
 
   return {
     queryKey,
@@ -182,61 +182,142 @@ export const getGetProfessionalsProfessionalIdServicesInfiniteQueryOptions = <
     enabled: !!professionalId,
     ...queryOptions,
   } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
+    Awaited<ReturnType<typeof listProfessionalServices>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetProfessionalsProfessionalIdServicesInfiniteQueryResult =
-  NonNullable<
-    Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>
-  >;
-export type GetProfessionalsProfessionalIdServicesInfiniteQueryError =
-  GetProfessionalsProfessionalIdServices400;
+export type ListProfessionalServicesInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listProfessionalServices>>
+>;
+export type ListProfessionalServicesInfiniteQueryError =
+  ListProfessionalServices400;
 
-export function useGetProfessionalsProfessionalIdServicesInfinite<
-  TData = Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-  TError = GetProfessionalsProfessionalIdServices400,
+export function useListProfessionalServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalServices>>>,
+  TError = ListProfessionalServices400,
 >(
   professionalId: string,
-  params?: GetProfessionalsProfessionalIdServicesParams,
+  params: undefined | ListProfessionalServicesParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalServices>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalServices>>>,
+  TError = ListProfessionalServices400,
+>(
+  professionalId: string,
+  params?: ListProfessionalServicesParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalServices>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalServices>>>,
+  TError = ListProfessionalServices400,
+>(
+  professionalId: string,
+  params?: ListProfessionalServicesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions =
-    getGetProfessionalsProfessionalIdServicesInfiniteQueryOptions(
-      professionalId,
-      params,
-      options,
-    );
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useListProfessionalServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalServices>>>,
+  TError = ListProfessionalServices400,
+>(
+  professionalId: string,
+  params?: ListProfessionalServicesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListProfessionalServicesInfiniteQueryOptions(
+    professionalId,
+    params,
+    options,
+  );
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetProfessionalsProfessionalIdServicesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-  TError = GetProfessionalsProfessionalIdServices400,
+export const getListProfessionalServicesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listProfessionalServices>>,
+  TError = ListProfessionalServices400,
 >(
   professionalId: string,
-  params?: GetProfessionalsProfessionalIdServicesParams,
+  params?: ListProfessionalServicesParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
@@ -244,12 +325,11 @@ export const getGetProfessionalsProfessionalIdServicesQueryOptions = <
 
   const queryKey =
     queryOptions?.queryKey ??
-    getGetProfessionalsProfessionalIdServicesQueryKey(professionalId, params);
+    getListProfessionalServicesQueryKey(professionalId, params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>
-  > = ({ signal }) =>
-    getProfessionalsProfessionalIdServices(professionalId, params, signal);
+    Awaited<ReturnType<typeof listProfessionalServices>>
+  > = ({ signal }) => listProfessionalServices(professionalId, params, signal);
 
   return {
     queryKey,
@@ -257,257 +337,304 @@ export const getGetProfessionalsProfessionalIdServicesQueryOptions = <
     enabled: !!professionalId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
+    Awaited<ReturnType<typeof listProfessionalServices>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetProfessionalsProfessionalIdServicesQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>
+export type ListProfessionalServicesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listProfessionalServices>>
 >;
-export type GetProfessionalsProfessionalIdServicesQueryError =
-  GetProfessionalsProfessionalIdServices400;
+export type ListProfessionalServicesQueryError = ListProfessionalServices400;
 
-export function useGetProfessionalsProfessionalIdServices<
-  TData = Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-  TError = GetProfessionalsProfessionalIdServices400,
+export function useListProfessionalServices<
+  TData = Awaited<ReturnType<typeof listProfessionalServices>>,
+  TError = ListProfessionalServices400,
 >(
   professionalId: string,
-  params?: GetProfessionalsProfessionalIdServicesParams,
+  params: undefined | ListProfessionalServicesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalServices>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalServices<
+  TData = Awaited<ReturnType<typeof listProfessionalServices>>,
+  TError = ListProfessionalServices400,
+>(
+  professionalId: string,
+  params?: ListProfessionalServicesParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getProfessionalsProfessionalIdServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalServices>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalServices<
+  TData = Awaited<ReturnType<typeof listProfessionalServices>>,
+  TError = ListProfessionalServices400,
+>(
+  professionalId: string,
+  params?: ListProfessionalServicesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetProfessionalsProfessionalIdServicesQueryOptions(
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useListProfessionalServices<
+  TData = Awaited<ReturnType<typeof listProfessionalServices>>,
+  TError = ListProfessionalServices400,
+>(
+  professionalId: string,
+  params?: ListProfessionalServicesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalServices>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListProfessionalServicesQueryOptions(
     professionalId,
     params,
     options,
   );
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const deleteProfessionalsProfessionalIdServicesServiceId = (
+export const removeServiceFromProfessional = (
   professionalId: string,
   serviceId: string,
 ) => {
-  return axiosInstance<DeleteProfessionalsProfessionalIdServicesServiceId204>({
+  return axiosInstance<RemoveServiceFromProfessional204>({
     url: `/professionals/${professionalId}/services/${serviceId}`,
     method: "DELETE",
   });
 };
 
-export const getDeleteProfessionalsProfessionalIdServicesServiceIdMutationOptions =
-  <
-    TError =
-      | DeleteProfessionalsProfessionalIdServicesServiceId400
-      | DeleteProfessionalsProfessionalIdServicesServiceId404,
-    TContext = unknown,
-  >(options?: {
+export const getRemoveServiceFromProfessionalMutationOptions = <
+  TError = RemoveServiceFromProfessional400 | RemoveServiceFromProfessional404,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof removeServiceFromProfessional>>,
+    TError,
+    { professionalId: string; serviceId: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof removeServiceFromProfessional>>,
+  TError,
+  { professionalId: string; serviceId: string },
+  TContext
+> => {
+  const mutationKey = ["removeServiceFromProfessional"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof removeServiceFromProfessional>>,
+    { professionalId: string; serviceId: string }
+  > = (props) => {
+    const { professionalId, serviceId } = props ?? {};
+
+    return removeServiceFromProfessional(professionalId, serviceId);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RemoveServiceFromProfessionalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof removeServiceFromProfessional>>
+>;
+
+export type RemoveServiceFromProfessionalMutationError =
+  | RemoveServiceFromProfessional400
+  | RemoveServiceFromProfessional404;
+
+export const useRemoveServiceFromProfessional = <
+  TError = RemoveServiceFromProfessional400 | RemoveServiceFromProfessional404,
+  TContext = unknown,
+>(
+  options?: {
     mutation?: UseMutationOptions<
-      Awaited<
-        ReturnType<typeof deleteProfessionalsProfessionalIdServicesServiceId>
-      >,
+      Awaited<ReturnType<typeof removeServiceFromProfessional>>,
       TError,
       { professionalId: string; serviceId: string },
       TContext
     >;
-  }): UseMutationOptions<
-    Awaited<
-      ReturnType<typeof deleteProfessionalsProfessionalIdServicesServiceId>
-    >,
-    TError,
-    { professionalId: string; serviceId: string },
-    TContext
-  > => {
-    const mutationKey = ["deleteProfessionalsProfessionalIdServicesServiceId"];
-    const { mutation: mutationOptions } = options
-      ? options.mutation &&
-        "mutationKey" in options.mutation &&
-        options.mutation.mutationKey
-        ? options
-        : { ...options, mutation: { ...options.mutation, mutationKey } }
-      : { mutation: { mutationKey } };
-
-    const mutationFn: MutationFunction<
-      Awaited<
-        ReturnType<typeof deleteProfessionalsProfessionalIdServicesServiceId>
-      >,
-      { professionalId: string; serviceId: string }
-    > = (props) => {
-      const { professionalId, serviceId } = props ?? {};
-
-      return deleteProfessionalsProfessionalIdServicesServiceId(
-        professionalId,
-        serviceId,
-      );
-    };
-
-    return { mutationFn, ...mutationOptions };
-  };
-
-export type DeleteProfessionalsProfessionalIdServicesServiceIdMutationResult =
-  NonNullable<
-    Awaited<
-      ReturnType<typeof deleteProfessionalsProfessionalIdServicesServiceId>
-    >
-  >;
-
-export type DeleteProfessionalsProfessionalIdServicesServiceIdMutationError =
-  | DeleteProfessionalsProfessionalIdServicesServiceId400
-  | DeleteProfessionalsProfessionalIdServicesServiceId404;
-
-export const useDeleteProfessionalsProfessionalIdServicesServiceId = <
-  TError =
-    | DeleteProfessionalsProfessionalIdServicesServiceId400
-    | DeleteProfessionalsProfessionalIdServicesServiceId404,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<
-      ReturnType<typeof deleteProfessionalsProfessionalIdServicesServiceId>
-    >,
-    TError,
-    { professionalId: string; serviceId: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<
-    ReturnType<typeof deleteProfessionalsProfessionalIdServicesServiceId>
-  >,
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof removeServiceFromProfessional>>,
   TError,
   { professionalId: string; serviceId: string },
   TContext
 > => {
   const mutationOptions =
-    getDeleteProfessionalsProfessionalIdServicesServiceIdMutationOptions(
-      options,
-    );
+    getRemoveServiceFromProfessionalMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const putProfessionalsProfessionalIdServicesServiceId = (
+export const updateServiceProfessional = (
   professionalId: string,
   serviceId: string,
-  putProfessionalsProfessionalIdServicesServiceIdBody: PutProfessionalsProfessionalIdServicesServiceIdBody,
+  updateServiceProfessionalBody: UpdateServiceProfessionalBody,
 ) => {
-  return axiosInstance<PutProfessionalsProfessionalIdServicesServiceId204>({
+  return axiosInstance<UpdateServiceProfessional204>({
     url: `/professionals/${professionalId}/services/${serviceId}`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    data: putProfessionalsProfessionalIdServicesServiceIdBody,
+    data: updateServiceProfessionalBody,
   });
 };
 
-export const getPutProfessionalsProfessionalIdServicesServiceIdMutationOptions =
-  <
-    TError =
-      | PutProfessionalsProfessionalIdServicesServiceId400
-      | PutProfessionalsProfessionalIdServicesServiceId500,
-    TContext = unknown,
-  >(options?: {
-    mutation?: UseMutationOptions<
-      Awaited<
-        ReturnType<typeof putProfessionalsProfessionalIdServicesServiceId>
-      >,
-      TError,
-      {
-        professionalId: string;
-        serviceId: string;
-        data: PutProfessionalsProfessionalIdServicesServiceIdBody;
-      },
-      TContext
-    >;
-  }): UseMutationOptions<
-    Awaited<ReturnType<typeof putProfessionalsProfessionalIdServicesServiceId>>,
-    TError,
-    {
-      professionalId: string;
-      serviceId: string;
-      data: PutProfessionalsProfessionalIdServicesServiceIdBody;
-    },
-    TContext
-  > => {
-    const mutationKey = ["putProfessionalsProfessionalIdServicesServiceId"];
-    const { mutation: mutationOptions } = options
-      ? options.mutation &&
-        "mutationKey" in options.mutation &&
-        options.mutation.mutationKey
-        ? options
-        : { ...options, mutation: { ...options.mutation, mutationKey } }
-      : { mutation: { mutationKey } };
-
-    const mutationFn: MutationFunction<
-      Awaited<
-        ReturnType<typeof putProfessionalsProfessionalIdServicesServiceId>
-      >,
-      {
-        professionalId: string;
-        serviceId: string;
-        data: PutProfessionalsProfessionalIdServicesServiceIdBody;
-      }
-    > = (props) => {
-      const { professionalId, serviceId, data } = props ?? {};
-
-      return putProfessionalsProfessionalIdServicesServiceId(
-        professionalId,
-        serviceId,
-        data,
-      );
-    };
-
-    return { mutationFn, ...mutationOptions };
-  };
-
-export type PutProfessionalsProfessionalIdServicesServiceIdMutationResult =
-  NonNullable<
-    Awaited<ReturnType<typeof putProfessionalsProfessionalIdServicesServiceId>>
-  >;
-export type PutProfessionalsProfessionalIdServicesServiceIdMutationBody =
-  PutProfessionalsProfessionalIdServicesServiceIdBody;
-export type PutProfessionalsProfessionalIdServicesServiceIdMutationError =
-  | PutProfessionalsProfessionalIdServicesServiceId400
-  | PutProfessionalsProfessionalIdServicesServiceId500;
-
-export const usePutProfessionalsProfessionalIdServicesServiceId = <
-  TError =
-    | PutProfessionalsProfessionalIdServicesServiceId400
-    | PutProfessionalsProfessionalIdServicesServiceId500,
+export const getUpdateServiceProfessionalMutationOptions = <
+  TError = UpdateServiceProfessional400 | UpdateServiceProfessional500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putProfessionalsProfessionalIdServicesServiceId>>,
+    Awaited<ReturnType<typeof updateServiceProfessional>>,
     TError,
     {
       professionalId: string;
       serviceId: string;
-      data: PutProfessionalsProfessionalIdServicesServiceIdBody;
+      data: UpdateServiceProfessionalBody;
     },
     TContext
   >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof putProfessionalsProfessionalIdServicesServiceId>>,
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateServiceProfessional>>,
   TError,
   {
     professionalId: string;
     serviceId: string;
-    data: PutProfessionalsProfessionalIdServicesServiceIdBody;
+    data: UpdateServiceProfessionalBody;
   },
   TContext
 > => {
-  const mutationOptions =
-    getPutProfessionalsProfessionalIdServicesServiceIdMutationOptions(options);
+  const mutationKey = ["updateServiceProfessional"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
-  return useMutation(mutationOptions);
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateServiceProfessional>>,
+    {
+      professionalId: string;
+      serviceId: string;
+      data: UpdateServiceProfessionalBody;
+    }
+  > = (props) => {
+    const { professionalId, serviceId, data } = props ?? {};
+
+    return updateServiceProfessional(professionalId, serviceId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateServiceProfessionalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateServiceProfessional>>
+>;
+export type UpdateServiceProfessionalMutationBody =
+  UpdateServiceProfessionalBody;
+export type UpdateServiceProfessionalMutationError =
+  | UpdateServiceProfessional400
+  | UpdateServiceProfessional500;
+
+export const useUpdateServiceProfessional = <
+  TError = UpdateServiceProfessional400 | UpdateServiceProfessional500,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateServiceProfessional>>,
+      TError,
+      {
+        professionalId: string;
+        serviceId: string;
+        data: UpdateServiceProfessionalBody;
+      },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateServiceProfessional>>,
+  TError,
+  {
+    professionalId: string;
+    serviceId: string;
+    data: UpdateServiceProfessionalBody;
+  },
+  TContext
+> => {
+  const mutationOptions = getUpdateServiceProfessionalMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
 };

@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,63 +19,66 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetMeProfessionalDashboard200,
-  GetMeProfessionalDashboard400,
-  GetMeProfessionalDashboard404,
-  GetMeProfessionalDashboardParams,
-  GetMeProfessionalSchedule200,
-  GetMeProfessionalSchedule400,
-  GetMeProfessionalSchedule404,
-  GetMeProfessionalScheduleParams,
-  GetProfessionals200,
-  GetProfessionals400,
-  GetProfessionalsParams,
-  PatchProfessionalsId200,
-  PatchProfessionalsId400,
-  PatchProfessionalsId404,
-  PatchProfessionalsIdBody,
-  PatchProfessionalsIdStatus200,
-  PatchProfessionalsIdStatus400,
-  PatchProfessionalsIdStatus404,
-  PostProfessionals201,
-  PostProfessionals400,
-  PostProfessionals404,
-  PostProfessionals409,
-  PostProfessionalsBody,
+  CreateProfessional201,
+  CreateProfessional400,
+  CreateProfessional404,
+  CreateProfessional409,
+  CreateProfessionalBody,
+  GetProfessionalDashboard200,
+  GetProfessionalDashboard400,
+  GetProfessionalDashboard404,
+  GetProfessionalDashboardParams,
+  GetProfessionalSchedule200,
+  GetProfessionalSchedule400,
+  GetProfessionalSchedule404,
+  GetProfessionalScheduleParams,
+  ListOrSearchProfessionals200,
+  ListOrSearchProfessionals400,
+  ListOrSearchProfessionalsParams,
+  ToggleProfessionalStatus200,
+  ToggleProfessionalStatus400,
+  ToggleProfessionalStatus404,
+  UpdateProfessional200,
+  UpdateProfessional400,
+  UpdateProfessional404,
+  UpdateProfessionalBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
 
-export const postProfessionals = (
-  postProfessionalsBody: PostProfessionalsBody,
+export const createProfessional = (
+  createProfessionalBody: CreateProfessionalBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostProfessionals201>({
+  return axiosInstance<CreateProfessional201>({
     url: `/professionals`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postProfessionalsBody,
+    data: createProfessionalBody,
     signal,
   });
 };
 
-export const getPostProfessionalsMutationOptions = <
-  TError = PostProfessionals400 | PostProfessionals404 | PostProfessionals409,
+export const getCreateProfessionalMutationOptions = <
+  TError =
+    | CreateProfessional400
+    | CreateProfessional404
+    | CreateProfessional409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postProfessionals>>,
+    Awaited<ReturnType<typeof createProfessional>>,
     TError,
-    { data: PostProfessionalsBody },
+    { data: CreateProfessionalBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postProfessionals>>,
+  Awaited<ReturnType<typeof createProfessional>>,
   TError,
-  { data: PostProfessionalsBody },
+  { data: CreateProfessionalBody },
   TContext
 > => {
-  const mutationKey = ["postProfessionals"];
+  const mutationKey = ["createProfessional"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -78,51 +88,57 @@ export const getPostProfessionalsMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postProfessionals>>,
-    { data: PostProfessionalsBody }
+    Awaited<ReturnType<typeof createProfessional>>,
+    { data: CreateProfessionalBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postProfessionals(data);
+    return createProfessional(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostProfessionalsMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postProfessionals>>
+export type CreateProfessionalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createProfessional>>
 >;
-export type PostProfessionalsMutationBody = PostProfessionalsBody;
-export type PostProfessionalsMutationError =
-  | PostProfessionals400
-  | PostProfessionals404
-  | PostProfessionals409;
+export type CreateProfessionalMutationBody = CreateProfessionalBody;
+export type CreateProfessionalMutationError =
+  | CreateProfessional400
+  | CreateProfessional404
+  | CreateProfessional409;
 
-export const usePostProfessionals = <
-  TError = PostProfessionals400 | PostProfessionals404 | PostProfessionals409,
+export const useCreateProfessional = <
+  TError =
+    | CreateProfessional400
+    | CreateProfessional404
+    | CreateProfessional409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postProfessionals>>,
-    TError,
-    { data: PostProfessionalsBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postProfessionals>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createProfessional>>,
+      TError,
+      { data: CreateProfessionalBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createProfessional>>,
   TError,
-  { data: PostProfessionalsBody },
+  { data: CreateProfessionalBody },
   TContext
 > => {
-  const mutationOptions = getPostProfessionalsMutationOptions(options);
+  const mutationOptions = getCreateProfessionalMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const getProfessionals = (
-  params: GetProfessionalsParams,
+export const listOrSearchProfessionals = (
+  params: ListOrSearchProfessionalsParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetProfessionals200>({
+  return axiosInstance<ListOrSearchProfessionals200>({
     url: `/professionals`,
     method: "GET",
     params,
@@ -130,120 +146,148 @@ export const getProfessionals = (
   });
 };
 
-export const getGetProfessionalsQueryKey = (params: GetProfessionalsParams) => {
+export const getListOrSearchProfessionalsQueryKey = (
+  params: ListOrSearchProfessionalsParams,
+) => {
   return [`/professionals`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetProfessionalsInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getProfessionals>>,
-  TError = GetProfessionals400,
+export const getListOrSearchProfessionalsInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
+  TError = ListOrSearchProfessionals400,
 >(
-  params: GetProfessionalsParams,
+  params: ListOrSearchProfessionalsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getProfessionals>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetProfessionalsQueryKey(params);
+    queryOptions?.queryKey ?? getListOrSearchProfessionalsQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getProfessionals>>
-  > = ({ signal }) => getProfessionals(params, signal);
+    Awaited<ReturnType<typeof listOrSearchProfessionals>>
+  > = ({ signal }) => listOrSearchProfessionals(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getProfessionals>>,
+    Awaited<ReturnType<typeof listOrSearchProfessionals>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetProfessionalsInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getProfessionals>>
+export type ListOrSearchProfessionalsInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listOrSearchProfessionals>>
 >;
-export type GetProfessionalsInfiniteQueryError = GetProfessionals400;
+export type ListOrSearchProfessionalsInfiniteQueryError =
+  ListOrSearchProfessionals400;
 
-export function useGetProfessionalsInfinite<
-  TData = Awaited<ReturnType<typeof getProfessionals>>,
-  TError = GetProfessionals400,
+export function useListOrSearchProfessionalsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
+  TError = ListOrSearchProfessionals400,
 >(
-  params: GetProfessionalsParams,
+  params: ListOrSearchProfessionalsParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+          TError,
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListOrSearchProfessionalsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getProfessionals>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+          TError,
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListOrSearchProfessionalsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetProfessionalsInfiniteQueryOptions(params, options);
-
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export const getGetProfessionalsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getProfessionals>>,
-  TError = GetProfessionals400,
->(
-  params: GetProfessionalsParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getProfessionals>>,
-      TError,
-      TData
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetProfessionalsQueryKey(params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getProfessionals>>
-  > = ({ signal }) => getProfessionals(params, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getProfessionals>>,
-    TError,
-    TData
-  > & { queryKey: QueryKey };
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export type GetProfessionalsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getProfessionals>>
->;
-export type GetProfessionalsQueryError = GetProfessionals400;
-
-export function useGetProfessionals<
-  TData = Awaited<ReturnType<typeof getProfessionals>>,
-  TError = GetProfessionals400,
+export function useListOrSearchProfessionalsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
+  TError = ListOrSearchProfessionals400,
 >(
-  params: GetProfessionalsParams,
+  params: ListOrSearchProfessionalsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getProfessionals>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetProfessionalsQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListOrSearchProfessionalsInfiniteQueryOptions(
+    params,
+    options,
+  );
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
   };
 
   query.queryKey = queryOptions.queryKey;
@@ -251,35 +295,175 @@ export function useGetProfessionals<
   return query;
 }
 
-export const patchProfessionalsId = (
-  id: string,
-  patchProfessionalsIdBody: PatchProfessionalsIdBody,
+export const getListOrSearchProfessionalsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    >;
+  },
 ) => {
-  return axiosInstance<PatchProfessionalsId200>({
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListOrSearchProfessionalsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listOrSearchProfessionals>>
+  > = ({ signal }) => listOrSearchProfessionals(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListOrSearchProfessionalsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listOrSearchProfessionals>>
+>;
+export type ListOrSearchProfessionalsQueryError = ListOrSearchProfessionals400;
+
+export function useListOrSearchProfessionals<
+  TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+          TError,
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListOrSearchProfessionals<
+  TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+          TError,
+          Awaited<ReturnType<typeof listOrSearchProfessionals>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListOrSearchProfessionals<
+  TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useListOrSearchProfessionals<
+  TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+  TError = ListOrSearchProfessionals400,
+>(
+  params: ListOrSearchProfessionalsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listOrSearchProfessionals>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListOrSearchProfessionalsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const updateProfessional = (
+  id: string,
+  updateProfessionalBody: UpdateProfessionalBody,
+) => {
+  return axiosInstance<UpdateProfessional200>({
     url: `/professionals/${id}`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    data: patchProfessionalsIdBody,
+    data: updateProfessionalBody,
   });
 };
 
-export const getPatchProfessionalsIdMutationOptions = <
-  TError = PatchProfessionalsId400 | PatchProfessionalsId404,
+export const getUpdateProfessionalMutationOptions = <
+  TError = UpdateProfessional400 | UpdateProfessional404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchProfessionalsId>>,
+    Awaited<ReturnType<typeof updateProfessional>>,
     TError,
-    { id: string; data: PatchProfessionalsIdBody },
+    { id: string; data: UpdateProfessionalBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchProfessionalsId>>,
+  Awaited<ReturnType<typeof updateProfessional>>,
   TError,
-  { id: string; data: PatchProfessionalsIdBody },
+  { id: string; data: UpdateProfessionalBody },
   TContext
 > => {
-  const mutationKey = ["patchProfessionalsId"];
+  const mutationKey = ["updateProfessional"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -289,69 +473,72 @@ export const getPatchProfessionalsIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchProfessionalsId>>,
-    { id: string; data: PatchProfessionalsIdBody }
+    Awaited<ReturnType<typeof updateProfessional>>,
+    { id: string; data: UpdateProfessionalBody }
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return patchProfessionalsId(id, data);
+    return updateProfessional(id, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchProfessionalsIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchProfessionalsId>>
+export type UpdateProfessionalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateProfessional>>
 >;
-export type PatchProfessionalsIdMutationBody = PatchProfessionalsIdBody;
-export type PatchProfessionalsIdMutationError =
-  | PatchProfessionalsId400
-  | PatchProfessionalsId404;
+export type UpdateProfessionalMutationBody = UpdateProfessionalBody;
+export type UpdateProfessionalMutationError =
+  | UpdateProfessional400
+  | UpdateProfessional404;
 
-export const usePatchProfessionalsId = <
-  TError = PatchProfessionalsId400 | PatchProfessionalsId404,
+export const useUpdateProfessional = <
+  TError = UpdateProfessional400 | UpdateProfessional404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchProfessionalsId>>,
-    TError,
-    { id: string; data: PatchProfessionalsIdBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchProfessionalsId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateProfessional>>,
+      TError,
+      { id: string; data: UpdateProfessionalBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateProfessional>>,
   TError,
-  { id: string; data: PatchProfessionalsIdBody },
+  { id: string; data: UpdateProfessionalBody },
   TContext
 > => {
-  const mutationOptions = getPatchProfessionalsIdMutationOptions(options);
+  const mutationOptions = getUpdateProfessionalMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const patchProfessionalsIdStatus = (id: string) => {
-  return axiosInstance<PatchProfessionalsIdStatus200>({
+export const toggleProfessionalStatus = (id: string) => {
+  return axiosInstance<ToggleProfessionalStatus200>({
     url: `/professionals/${id}/status`,
     method: "PATCH",
   });
 };
 
-export const getPatchProfessionalsIdStatusMutationOptions = <
-  TError = PatchProfessionalsIdStatus400 | PatchProfessionalsIdStatus404,
+export const getToggleProfessionalStatusMutationOptions = <
+  TError = ToggleProfessionalStatus400 | ToggleProfessionalStatus404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchProfessionalsIdStatus>>,
+    Awaited<ReturnType<typeof toggleProfessionalStatus>>,
     TError,
     { id: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchProfessionalsIdStatus>>,
+  Awaited<ReturnType<typeof toggleProfessionalStatus>>,
   TError,
   { id: string },
   TContext
 > => {
-  const mutationKey = ["patchProfessionalsIdStatus"];
+  const mutationKey = ["toggleProfessionalStatus"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -361,50 +548,53 @@ export const getPatchProfessionalsIdStatusMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchProfessionalsIdStatus>>,
+    Awaited<ReturnType<typeof toggleProfessionalStatus>>,
     { id: string }
   > = (props) => {
     const { id } = props ?? {};
 
-    return patchProfessionalsIdStatus(id);
+    return toggleProfessionalStatus(id);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchProfessionalsIdStatusMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchProfessionalsIdStatus>>
+export type ToggleProfessionalStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof toggleProfessionalStatus>>
 >;
 
-export type PatchProfessionalsIdStatusMutationError =
-  | PatchProfessionalsIdStatus400
-  | PatchProfessionalsIdStatus404;
+export type ToggleProfessionalStatusMutationError =
+  | ToggleProfessionalStatus400
+  | ToggleProfessionalStatus404;
 
-export const usePatchProfessionalsIdStatus = <
-  TError = PatchProfessionalsIdStatus400 | PatchProfessionalsIdStatus404,
+export const useToggleProfessionalStatus = <
+  TError = ToggleProfessionalStatus400 | ToggleProfessionalStatus404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchProfessionalsIdStatus>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchProfessionalsIdStatus>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof toggleProfessionalStatus>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof toggleProfessionalStatus>>,
   TError,
   { id: string },
   TContext
 > => {
-  const mutationOptions = getPatchProfessionalsIdStatusMutationOptions(options);
+  const mutationOptions = getToggleProfessionalStatusMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const getMeProfessionalDashboard = (
-  params: GetMeProfessionalDashboardParams,
+export const getProfessionalDashboard = (
+  params: GetProfessionalDashboardParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetMeProfessionalDashboard200>({
+  return axiosInstance<GetProfessionalDashboard200>({
     url: `/me/professional/dashboard`,
     method: "GET",
     params,
@@ -412,132 +602,149 @@ export const getMeProfessionalDashboard = (
   });
 };
 
-export const getGetMeProfessionalDashboardQueryKey = (
-  params: GetMeProfessionalDashboardParams,
+export const getGetProfessionalDashboardQueryKey = (
+  params: GetProfessionalDashboardParams,
 ) => {
   return [`/me/professional/dashboard`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetMeProfessionalDashboardInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-  TError = GetMeProfessionalDashboard400 | GetMeProfessionalDashboard404,
+export const getGetProfessionalDashboardInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalDashboard>>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
 >(
-  params: GetMeProfessionalDashboardParams,
+  params: GetProfessionalDashboardParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetMeProfessionalDashboardQueryKey(params);
+    queryOptions?.queryKey ?? getGetProfessionalDashboardQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getMeProfessionalDashboard>>
-  > = ({ signal }) => getMeProfessionalDashboard(params, signal);
+    Awaited<ReturnType<typeof getProfessionalDashboard>>
+  > = ({ signal }) => getProfessionalDashboard(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
+    Awaited<ReturnType<typeof getProfessionalDashboard>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetMeProfessionalDashboardInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getMeProfessionalDashboard>>
+export type GetProfessionalDashboardInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProfessionalDashboard>>
 >;
-export type GetMeProfessionalDashboardInfiniteQueryError =
-  | GetMeProfessionalDashboard400
-  | GetMeProfessionalDashboard404;
+export type GetProfessionalDashboardInfiniteQueryError =
+  | GetProfessionalDashboard400
+  | GetProfessionalDashboard404;
 
-export function useGetMeProfessionalDashboardInfinite<
-  TData = Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-  TError = GetMeProfessionalDashboard400 | GetMeProfessionalDashboard404,
+export function useGetProfessionalDashboardInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalDashboard>>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
 >(
-  params: GetMeProfessionalDashboardParams,
+  params: GetProfessionalDashboardParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalDashboard>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalDashboardInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalDashboard>>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalDashboard>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalDashboardInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalDashboard>>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetMeProfessionalDashboardInfiniteQueryOptions(
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetProfessionalDashboardInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalDashboard>>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetProfessionalDashboardInfiniteQueryOptions(
     params,
     options,
   );
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export const getGetMeProfessionalDashboardQueryOptions = <
-  TData = Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-  TError = GetMeProfessionalDashboard400 | GetMeProfessionalDashboard404,
->(
-  params: GetMeProfessionalDashboardParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-      TError,
-      TData
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetMeProfessionalDashboardQueryKey(params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getMeProfessionalDashboard>>
-  > = ({ signal }) => getMeProfessionalDashboard(params, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-    TError,
-    TData
-  > & { queryKey: QueryKey };
-};
-
-export type GetMeProfessionalDashboardQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getMeProfessionalDashboard>>
->;
-export type GetMeProfessionalDashboardQueryError =
-  | GetMeProfessionalDashboard400
-  | GetMeProfessionalDashboard404;
-
-export function useGetMeProfessionalDashboard<
-  TData = Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-  TError = GetMeProfessionalDashboard400 | GetMeProfessionalDashboard404,
->(
-  params: GetMeProfessionalDashboardParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalDashboard>>,
-      TError,
-      TData
-    >;
-  },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetMeProfessionalDashboardQueryOptions(
-    params,
-    options,
-  );
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
   };
 
   query.queryKey = queryOptions.queryKey;
@@ -545,11 +752,150 @@ export function useGetMeProfessionalDashboard<
   return query;
 }
 
-export const getMeProfessionalSchedule = (
-  params: GetMeProfessionalScheduleParams,
+export const getGetProfessionalDashboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof getProfessionalDashboard>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetProfessionalDashboardQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getProfessionalDashboard>>
+  > = ({ signal }) => getProfessionalDashboard(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getProfessionalDashboard>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetProfessionalDashboardQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProfessionalDashboard>>
+>;
+export type GetProfessionalDashboardQueryError =
+  | GetProfessionalDashboard400
+  | GetProfessionalDashboard404;
+
+export function useGetProfessionalDashboard<
+  TData = Awaited<ReturnType<typeof getProfessionalDashboard>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalDashboard>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalDashboard<
+  TData = Awaited<ReturnType<typeof getProfessionalDashboard>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalDashboard>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalDashboard<
+  TData = Awaited<ReturnType<typeof getProfessionalDashboard>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetProfessionalDashboard<
+  TData = Awaited<ReturnType<typeof getProfessionalDashboard>>,
+  TError = GetProfessionalDashboard400 | GetProfessionalDashboard404,
+>(
+  params: GetProfessionalDashboardParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalDashboard>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetProfessionalDashboardQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getProfessionalSchedule = (
+  params: GetProfessionalScheduleParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetMeProfessionalSchedule200>({
+  return axiosInstance<GetProfessionalSchedule200>({
     url: `/me/professional/schedule`,
     method: "GET",
     params,
@@ -557,133 +903,289 @@ export const getMeProfessionalSchedule = (
   });
 };
 
-export const getGetMeProfessionalScheduleQueryKey = (
-  params: GetMeProfessionalScheduleParams,
+export const getGetProfessionalScheduleQueryKey = (
+  params: GetProfessionalScheduleParams,
 ) => {
   return [`/me/professional/schedule`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetMeProfessionalScheduleInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-  TError = GetMeProfessionalSchedule400 | GetMeProfessionalSchedule404,
+export const getGetProfessionalScheduleInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalSchedule>>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
 >(
-  params: GetMeProfessionalScheduleParams,
+  params: GetProfessionalScheduleParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetMeProfessionalScheduleQueryKey(params);
+    queryOptions?.queryKey ?? getGetProfessionalScheduleQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getMeProfessionalSchedule>>
-  > = ({ signal }) => getMeProfessionalSchedule(params, signal);
+    Awaited<ReturnType<typeof getProfessionalSchedule>>
+  > = ({ signal }) => getProfessionalSchedule(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
+    Awaited<ReturnType<typeof getProfessionalSchedule>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetMeProfessionalScheduleInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getMeProfessionalSchedule>>
+export type GetProfessionalScheduleInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProfessionalSchedule>>
 >;
-export type GetMeProfessionalScheduleInfiniteQueryError =
-  | GetMeProfessionalSchedule400
-  | GetMeProfessionalSchedule404;
+export type GetProfessionalScheduleInfiniteQueryError =
+  | GetProfessionalSchedule400
+  | GetProfessionalSchedule404;
 
-export function useGetMeProfessionalScheduleInfinite<
-  TData = Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-  TError = GetMeProfessionalSchedule400 | GetMeProfessionalSchedule404,
+export function useGetProfessionalScheduleInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalSchedule>>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
 >(
-  params: GetMeProfessionalScheduleParams,
+  params: GetProfessionalScheduleParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalScheduleInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalSchedule>>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
+>(
+  params: GetProfessionalScheduleParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalScheduleInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalSchedule>>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
+>(
+  params: GetProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetMeProfessionalScheduleInfiniteQueryOptions(
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetProfessionalScheduleInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getProfessionalSchedule>>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
+>(
+  params: GetProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetProfessionalScheduleInfiniteQueryOptions(
     params,
     options,
   );
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetMeProfessionalScheduleQueryOptions = <
-  TData = Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-  TError = GetMeProfessionalSchedule400 | GetMeProfessionalSchedule404,
+export const getGetProfessionalScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof getProfessionalSchedule>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
 >(
-  params: GetMeProfessionalScheduleParams,
+  params: GetProfessionalScheduleParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetMeProfessionalScheduleQueryKey(params);
+    queryOptions?.queryKey ?? getGetProfessionalScheduleQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getMeProfessionalSchedule>>
-  > = ({ signal }) => getMeProfessionalSchedule(params, signal);
+    Awaited<ReturnType<typeof getProfessionalSchedule>>
+  > = ({ signal }) => getProfessionalSchedule(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
+    Awaited<ReturnType<typeof getProfessionalSchedule>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetMeProfessionalScheduleQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getMeProfessionalSchedule>>
+export type GetProfessionalScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProfessionalSchedule>>
 >;
-export type GetMeProfessionalScheduleQueryError =
-  | GetMeProfessionalSchedule400
-  | GetMeProfessionalSchedule404;
+export type GetProfessionalScheduleQueryError =
+  | GetProfessionalSchedule400
+  | GetProfessionalSchedule404;
 
-export function useGetMeProfessionalSchedule<
-  TData = Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-  TError = GetMeProfessionalSchedule400 | GetMeProfessionalSchedule404,
+export function useGetProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getProfessionalSchedule>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
 >(
-  params: GetMeProfessionalScheduleParams,
+  params: GetProfessionalScheduleParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getProfessionalSchedule>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
+>(
+  params: GetProfessionalScheduleParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getMeProfessionalSchedule>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getProfessionalSchedule>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
+>(
+  params: GetProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetMeProfessionalScheduleQueryOptions(
-    params,
-    options,
-  );
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useGetProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getProfessionalSchedule>>,
+  TError = GetProfessionalSchedule400 | GetProfessionalSchedule404,
+>(
+  params: GetProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetProfessionalScheduleQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 

@@ -1,0 +1,26 @@
+import type { ListProfessionalServicesSortOrder } from "./listProfessionalServicesSortOrder";
+
+export type ListProfessionalServicesParams = {
+  /**
+   * Número da página atual (começa em 1)
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  page?: number;
+  /**
+   * Quantidade de itens por página (máximo 100)
+   * @minimum 0
+   * @maximum 100
+   * @exclusiveMinimum
+   */
+  limit?: number;
+  /**
+   * Campo para ordenação (opcional)
+   */
+  sortBy?: string;
+  /**
+   * Direção da ordenação: asc (crescente) ou desc (decrescente)
+   */
+  sortOrder?: ListProfessionalServicesSortOrder;
+  activeOnly?: boolean;
+};

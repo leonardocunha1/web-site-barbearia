@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,23 +19,23 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  DeleteCouponsCouponId204,
-  DeleteCouponsCouponId404,
-  GetCoupons200,
-  GetCoupons400,
-  GetCouponsCouponId200,
-  GetCouponsCouponId404,
-  GetCouponsParams,
-  PatchCouponsCouponIdToggleStatus200,
-  PatchCouponsCouponIdToggleStatus404,
-  PostCoupons201,
-  PostCoupons400,
-  PostCoupons409,
-  PostCouponsBody,
-  PutCouponsCouponId200,
-  PutCouponsCouponId400,
-  PutCouponsCouponId404,
-  PutCouponsCouponIdBody,
+  CreateCoupon201,
+  CreateCoupon400,
+  CreateCoupon409,
+  CreateCouponBody,
+  DeleteCoupon204,
+  DeleteCoupon404,
+  GetCouponById200,
+  GetCouponById404,
+  ListCoupons200,
+  ListCoupons400,
+  ListCouponsParams,
+  ToggleCouponStatus200,
+  ToggleCouponStatus404,
+  UpdateCoupon200,
+  UpdateCoupon400,
+  UpdateCoupon404,
+  UpdateCouponBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -36,36 +43,36 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Criação de um novo cupom.
  */
-export const postCoupons = (
-  postCouponsBody: PostCouponsBody,
+export const createCoupon = (
+  createCouponBody: CreateCouponBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostCoupons201>({
+  return axiosInstance<CreateCoupon201>({
     url: `/coupons`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postCouponsBody,
+    data: createCouponBody,
     signal,
   });
 };
 
-export const getPostCouponsMutationOptions = <
-  TError = PostCoupons400 | PostCoupons409,
+export const getCreateCouponMutationOptions = <
+  TError = CreateCoupon400 | CreateCoupon409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCoupons>>,
+    Awaited<ReturnType<typeof createCoupon>>,
     TError,
-    { data: PostCouponsBody },
+    { data: CreateCouponBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postCoupons>>,
+  Awaited<ReturnType<typeof createCoupon>>,
   TError,
-  { data: PostCouponsBody },
+  { data: CreateCouponBody },
   TContext
 > => {
-  const mutationKey = ["postCoupons"];
+  const mutationKey = ["createCoupon"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -75,48 +82,54 @@ export const getPostCouponsMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCoupons>>,
-    { data: PostCouponsBody }
+    Awaited<ReturnType<typeof createCoupon>>,
+    { data: CreateCouponBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postCoupons(data);
+    return createCoupon(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostCouponsMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postCoupons>>
+export type CreateCouponMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCoupon>>
 >;
-export type PostCouponsMutationBody = PostCouponsBody;
-export type PostCouponsMutationError = PostCoupons400 | PostCoupons409;
+export type CreateCouponMutationBody = CreateCouponBody;
+export type CreateCouponMutationError = CreateCoupon400 | CreateCoupon409;
 
-export const usePostCoupons = <
-  TError = PostCoupons400 | PostCoupons409,
+export const useCreateCoupon = <
+  TError = CreateCoupon400 | CreateCoupon409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCoupons>>,
-    TError,
-    { data: PostCouponsBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postCoupons>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createCoupon>>,
+      TError,
+      { data: CreateCouponBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createCoupon>>,
   TError,
-  { data: PostCouponsBody },
+  { data: CreateCouponBody },
   TContext
 > => {
-  const mutationOptions = getPostCouponsMutationOptions(options);
+  const mutationOptions = getCreateCouponMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Lista todos os cupons com paginação.
  */
-export const getCoupons = (params?: GetCouponsParams, signal?: AbortSignal) => {
-  return axiosInstance<GetCoupons200>({
+export const listCoupons = (
+  params?: ListCouponsParams,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ListCoupons200>({
     url: `/coupons`,
     method: "GET",
     params,
@@ -124,119 +137,258 @@ export const getCoupons = (params?: GetCouponsParams, signal?: AbortSignal) => {
   });
 };
 
-export const getGetCouponsQueryKey = (params?: GetCouponsParams) => {
+export const getListCouponsQueryKey = (params?: ListCouponsParams) => {
   return [`/coupons`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetCouponsInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCoupons>>,
-  TError = GetCoupons400,
+export const getListCouponsInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listCoupons>>>,
+  TError = ListCoupons400,
 >(
-  params?: GetCouponsParams,
+  params?: ListCouponsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getCoupons>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listCoupons>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetCouponsQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListCouponsQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCoupons>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listCoupons>>> = ({
     signal,
-  }) => getCoupons(params, signal);
+  }) => listCoupons(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getCoupons>>,
+    Awaited<ReturnType<typeof listCoupons>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetCouponsInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCoupons>>
+export type ListCouponsInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCoupons>>
 >;
-export type GetCouponsInfiniteQueryError = GetCoupons400;
+export type ListCouponsInfiniteQueryError = ListCoupons400;
 
-export function useGetCouponsInfinite<
-  TData = Awaited<ReturnType<typeof getCoupons>>,
-  TError = GetCoupons400,
+export function useListCouponsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listCoupons>>>,
+  TError = ListCoupons400,
 >(
-  params?: GetCouponsParams,
+  params: undefined | ListCouponsParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listCoupons>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCoupons>>,
+          TError,
+          Awaited<ReturnType<typeof listCoupons>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListCouponsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listCoupons>>>,
+  TError = ListCoupons400,
+>(
+  params?: ListCouponsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getCoupons>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listCoupons>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCoupons>>,
+          TError,
+          Awaited<ReturnType<typeof listCoupons>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListCouponsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listCoupons>>>,
+  TError = ListCoupons400,
+>(
+  params?: ListCouponsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listCoupons>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetCouponsInfiniteQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useListCouponsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listCoupons>>>,
+  TError = ListCoupons400,
+>(
+  params?: ListCouponsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listCoupons>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListCouponsInfiniteQueryOptions(params, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetCouponsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCoupons>>,
-  TError = GetCoupons400,
+export const getListCouponsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listCoupons>>,
+  TError = ListCoupons400,
 >(
-  params?: GetCouponsParams,
+  params?: ListCouponsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getCoupons>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listCoupons>>, TError, TData>
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetCouponsQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListCouponsQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCoupons>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listCoupons>>> = ({
     signal,
-  }) => getCoupons(params, signal);
+  }) => listCoupons(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCoupons>>,
+    Awaited<ReturnType<typeof listCoupons>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetCouponsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCoupons>>
+export type ListCouponsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCoupons>>
 >;
-export type GetCouponsQueryError = GetCoupons400;
+export type ListCouponsQueryError = ListCoupons400;
 
-export function useGetCoupons<
-  TData = Awaited<ReturnType<typeof getCoupons>>,
-  TError = GetCoupons400,
+export function useListCoupons<
+  TData = Awaited<ReturnType<typeof listCoupons>>,
+  TError = ListCoupons400,
 >(
-  params?: GetCouponsParams,
+  params: undefined | ListCouponsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listCoupons>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCoupons>>,
+          TError,
+          Awaited<ReturnType<typeof listCoupons>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListCoupons<
+  TData = Awaited<ReturnType<typeof listCoupons>>,
+  TError = ListCoupons400,
+>(
+  params?: ListCouponsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getCoupons>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listCoupons>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCoupons>>,
+          TError,
+          Awaited<ReturnType<typeof listCoupons>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListCoupons<
+  TData = Awaited<ReturnType<typeof listCoupons>>,
+  TError = ListCoupons400,
+>(
+  params?: ListCouponsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listCoupons>>, TError, TData>
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetCouponsQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useListCoupons<
+  TData = Awaited<ReturnType<typeof listCoupons>>,
+  TError = ListCoupons400,
+>(
+  params?: ListCouponsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listCoupons>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListCouponsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -246,39 +398,40 @@ export function useGetCoupons<
 /**
  * Retorna os detalhes de um cupom pelo ID.
  */
-export const getCouponsCouponId = (couponId: string, signal?: AbortSignal) => {
-  return axiosInstance<GetCouponsCouponId200>({
+export const getCouponById = (couponId: string, signal?: AbortSignal) => {
+  return axiosInstance<GetCouponById200>({
     url: `/coupons/${couponId}`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetCouponsCouponIdQueryKey = (couponId: string) => {
+export const getGetCouponByIdQueryKey = (couponId: string) => {
   return [`/coupons/${couponId}`] as const;
 };
 
-export const getGetCouponsCouponIdInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCouponsCouponId>>,
-  TError = GetCouponsCouponId404,
+export const getGetCouponByIdInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getCouponById>>>,
+  TError = GetCouponById404,
 >(
   couponId: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getCouponsCouponId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getCouponById>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetCouponsCouponIdQueryKey(couponId);
+  const queryKey = queryOptions?.queryKey ?? getGetCouponByIdQueryKey(couponId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getCouponsCouponId>>
-  > = ({ signal }) => getCouponsCouponId(couponId, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCouponById>>> = ({
+    signal,
+  }) => getCouponById(couponId, signal);
 
   return {
     queryKey,
@@ -286,66 +439,138 @@ export const getGetCouponsCouponIdInfiniteQueryOptions = <
     enabled: !!couponId,
     ...queryOptions,
   } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getCouponsCouponId>>,
+    Awaited<ReturnType<typeof getCouponById>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetCouponsCouponIdInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCouponsCouponId>>
+export type GetCouponByIdInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCouponById>>
 >;
-export type GetCouponsCouponIdInfiniteQueryError = GetCouponsCouponId404;
+export type GetCouponByIdInfiniteQueryError = GetCouponById404;
 
-export function useGetCouponsCouponIdInfinite<
-  TData = Awaited<ReturnType<typeof getCouponsCouponId>>,
-  TError = GetCouponsCouponId404,
+export function useGetCouponByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getCouponById>>>,
+  TError = GetCouponById404,
+>(
+  couponId: string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getCouponById>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCouponById>>,
+          TError,
+          Awaited<ReturnType<typeof getCouponById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCouponByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getCouponById>>>,
+  TError = GetCouponById404,
 >(
   couponId: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getCouponsCouponId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getCouponById>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCouponById>>,
+          TError,
+          Awaited<ReturnType<typeof getCouponById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCouponByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getCouponById>>>,
+  TError = GetCouponById404,
+>(
+  couponId: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getCouponById>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetCouponsCouponIdInfiniteQueryOptions(
-    couponId,
-    options,
-  );
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useGetCouponByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getCouponById>>>,
+  TError = GetCouponById404,
+>(
+  couponId: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getCouponById>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCouponByIdInfiniteQueryOptions(couponId, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetCouponsCouponIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCouponsCouponId>>,
-  TError = GetCouponsCouponId404,
+export const getGetCouponByIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCouponById>>,
+  TError = GetCouponById404,
 >(
   couponId: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getCouponsCouponId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCouponById>>, TError, TData>
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetCouponsCouponIdQueryKey(couponId);
+  const queryKey = queryOptions?.queryKey ?? getGetCouponByIdQueryKey(couponId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getCouponsCouponId>>
-  > = ({ signal }) => getCouponsCouponId(couponId, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCouponById>>> = ({
+    signal,
+  }) => getCouponById(couponId, signal);
 
   return {
     queryKey,
@@ -353,35 +578,96 @@ export const getGetCouponsCouponIdQueryOptions = <
     enabled: !!couponId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCouponsCouponId>>,
+    Awaited<ReturnType<typeof getCouponById>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetCouponsCouponIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCouponsCouponId>>
+export type GetCouponByIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCouponById>>
 >;
-export type GetCouponsCouponIdQueryError = GetCouponsCouponId404;
+export type GetCouponByIdQueryError = GetCouponById404;
 
-export function useGetCouponsCouponId<
-  TData = Awaited<ReturnType<typeof getCouponsCouponId>>,
-  TError = GetCouponsCouponId404,
+export function useGetCouponById<
+  TData = Awaited<ReturnType<typeof getCouponById>>,
+  TError = GetCouponById404,
+>(
+  couponId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCouponById>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCouponById>>,
+          TError,
+          Awaited<ReturnType<typeof getCouponById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCouponById<
+  TData = Awaited<ReturnType<typeof getCouponById>>,
+  TError = GetCouponById404,
 >(
   couponId: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getCouponsCouponId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCouponById>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCouponById>>,
+          TError,
+          Awaited<ReturnType<typeof getCouponById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCouponById<
+  TData = Awaited<ReturnType<typeof getCouponById>>,
+  TError = GetCouponById404,
+>(
+  couponId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCouponById>>, TError, TData>
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetCouponsCouponIdQueryOptions(couponId, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useGetCouponById<
+  TData = Awaited<ReturnType<typeof getCouponById>>,
+  TError = GetCouponById404,
+>(
+  couponId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCouponById>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCouponByIdQueryOptions(couponId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -391,35 +677,35 @@ export function useGetCouponsCouponId<
 /**
  * Atualiza um cupom existente.
  */
-export const putCouponsCouponId = (
+export const updateCoupon = (
   couponId: string,
-  putCouponsCouponIdBody: PutCouponsCouponIdBody,
+  updateCouponBody: UpdateCouponBody,
 ) => {
-  return axiosInstance<PutCouponsCouponId200>({
+  return axiosInstance<UpdateCoupon200>({
     url: `/coupons/${couponId}`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    data: putCouponsCouponIdBody,
+    data: updateCouponBody,
   });
 };
 
-export const getPutCouponsCouponIdMutationOptions = <
-  TError = PutCouponsCouponId400 | PutCouponsCouponId404,
+export const getUpdateCouponMutationOptions = <
+  TError = UpdateCoupon400 | UpdateCoupon404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putCouponsCouponId>>,
+    Awaited<ReturnType<typeof updateCoupon>>,
     TError,
-    { couponId: string; data: PutCouponsCouponIdBody },
+    { couponId: string; data: UpdateCouponBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof putCouponsCouponId>>,
+  Awaited<ReturnType<typeof updateCoupon>>,
   TError,
-  { couponId: string; data: PutCouponsCouponIdBody },
+  { couponId: string; data: UpdateCouponBody },
   TContext
 > => {
-  const mutationKey = ["putCouponsCouponId"];
+  const mutationKey = ["updateCoupon"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -429,72 +715,73 @@ export const getPutCouponsCouponIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof putCouponsCouponId>>,
-    { couponId: string; data: PutCouponsCouponIdBody }
+    Awaited<ReturnType<typeof updateCoupon>>,
+    { couponId: string; data: UpdateCouponBody }
   > = (props) => {
     const { couponId, data } = props ?? {};
 
-    return putCouponsCouponId(couponId, data);
+    return updateCoupon(couponId, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PutCouponsCouponIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof putCouponsCouponId>>
+export type UpdateCouponMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCoupon>>
 >;
-export type PutCouponsCouponIdMutationBody = PutCouponsCouponIdBody;
-export type PutCouponsCouponIdMutationError =
-  | PutCouponsCouponId400
-  | PutCouponsCouponId404;
+export type UpdateCouponMutationBody = UpdateCouponBody;
+export type UpdateCouponMutationError = UpdateCoupon400 | UpdateCoupon404;
 
-export const usePutCouponsCouponId = <
-  TError = PutCouponsCouponId400 | PutCouponsCouponId404,
+export const useUpdateCoupon = <
+  TError = UpdateCoupon400 | UpdateCoupon404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putCouponsCouponId>>,
-    TError,
-    { couponId: string; data: PutCouponsCouponIdBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof putCouponsCouponId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateCoupon>>,
+      TError,
+      { couponId: string; data: UpdateCouponBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateCoupon>>,
   TError,
-  { couponId: string; data: PutCouponsCouponIdBody },
+  { couponId: string; data: UpdateCouponBody },
   TContext
 > => {
-  const mutationOptions = getPutCouponsCouponIdMutationOptions(options);
+  const mutationOptions = getUpdateCouponMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Deleta um cupom pelo ID.
  */
-export const deleteCouponsCouponId = (couponId: string) => {
-  return axiosInstance<DeleteCouponsCouponId204>({
+export const deleteCoupon = (couponId: string) => {
+  return axiosInstance<DeleteCoupon204>({
     url: `/coupons/${couponId}`,
     method: "DELETE",
   });
 };
 
-export const getDeleteCouponsCouponIdMutationOptions = <
-  TError = DeleteCouponsCouponId404,
+export const getDeleteCouponMutationOptions = <
+  TError = DeleteCoupon404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteCouponsCouponId>>,
+    Awaited<ReturnType<typeof deleteCoupon>>,
     TError,
     { couponId: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteCouponsCouponId>>,
+  Awaited<ReturnType<typeof deleteCoupon>>,
   TError,
   { couponId: string },
   TContext
 > => {
-  const mutationKey = ["deleteCouponsCouponId"];
+  const mutationKey = ["deleteCoupon"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -504,70 +791,70 @@ export const getDeleteCouponsCouponIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteCouponsCouponId>>,
+    Awaited<ReturnType<typeof deleteCoupon>>,
     { couponId: string }
   > = (props) => {
     const { couponId } = props ?? {};
 
-    return deleteCouponsCouponId(couponId);
+    return deleteCoupon(couponId);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteCouponsCouponIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteCouponsCouponId>>
+export type DeleteCouponMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCoupon>>
 >;
 
-export type DeleteCouponsCouponIdMutationError = DeleteCouponsCouponId404;
+export type DeleteCouponMutationError = DeleteCoupon404;
 
-export const useDeleteCouponsCouponId = <
-  TError = DeleteCouponsCouponId404,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteCouponsCouponId>>,
-    TError,
-    { couponId: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteCouponsCouponId>>,
+export const useDeleteCoupon = <TError = DeleteCoupon404, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteCoupon>>,
+      TError,
+      { couponId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCoupon>>,
   TError,
   { couponId: string },
   TContext
 > => {
-  const mutationOptions = getDeleteCouponsCouponIdMutationOptions(options);
+  const mutationOptions = getDeleteCouponMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Ativa ou desativa o status de um cupom.
  */
-export const patchCouponsCouponIdToggleStatus = (couponId: string) => {
-  return axiosInstance<PatchCouponsCouponIdToggleStatus200>({
+export const toggleCouponStatus = (couponId: string) => {
+  return axiosInstance<ToggleCouponStatus200>({
     url: `/coupons/${couponId}/toggle-status`,
     method: "PATCH",
   });
 };
 
-export const getPatchCouponsCouponIdToggleStatusMutationOptions = <
-  TError = PatchCouponsCouponIdToggleStatus404,
+export const getToggleCouponStatusMutationOptions = <
+  TError = ToggleCouponStatus404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchCouponsCouponIdToggleStatus>>,
+    Awaited<ReturnType<typeof toggleCouponStatus>>,
     TError,
     { couponId: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchCouponsCouponIdToggleStatus>>,
+  Awaited<ReturnType<typeof toggleCouponStatus>>,
   TError,
   { couponId: string },
   TContext
 > => {
-  const mutationKey = ["patchCouponsCouponIdToggleStatus"];
+  const mutationKey = ["toggleCouponStatus"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -577,42 +864,43 @@ export const getPatchCouponsCouponIdToggleStatusMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchCouponsCouponIdToggleStatus>>,
+    Awaited<ReturnType<typeof toggleCouponStatus>>,
     { couponId: string }
   > = (props) => {
     const { couponId } = props ?? {};
 
-    return patchCouponsCouponIdToggleStatus(couponId);
+    return toggleCouponStatus(couponId);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchCouponsCouponIdToggleStatusMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchCouponsCouponIdToggleStatus>>
+export type ToggleCouponStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof toggleCouponStatus>>
 >;
 
-export type PatchCouponsCouponIdToggleStatusMutationError =
-  PatchCouponsCouponIdToggleStatus404;
+export type ToggleCouponStatusMutationError = ToggleCouponStatus404;
 
-export const usePatchCouponsCouponIdToggleStatus = <
-  TError = PatchCouponsCouponIdToggleStatus404,
+export const useToggleCouponStatus = <
+  TError = ToggleCouponStatus404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchCouponsCouponIdToggleStatus>>,
-    TError,
-    { couponId: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchCouponsCouponIdToggleStatus>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof toggleCouponStatus>>,
+      TError,
+      { couponId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof toggleCouponStatus>>,
   TError,
   { couponId: string },
   TContext
 > => {
-  const mutationOptions =
-    getPatchCouponsCouponIdToggleStatusMutationOptions(options);
+  const mutationOptions = getToggleCouponStatusMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };

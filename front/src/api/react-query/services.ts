@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,63 +19,63 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  DeleteServicesId204,
-  DeleteServicesId400,
-  DeleteServicesId404,
-  DeleteServicesIdParams,
-  GetServices200,
-  GetServices400,
-  GetServices404,
-  GetServicesId200,
-  GetServicesId400,
-  GetServicesId404,
-  GetServicesParams,
-  PatchServicesIdStatus200,
-  PatchServicesIdStatus400,
-  PatchServicesIdStatus404,
-  PostServices201,
-  PostServices400,
-  PostServices403,
-  PostServices404,
-  PostServicesBody,
-  PutServicesId200,
-  PutServicesId400,
-  PutServicesId404,
-  PutServicesIdBody,
+  CreateService201,
+  CreateService400,
+  CreateService403,
+  CreateService404,
+  CreateServiceBody,
+  DeleteServiceById204,
+  DeleteServiceById400,
+  DeleteServiceById404,
+  DeleteServiceByIdParams,
+  GetServiceById200,
+  GetServiceById400,
+  GetServiceById404,
+  ListServices200,
+  ListServices400,
+  ListServices404,
+  ListServicesParams,
+  ToggleServiceStatusById200,
+  ToggleServiceStatusById400,
+  ToggleServiceStatusById404,
+  UpdateServiceById200,
+  UpdateServiceById400,
+  UpdateServiceById404,
+  UpdateServiceByIdBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
 
-export const postServices = (
-  postServicesBody: PostServicesBody,
+export const createService = (
+  createServiceBody: CreateServiceBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostServices201>({
+  return axiosInstance<CreateService201>({
     url: `/services`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postServicesBody,
+    data: createServiceBody,
     signal,
   });
 };
 
-export const getPostServicesMutationOptions = <
-  TError = PostServices400 | PostServices403 | PostServices404,
+export const getCreateServiceMutationOptions = <
+  TError = CreateService400 | CreateService403 | CreateService404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postServices>>,
+    Awaited<ReturnType<typeof createService>>,
     TError,
-    { data: PostServicesBody },
+    { data: CreateServiceBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postServices>>,
+  Awaited<ReturnType<typeof createService>>,
   TError,
-  { data: PostServicesBody },
+  { data: CreateServiceBody },
   TContext
 > => {
-  const mutationKey = ["postServices"];
+  const mutationKey = ["createService"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -78,51 +85,54 @@ export const getPostServicesMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postServices>>,
-    { data: PostServicesBody }
+    Awaited<ReturnType<typeof createService>>,
+    { data: CreateServiceBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postServices(data);
+    return createService(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostServicesMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postServices>>
+export type CreateServiceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createService>>
 >;
-export type PostServicesMutationBody = PostServicesBody;
-export type PostServicesMutationError =
-  | PostServices400
-  | PostServices403
-  | PostServices404;
+export type CreateServiceMutationBody = CreateServiceBody;
+export type CreateServiceMutationError =
+  | CreateService400
+  | CreateService403
+  | CreateService404;
 
-export const usePostServices = <
-  TError = PostServices400 | PostServices403 | PostServices404,
+export const useCreateService = <
+  TError = CreateService400 | CreateService403 | CreateService404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postServices>>,
-    TError,
-    { data: PostServicesBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postServices>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createService>>,
+      TError,
+      { data: CreateServiceBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createService>>,
   TError,
-  { data: PostServicesBody },
+  { data: CreateServiceBody },
   TContext
 > => {
-  const mutationOptions = getPostServicesMutationOptions(options);
+  const mutationOptions = getCreateServiceMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const getServices = (
-  params?: GetServicesParams,
+export const listServices = (
+  params?: ListServicesParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetServices200>({
+  return axiosInstance<ListServices200>({
     url: `/services`,
     method: "GET",
     params,
@@ -130,118 +140,141 @@ export const getServices = (
   });
 };
 
-export const getGetServicesQueryKey = (params?: GetServicesParams) => {
+export const getListServicesQueryKey = (params?: ListServicesParams) => {
   return [`/services`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetServicesInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getServices>>,
-  TError = GetServices400 | GetServices404,
+export const getListServicesInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listServices>>>,
+  TError = ListServices400 | ListServices404,
 >(
-  params?: GetServicesParams,
+  params?: ListServicesParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listServices>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetServicesQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListServicesQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getServices>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listServices>>> = ({
     signal,
-  }) => getServices(params, signal);
+  }) => listServices(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getServices>>,
+    Awaited<ReturnType<typeof listServices>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetServicesInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getServices>>
+export type ListServicesInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listServices>>
 >;
-export type GetServicesInfiniteQueryError = GetServices400 | GetServices404;
+export type ListServicesInfiniteQueryError = ListServices400 | ListServices404;
 
-export function useGetServicesInfinite<
-  TData = Awaited<ReturnType<typeof getServices>>,
-  TError = GetServices400 | GetServices404,
+export function useListServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listServices>>>,
+  TError = ListServices400 | ListServices404,
 >(
-  params?: GetServicesParams,
+  params: undefined | ListServicesParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listServices>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listServices>>,
+          TError,
+          Awaited<ReturnType<typeof listServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listServices>>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params?: ListServicesParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listServices>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listServices>>,
+          TError,
+          Awaited<ReturnType<typeof listServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listServices>>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params?: ListServicesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listServices>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetServicesInfiniteQueryOptions(params, options);
-
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export const getGetServicesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getServices>>,
-  TError = GetServices400 | GetServices404,
->(
-  params?: GetServicesParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getServices>>,
-      TError,
-      TData
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getGetServicesQueryKey(params);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getServices>>> = ({
-    signal,
-  }) => getServices(params, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getServices>>,
-    TError,
-    TData
-  > & { queryKey: QueryKey };
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export type GetServicesQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getServices>>
->;
-export type GetServicesQueryError = GetServices400 | GetServices404;
-
-export function useGetServices<
-  TData = Awaited<ReturnType<typeof getServices>>,
-  TError = GetServices400 | GetServices404,
+export function useListServicesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listServices>>>,
+  TError = ListServices400 | ListServices404,
 >(
-  params?: GetServicesParams,
+  params?: ListServicesParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getServices>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listServices>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetServicesQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListServicesInfiniteQueryOptions(params, options);
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
   };
 
   query.queryKey = queryOptions.queryKey;
@@ -249,38 +282,156 @@ export function useGetServices<
   return query;
 }
 
-export const getServicesId = (id: string, signal?: AbortSignal) => {
-  return axiosInstance<GetServicesId200>({
+export const getListServicesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listServices>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params?: ListServicesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listServices>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListServicesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listServices>>> = ({
+    signal,
+  }) => listServices(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listServices>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListServicesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listServices>>
+>;
+export type ListServicesQueryError = ListServices400 | ListServices404;
+
+export function useListServices<
+  TData = Awaited<ReturnType<typeof listServices>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params: undefined | ListServicesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listServices>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listServices>>,
+          TError,
+          Awaited<ReturnType<typeof listServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListServices<
+  TData = Awaited<ReturnType<typeof listServices>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params?: ListServicesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listServices>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listServices>>,
+          TError,
+          Awaited<ReturnType<typeof listServices>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListServices<
+  TData = Awaited<ReturnType<typeof listServices>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params?: ListServicesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listServices>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useListServices<
+  TData = Awaited<ReturnType<typeof listServices>>,
+  TError = ListServices400 | ListServices404,
+>(
+  params?: ListServicesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listServices>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListServicesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getServiceById = (id: string, signal?: AbortSignal) => {
+  return axiosInstance<GetServiceById200>({
     url: `/services/${id}`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetServicesIdQueryKey = (id: string) => {
+export const getGetServiceByIdQueryKey = (id: string) => {
   return [`/services/${id}`] as const;
 };
 
-export const getGetServicesIdInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getServicesId>>,
-  TError = GetServicesId400 | GetServicesId404,
+export const getGetServiceByIdInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getServiceById>>>,
+  TError = GetServiceById400 | GetServiceById404,
 >(
   id: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getServicesId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getServiceById>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetServicesIdQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetServiceByIdQueryKey(id);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getServicesId>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getServiceById>>> = ({
     signal,
-  }) => getServicesId(id, signal);
+  }) => getServiceById(id, signal);
 
   return {
     queryKey,
@@ -288,64 +439,140 @@ export const getGetServicesIdInfiniteQueryOptions = <
     enabled: !!id,
     ...queryOptions,
   } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getServicesId>>,
+    Awaited<ReturnType<typeof getServiceById>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetServicesIdInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getServicesId>>
+export type GetServiceByIdInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getServiceById>>
 >;
-export type GetServicesIdInfiniteQueryError =
-  | GetServicesId400
-  | GetServicesId404;
+export type GetServiceByIdInfiniteQueryError =
+  | GetServiceById400
+  | GetServiceById404;
 
-export function useGetServicesIdInfinite<
-  TData = Awaited<ReturnType<typeof getServicesId>>,
-  TError = GetServicesId400 | GetServicesId404,
+export function useGetServiceByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getServiceById>>>,
+  TError = GetServiceById400 | GetServiceById404,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getServiceById>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getServiceById>>,
+          TError,
+          Awaited<ReturnType<typeof getServiceById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetServiceByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getServiceById>>>,
+  TError = GetServiceById400 | GetServiceById404,
 >(
   id: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getServicesId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getServiceById>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getServiceById>>,
+          TError,
+          Awaited<ReturnType<typeof getServiceById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetServiceByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getServiceById>>>,
+  TError = GetServiceById400 | GetServiceById404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getServiceById>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetServicesIdInfiniteQueryOptions(id, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useGetServiceByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getServiceById>>>,
+  TError = GetServiceById400 | GetServiceById404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getServiceById>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetServiceByIdInfiniteQueryOptions(id, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetServicesIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getServicesId>>,
-  TError = GetServicesId400 | GetServicesId404,
+export const getGetServiceByIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getServiceById>>,
+  TError = GetServiceById400 | GetServiceById404,
 >(
   id: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getServicesId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getServiceById>>, TError, TData>
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetServicesIdQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetServiceByIdQueryKey(id);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getServicesId>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getServiceById>>> = ({
     signal,
-  }) => getServicesId(id, signal);
+  }) => getServiceById(id, signal);
 
   return {
     queryKey,
@@ -353,70 +580,131 @@ export const getGetServicesIdQueryOptions = <
     enabled: !!id,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getServicesId>>,
+    Awaited<ReturnType<typeof getServiceById>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetServicesIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getServicesId>>
+export type GetServiceByIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getServiceById>>
 >;
-export type GetServicesIdQueryError = GetServicesId400 | GetServicesId404;
+export type GetServiceByIdQueryError = GetServiceById400 | GetServiceById404;
 
-export function useGetServicesId<
-  TData = Awaited<ReturnType<typeof getServicesId>>,
-  TError = GetServicesId400 | GetServicesId404,
+export function useGetServiceById<
+  TData = Awaited<ReturnType<typeof getServiceById>>,
+  TError = GetServiceById400 | GetServiceById404,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getServiceById>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getServiceById>>,
+          TError,
+          Awaited<ReturnType<typeof getServiceById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetServiceById<
+  TData = Awaited<ReturnType<typeof getServiceById>>,
+  TError = GetServiceById400 | GetServiceById404,
 >(
   id: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getServicesId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getServiceById>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getServiceById>>,
+          TError,
+          Awaited<ReturnType<typeof getServiceById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetServiceById<
+  TData = Awaited<ReturnType<typeof getServiceById>>,
+  TError = GetServiceById400 | GetServiceById404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getServiceById>>, TError, TData>
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetServicesIdQueryOptions(id, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useGetServiceById<
+  TData = Awaited<ReturnType<typeof getServiceById>>,
+  TError = GetServiceById400 | GetServiceById404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getServiceById>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetServiceByIdQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const putServicesId = (
+export const updateServiceById = (
   id: string,
-  putServicesIdBody: PutServicesIdBody,
+  updateServiceByIdBody: UpdateServiceByIdBody,
 ) => {
-  return axiosInstance<PutServicesId200>({
+  return axiosInstance<UpdateServiceById200>({
     url: `/services/${id}`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    data: putServicesIdBody,
+    data: updateServiceByIdBody,
   });
 };
 
-export const getPutServicesIdMutationOptions = <
-  TError = PutServicesId400 | PutServicesId404,
+export const getUpdateServiceByIdMutationOptions = <
+  TError = UpdateServiceById400 | UpdateServiceById404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putServicesId>>,
+    Awaited<ReturnType<typeof updateServiceById>>,
     TError,
-    { id: string; data: PutServicesIdBody },
+    { id: string; data: UpdateServiceByIdBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof putServicesId>>,
+  Awaited<ReturnType<typeof updateServiceById>>,
   TError,
-  { id: string; data: PutServicesIdBody },
+  { id: string; data: UpdateServiceByIdBody },
   TContext
 > => {
-  const mutationKey = ["putServicesId"];
+  const mutationKey = ["updateServiceById"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -426,71 +714,76 @@ export const getPutServicesIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof putServicesId>>,
-    { id: string; data: PutServicesIdBody }
+    Awaited<ReturnType<typeof updateServiceById>>,
+    { id: string; data: UpdateServiceByIdBody }
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return putServicesId(id, data);
+    return updateServiceById(id, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PutServicesIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof putServicesId>>
+export type UpdateServiceByIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateServiceById>>
 >;
-export type PutServicesIdMutationBody = PutServicesIdBody;
-export type PutServicesIdMutationError = PutServicesId400 | PutServicesId404;
+export type UpdateServiceByIdMutationBody = UpdateServiceByIdBody;
+export type UpdateServiceByIdMutationError =
+  | UpdateServiceById400
+  | UpdateServiceById404;
 
-export const usePutServicesId = <
-  TError = PutServicesId400 | PutServicesId404,
+export const useUpdateServiceById = <
+  TError = UpdateServiceById400 | UpdateServiceById404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putServicesId>>,
-    TError,
-    { id: string; data: PutServicesIdBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof putServicesId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateServiceById>>,
+      TError,
+      { id: string; data: UpdateServiceByIdBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateServiceById>>,
   TError,
-  { id: string; data: PutServicesIdBody },
+  { id: string; data: UpdateServiceByIdBody },
   TContext
 > => {
-  const mutationOptions = getPutServicesIdMutationOptions(options);
+  const mutationOptions = getUpdateServiceByIdMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const deleteServicesId = (
+export const deleteServiceById = (
   id: string,
-  params?: DeleteServicesIdParams,
+  params?: DeleteServiceByIdParams,
 ) => {
-  return axiosInstance<DeleteServicesId204>({
+  return axiosInstance<DeleteServiceById204>({
     url: `/services/${id}`,
     method: "DELETE",
     params,
   });
 };
 
-export const getDeleteServicesIdMutationOptions = <
-  TError = DeleteServicesId400 | DeleteServicesId404,
+export const getDeleteServiceByIdMutationOptions = <
+  TError = DeleteServiceById400 | DeleteServiceById404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteServicesId>>,
+    Awaited<ReturnType<typeof deleteServiceById>>,
     TError,
-    { id: string; params?: DeleteServicesIdParams },
+    { id: string; params?: DeleteServiceByIdParams },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteServicesId>>,
+  Awaited<ReturnType<typeof deleteServiceById>>,
   TError,
-  { id: string; params?: DeleteServicesIdParams },
+  { id: string; params?: DeleteServiceByIdParams },
   TContext
 > => {
-  const mutationKey = ["deleteServicesId"];
+  const mutationKey = ["deleteServiceById"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -500,69 +793,72 @@ export const getDeleteServicesIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteServicesId>>,
-    { id: string; params?: DeleteServicesIdParams }
+    Awaited<ReturnType<typeof deleteServiceById>>,
+    { id: string; params?: DeleteServiceByIdParams }
   > = (props) => {
     const { id, params } = props ?? {};
 
-    return deleteServicesId(id, params);
+    return deleteServiceById(id, params);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteServicesIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteServicesId>>
+export type DeleteServiceByIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteServiceById>>
 >;
 
-export type DeleteServicesIdMutationError =
-  | DeleteServicesId400
-  | DeleteServicesId404;
+export type DeleteServiceByIdMutationError =
+  | DeleteServiceById400
+  | DeleteServiceById404;
 
-export const useDeleteServicesId = <
-  TError = DeleteServicesId400 | DeleteServicesId404,
+export const useDeleteServiceById = <
+  TError = DeleteServiceById400 | DeleteServiceById404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteServicesId>>,
-    TError,
-    { id: string; params?: DeleteServicesIdParams },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteServicesId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteServiceById>>,
+      TError,
+      { id: string; params?: DeleteServiceByIdParams },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteServiceById>>,
   TError,
-  { id: string; params?: DeleteServicesIdParams },
+  { id: string; params?: DeleteServiceByIdParams },
   TContext
 > => {
-  const mutationOptions = getDeleteServicesIdMutationOptions(options);
+  const mutationOptions = getDeleteServiceByIdMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
-export const patchServicesIdStatus = (id: string) => {
-  return axiosInstance<PatchServicesIdStatus200>({
+export const toggleServiceStatusById = (id: string) => {
+  return axiosInstance<ToggleServiceStatusById200>({
     url: `/services/${id}/status`,
     method: "PATCH",
   });
 };
 
-export const getPatchServicesIdStatusMutationOptions = <
-  TError = PatchServicesIdStatus400 | PatchServicesIdStatus404,
+export const getToggleServiceStatusByIdMutationOptions = <
+  TError = ToggleServiceStatusById400 | ToggleServiceStatusById404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchServicesIdStatus>>,
+    Awaited<ReturnType<typeof toggleServiceStatusById>>,
     TError,
     { id: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchServicesIdStatus>>,
+  Awaited<ReturnType<typeof toggleServiceStatusById>>,
   TError,
   { id: string },
   TContext
 > => {
-  const mutationKey = ["patchServicesIdStatus"];
+  const mutationKey = ["toggleServiceStatusById"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -572,42 +868,45 @@ export const getPatchServicesIdStatusMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchServicesIdStatus>>,
+    Awaited<ReturnType<typeof toggleServiceStatusById>>,
     { id: string }
   > = (props) => {
     const { id } = props ?? {};
 
-    return patchServicesIdStatus(id);
+    return toggleServiceStatusById(id);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchServicesIdStatusMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchServicesIdStatus>>
+export type ToggleServiceStatusByIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof toggleServiceStatusById>>
 >;
 
-export type PatchServicesIdStatusMutationError =
-  | PatchServicesIdStatus400
-  | PatchServicesIdStatus404;
+export type ToggleServiceStatusByIdMutationError =
+  | ToggleServiceStatusById400
+  | ToggleServiceStatusById404;
 
-export const usePatchServicesIdStatus = <
-  TError = PatchServicesIdStatus400 | PatchServicesIdStatus404,
+export const useToggleServiceStatusById = <
+  TError = ToggleServiceStatusById400 | ToggleServiceStatusById404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchServicesIdStatus>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchServicesIdStatus>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof toggleServiceStatusById>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof toggleServiceStatusById>>,
   TError,
   { id: string },
   TContext
 > => {
-  const mutationOptions = getPatchServicesIdStatusMutationOptions(options);
+  const mutationOptions = getToggleServiceStatusByIdMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };

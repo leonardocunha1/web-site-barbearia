@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,22 +19,22 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  DeleteBusinessHoursBusinessHoursId204,
-  DeleteBusinessHoursBusinessHoursId400,
-  DeleteBusinessHoursBusinessHoursId403,
-  DeleteBusinessHoursBusinessHoursId404,
-  GetBusinessHoursProfessionalId200,
-  GetBusinessHoursProfessionalId400,
-  GetBusinessHoursProfessionalId404,
-  PostBusinessHours201,
-  PostBusinessHours400,
-  PostBusinessHours404,
-  PostBusinessHours409,
-  PostBusinessHoursBody,
-  PutBusinessHoursProfessionalId200,
-  PutBusinessHoursProfessionalId400,
-  PutBusinessHoursProfessionalId404,
-  PutBusinessHoursProfessionalIdBody,
+  CreateBusinessHour201,
+  CreateBusinessHour400,
+  CreateBusinessHour404,
+  CreateBusinessHour409,
+  CreateBusinessHourBody,
+  DeleteBusinessHour204,
+  DeleteBusinessHour400,
+  DeleteBusinessHour403,
+  DeleteBusinessHour404,
+  ListBusinessHours200,
+  ListBusinessHours400,
+  ListBusinessHours404,
+  UpdateBusinessHour200,
+  UpdateBusinessHour400,
+  UpdateBusinessHour404,
+  UpdateBusinessHourBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -35,36 +42,39 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Criação de um novo horário de funcionamento.
  */
-export const postBusinessHours = (
-  postBusinessHoursBody: PostBusinessHoursBody,
+export const createBusinessHour = (
+  createBusinessHourBody: CreateBusinessHourBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostBusinessHours201>({
+  return axiosInstance<CreateBusinessHour201>({
     url: `/business-hours`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postBusinessHoursBody,
+    data: createBusinessHourBody,
     signal,
   });
 };
 
-export const getPostBusinessHoursMutationOptions = <
-  TError = PostBusinessHours400 | PostBusinessHours404 | PostBusinessHours409,
+export const getCreateBusinessHourMutationOptions = <
+  TError =
+    | CreateBusinessHour400
+    | CreateBusinessHour404
+    | CreateBusinessHour409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postBusinessHours>>,
+    Awaited<ReturnType<typeof createBusinessHour>>,
     TError,
-    { data: PostBusinessHoursBody },
+    { data: CreateBusinessHourBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postBusinessHours>>,
+  Awaited<ReturnType<typeof createBusinessHour>>,
   TError,
-  { data: PostBusinessHoursBody },
+  { data: CreateBusinessHourBody },
   TContext
 > => {
-  const mutationKey = ["postBusinessHours"];
+  const mutationKey = ["createBusinessHour"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -74,80 +84,84 @@ export const getPostBusinessHoursMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postBusinessHours>>,
-    { data: PostBusinessHoursBody }
+    Awaited<ReturnType<typeof createBusinessHour>>,
+    { data: CreateBusinessHourBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postBusinessHours(data);
+    return createBusinessHour(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostBusinessHoursMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postBusinessHours>>
+export type CreateBusinessHourMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createBusinessHour>>
 >;
-export type PostBusinessHoursMutationBody = PostBusinessHoursBody;
-export type PostBusinessHoursMutationError =
-  | PostBusinessHours400
-  | PostBusinessHours404
-  | PostBusinessHours409;
+export type CreateBusinessHourMutationBody = CreateBusinessHourBody;
+export type CreateBusinessHourMutationError =
+  | CreateBusinessHour400
+  | CreateBusinessHour404
+  | CreateBusinessHour409;
 
-export const usePostBusinessHours = <
-  TError = PostBusinessHours400 | PostBusinessHours404 | PostBusinessHours409,
+export const useCreateBusinessHour = <
+  TError =
+    | CreateBusinessHour400
+    | CreateBusinessHour404
+    | CreateBusinessHour409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postBusinessHours>>,
-    TError,
-    { data: PostBusinessHoursBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postBusinessHours>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createBusinessHour>>,
+      TError,
+      { data: CreateBusinessHourBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createBusinessHour>>,
   TError,
-  { data: PostBusinessHoursBody },
+  { data: CreateBusinessHourBody },
   TContext
 > => {
-  const mutationOptions = getPostBusinessHoursMutationOptions(options);
+  const mutationOptions = getCreateBusinessHourMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Atualização de um horário de funcionamento.
  */
-export const putBusinessHoursProfessionalId = (
+export const updateBusinessHour = (
   professionalId: string,
-  putBusinessHoursProfessionalIdBody: PutBusinessHoursProfessionalIdBody,
+  updateBusinessHourBody: UpdateBusinessHourBody,
 ) => {
-  return axiosInstance<PutBusinessHoursProfessionalId200>({
+  return axiosInstance<UpdateBusinessHour200>({
     url: `/business-hours/${professionalId}`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    data: putBusinessHoursProfessionalIdBody,
+    data: updateBusinessHourBody,
   });
 };
 
-export const getPutBusinessHoursProfessionalIdMutationOptions = <
-  TError =
-    | PutBusinessHoursProfessionalId400
-    | PutBusinessHoursProfessionalId404,
+export const getUpdateBusinessHourMutationOptions = <
+  TError = UpdateBusinessHour400 | UpdateBusinessHour404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putBusinessHoursProfessionalId>>,
+    Awaited<ReturnType<typeof updateBusinessHour>>,
     TError,
-    { professionalId: string; data: PutBusinessHoursProfessionalIdBody },
+    { professionalId: string; data: UpdateBusinessHourBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof putBusinessHoursProfessionalId>>,
+  Awaited<ReturnType<typeof updateBusinessHour>>,
   TError,
-  { professionalId: string; data: PutBusinessHoursProfessionalIdBody },
+  { professionalId: string; data: UpdateBusinessHourBody },
   TContext
 > => {
-  const mutationKey = ["putBusinessHoursProfessionalId"];
+  const mutationKey = ["updateBusinessHour"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -157,93 +171,89 @@ export const getPutBusinessHoursProfessionalIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof putBusinessHoursProfessionalId>>,
-    { professionalId: string; data: PutBusinessHoursProfessionalIdBody }
+    Awaited<ReturnType<typeof updateBusinessHour>>,
+    { professionalId: string; data: UpdateBusinessHourBody }
   > = (props) => {
     const { professionalId, data } = props ?? {};
 
-    return putBusinessHoursProfessionalId(professionalId, data);
+    return updateBusinessHour(professionalId, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PutBusinessHoursProfessionalIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof putBusinessHoursProfessionalId>>
+export type UpdateBusinessHourMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateBusinessHour>>
 >;
-export type PutBusinessHoursProfessionalIdMutationBody =
-  PutBusinessHoursProfessionalIdBody;
-export type PutBusinessHoursProfessionalIdMutationError =
-  | PutBusinessHoursProfessionalId400
-  | PutBusinessHoursProfessionalId404;
+export type UpdateBusinessHourMutationBody = UpdateBusinessHourBody;
+export type UpdateBusinessHourMutationError =
+  | UpdateBusinessHour400
+  | UpdateBusinessHour404;
 
-export const usePutBusinessHoursProfessionalId = <
-  TError =
-    | PutBusinessHoursProfessionalId400
-    | PutBusinessHoursProfessionalId404,
+export const useUpdateBusinessHour = <
+  TError = UpdateBusinessHour400 | UpdateBusinessHour404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putBusinessHoursProfessionalId>>,
-    TError,
-    { professionalId: string; data: PutBusinessHoursProfessionalIdBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof putBusinessHoursProfessionalId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateBusinessHour>>,
+      TError,
+      { professionalId: string; data: UpdateBusinessHourBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateBusinessHour>>,
   TError,
-  { professionalId: string; data: PutBusinessHoursProfessionalIdBody },
+  { professionalId: string; data: UpdateBusinessHourBody },
   TContext
 > => {
-  const mutationOptions =
-    getPutBusinessHoursProfessionalIdMutationOptions(options);
+  const mutationOptions = getUpdateBusinessHourMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Listar horários de funcionamento.
  */
-export const getBusinessHoursProfessionalId = (
+export const listBusinessHours = (
   professionalId: string,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetBusinessHoursProfessionalId200>({
+  return axiosInstance<ListBusinessHours200>({
     url: `/business-hours/${professionalId}`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetBusinessHoursProfessionalIdQueryKey = (
-  professionalId: string,
-) => {
+export const getListBusinessHoursQueryKey = (professionalId: string) => {
   return [`/business-hours/${professionalId}`] as const;
 };
 
-export const getGetBusinessHoursProfessionalIdInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-  TError =
-    | GetBusinessHoursProfessionalId400
-    | GetBusinessHoursProfessionalId404,
+export const getListBusinessHoursInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listBusinessHours>>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
 >(
   professionalId: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getGetBusinessHoursProfessionalIdQueryKey(professionalId);
+    queryOptions?.queryKey ?? getListBusinessHoursQueryKey(professionalId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>
-  > = ({ signal }) => getBusinessHoursProfessionalId(professionalId, signal);
+    Awaited<ReturnType<typeof listBusinessHours>>
+  > = ({ signal }) => listBusinessHours(professionalId, signal);
 
   return {
     queryKey,
@@ -251,73 +261,148 @@ export const getGetBusinessHoursProfessionalIdInfiniteQueryOptions = <
     enabled: !!professionalId,
     ...queryOptions,
   } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
+    Awaited<ReturnType<typeof listBusinessHours>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBusinessHoursProfessionalIdInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>
+export type ListBusinessHoursInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listBusinessHours>>
 >;
-export type GetBusinessHoursProfessionalIdInfiniteQueryError =
-  | GetBusinessHoursProfessionalId400
-  | GetBusinessHoursProfessionalId404;
+export type ListBusinessHoursInfiniteQueryError =
+  | ListBusinessHours400
+  | ListBusinessHours404;
 
-export function useGetBusinessHoursProfessionalIdInfinite<
-  TData = Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-  TError =
-    | GetBusinessHoursProfessionalId400
-    | GetBusinessHoursProfessionalId404,
+export function useListBusinessHoursInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listBusinessHours>>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
+>(
+  professionalId: string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listBusinessHours>>,
+          TError,
+          Awaited<ReturnType<typeof listBusinessHours>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListBusinessHoursInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listBusinessHours>>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
 >(
   professionalId: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listBusinessHours>>,
+          TError,
+          Awaited<ReturnType<typeof listBusinessHours>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListBusinessHoursInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listBusinessHours>>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
+>(
+  professionalId: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBusinessHoursProfessionalIdInfiniteQueryOptions(
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useListBusinessHoursInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listBusinessHours>>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
+>(
+  professionalId: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListBusinessHoursInfiniteQueryOptions(
     professionalId,
     options,
   );
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetBusinessHoursProfessionalIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-  TError =
-    | GetBusinessHoursProfessionalId400
-    | GetBusinessHoursProfessionalId404,
+export const getListBusinessHoursQueryOptions = <
+  TData = Awaited<ReturnType<typeof listBusinessHours>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
 >(
   professionalId: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getGetBusinessHoursProfessionalIdQueryKey(professionalId);
+    queryOptions?.queryKey ?? getListBusinessHoursQueryKey(professionalId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>
-  > = ({ signal }) => getBusinessHoursProfessionalId(professionalId, signal);
+    Awaited<ReturnType<typeof listBusinessHours>>
+  > = ({ signal }) => listBusinessHours(professionalId, signal);
 
   return {
     queryKey,
@@ -325,42 +410,117 @@ export const getGetBusinessHoursProfessionalIdQueryOptions = <
     enabled: !!professionalId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
+    Awaited<ReturnType<typeof listBusinessHours>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBusinessHoursProfessionalIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>
+export type ListBusinessHoursQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listBusinessHours>>
 >;
-export type GetBusinessHoursProfessionalIdQueryError =
-  | GetBusinessHoursProfessionalId400
-  | GetBusinessHoursProfessionalId404;
+export type ListBusinessHoursQueryError =
+  | ListBusinessHours400
+  | ListBusinessHours404;
 
-export function useGetBusinessHoursProfessionalId<
-  TData = Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-  TError =
-    | GetBusinessHoursProfessionalId400
-    | GetBusinessHoursProfessionalId404,
+export function useListBusinessHours<
+  TData = Awaited<ReturnType<typeof listBusinessHours>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
+>(
+  professionalId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listBusinessHours>>,
+          TError,
+          Awaited<ReturnType<typeof listBusinessHours>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListBusinessHours<
+  TData = Awaited<ReturnType<typeof listBusinessHours>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
 >(
   professionalId: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBusinessHoursProfessionalId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listBusinessHours>>,
+          TError,
+          Awaited<ReturnType<typeof listBusinessHours>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListBusinessHours<
+  TData = Awaited<ReturnType<typeof listBusinessHours>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
+>(
+  professionalId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBusinessHoursProfessionalIdQueryOptions(
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useListBusinessHours<
+  TData = Awaited<ReturnType<typeof listBusinessHours>>,
+  TError = ListBusinessHours400 | ListBusinessHours404,
+>(
+  professionalId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listBusinessHours>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListBusinessHoursQueryOptions(
     professionalId,
     options,
   );
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -370,33 +530,33 @@ export function useGetBusinessHoursProfessionalId<
 /**
  * Deletar um horário de funcionamento.
  */
-export const deleteBusinessHoursBusinessHoursId = (businessHoursId: string) => {
-  return axiosInstance<DeleteBusinessHoursBusinessHoursId204>({
+export const deleteBusinessHour = (businessHoursId: string) => {
+  return axiosInstance<DeleteBusinessHour204>({
     url: `/business-hours/${businessHoursId}`,
     method: "DELETE",
   });
 };
 
-export const getDeleteBusinessHoursBusinessHoursIdMutationOptions = <
+export const getDeleteBusinessHourMutationOptions = <
   TError =
-    | DeleteBusinessHoursBusinessHoursId400
-    | DeleteBusinessHoursBusinessHoursId403
-    | DeleteBusinessHoursBusinessHoursId404,
+    | DeleteBusinessHour400
+    | DeleteBusinessHour403
+    | DeleteBusinessHour404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteBusinessHoursBusinessHoursId>>,
+    Awaited<ReturnType<typeof deleteBusinessHour>>,
     TError,
     { businessHoursId: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteBusinessHoursBusinessHoursId>>,
+  Awaited<ReturnType<typeof deleteBusinessHour>>,
   TError,
   { businessHoursId: string },
   TContext
 > => {
-  const mutationKey = ["deleteBusinessHoursBusinessHoursId"];
+  const mutationKey = ["deleteBusinessHour"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -406,47 +566,49 @@ export const getDeleteBusinessHoursBusinessHoursIdMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteBusinessHoursBusinessHoursId>>,
+    Awaited<ReturnType<typeof deleteBusinessHour>>,
     { businessHoursId: string }
   > = (props) => {
     const { businessHoursId } = props ?? {};
 
-    return deleteBusinessHoursBusinessHoursId(businessHoursId);
+    return deleteBusinessHour(businessHoursId);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteBusinessHoursBusinessHoursIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteBusinessHoursBusinessHoursId>>
+export type DeleteBusinessHourMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteBusinessHour>>
 >;
 
-export type DeleteBusinessHoursBusinessHoursIdMutationError =
-  | DeleteBusinessHoursBusinessHoursId400
-  | DeleteBusinessHoursBusinessHoursId403
-  | DeleteBusinessHoursBusinessHoursId404;
+export type DeleteBusinessHourMutationError =
+  | DeleteBusinessHour400
+  | DeleteBusinessHour403
+  | DeleteBusinessHour404;
 
-export const useDeleteBusinessHoursBusinessHoursId = <
+export const useDeleteBusinessHour = <
   TError =
-    | DeleteBusinessHoursBusinessHoursId400
-    | DeleteBusinessHoursBusinessHoursId403
-    | DeleteBusinessHoursBusinessHoursId404,
+    | DeleteBusinessHour400
+    | DeleteBusinessHour403
+    | DeleteBusinessHour404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteBusinessHoursBusinessHoursId>>,
-    TError,
-    { businessHoursId: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteBusinessHoursBusinessHoursId>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteBusinessHour>>,
+      TError,
+      { businessHoursId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteBusinessHour>>,
   TError,
   { businessHoursId: string },
   TContext
 > => {
-  const mutationOptions =
-    getDeleteBusinessHoursBusinessHoursIdMutationOptions(options);
+  const mutationOptions = getDeleteBusinessHourMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };

@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,28 +19,28 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetBookingsBookingId200,
-  GetBookingsBookingId400,
-  GetBookingsBookingId404,
-  GetBookingsMe200,
-  GetBookingsMe400,
-  GetBookingsMe403,
-  GetBookingsMe404,
-  GetBookingsMeParams,
-  GetBookingsProfessional200,
-  GetBookingsProfessional400,
-  GetBookingsProfessional404,
-  GetBookingsProfessionalParams,
-  PatchBookingsBookingIdStatus200,
-  PatchBookingsBookingIdStatus400,
-  PatchBookingsBookingIdStatus403,
-  PatchBookingsBookingIdStatus404,
-  PatchBookingsBookingIdStatusBody,
-  PostBookings201,
-  PostBookings400,
-  PostBookings404,
-  PostBookings409,
-  PostBookingsBody,
+  CreateBooking201,
+  CreateBooking400,
+  CreateBooking404,
+  CreateBooking409,
+  CreateBookingBody,
+  GetBookingById200,
+  GetBookingById400,
+  GetBookingById404,
+  ListProfessionalBookings200,
+  ListProfessionalBookings400,
+  ListProfessionalBookings404,
+  ListProfessionalBookingsParams,
+  ListUserBookings200,
+  ListUserBookings400,
+  ListUserBookings403,
+  ListUserBookings404,
+  ListUserBookingsParams,
+  UpdateBookingStatus200,
+  UpdateBookingStatus400,
+  UpdateBookingStatus403,
+  UpdateBookingStatus404,
+  UpdateBookingStatusBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -41,36 +48,36 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Criação de um novo agendamento.
  */
-export const postBookings = (
-  postBookingsBody: PostBookingsBody,
+export const createBooking = (
+  createBookingBody: CreateBookingBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostBookings201>({
+  return axiosInstance<CreateBooking201>({
     url: `/bookings`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postBookingsBody,
+    data: createBookingBody,
     signal,
   });
 };
 
-export const getPostBookingsMutationOptions = <
-  TError = PostBookings400 | PostBookings404 | PostBookings409,
+export const getCreateBookingMutationOptions = <
+  TError = CreateBooking400 | CreateBooking404 | CreateBooking409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postBookings>>,
+    Awaited<ReturnType<typeof createBooking>>,
     TError,
-    { data: PostBookingsBody },
+    { data: CreateBookingBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postBookings>>,
+  Awaited<ReturnType<typeof createBooking>>,
   TError,
-  { data: PostBookingsBody },
+  { data: CreateBookingBody },
   TContext
 > => {
-  const mutationKey = ["postBookings"];
+  const mutationKey = ["createBooking"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -80,81 +87,84 @@ export const getPostBookingsMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postBookings>>,
-    { data: PostBookingsBody }
+    Awaited<ReturnType<typeof createBooking>>,
+    { data: CreateBookingBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postBookings(data);
+    return createBooking(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostBookingsMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postBookings>>
+export type CreateBookingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createBooking>>
 >;
-export type PostBookingsMutationBody = PostBookingsBody;
-export type PostBookingsMutationError =
-  | PostBookings400
-  | PostBookings404
-  | PostBookings409;
+export type CreateBookingMutationBody = CreateBookingBody;
+export type CreateBookingMutationError =
+  | CreateBooking400
+  | CreateBooking404
+  | CreateBooking409;
 
-export const usePostBookings = <
-  TError = PostBookings400 | PostBookings404 | PostBookings409,
+export const useCreateBooking = <
+  TError = CreateBooking400 | CreateBooking404 | CreateBooking409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postBookings>>,
-    TError,
-    { data: PostBookingsBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postBookings>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createBooking>>,
+      TError,
+      { data: CreateBookingBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createBooking>>,
   TError,
-  { data: PostBookingsBody },
+  { data: CreateBookingBody },
   TContext
 > => {
-  const mutationOptions = getPostBookingsMutationOptions(options);
+  const mutationOptions = getCreateBookingMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Atualiza o status de um agendamento (apenas para profissionais)
  */
-export const patchBookingsBookingIdStatus = (
+export const updateBookingStatus = (
   bookingId: string,
-  patchBookingsBookingIdStatusBody: PatchBookingsBookingIdStatusBody,
+  updateBookingStatusBody: UpdateBookingStatusBody,
 ) => {
-  return axiosInstance<PatchBookingsBookingIdStatus200>({
+  return axiosInstance<UpdateBookingStatus200>({
     url: `/bookings/${bookingId}/status`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    data: patchBookingsBookingIdStatusBody,
+    data: updateBookingStatusBody,
   });
 };
 
-export const getPatchBookingsBookingIdStatusMutationOptions = <
+export const getUpdateBookingStatusMutationOptions = <
   TError =
-    | PatchBookingsBookingIdStatus400
-    | PatchBookingsBookingIdStatus403
-    | PatchBookingsBookingIdStatus404,
+    | UpdateBookingStatus400
+    | UpdateBookingStatus403
+    | UpdateBookingStatus404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchBookingsBookingIdStatus>>,
+    Awaited<ReturnType<typeof updateBookingStatus>>,
     TError,
-    { bookingId: string; data: PatchBookingsBookingIdStatusBody },
+    { bookingId: string; data: UpdateBookingStatusBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchBookingsBookingIdStatus>>,
+  Awaited<ReturnType<typeof updateBookingStatus>>,
   TError,
-  { bookingId: string; data: PatchBookingsBookingIdStatusBody },
+  { bookingId: string; data: UpdateBookingStatusBody },
   TContext
 > => {
-  const mutationKey = ["patchBookingsBookingIdStatus"];
+  const mutationKey = ["updateBookingStatus"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -164,59 +174,60 @@ export const getPatchBookingsBookingIdStatusMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchBookingsBookingIdStatus>>,
-    { bookingId: string; data: PatchBookingsBookingIdStatusBody }
+    Awaited<ReturnType<typeof updateBookingStatus>>,
+    { bookingId: string; data: UpdateBookingStatusBody }
   > = (props) => {
     const { bookingId, data } = props ?? {};
 
-    return patchBookingsBookingIdStatus(bookingId, data);
+    return updateBookingStatus(bookingId, data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchBookingsBookingIdStatusMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchBookingsBookingIdStatus>>
+export type UpdateBookingStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateBookingStatus>>
 >;
-export type PatchBookingsBookingIdStatusMutationBody =
-  PatchBookingsBookingIdStatusBody;
-export type PatchBookingsBookingIdStatusMutationError =
-  | PatchBookingsBookingIdStatus400
-  | PatchBookingsBookingIdStatus403
-  | PatchBookingsBookingIdStatus404;
+export type UpdateBookingStatusMutationBody = UpdateBookingStatusBody;
+export type UpdateBookingStatusMutationError =
+  | UpdateBookingStatus400
+  | UpdateBookingStatus403
+  | UpdateBookingStatus404;
 
-export const usePatchBookingsBookingIdStatus = <
+export const useUpdateBookingStatus = <
   TError =
-    | PatchBookingsBookingIdStatus400
-    | PatchBookingsBookingIdStatus403
-    | PatchBookingsBookingIdStatus404,
+    | UpdateBookingStatus400
+    | UpdateBookingStatus403
+    | UpdateBookingStatus404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchBookingsBookingIdStatus>>,
-    TError,
-    { bookingId: string; data: PatchBookingsBookingIdStatusBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchBookingsBookingIdStatus>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateBookingStatus>>,
+      TError,
+      { bookingId: string; data: UpdateBookingStatusBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateBookingStatus>>,
   TError,
-  { bookingId: string; data: PatchBookingsBookingIdStatusBody },
+  { bookingId: string; data: UpdateBookingStatusBody },
   TContext
 > => {
-  const mutationOptions =
-    getPatchBookingsBookingIdStatusMutationOptions(options);
+  const mutationOptions = getUpdateBookingStatusMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Lista os agendamentos do usuário autenticado
  */
-export const getBookingsMe = (
-  params?: GetBookingsMeParams,
+export const listUserBookings = (
+  params?: ListUserBookingsParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetBookingsMe200>({
+  return axiosInstance<ListUserBookings200>({
     url: `/bookings/me`,
     method: "GET",
     params,
@@ -224,125 +235,288 @@ export const getBookingsMe = (
   });
 };
 
-export const getGetBookingsMeQueryKey = (params?: GetBookingsMeParams) => {
+export const getListUserBookingsQueryKey = (
+  params?: ListUserBookingsParams,
+) => {
   return [`/bookings/me`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetBookingsMeInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBookingsMe>>,
-  TError = GetBookingsMe400 | GetBookingsMe403 | GetBookingsMe404,
+export const getListUserBookingsInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listUserBookings>>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
 >(
-  params?: GetBookingsMeParams,
+  params?: ListUserBookingsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBookingsMe>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetBookingsMeQueryKey(params);
+  const queryKey =
+    queryOptions?.queryKey ?? getListUserBookingsQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBookingsMe>>> = ({
-    signal,
-  }) => getBookingsMe(params, signal);
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listUserBookings>>
+  > = ({ signal }) => listUserBookings(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getBookingsMe>>,
+    Awaited<ReturnType<typeof listUserBookings>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBookingsMeInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBookingsMe>>
+export type ListUserBookingsInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listUserBookings>>
 >;
-export type GetBookingsMeInfiniteQueryError =
-  | GetBookingsMe400
-  | GetBookingsMe403
-  | GetBookingsMe404;
+export type ListUserBookingsInfiniteQueryError =
+  | ListUserBookings400
+  | ListUserBookings403
+  | ListUserBookings404;
 
-export function useGetBookingsMeInfinite<
-  TData = Awaited<ReturnType<typeof getBookingsMe>>,
-  TError = GetBookingsMe400 | GetBookingsMe403 | GetBookingsMe404,
+export function useListUserBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUserBookings>>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
 >(
-  params?: GetBookingsMeParams,
+  params: undefined | ListUserBookingsParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUserBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listUserBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUserBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUserBookings>>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
+>(
+  params?: ListUserBookingsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBookingsMe>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUserBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listUserBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUserBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUserBookings>>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
+>(
+  params?: ListUserBookingsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBookingsMeInfiniteQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useListUserBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUserBookings>>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
+>(
+  params?: ListUserBookingsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListUserBookingsInfiniteQueryOptions(params, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetBookingsMeQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBookingsMe>>,
-  TError = GetBookingsMe400 | GetBookingsMe403 | GetBookingsMe404,
+export const getListUserBookingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listUserBookings>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
 >(
-  params?: GetBookingsMeParams,
+  params?: ListUserBookingsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBookingsMe>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetBookingsMeQueryKey(params);
+  const queryKey =
+    queryOptions?.queryKey ?? getListUserBookingsQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBookingsMe>>> = ({
-    signal,
-  }) => getBookingsMe(params, signal);
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listUserBookings>>
+  > = ({ signal }) => listUserBookings(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getBookingsMe>>,
+    Awaited<ReturnType<typeof listUserBookings>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBookingsMeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBookingsMe>>
+export type ListUserBookingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listUserBookings>>
 >;
-export type GetBookingsMeQueryError =
-  | GetBookingsMe400
-  | GetBookingsMe403
-  | GetBookingsMe404;
+export type ListUserBookingsQueryError =
+  | ListUserBookings400
+  | ListUserBookings403
+  | ListUserBookings404;
 
-export function useGetBookingsMe<
-  TData = Awaited<ReturnType<typeof getBookingsMe>>,
-  TError = GetBookingsMe400 | GetBookingsMe403 | GetBookingsMe404,
+export function useListUserBookings<
+  TData = Awaited<ReturnType<typeof listUserBookings>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
 >(
-  params?: GetBookingsMeParams,
+  params: undefined | ListUserBookingsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUserBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listUserBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUserBookings<
+  TData = Awaited<ReturnType<typeof listUserBookings>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
+>(
+  params?: ListUserBookingsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBookingsMe>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUserBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listUserBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUserBookings<
+  TData = Awaited<ReturnType<typeof listUserBookings>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
+>(
+  params?: ListUserBookingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBookingsMeQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useListUserBookings<
+  TData = Awaited<ReturnType<typeof listUserBookings>>,
+  TError = ListUserBookings400 | ListUserBookings403 | ListUserBookings404,
+>(
+  params?: ListUserBookingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUserBookings>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListUserBookingsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -352,11 +526,11 @@ export function useGetBookingsMe<
 /**
  * Lista os agendamentos do profissional autenticado
  */
-export const getBookingsProfessional = (
-  params?: GetBookingsProfessionalParams,
+export const listProfessionalBookings = (
+  params?: ListProfessionalBookingsParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetBookingsProfessional200>({
+  return axiosInstance<ListProfessionalBookings200>({
     url: `/bookings/professional`,
     method: "GET",
     params,
@@ -364,130 +538,289 @@ export const getBookingsProfessional = (
   });
 };
 
-export const getGetBookingsProfessionalQueryKey = (
-  params?: GetBookingsProfessionalParams,
+export const getListProfessionalBookingsQueryKey = (
+  params?: ListProfessionalBookingsParams,
 ) => {
   return [`/bookings/professional`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetBookingsProfessionalInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBookingsProfessional>>,
-  TError = GetBookingsProfessional400 | GetBookingsProfessional404,
+export const getListProfessionalBookingsInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalBookings>>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
 >(
-  params?: GetBookingsProfessionalParams,
+  params?: ListProfessionalBookingsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBookingsProfessional>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetBookingsProfessionalQueryKey(params);
+    queryOptions?.queryKey ?? getListProfessionalBookingsQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getBookingsProfessional>>
-  > = ({ signal }) => getBookingsProfessional(params, signal);
+    Awaited<ReturnType<typeof listProfessionalBookings>>
+  > = ({ signal }) => listProfessionalBookings(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getBookingsProfessional>>,
+    Awaited<ReturnType<typeof listProfessionalBookings>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBookingsProfessionalInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBookingsProfessional>>
+export type ListProfessionalBookingsInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listProfessionalBookings>>
 >;
-export type GetBookingsProfessionalInfiniteQueryError =
-  | GetBookingsProfessional400
-  | GetBookingsProfessional404;
+export type ListProfessionalBookingsInfiniteQueryError =
+  | ListProfessionalBookings400
+  | ListProfessionalBookings404;
 
-export function useGetBookingsProfessionalInfinite<
-  TData = Awaited<ReturnType<typeof getBookingsProfessional>>,
-  TError = GetBookingsProfessional400 | GetBookingsProfessional404,
+export function useListProfessionalBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalBookings>>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
 >(
-  params?: GetBookingsProfessionalParams,
+  params: undefined | ListProfessionalBookingsParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalBookings>>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
+>(
+  params?: ListProfessionalBookingsParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBookingsProfessional>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalBookings>>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
+>(
+  params?: ListProfessionalBookingsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBookingsProfessionalInfiniteQueryOptions(
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useListProfessionalBookingsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listProfessionalBookings>>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
+>(
+  params?: ListProfessionalBookingsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListProfessionalBookingsInfiniteQueryOptions(
     params,
     options,
   );
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetBookingsProfessionalQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBookingsProfessional>>,
-  TError = GetBookingsProfessional400 | GetBookingsProfessional404,
+export const getListProfessionalBookingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listProfessionalBookings>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
 >(
-  params?: GetBookingsProfessionalParams,
+  params?: ListProfessionalBookingsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBookingsProfessional>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetBookingsProfessionalQueryKey(params);
+    queryOptions?.queryKey ?? getListProfessionalBookingsQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getBookingsProfessional>>
-  > = ({ signal }) => getBookingsProfessional(params, signal);
+    Awaited<ReturnType<typeof listProfessionalBookings>>
+  > = ({ signal }) => listProfessionalBookings(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getBookingsProfessional>>,
+    Awaited<ReturnType<typeof listProfessionalBookings>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBookingsProfessionalQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBookingsProfessional>>
+export type ListProfessionalBookingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listProfessionalBookings>>
 >;
-export type GetBookingsProfessionalQueryError =
-  | GetBookingsProfessional400
-  | GetBookingsProfessional404;
+export type ListProfessionalBookingsQueryError =
+  | ListProfessionalBookings400
+  | ListProfessionalBookings404;
 
-export function useGetBookingsProfessional<
-  TData = Awaited<ReturnType<typeof getBookingsProfessional>>,
-  TError = GetBookingsProfessional400 | GetBookingsProfessional404,
+export function useListProfessionalBookings<
+  TData = Awaited<ReturnType<typeof listProfessionalBookings>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
 >(
-  params?: GetBookingsProfessionalParams,
+  params: undefined | ListProfessionalBookingsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalBookings<
+  TData = Awaited<ReturnType<typeof listProfessionalBookings>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
+>(
+  params?: ListProfessionalBookingsParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBookingsProfessional>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProfessionalBookings>>,
+          TError,
+          Awaited<ReturnType<typeof listProfessionalBookings>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListProfessionalBookings<
+  TData = Awaited<ReturnType<typeof listProfessionalBookings>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
+>(
+  params?: ListProfessionalBookingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBookingsProfessionalQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useListProfessionalBookings<
+  TData = Awaited<ReturnType<typeof listProfessionalBookings>>,
+  TError = ListProfessionalBookings400 | ListProfessionalBookings404,
+>(
+  params?: ListProfessionalBookingsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listProfessionalBookings>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListProfessionalBookingsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -497,42 +830,41 @@ export function useGetBookingsProfessional<
 /**
  * Busca os detalhes de um agendamento pelo ID.
  */
-export const getBookingsBookingId = (
-  bookingId: string,
-  signal?: AbortSignal,
-) => {
-  return axiosInstance<GetBookingsBookingId200>({
+export const getBookingById = (bookingId: string, signal?: AbortSignal) => {
+  return axiosInstance<GetBookingById200>({
     url: `/bookings/${bookingId}`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetBookingsBookingIdQueryKey = (bookingId: string) => {
+export const getGetBookingByIdQueryKey = (bookingId: string) => {
   return [`/bookings/${bookingId}`] as const;
 };
 
-export const getGetBookingsBookingIdInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBookingsBookingId>>,
-  TError = GetBookingsBookingId400 | GetBookingsBookingId404,
+export const getGetBookingByIdInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getBookingById>>>,
+  TError = GetBookingById400 | GetBookingById404,
 >(
   bookingId: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBookingsBookingId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBookingById>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetBookingsBookingIdQueryKey(bookingId);
+    queryOptions?.queryKey ?? getGetBookingByIdQueryKey(bookingId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getBookingsBookingId>>
-  > = ({ signal }) => getBookingsBookingId(bookingId, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBookingById>>> = ({
+    signal,
+  }) => getBookingById(bookingId, signal);
 
   return {
     queryKey,
@@ -540,68 +872,144 @@ export const getGetBookingsBookingIdInfiniteQueryOptions = <
     enabled: !!bookingId,
     ...queryOptions,
   } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getBookingsBookingId>>,
+    Awaited<ReturnType<typeof getBookingById>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBookingsBookingIdInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBookingsBookingId>>
+export type GetBookingByIdInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBookingById>>
 >;
-export type GetBookingsBookingIdInfiniteQueryError =
-  | GetBookingsBookingId400
-  | GetBookingsBookingId404;
+export type GetBookingByIdInfiniteQueryError =
+  | GetBookingById400
+  | GetBookingById404;
 
-export function useGetBookingsBookingIdInfinite<
-  TData = Awaited<ReturnType<typeof getBookingsBookingId>>,
-  TError = GetBookingsBookingId400 | GetBookingsBookingId404,
+export function useGetBookingByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBookingById>>>,
+  TError = GetBookingById400 | GetBookingById404,
+>(
+  bookingId: string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBookingById>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBookingById>>,
+          TError,
+          Awaited<ReturnType<typeof getBookingById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBookingByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBookingById>>>,
+  TError = GetBookingById400 | GetBookingById404,
 >(
   bookingId: string,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getBookingsBookingId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBookingById>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBookingById>>,
+          TError,
+          Awaited<ReturnType<typeof getBookingById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBookingByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBookingById>>>,
+  TError = GetBookingById400 | GetBookingById404,
+>(
+  bookingId: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBookingById>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBookingsBookingIdInfiniteQueryOptions(
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetBookingByIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getBookingById>>>,
+  TError = GetBookingById400 | GetBookingById404,
+>(
+  bookingId: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getBookingById>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetBookingByIdInfiniteQueryOptions(
     bookingId,
     options,
   );
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetBookingsBookingIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getBookingsBookingId>>,
-  TError = GetBookingsBookingId400 | GetBookingsBookingId404,
+export const getGetBookingByIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBookingById>>,
+  TError = GetBookingById400 | GetBookingById404,
 >(
   bookingId: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBookingsBookingId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getBookingById>>, TError, TData>
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetBookingsBookingIdQueryKey(bookingId);
+    queryOptions?.queryKey ?? getGetBookingByIdQueryKey(bookingId);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getBookingsBookingId>>
-  > = ({ signal }) => getBookingsBookingId(bookingId, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBookingById>>> = ({
+    signal,
+  }) => getBookingById(bookingId, signal);
 
   return {
     queryKey,
@@ -609,37 +1017,96 @@ export const getGetBookingsBookingIdQueryOptions = <
     enabled: !!bookingId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getBookingsBookingId>>,
+    Awaited<ReturnType<typeof getBookingById>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetBookingsBookingIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getBookingsBookingId>>
+export type GetBookingByIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBookingById>>
 >;
-export type GetBookingsBookingIdQueryError =
-  | GetBookingsBookingId400
-  | GetBookingsBookingId404;
+export type GetBookingByIdQueryError = GetBookingById400 | GetBookingById404;
 
-export function useGetBookingsBookingId<
-  TData = Awaited<ReturnType<typeof getBookingsBookingId>>,
-  TError = GetBookingsBookingId400 | GetBookingsBookingId404,
+export function useGetBookingById<
+  TData = Awaited<ReturnType<typeof getBookingById>>,
+  TError = GetBookingById400 | GetBookingById404,
+>(
+  bookingId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getBookingById>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBookingById>>,
+          TError,
+          Awaited<ReturnType<typeof getBookingById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBookingById<
+  TData = Awaited<ReturnType<typeof getBookingById>>,
+  TError = GetBookingById400 | GetBookingById404,
 >(
   bookingId: string,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getBookingsBookingId>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getBookingById>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBookingById>>,
+          TError,
+          Awaited<ReturnType<typeof getBookingById>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBookingById<
+  TData = Awaited<ReturnType<typeof getBookingById>>,
+  TError = GetBookingById400 | GetBookingById404,
+>(
+  bookingId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getBookingById>>, TError, TData>
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetBookingsBookingIdQueryOptions(bookingId, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useGetBookingById<
+  TData = Awaited<ReturnType<typeof getBookingById>>,
+  TError = GetBookingById400 | GetBookingById404,
+>(
+  bookingId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getBookingById>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetBookingByIdQueryOptions(bookingId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 

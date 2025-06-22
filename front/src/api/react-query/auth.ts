@@ -1,24 +1,25 @@
 import { useMutation } from "@tanstack/react-query";
 import type {
   MutationFunction,
+  QueryClient,
   UseMutationOptions,
   UseMutationResult,
 } from "@tanstack/react-query";
 
 import type {
-  PostAuthLogin200,
-  PostAuthLogin400,
-  PostAuthLogin401,
-  PostAuthLogin403,
-  PostAuthLoginBody,
-  PostAuthLogout200,
-  PostAuthRefreshToken200,
-  PostAuthRefreshToken401,
-  PostAuthRegister201,
-  PostAuthRegister400,
-  PostAuthRegister403,
-  PostAuthRegister409,
-  PostAuthRegisterBody,
+  LoginUser200,
+  LoginUser400,
+  LoginUser401,
+  LoginUser403,
+  LoginUserBody,
+  LogoutUser200,
+  RefreshToken200,
+  RefreshToken401,
+  RegisterUser201,
+  RegisterUser400,
+  RegisterUser403,
+  RegisterUser409,
+  RegisterUserBody,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -26,36 +27,36 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Registro de novo usuário.
  */
-export const postAuthRegister = (
-  postAuthRegisterBody: PostAuthRegisterBody,
+export const registerUser = (
+  registerUserBody: RegisterUserBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostAuthRegister201>({
+  return axiosInstance<RegisterUser201>({
     url: `/auth/register`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postAuthRegisterBody,
+    data: registerUserBody,
     signal,
   });
 };
 
-export const getPostAuthRegisterMutationOptions = <
-  TError = PostAuthRegister400 | PostAuthRegister403 | PostAuthRegister409,
+export const getRegisterUserMutationOptions = <
+  TError = RegisterUser400 | RegisterUser403 | RegisterUser409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthRegister>>,
+    Awaited<ReturnType<typeof registerUser>>,
     TError,
-    { data: PostAuthRegisterBody },
+    { data: RegisterUserBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postAuthRegister>>,
+  Awaited<ReturnType<typeof registerUser>>,
   TError,
-  { data: PostAuthRegisterBody },
+  { data: RegisterUserBody },
   TContext
 > => {
-  const mutationKey = ["postAuthRegister"];
+  const mutationKey = ["registerUser"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -65,79 +66,82 @@ export const getPostAuthRegisterMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postAuthRegister>>,
-    { data: PostAuthRegisterBody }
+    Awaited<ReturnType<typeof registerUser>>,
+    { data: RegisterUserBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postAuthRegister(data);
+    return registerUser(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostAuthRegisterMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postAuthRegister>>
+export type RegisterUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof registerUser>>
 >;
-export type PostAuthRegisterMutationBody = PostAuthRegisterBody;
-export type PostAuthRegisterMutationError =
-  | PostAuthRegister400
-  | PostAuthRegister403
-  | PostAuthRegister409;
+export type RegisterUserMutationBody = RegisterUserBody;
+export type RegisterUserMutationError =
+  | RegisterUser400
+  | RegisterUser403
+  | RegisterUser409;
 
-export const usePostAuthRegister = <
-  TError = PostAuthRegister400 | PostAuthRegister403 | PostAuthRegister409,
+export const useRegisterUser = <
+  TError = RegisterUser400 | RegisterUser403 | RegisterUser409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthRegister>>,
-    TError,
-    { data: PostAuthRegisterBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postAuthRegister>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof registerUser>>,
+      TError,
+      { data: RegisterUserBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof registerUser>>,
   TError,
-  { data: PostAuthRegisterBody },
+  { data: RegisterUserBody },
   TContext
 > => {
-  const mutationOptions = getPostAuthRegisterMutationOptions(options);
+  const mutationOptions = getRegisterUserMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Autenticação do usuário.
  */
-export const postAuthLogin = (
-  postAuthLoginBody: PostAuthLoginBody,
+export const loginUser = (
+  loginUserBody: LoginUserBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostAuthLogin200>({
+  return axiosInstance<LoginUser200>({
     url: `/auth/login`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postAuthLoginBody,
+    data: loginUserBody,
     signal,
   });
 };
 
-export const getPostAuthLoginMutationOptions = <
-  TError = PostAuthLogin400 | PostAuthLogin401 | PostAuthLogin403,
+export const getLoginUserMutationOptions = <
+  TError = LoginUser400 | LoginUser401 | LoginUser403,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthLogin>>,
+    Awaited<ReturnType<typeof loginUser>>,
     TError,
-    { data: PostAuthLoginBody },
+    { data: LoginUserBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postAuthLogin>>,
+  Awaited<ReturnType<typeof loginUser>>,
   TError,
-  { data: PostAuthLoginBody },
+  { data: LoginUserBody },
   TContext
 > => {
-  const mutationKey = ["postAuthLogin"];
+  const mutationKey = ["loginUser"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -147,74 +151,74 @@ export const getPostAuthLoginMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postAuthLogin>>,
-    { data: PostAuthLoginBody }
+    Awaited<ReturnType<typeof loginUser>>,
+    { data: LoginUserBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postAuthLogin(data);
+    return loginUser(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostAuthLoginMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postAuthLogin>>
+export type LoginUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof loginUser>>
 >;
-export type PostAuthLoginMutationBody = PostAuthLoginBody;
-export type PostAuthLoginMutationError =
-  | PostAuthLogin400
-  | PostAuthLogin401
-  | PostAuthLogin403;
+export type LoginUserMutationBody = LoginUserBody;
+export type LoginUserMutationError = LoginUser400 | LoginUser401 | LoginUser403;
 
-export const usePostAuthLogin = <
-  TError = PostAuthLogin400 | PostAuthLogin401 | PostAuthLogin403,
+export const useLoginUser = <
+  TError = LoginUser400 | LoginUser401 | LoginUser403,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthLogin>>,
-    TError,
-    { data: PostAuthLoginBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postAuthLogin>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof loginUser>>,
+      TError,
+      { data: LoginUserBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof loginUser>>,
   TError,
-  { data: PostAuthLoginBody },
+  { data: LoginUserBody },
   TContext
 > => {
-  const mutationOptions = getPostAuthLoginMutationOptions(options);
+  const mutationOptions = getLoginUserMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Logout do usuário, removendo cookies de autenticação.
  */
-export const postAuthLogout = (signal?: AbortSignal) => {
-  return axiosInstance<PostAuthLogout200>({
+export const logoutUser = (signal?: AbortSignal) => {
+  return axiosInstance<LogoutUser200>({
     url: `/auth/logout`,
     method: "POST",
     signal,
   });
 };
 
-export const getPostAuthLogoutMutationOptions = <
+export const getLogoutUserMutationOptions = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthLogout>>,
+    Awaited<ReturnType<typeof logoutUser>>,
     TError,
     void,
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postAuthLogout>>,
+  Awaited<ReturnType<typeof logoutUser>>,
   TError,
   void,
   TContext
 > => {
-  const mutationKey = ["postAuthLogout"];
+  const mutationKey = ["logoutUser"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -224,69 +228,69 @@ export const getPostAuthLogoutMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postAuthLogout>>,
+    Awaited<ReturnType<typeof logoutUser>>,
     void
   > = () => {
-    return postAuthLogout();
+    return logoutUser();
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostAuthLogoutMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postAuthLogout>>
+export type LogoutUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logoutUser>>
 >;
 
-export type PostAuthLogoutMutationError = unknown;
+export type LogoutUserMutationError = unknown;
 
-export const usePostAuthLogout = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthLogout>>,
-    TError,
-    void,
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postAuthLogout>>,
+export const useLogoutUser = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof logoutUser>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof logoutUser>>,
   TError,
   void,
   TContext
 > => {
-  const mutationOptions = getPostAuthLogoutMutationOptions(options);
+  const mutationOptions = getLogoutUserMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Geração de um novo token de acesso com base no refresh token válido presente nos cookies.
  */
-export const postAuthRefreshToken = (signal?: AbortSignal) => {
-  return axiosInstance<PostAuthRefreshToken200>({
+export const refreshToken = (signal?: AbortSignal) => {
+  return axiosInstance<RefreshToken200>({
     url: `/auth/refresh-token`,
     method: "POST",
     signal,
   });
 };
 
-export const getPostAuthRefreshTokenMutationOptions = <
-  TError = PostAuthRefreshToken401,
+export const getRefreshTokenMutationOptions = <
+  TError = RefreshToken401,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthRefreshToken>>,
+    Awaited<ReturnType<typeof refreshToken>>,
     TError,
     void,
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postAuthRefreshToken>>,
+  Awaited<ReturnType<typeof refreshToken>>,
   TError,
   void,
   TContext
 > => {
-  const mutationKey = ["postAuthRefreshToken"];
+  const mutationKey = ["refreshToken"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -296,38 +300,38 @@ export const getPostAuthRefreshTokenMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postAuthRefreshToken>>,
+    Awaited<ReturnType<typeof refreshToken>>,
     void
   > = () => {
-    return postAuthRefreshToken();
+    return refreshToken();
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostAuthRefreshTokenMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postAuthRefreshToken>>
+export type RefreshTokenMutationResult = NonNullable<
+  Awaited<ReturnType<typeof refreshToken>>
 >;
 
-export type PostAuthRefreshTokenMutationError = PostAuthRefreshToken401;
+export type RefreshTokenMutationError = RefreshToken401;
 
-export const usePostAuthRefreshToken = <
-  TError = PostAuthRefreshToken401,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAuthRefreshToken>>,
-    TError,
-    void,
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postAuthRefreshToken>>,
+export const useRefreshToken = <TError = RefreshToken401, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof refreshToken>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof refreshToken>>,
   TError,
   void,
   TContext
 > => {
-  const mutationOptions = getPostAuthRefreshTokenMutationOptions(options);
+  const mutationOptions = getRefreshTokenMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };

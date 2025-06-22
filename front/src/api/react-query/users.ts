@@ -1,8 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
+  DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   UseMutationOptions,
@@ -12,41 +19,41 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetUsers200,
-  GetUsers400,
-  GetUsersMe200,
-  GetUsersMe404,
-  GetUsersParams,
-  GetUsersVerifyEmail200,
-  GetUsersVerifyEmail400,
-  GetUsersVerifyEmailParams,
-  PatchUsersMe200,
-  PatchUsersMe400,
-  PatchUsersMe404,
-  PatchUsersMe409,
-  PatchUsersMeBody,
-  PatchUsersUpdatePassword200,
-  PatchUsersUpdatePassword400,
-  PatchUsersUpdatePassword401,
-  PatchUsersUpdatePassword404,
-  PatchUsersUpdatePassword409,
-  PatchUsersUpdatePasswordBody,
-  PatchUsersUserIdAnonymize204,
-  PatchUsersUserIdAnonymize400,
-  PatchUsersUserIdAnonymize403,
-  PatchUsersUserIdAnonymize404,
-  PostUsersForgotPassword200,
-  PostUsersForgotPassword400,
-  PostUsersForgotPassword404,
-  PostUsersForgotPasswordBody,
-  PostUsersResetPassword200,
-  PostUsersResetPassword400,
-  PostUsersResetPassword401,
-  PostUsersResetPasswordBody,
-  PostUsersSendVerificationEmail200,
-  PostUsersSendVerificationEmail400,
-  PostUsersSendVerificationEmail404,
-  PostUsersSendVerificationEmailBody,
+  AnonymizeUser204,
+  AnonymizeUser400,
+  AnonymizeUser403,
+  AnonymizeUser404,
+  GetUserProfile200,
+  GetUserProfile404,
+  ListUsers200,
+  ListUsers400,
+  ListUsersParams,
+  ResetUserPassword200,
+  ResetUserPassword400,
+  ResetUserPassword401,
+  ResetUserPasswordBody,
+  SendForgotPasswordEmail200,
+  SendForgotPasswordEmail400,
+  SendForgotPasswordEmail404,
+  SendForgotPasswordEmailBody,
+  SendUserVerificationEmail200,
+  SendUserVerificationEmail400,
+  SendUserVerificationEmail404,
+  SendUserVerificationEmailBody,
+  UpdateUserPassword200,
+  UpdateUserPassword400,
+  UpdateUserPassword401,
+  UpdateUserPassword404,
+  UpdateUserPassword409,
+  UpdateUserPasswordBody,
+  UpdateUserProfile200,
+  UpdateUserProfile400,
+  UpdateUserProfile404,
+  UpdateUserProfile409,
+  UpdateUserProfileBody,
+  VerifyUserEmail200,
+  VerifyUserEmail400,
+  VerifyUserEmailParams,
 } from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
@@ -54,115 +61,252 @@ import { axiosInstance } from "../http/axios-instance";
 /**
  * Retorna o perfil do usuário logado.
  */
-export const getUsersMe = (signal?: AbortSignal) => {
-  return axiosInstance<GetUsersMe200>({
+export const getUserProfile = (signal?: AbortSignal) => {
+  return axiosInstance<GetUserProfile200>({
     url: `/users/me`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetUsersMeQueryKey = () => {
+export const getGetUserProfileQueryKey = () => {
   return [`/users/me`] as const;
 };
 
-export const getGetUsersMeInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUsersMe>>,
-  TError = GetUsersMe404,
+export const getGetUserProfileInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getUserProfile>>>,
+  TError = GetUserProfile404,
 >(options?: {
-  query?: UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getUsersMe>>,
-    TError,
-    TData
+  query?: Partial<
+    UseInfiniteQueryOptions<
+      Awaited<ReturnType<typeof getUserProfile>>,
+      TError,
+      TData
+    >
   >;
 }) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetUsersMeQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetUserProfileQueryKey();
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersMe>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserProfile>>> = ({
     signal,
-  }) => getUsersMe(signal);
+  }) => getUserProfile(signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getUsersMe>>,
+    Awaited<ReturnType<typeof getUserProfile>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUsersMeInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsersMe>>
+export type GetUserProfileInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUserProfile>>
 >;
-export type GetUsersMeInfiniteQueryError = GetUsersMe404;
+export type GetUserProfileInfiniteQueryError = GetUserProfile404;
 
-export function useGetUsersMeInfinite<
-  TData = Awaited<ReturnType<typeof getUsersMe>>,
-  TError = GetUsersMe404,
->(options?: {
-  query?: UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getUsersMe>>,
-    TError,
-    TData
-  >;
-}): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetUsersMeInfiniteQueryOptions(options);
+export function useGetUserProfileInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUserProfile>>>,
+  TError = GetUserProfile404,
+>(
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUserProfile>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getUserProfile>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserProfileInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUserProfile>>>,
+  TError = GetUserProfile404,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUserProfile>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getUserProfile>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserProfileInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUserProfile>>>,
+  TError = GetUserProfile404,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUserProfile>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useGetUserProfileInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getUserProfile>>>,
+  TError = GetUserProfile404,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getUserProfile>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUserProfileInfiniteQueryOptions(options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetUsersMeQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUsersMe>>,
-  TError = GetUsersMe404,
+export const getGetUserProfileQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUserProfile>>,
+  TError = GetUserProfile404,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getUsersMe>>,
-    TError,
-    TData
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getUserProfile>>, TError, TData>
   >;
 }) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetUsersMeQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetUserProfileQueryKey();
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersMe>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserProfile>>> = ({
     signal,
-  }) => getUsersMe(signal);
+  }) => getUserProfile(signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getUsersMe>>,
+    Awaited<ReturnType<typeof getUserProfile>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUsersMeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsersMe>>
+export type GetUserProfileQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUserProfile>>
 >;
-export type GetUsersMeQueryError = GetUsersMe404;
+export type GetUserProfileQueryError = GetUserProfile404;
 
-export function useGetUsersMe<
-  TData = Awaited<ReturnType<typeof getUsersMe>>,
-  TError = GetUsersMe404,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getUsersMe>>,
-    TError,
-    TData
-  >;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetUsersMeQueryOptions(options);
+export function useGetUserProfile<
+  TData = Awaited<ReturnType<typeof getUserProfile>>,
+  TError = GetUserProfile404,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserProfile>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getUserProfile>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserProfile<
+  TData = Awaited<ReturnType<typeof getUserProfile>>,
+  TError = GetUserProfile404,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserProfile>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getUserProfile>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserProfile<
+  TData = Awaited<ReturnType<typeof getUserProfile>>,
+  TError = GetUserProfile404,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserProfile>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useGetUserProfile<
+  TData = Awaited<ReturnType<typeof getUserProfile>>,
+  TError = GetUserProfile404,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserProfile>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUserProfileQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -172,32 +316,34 @@ export function useGetUsersMe<
 /**
  * Atualiza o perfil do usuário logado.
  */
-export const patchUsersMe = (patchUsersMeBody: PatchUsersMeBody) => {
-  return axiosInstance<PatchUsersMe200>({
+export const updateUserProfile = (
+  updateUserProfileBody: UpdateUserProfileBody,
+) => {
+  return axiosInstance<UpdateUserProfile200>({
     url: `/users/me`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    data: patchUsersMeBody,
+    data: updateUserProfileBody,
   });
 };
 
-export const getPatchUsersMeMutationOptions = <
-  TError = PatchUsersMe400 | PatchUsersMe404 | PatchUsersMe409,
+export const getUpdateUserProfileMutationOptions = <
+  TError = UpdateUserProfile400 | UpdateUserProfile404 | UpdateUserProfile409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchUsersMe>>,
+    Awaited<ReturnType<typeof updateUserProfile>>,
     TError,
-    { data: PatchUsersMeBody },
+    { data: UpdateUserProfileBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchUsersMe>>,
+  Awaited<ReturnType<typeof updateUserProfile>>,
   TError,
-  { data: PatchUsersMeBody },
+  { data: UpdateUserProfileBody },
   TContext
 > => {
-  const mutationKey = ["patchUsersMe"];
+  const mutationKey = ["updateUserProfile"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -207,51 +353,54 @@ export const getPatchUsersMeMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchUsersMe>>,
-    { data: PatchUsersMeBody }
+    Awaited<ReturnType<typeof updateUserProfile>>,
+    { data: UpdateUserProfileBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return patchUsersMe(data);
+    return updateUserProfile(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchUsersMeMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchUsersMe>>
+export type UpdateUserProfileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateUserProfile>>
 >;
-export type PatchUsersMeMutationBody = PatchUsersMeBody;
-export type PatchUsersMeMutationError =
-  | PatchUsersMe400
-  | PatchUsersMe404
-  | PatchUsersMe409;
+export type UpdateUserProfileMutationBody = UpdateUserProfileBody;
+export type UpdateUserProfileMutationError =
+  | UpdateUserProfile400
+  | UpdateUserProfile404
+  | UpdateUserProfile409;
 
-export const usePatchUsersMe = <
-  TError = PatchUsersMe400 | PatchUsersMe404 | PatchUsersMe409,
+export const useUpdateUserProfile = <
+  TError = UpdateUserProfile400 | UpdateUserProfile404 | UpdateUserProfile409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchUsersMe>>,
-    TError,
-    { data: PatchUsersMeBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchUsersMe>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateUserProfile>>,
+      TError,
+      { data: UpdateUserProfileBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateUserProfile>>,
   TError,
-  { data: PatchUsersMeBody },
+  { data: UpdateUserProfileBody },
   TContext
 > => {
-  const mutationOptions = getPatchUsersMeMutationOptions(options);
+  const mutationOptions = getUpdateUserProfileMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Listar usuários
  */
-export const getUsers = (params?: GetUsersParams, signal?: AbortSignal) => {
-  return axiosInstance<GetUsers200>({
+export const listUsers = (params?: ListUsersParams, signal?: AbortSignal) => {
+  return axiosInstance<ListUsers200>({
     url: `/users`,
     method: "GET",
     params,
@@ -259,119 +408,258 @@ export const getUsers = (params?: GetUsersParams, signal?: AbortSignal) => {
   });
 };
 
-export const getGetUsersQueryKey = (params?: GetUsersParams) => {
+export const getListUsersQueryKey = (params?: ListUsersParams) => {
   return [`/users`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetUsersInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUsers>>,
-  TError = GetUsers400,
+export const getListUsersInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listUsers>>>,
+  TError = ListUsers400,
 >(
-  params?: GetUsersParams,
+  params?: ListUsersParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getUsers>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUsers>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetUsersQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListUsersQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsers>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listUsers>>> = ({
     signal,
-  }) => getUsers(params, signal);
+  }) => listUsers(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getUsers>>,
+    Awaited<ReturnType<typeof listUsers>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUsersInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsers>>
+export type ListUsersInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listUsers>>
 >;
-export type GetUsersInfiniteQueryError = GetUsers400;
+export type ListUsersInfiniteQueryError = ListUsers400;
 
-export function useGetUsersInfinite<
-  TData = Awaited<ReturnType<typeof getUsers>>,
-  TError = GetUsers400,
+export function useListUsersInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUsers>>>,
+  TError = ListUsers400,
 >(
-  params?: GetUsersParams,
+  params: undefined | ListUsersParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUsersInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUsers>>>,
+  TError = ListUsers400,
+>(
+  params?: ListUsersParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getUsers>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUsersInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUsers>>>,
+  TError = ListUsers400,
+>(
+  params?: ListUsersParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUsers>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetUsersInfiniteQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useListUsersInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listUsers>>>,
+  TError = ListUsers400,
+>(
+  params?: ListUsersParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listUsers>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListUsersInfiniteQueryOptions(params, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetUsersQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUsers>>,
-  TError = GetUsers400,
+export const getListUsersQueryOptions = <
+  TData = Awaited<ReturnType<typeof listUsers>>,
+  TError = ListUsers400,
 >(
-  params?: GetUsersParams,
+  params?: ListUsersParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getUsers>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetUsersQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListUsersQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsers>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listUsers>>> = ({
     signal,
-  }) => getUsers(params, signal);
+  }) => listUsers(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getUsers>>,
+    Awaited<ReturnType<typeof listUsers>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUsersQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsers>>
+export type ListUsersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listUsers>>
 >;
-export type GetUsersQueryError = GetUsers400;
+export type ListUsersQueryError = ListUsers400;
 
-export function useGetUsers<
-  TData = Awaited<ReturnType<typeof getUsers>>,
-  TError = GetUsers400,
+export function useListUsers<
+  TData = Awaited<ReturnType<typeof listUsers>>,
+  TError = ListUsers400,
 >(
-  params?: GetUsersParams,
+  params: undefined | ListUsersParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUsers<
+  TData = Awaited<ReturnType<typeof listUsers>>,
+  TError = ListUsers400,
+>(
+  params?: ListUsersParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getUsers>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUsers<
+  TData = Awaited<ReturnType<typeof listUsers>>,
+  TError = ListUsers400,
+>(
+  params?: ListUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetUsersQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useListUsers<
+  TData = Awaited<ReturnType<typeof listUsers>>,
+  TError = ListUsers400,
+>(
+  params?: ListUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListUsersQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -381,33 +669,30 @@ export function useGetUsers<
 /**
  * Anonimiza um usuário.
  */
-export const patchUsersUserIdAnonymize = (userId: string) => {
-  return axiosInstance<PatchUsersUserIdAnonymize204>({
+export const anonymizeUser = (userId: string) => {
+  return axiosInstance<AnonymizeUser204>({
     url: `/users/${userId}/anonymize`,
     method: "PATCH",
   });
 };
 
-export const getPatchUsersUserIdAnonymizeMutationOptions = <
-  TError =
-    | PatchUsersUserIdAnonymize400
-    | PatchUsersUserIdAnonymize403
-    | PatchUsersUserIdAnonymize404,
+export const getAnonymizeUserMutationOptions = <
+  TError = AnonymizeUser400 | AnonymizeUser403 | AnonymizeUser404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchUsersUserIdAnonymize>>,
+    Awaited<ReturnType<typeof anonymizeUser>>,
     TError,
     { userId: string },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchUsersUserIdAnonymize>>,
+  Awaited<ReturnType<typeof anonymizeUser>>,
   TError,
   { userId: string },
   TContext
 > => {
-  const mutationKey = ["patchUsersUserIdAnonymize"];
+  const mutationKey = ["anonymizeUser"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -417,84 +702,84 @@ export const getPatchUsersUserIdAnonymizeMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchUsersUserIdAnonymize>>,
+    Awaited<ReturnType<typeof anonymizeUser>>,
     { userId: string }
   > = (props) => {
     const { userId } = props ?? {};
 
-    return patchUsersUserIdAnonymize(userId);
+    return anonymizeUser(userId);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchUsersUserIdAnonymizeMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchUsersUserIdAnonymize>>
+export type AnonymizeUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof anonymizeUser>>
 >;
 
-export type PatchUsersUserIdAnonymizeMutationError =
-  | PatchUsersUserIdAnonymize400
-  | PatchUsersUserIdAnonymize403
-  | PatchUsersUserIdAnonymize404;
+export type AnonymizeUserMutationError =
+  | AnonymizeUser400
+  | AnonymizeUser403
+  | AnonymizeUser404;
 
-export const usePatchUsersUserIdAnonymize = <
-  TError =
-    | PatchUsersUserIdAnonymize400
-    | PatchUsersUserIdAnonymize403
-    | PatchUsersUserIdAnonymize404,
+export const useAnonymizeUser = <
+  TError = AnonymizeUser400 | AnonymizeUser403 | AnonymizeUser404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchUsersUserIdAnonymize>>,
-    TError,
-    { userId: string },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchUsersUserIdAnonymize>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof anonymizeUser>>,
+      TError,
+      { userId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof anonymizeUser>>,
   TError,
   { userId: string },
   TContext
 > => {
-  const mutationOptions = getPatchUsersUserIdAnonymizeMutationOptions(options);
+  const mutationOptions = getAnonymizeUserMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Atualiza a senha do usuário logado.
  */
-export const patchUsersUpdatePassword = (
-  patchUsersUpdatePasswordBody: PatchUsersUpdatePasswordBody,
+export const updateUserPassword = (
+  updateUserPasswordBody: UpdateUserPasswordBody,
 ) => {
-  return axiosInstance<PatchUsersUpdatePassword200>({
+  return axiosInstance<UpdateUserPassword200>({
     url: `/users/update-password`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    data: patchUsersUpdatePasswordBody,
+    data: updateUserPasswordBody,
   });
 };
 
-export const getPatchUsersUpdatePasswordMutationOptions = <
+export const getUpdateUserPasswordMutationOptions = <
   TError =
-    | PatchUsersUpdatePassword400
-    | PatchUsersUpdatePassword401
-    | PatchUsersUpdatePassword404
-    | PatchUsersUpdatePassword409,
+    | UpdateUserPassword400
+    | UpdateUserPassword401
+    | UpdateUserPassword404
+    | UpdateUserPassword409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchUsersUpdatePassword>>,
+    Awaited<ReturnType<typeof updateUserPassword>>,
     TError,
-    { data: PatchUsersUpdatePasswordBody },
+    { data: UpdateUserPasswordBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchUsersUpdatePassword>>,
+  Awaited<ReturnType<typeof updateUserPassword>>,
   TError,
-  { data: PatchUsersUpdatePasswordBody },
+  { data: UpdateUserPasswordBody },
   TContext
 > => {
-  const mutationKey = ["patchUsersUpdatePassword"];
+  const mutationKey = ["updateUserPassword"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -504,59 +789,62 @@ export const getPatchUsersUpdatePasswordMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchUsersUpdatePassword>>,
-    { data: PatchUsersUpdatePasswordBody }
+    Awaited<ReturnType<typeof updateUserPassword>>,
+    { data: UpdateUserPasswordBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return patchUsersUpdatePassword(data);
+    return updateUserPassword(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchUsersUpdatePasswordMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchUsersUpdatePassword>>
+export type UpdateUserPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateUserPassword>>
 >;
-export type PatchUsersUpdatePasswordMutationBody = PatchUsersUpdatePasswordBody;
-export type PatchUsersUpdatePasswordMutationError =
-  | PatchUsersUpdatePassword400
-  | PatchUsersUpdatePassword401
-  | PatchUsersUpdatePassword404
-  | PatchUsersUpdatePassword409;
+export type UpdateUserPasswordMutationBody = UpdateUserPasswordBody;
+export type UpdateUserPasswordMutationError =
+  | UpdateUserPassword400
+  | UpdateUserPassword401
+  | UpdateUserPassword404
+  | UpdateUserPassword409;
 
-export const usePatchUsersUpdatePassword = <
+export const useUpdateUserPassword = <
   TError =
-    | PatchUsersUpdatePassword400
-    | PatchUsersUpdatePassword401
-    | PatchUsersUpdatePassword404
-    | PatchUsersUpdatePassword409,
+    | UpdateUserPassword400
+    | UpdateUserPassword401
+    | UpdateUserPassword404
+    | UpdateUserPassword409,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchUsersUpdatePassword>>,
-    TError,
-    { data: PatchUsersUpdatePasswordBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof patchUsersUpdatePassword>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateUserPassword>>,
+      TError,
+      { data: UpdateUserPasswordBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateUserPassword>>,
   TError,
-  { data: PatchUsersUpdatePasswordBody },
+  { data: UpdateUserPasswordBody },
   TContext
 > => {
-  const mutationOptions = getPatchUsersUpdatePasswordMutationOptions(options);
+  const mutationOptions = getUpdateUserPasswordMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Verifica o e-mail do usuário.
  */
-export const getUsersVerifyEmail = (
-  params: GetUsersVerifyEmailParams,
+export const verifyUserEmail = (
+  params: VerifyUserEmailParams,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<GetUsersVerifyEmail200>({
+  return axiosInstance<VerifyUserEmail200>({
     url: `/users/verify-email`,
     method: "GET",
     params,
@@ -564,126 +852,278 @@ export const getUsersVerifyEmail = (
   });
 };
 
-export const getGetUsersVerifyEmailQueryKey = (
-  params: GetUsersVerifyEmailParams,
-) => {
+export const getVerifyUserEmailQueryKey = (params: VerifyUserEmailParams) => {
   return [`/users/verify-email`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetUsersVerifyEmailInfiniteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-  TError = GetUsersVerifyEmail400,
+export const getVerifyUserEmailInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof verifyUserEmail>>>,
+  TError = VerifyUserEmail400,
 >(
-  params: GetUsersVerifyEmailParams,
+  params: VerifyUserEmailParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetUsersVerifyEmailQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getVerifyUserEmailQueryKey(params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getUsersVerifyEmail>>
-  > = ({ signal }) => getUsersVerifyEmail(params, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof verifyUserEmail>>> = ({
+    signal,
+  }) => verifyUserEmail(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
-    Awaited<ReturnType<typeof getUsersVerifyEmail>>,
+    Awaited<ReturnType<typeof verifyUserEmail>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUsersVerifyEmailInfiniteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsersVerifyEmail>>
+export type VerifyUserEmailInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof verifyUserEmail>>
 >;
-export type GetUsersVerifyEmailInfiniteQueryError = GetUsersVerifyEmail400;
+export type VerifyUserEmailInfiniteQueryError = VerifyUserEmail400;
 
-export function useGetUsersVerifyEmailInfinite<
-  TData = Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-  TError = GetUsersVerifyEmail400,
+export function useVerifyUserEmailInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof verifyUserEmail>>>,
+  TError = VerifyUserEmail400,
 >(
-  params: GetUsersVerifyEmailParams,
+  params: VerifyUserEmailParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof verifyUserEmail>>,
+          TError,
+          Awaited<ReturnType<typeof verifyUserEmail>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useVerifyUserEmailInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof verifyUserEmail>>>,
+  TError = VerifyUserEmail400,
+>(
+  params: VerifyUserEmailParams,
   options?: {
-    query?: UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-      TError,
-      TData
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof verifyUserEmail>>,
+          TError,
+          Awaited<ReturnType<typeof verifyUserEmail>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useVerifyUserEmailInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof verifyUserEmail>>>,
+  TError = VerifyUserEmail400,
+>(
+  params: VerifyUserEmailParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetUsersVerifyEmailInfiniteQueryOptions(
-    params,
-    options,
-  );
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
-    TData,
-    TError
-  > & { queryKey: QueryKey };
+export function useVerifyUserEmailInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof verifyUserEmail>>>,
+  TError = VerifyUserEmail400,
+>(
+  params: VerifyUserEmailParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getVerifyUserEmailInfiniteQueryOptions(params, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
 
   query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-export const getGetUsersVerifyEmailQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-  TError = GetUsersVerifyEmail400,
+export const getVerifyUserEmailQueryOptions = <
+  TData = Awaited<ReturnType<typeof verifyUserEmail>>,
+  TError = VerifyUserEmail400,
 >(
-  params: GetUsersVerifyEmailParams,
+  params: VerifyUserEmailParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
     >;
   },
 ) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetUsersVerifyEmailQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getVerifyUserEmailQueryKey(params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getUsersVerifyEmail>>
-  > = ({ signal }) => getUsersVerifyEmail(params, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof verifyUserEmail>>> = ({
+    signal,
+  }) => verifyUserEmail(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getUsersVerifyEmail>>,
+    Awaited<ReturnType<typeof verifyUserEmail>>,
     TError,
     TData
-  > & { queryKey: QueryKey };
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUsersVerifyEmailQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsersVerifyEmail>>
+export type VerifyUserEmailQueryResult = NonNullable<
+  Awaited<ReturnType<typeof verifyUserEmail>>
 >;
-export type GetUsersVerifyEmailQueryError = GetUsersVerifyEmail400;
+export type VerifyUserEmailQueryError = VerifyUserEmail400;
 
-export function useGetUsersVerifyEmail<
-  TData = Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-  TError = GetUsersVerifyEmail400,
+export function useVerifyUserEmail<
+  TData = Awaited<ReturnType<typeof verifyUserEmail>>,
+  TError = VerifyUserEmail400,
 >(
-  params: GetUsersVerifyEmailParams,
+  params: VerifyUserEmailParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof verifyUserEmail>>,
+          TError,
+          Awaited<ReturnType<typeof verifyUserEmail>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useVerifyUserEmail<
+  TData = Awaited<ReturnType<typeof verifyUserEmail>>,
+  TError = VerifyUserEmail400,
+>(
+  params: VerifyUserEmailParams,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getUsersVerifyEmail>>,
-      TError,
-      TData
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof verifyUserEmail>>,
+          TError,
+          Awaited<ReturnType<typeof verifyUserEmail>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useVerifyUserEmail<
+  TData = Awaited<ReturnType<typeof verifyUserEmail>>,
+  TError = VerifyUserEmail400,
+>(
+  params: VerifyUserEmailParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
     >;
   },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetUsersVerifyEmailQueryOptions(params, options);
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+export function useVerifyUserEmail<
+  TData = Awaited<ReturnType<typeof verifyUserEmail>>,
+  TError = VerifyUserEmail400,
+>(
+  params: VerifyUserEmailParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof verifyUserEmail>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getVerifyUserEmailQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey;
 
@@ -693,38 +1133,36 @@ export function useGetUsersVerifyEmail<
 /**
  * Envia um e-mail de verificação.
  */
-export const postUsersSendVerificationEmail = (
-  postUsersSendVerificationEmailBody: PostUsersSendVerificationEmailBody,
+export const sendUserVerificationEmail = (
+  sendUserVerificationEmailBody: SendUserVerificationEmailBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostUsersSendVerificationEmail200>({
+  return axiosInstance<SendUserVerificationEmail200>({
     url: `/users/send-verification-email`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postUsersSendVerificationEmailBody,
+    data: sendUserVerificationEmailBody,
     signal,
   });
 };
 
-export const getPostUsersSendVerificationEmailMutationOptions = <
-  TError =
-    | PostUsersSendVerificationEmail400
-    | PostUsersSendVerificationEmail404,
+export const getSendUserVerificationEmailMutationOptions = <
+  TError = SendUserVerificationEmail400 | SendUserVerificationEmail404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersSendVerificationEmail>>,
+    Awaited<ReturnType<typeof sendUserVerificationEmail>>,
     TError,
-    { data: PostUsersSendVerificationEmailBody },
+    { data: SendUserVerificationEmailBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postUsersSendVerificationEmail>>,
+  Awaited<ReturnType<typeof sendUserVerificationEmail>>,
   TError,
-  { data: PostUsersSendVerificationEmailBody },
+  { data: SendUserVerificationEmailBody },
   TContext
 > => {
-  const mutationKey = ["postUsersSendVerificationEmail"];
+  const mutationKey = ["sendUserVerificationEmail"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -734,82 +1172,82 @@ export const getPostUsersSendVerificationEmailMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postUsersSendVerificationEmail>>,
-    { data: PostUsersSendVerificationEmailBody }
+    Awaited<ReturnType<typeof sendUserVerificationEmail>>,
+    { data: SendUserVerificationEmailBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postUsersSendVerificationEmail(data);
+    return sendUserVerificationEmail(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostUsersSendVerificationEmailMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postUsersSendVerificationEmail>>
+export type SendUserVerificationEmailMutationResult = NonNullable<
+  Awaited<ReturnType<typeof sendUserVerificationEmail>>
 >;
-export type PostUsersSendVerificationEmailMutationBody =
-  PostUsersSendVerificationEmailBody;
-export type PostUsersSendVerificationEmailMutationError =
-  | PostUsersSendVerificationEmail400
-  | PostUsersSendVerificationEmail404;
+export type SendUserVerificationEmailMutationBody =
+  SendUserVerificationEmailBody;
+export type SendUserVerificationEmailMutationError =
+  | SendUserVerificationEmail400
+  | SendUserVerificationEmail404;
 
-export const usePostUsersSendVerificationEmail = <
-  TError =
-    | PostUsersSendVerificationEmail400
-    | PostUsersSendVerificationEmail404,
+export const useSendUserVerificationEmail = <
+  TError = SendUserVerificationEmail400 | SendUserVerificationEmail404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersSendVerificationEmail>>,
-    TError,
-    { data: PostUsersSendVerificationEmailBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postUsersSendVerificationEmail>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof sendUserVerificationEmail>>,
+      TError,
+      { data: SendUserVerificationEmailBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof sendUserVerificationEmail>>,
   TError,
-  { data: PostUsersSendVerificationEmailBody },
+  { data: SendUserVerificationEmailBody },
   TContext
 > => {
-  const mutationOptions =
-    getPostUsersSendVerificationEmailMutationOptions(options);
+  const mutationOptions = getSendUserVerificationEmailMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Envia um e-mail para redefinição de senha.
  */
-export const postUsersForgotPassword = (
-  postUsersForgotPasswordBody: PostUsersForgotPasswordBody,
+export const sendForgotPasswordEmail = (
+  sendForgotPasswordEmailBody: SendForgotPasswordEmailBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostUsersForgotPassword200>({
+  return axiosInstance<SendForgotPasswordEmail200>({
     url: `/users/forgot-password`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postUsersForgotPasswordBody,
+    data: sendForgotPasswordEmailBody,
     signal,
   });
 };
 
-export const getPostUsersForgotPasswordMutationOptions = <
-  TError = PostUsersForgotPassword400 | PostUsersForgotPassword404,
+export const getSendForgotPasswordEmailMutationOptions = <
+  TError = SendForgotPasswordEmail400 | SendForgotPasswordEmail404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersForgotPassword>>,
+    Awaited<ReturnType<typeof sendForgotPasswordEmail>>,
     TError,
-    { data: PostUsersForgotPasswordBody },
+    { data: SendForgotPasswordEmailBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postUsersForgotPassword>>,
+  Awaited<ReturnType<typeof sendForgotPasswordEmail>>,
   TError,
-  { data: PostUsersForgotPasswordBody },
+  { data: SendForgotPasswordEmailBody },
   TContext
 > => {
-  const mutationKey = ["postUsersForgotPassword"];
+  const mutationKey = ["sendForgotPasswordEmail"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -819,78 +1257,81 @@ export const getPostUsersForgotPasswordMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postUsersForgotPassword>>,
-    { data: PostUsersForgotPasswordBody }
+    Awaited<ReturnType<typeof sendForgotPasswordEmail>>,
+    { data: SendForgotPasswordEmailBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postUsersForgotPassword(data);
+    return sendForgotPasswordEmail(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostUsersForgotPasswordMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postUsersForgotPassword>>
+export type SendForgotPasswordEmailMutationResult = NonNullable<
+  Awaited<ReturnType<typeof sendForgotPasswordEmail>>
 >;
-export type PostUsersForgotPasswordMutationBody = PostUsersForgotPasswordBody;
-export type PostUsersForgotPasswordMutationError =
-  | PostUsersForgotPassword400
-  | PostUsersForgotPassword404;
+export type SendForgotPasswordEmailMutationBody = SendForgotPasswordEmailBody;
+export type SendForgotPasswordEmailMutationError =
+  | SendForgotPasswordEmail400
+  | SendForgotPasswordEmail404;
 
-export const usePostUsersForgotPassword = <
-  TError = PostUsersForgotPassword400 | PostUsersForgotPassword404,
+export const useSendForgotPasswordEmail = <
+  TError = SendForgotPasswordEmail400 | SendForgotPasswordEmail404,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersForgotPassword>>,
-    TError,
-    { data: PostUsersForgotPasswordBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postUsersForgotPassword>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof sendForgotPasswordEmail>>,
+      TError,
+      { data: SendForgotPasswordEmailBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof sendForgotPasswordEmail>>,
   TError,
-  { data: PostUsersForgotPasswordBody },
+  { data: SendForgotPasswordEmailBody },
   TContext
 > => {
-  const mutationOptions = getPostUsersForgotPasswordMutationOptions(options);
+  const mutationOptions = getSendForgotPasswordEmailMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
 /**
  * Redefine a senha do usuário.
  */
-export const postUsersResetPassword = (
-  postUsersResetPasswordBody: PostUsersResetPasswordBody,
+export const resetUserPassword = (
+  resetUserPasswordBody: ResetUserPasswordBody,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<PostUsersResetPassword200>({
+  return axiosInstance<ResetUserPassword200>({
     url: `/users/reset-password`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: postUsersResetPasswordBody,
+    data: resetUserPasswordBody,
     signal,
   });
 };
 
-export const getPostUsersResetPasswordMutationOptions = <
-  TError = PostUsersResetPassword400 | PostUsersResetPassword401,
+export const getResetUserPasswordMutationOptions = <
+  TError = ResetUserPassword400 | ResetUserPassword401,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersResetPassword>>,
+    Awaited<ReturnType<typeof resetUserPassword>>,
     TError,
-    { data: PostUsersResetPasswordBody },
+    { data: ResetUserPasswordBody },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postUsersResetPassword>>,
+  Awaited<ReturnType<typeof resetUserPassword>>,
   TError,
-  { data: PostUsersResetPasswordBody },
+  { data: ResetUserPasswordBody },
   TContext
 > => {
-  const mutationKey = ["postUsersResetPassword"];
+  const mutationKey = ["resetUserPassword"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -900,42 +1341,45 @@ export const getPostUsersResetPasswordMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postUsersResetPassword>>,
-    { data: PostUsersResetPasswordBody }
+    Awaited<ReturnType<typeof resetUserPassword>>,
+    { data: ResetUserPasswordBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postUsersResetPassword(data);
+    return resetUserPassword(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostUsersResetPasswordMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postUsersResetPassword>>
+export type ResetUserPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof resetUserPassword>>
 >;
-export type PostUsersResetPasswordMutationBody = PostUsersResetPasswordBody;
-export type PostUsersResetPasswordMutationError =
-  | PostUsersResetPassword400
-  | PostUsersResetPassword401;
+export type ResetUserPasswordMutationBody = ResetUserPasswordBody;
+export type ResetUserPasswordMutationError =
+  | ResetUserPassword400
+  | ResetUserPassword401;
 
-export const usePostUsersResetPassword = <
-  TError = PostUsersResetPassword400 | PostUsersResetPassword401,
+export const useResetUserPassword = <
+  TError = ResetUserPassword400 | ResetUserPassword401,
   TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersResetPassword>>,
-    TError,
-    { data: PostUsersResetPasswordBody },
-    TContext
-  >;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof postUsersResetPassword>>,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof resetUserPassword>>,
+      TError,
+      { data: ResetUserPasswordBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof resetUserPassword>>,
   TError,
-  { data: PostUsersResetPasswordBody },
+  { data: ResetUserPasswordBody },
   TContext
 > => {
-  const mutationOptions = getPostUsersResetPasswordMutationOptions(options);
+  const mutationOptions = getResetUserPasswordMutationOptions(options);
 
-  return useMutation(mutationOptions);
+  return useMutation(mutationOptions, queryClient);
 };
