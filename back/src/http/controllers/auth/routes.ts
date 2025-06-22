@@ -18,6 +18,7 @@ export async function authRoutes(app: FastifyTypedInstance) {
     '/auth/register',
     {
       schema: {
+        operationId: 'registerUser',
         tags: ['auth'],
         description: 'Registro de novo usuário.',
         body: registerUserSchema,
@@ -43,10 +44,12 @@ export async function authRoutes(app: FastifyTypedInstance) {
     },
     registerUser,
   );
+
   app.post(
     '/auth/login',
     {
       schema: {
+        operationId: 'loginUser',
         tags: ['auth'],
         description: 'Autenticação do usuário.',
         body: loginUserSchema,
@@ -82,6 +85,7 @@ export async function authRoutes(app: FastifyTypedInstance) {
     '/auth/logout',
     {
       schema: {
+        operationId: 'logoutUser',
         tags: ['auth'],
         description: 'Logout do usuário, removendo cookies de autenticação.',
         response: {
@@ -100,6 +104,7 @@ export async function authRoutes(app: FastifyTypedInstance) {
     '/auth/refresh-token',
     {
       schema: {
+        operationId: 'refreshToken',
         tags: ['auth'],
         description:
           'Geração de um novo token de acesso com base no refresh token válido presente nos cookies.',

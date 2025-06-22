@@ -12,6 +12,7 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'assignBonusToUser',
         tags: ['bonus'],
         description: 'Atribuir bônus a um usuário.',
         body: assignBonusBodySchema,
@@ -32,6 +33,7 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'getBonusBalance',
         tags: ['bonus'],
         description:
           'Obter o saldo de bônus (pontos e valor em R$) do usuário autenticado.',

@@ -19,18 +19,15 @@ export async function holidayRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'createHoliday',
         tags: ['holidays'],
         description: 'Criação de um novo feriado.',
         body: createBookingBodySchema,
         response: {
           201: z.null().describe('Feriado criado com sucesso.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado'),
-          409: z
-            .object({ message: z.string() })
-            .describe('Conflito de feriado'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
+          409: z.object({ message: z.string() }).describe('Conflito de feriado'),
         },
       },
     },
@@ -43,6 +40,7 @@ export async function holidayRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'deleteHoliday',
         tags: ['holidays'],
         description: 'Deletar um feriado.',
         params: deleteHolidayParamsSchema,
@@ -50,9 +48,7 @@ export async function holidayRoutes(app: FastifyTypedInstance) {
           204: z.null().describe('Feriado deletado.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
           403: z.object({ message: z.string() }).describe('Acesso negado'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
         },
       },
     },
@@ -64,16 +60,13 @@ export async function holidayRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'listHolidays',
         tags: ['holidays'],
         description: 'Listar feriados.',
         querystring: paginationSchema,
         response: {
-          200: listHolidaysResponseSchema.describe(
-            'Lista de feriados com paginação.',
-          ),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação e/ou dados inválidos'),
+          200: listHolidaysResponseSchema.describe('Lista de feriados com paginação.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação e/ou dados inválidos'),
           403: z.object({ message: z.string() }).describe('Acesso negado'),
         },
       },

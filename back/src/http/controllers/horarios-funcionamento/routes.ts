@@ -14,28 +14,23 @@ import {
 } from '@/schemas/horario-funcionamento';
 import { z } from 'zod';
 
+// ...imports mantidos
+
 export async function businessHoursRoutes(app: FastifyTypedInstance) {
   app.post(
     '/business-hours',
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'createBusinessHour',
         tags: ['business-hours'],
         description: 'Criação de um novo horário de funcionamento.',
         body: createBusinessHoursBodySchema,
         response: {
-          201: z
-            .null()
-            .describe('Horário de funcionamento criado com sucesso.'),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado'),
-          409: z
-            .object({ message: z.string() })
-            .describe('Conflito de horário de funcionamento'),
+          201: z.null().describe('Horário de funcionamento criado com sucesso.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
+          409: z.object({ message: z.string() }).describe('Conflito de horário de funcionamento'),
         },
       },
     },
@@ -47,19 +42,14 @@ export async function businessHoursRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'updateBusinessHour',
         tags: ['business-hours'],
         description: 'Atualização de um horário de funcionamento.',
         body: updateBusinessHoursBodySchema,
         response: {
-          200: z
-            .null()
-            .describe('Horário de funcionamento atualizado com sucesso.'),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado'),
+          200: z.null().describe('Horário de funcionamento atualizado com sucesso.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
         },
       },
     },
@@ -70,19 +60,14 @@ export async function businessHoursRoutes(app: FastifyTypedInstance) {
     '/business-hours/:professionalId',
     {
       schema: {
+        operationId: 'listBusinessHours',
         tags: ['business-hours'],
         description: 'Listar horários de funcionamento.',
         params: listBusinessHoursParamsSchema,
         response: {
-          200: z
-            .object({
-              businessHours: z.array(businessHoursSchema),
-            })
-            .describe('Horários de funcionamento encontrados.'),
+          200: z.object({ businessHours: z.array(businessHoursSchema) }).describe('Horários de funcionamento encontrados.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Horário não encontrado'),
+          404: z.object({ message: z.string() }).describe('Horário não encontrado'),
         },
       },
     },
@@ -94,18 +79,15 @@ export async function businessHoursRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'deleteBusinessHour',
         tags: ['business-hours'],
         description: 'Deletar um horário de funcionamento.',
         params: deleteBusinessHoursParamsSchema,
         response: {
           204: z.null().describe('Horário de funcionamento deletado.'),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
           403: z.object({ message: z.string() }).describe('Acesso negado'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Horário não encontrado'),
+          404: z.object({ message: z.string() }).describe('Horário não encontrado'),
         },
       },
     },

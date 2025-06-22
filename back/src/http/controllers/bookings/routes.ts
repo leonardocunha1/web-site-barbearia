@@ -22,6 +22,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('CLIENTE')],
       schema: {
+        operationId: 'createBooking',
         tags: ['bookings'],
         description: 'Criação de um novo agendamento.',
         body: createBookingBodySchema,
@@ -45,6 +46,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'updateBookingStatus',
         tags: ['bookings'],
         description:
           'Atualiza o status de um agendamento (apenas para profissionais)',
@@ -66,6 +68,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('CLIENTE')],
       schema: {
+        operationId: 'listUserBookings',
         tags: ['bookings'],
         description: 'Lista os agendamentos do usuário autenticado',
         querystring: listBookingsQuerySchema,
@@ -85,6 +88,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'listProfessionalBookings',
         tags: ['bookings'],
         description: 'Lista os agendamentos do profissional autenticado',
         querystring: listBookingsQuerySchema,
@@ -103,6 +107,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'getBookingById',
         tags: ['bookings'],
         description: 'Busca os detalhes de um agendamento pelo ID.',
         params: getOrUpdateBookingStatusParamsSchema,

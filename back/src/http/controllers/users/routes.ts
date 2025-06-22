@@ -21,6 +21,7 @@ export async function usersRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'getUserProfile',
         tags: ['users'],
         description: 'Retorna o perfil do usuário logado.',
         response: {
@@ -35,11 +36,13 @@ export async function usersRoutes(app: FastifyTypedInstance) {
     },
     profile,
   );
+
   app.patch(
     '/users/me',
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'updateUserProfile',
         tags: ['users'],
         description: 'Atualiza o perfil do usuário logado.',
         body: updateProfileBodySchema,
@@ -65,6 +68,7 @@ export async function usersRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
       schema: {
+        operationId: 'listUsers',
         tags: ['users'],
         description: 'Listar usuários',
         querystring: listUsersQuerySchema,
@@ -92,6 +96,7 @@ export async function usersRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'CLIENTE'])],
       schema: {
+        operationId: 'anonymizeUser',
         tags: ['users'],
         description: 'Anonimiza um usuário.',
         params: anonymizeUserParamsSchema,
@@ -117,6 +122,7 @@ export async function usersRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'updateUserPassword',
         tags: ['users'],
         description: 'Atualiza a senha do usuário logado.',
         body: updatePasswordBodySchema,

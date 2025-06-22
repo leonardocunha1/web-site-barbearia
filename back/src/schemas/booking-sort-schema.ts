@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const orderValues = ['asc', 'desc'] as const;
+
 export const sortFields = [
   'dataHoraInicio',
   'profissional',
@@ -8,15 +9,34 @@ export const sortFields = [
   'valorFinal',
 ] as const;
 
-export type SortField = (typeof sortFields)[number]; // Tipo literal para uso externo
+/**
+ * Tipo literal para os campos de ordenação permitidos.
+ */
+export type SortField = (typeof sortFields)[number];
 
-export const sortFieldSchema = z.enum(sortFields);
+/**
+ * Enum Zod com os campos de ordenação válidos.
+ */
+export const sortFieldSchema = z.enum(sortFields).describe('SortField');
 
-export const sortOrderSchema = z.enum(['asc', 'desc']);
+/**
+ * Enum Zod com as direções de ordenação válidas.
+ */
+export const sortOrderSchema = z.enum(orderValues).describe('SortOrder');
+
 export type SortOrder = z.infer<typeof sortOrderSchema>;
 
-export const sortSchema = z.object({
-  field: sortFieldSchema,
-  order: sortOrderSchema,
-});
-export type SortBookingSchema = z.infer<typeof sortSchema>; // Para tipar arrays, inputs etc.
+/**
+ * Schema completo para uma regra de ordenação.
+ */
+export const sortSchema = z
+  .object({
+    field: sortFieldSchema,
+    order: sortOrderSchema,
+  })
+  .describe('SortSchema');
+
+/**
+ * Tipo inferido para uso geral do sortSchema.
+ */
+export type SortBookingSchema = z.infer<typeof sortSchema>;

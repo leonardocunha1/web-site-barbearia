@@ -37,7 +37,7 @@ export const listUsersQuerySchema = paginationSchema.extend({
 });
 
 export const anonymizeUserParamsSchema = z.object({
-  userIdToAnonymize: z.string().uuid(),
+  userId: z.string().uuid(), 
 });
 
 export const updatePasswordBodySchema = z.object({

@@ -26,6 +26,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'createProfessional',
         tags: ['professionals'],
         body: createProfessionalBodySchema,
         response: {
@@ -52,6 +53,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
       schema: {
+        operationId: 'updateProfessional',
         tags: ['professionals'],
         params: updateProfessionalParamsSchema,
         body: updateProfessionalBodySchema,
@@ -76,6 +78,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'toggleProfessionalStatus',
         tags: ['professionals'],
         params: toggleProfessionalStatusParamsSchema,
         response: {
@@ -99,6 +102,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        operationId: 'listOrSearchProfessionals',
         tags: ['professionals'],
         querystring: searchProfessionalsQuerySchema,
         response: {
@@ -124,6 +128,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'getProfessionalDashboard',
         tags: ['professionals'],
         querystring: dashboardQuerySchema,
         response: {
@@ -146,6 +151,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
       schema: {
+        operationId: 'getProfessionalSchedule',
         tags: ['professionals'],
         querystring: getScheduleQuerySchema,
         response: {

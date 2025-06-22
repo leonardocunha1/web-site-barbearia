@@ -24,19 +24,14 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'createService',
         tags: ['services'],
         body: createServiceBodySchema,
         response: {
           201: z.null().describe('Serviço criado com sucesso.'),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          403: z
-            .object({ message: z.string() })
-            .describe('Permissão insuficiente.'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          403: z.object({ message: z.string() }).describe('Permissão insuficiente.'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado.'),
         },
       },
     },
@@ -47,6 +42,7 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
     '/services',
     {
       schema: {
+        operationId: 'listServices',
         tags: ['services'],
         querystring: listServicesQuerySchema,
         response: {
@@ -59,12 +55,8 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
               totalPages: z.number(),
             }),
           }),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado.'),
         },
       },
     },
@@ -75,18 +67,15 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
     '/services/:id',
     {
       schema: {
+        operationId: 'getServiceById',
         tags: ['services'],
         params: updateServiceParamsSchema,
         response: {
           200: z.object({
             service: serviceSchemaWithProfessional,
           }),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado.'),
         },
       },
     },
@@ -98,6 +87,7 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'updateServiceById',
         tags: ['services'],
         params: updateServiceParamsSchema,
         body: updateServiceBodySchema,
@@ -105,12 +95,8 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
           200: z.object({
             service: servicesSchema,
           }),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado.'),
         },
       },
     },
@@ -122,17 +108,14 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'deleteServiceById',
         tags: ['services'],
         params: updateServiceParamsSchema,
         querystring: deleteServiceQuerySchema,
         response: {
           204: z.null().describe('Serviço excluído com sucesso.'),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado.'),
         },
       },
     },
@@ -144,16 +127,13 @@ export async function servicesRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'toggleServiceStatusById',
         tags: ['services'],
         params: updateServiceParamsSchema,
         response: {
           200: z.null().describe('Status do serviço atualizado com sucesso.'),
-          400: z
-            .object({ message: z.string() })
-            .describe('Erro de validação dos dados'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado.'),
+          400: z.object({ message: z.string() }).describe('Erro de validação dos dados'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado.'),
         },
       },
     },

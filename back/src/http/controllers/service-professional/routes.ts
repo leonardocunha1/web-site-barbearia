@@ -22,6 +22,7 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'addServiceToProfessional',
         tags: ['service-professional'],
         body: addServiceToProfessionalBodySchema,
         params: listProfessionalServicesParamsSchema,
@@ -41,6 +42,7 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'removeServiceFromProfessional',
         tags: ['service-professional'],
         params: removeServiceFromProfessionalParamsSchema,
         response: {
@@ -57,9 +59,10 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
     '/professionals/:professionalId/services',
     {
       schema: {
+        operationId: 'listProfessionalServices',
         tags: ['service-professional'],
         params: listProfessionalServicesParamsSchema,
-        query: listProfessionalServicesQuerySchema,
+        querystring: listProfessionalServicesQuerySchema,
         response: {
           200: z.object({
             services: z.array(servicesSchema),
@@ -82,6 +85,7 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'updateServiceProfessional',
         tags: ['service-professional'],
         body: updateServiceProfessionalBodySchema,
         params: updateServiceProfessionalParamsSchema,

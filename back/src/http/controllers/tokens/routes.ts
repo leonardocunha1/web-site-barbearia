@@ -16,6 +16,7 @@ export async function tokenRoutes(app: FastifyTypedInstance) {
     '/users/verify-email',
     {
       schema: {
+        operationId: 'verifyUserEmail',
         tags: ['users'],
         description: 'Verifica o e-mail do usuário.',
         querystring: verifyEmailQuerySchema,
@@ -31,10 +32,12 @@ export async function tokenRoutes(app: FastifyTypedInstance) {
     },
     verifyEmail,
   );
+
   app.post(
     '/users/send-verification-email',
     {
       schema: {
+        operationId: 'sendUserVerificationEmail',
         tags: ['users'],
         description: 'Envia um e-mail de verificação.',
         body: sendVerificationEmailBodySchema,
@@ -53,10 +56,12 @@ export async function tokenRoutes(app: FastifyTypedInstance) {
     },
     sendVerificationEmail,
   );
+
   app.post(
     '/users/forgot-password',
     {
       schema: {
+        operationId: 'sendForgotPasswordEmail',
         tags: ['users'],
         description: 'Envia um e-mail para redefinição de senha.',
         body: forgotPasswordBodySchema,
@@ -75,10 +80,12 @@ export async function tokenRoutes(app: FastifyTypedInstance) {
     },
     forgotPassword,
   );
+
   app.post(
     '/users/reset-password',
     {
       schema: {
+        operationId: 'resetUserPassword',
         tags: ['users'],
         description: 'Redefine a senha do usuário.',
         body: resetPasswordBodySchema,

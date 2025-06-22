@@ -22,6 +22,7 @@ import {
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { bonusRoutes } from './http/controllers/bonus/routes';
+import { couponsRoutes } from './http/controllers/coupons/routes';
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -70,6 +71,7 @@ app.register(businessHoursRoutes);
 app.register(holidayRoutes);
 app.register(serviceProfessionalRoutes);
 app.register(bonusRoutes);
+app.register(couponsRoutes);
 
 app.setErrorHandler((error, _request, reply) => {
   if (error instanceof ZodError) {

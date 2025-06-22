@@ -1,6 +1,28 @@
 import { z } from 'zod';
 
 export const paginationSchema = z.object({
-  page: z.number().int().positive().default(1),
-  limit: z.number().int().positive().max(100).default(10),
-});
+  page: z.number()
+    .int('A página deve ser um número inteiro')
+    .positive('A página deve ser maior que zero')
+    .default(1)
+    .describe('Número da página atual (começa em 1)'),
+    
+  limit: z.number()
+    .int('O limite deve ser um número inteiro')
+    .positive('O limite deve ser maior que zero')
+    .max(100, 'O limite máximo por página é 100')
+    .default(10)
+    .describe('Quantidade de itens por página (máximo 100)'),
+    
+  // Campos opcionais para ordenação
+  sortBy: z.string()
+    .optional()
+    .describe('Campo para ordenação (opcional)'),
+    
+  sortOrder: z.enum(['asc', 'desc'])
+    .default('asc')
+    .describe('Direção da ordenação: asc (crescente) ou desc (decrescente)')
+}).describe("Schema para parâmetros de paginação e ordenação");
+
+// Tipo TypeScript inferido
+export type Pagination = z.infer<typeof paginationSchema>;

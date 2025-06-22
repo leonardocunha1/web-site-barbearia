@@ -24,15 +24,14 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'createCoupon',
         tags: ['coupons'],
         description: 'Criação de um novo cupom.',
         body: createCouponBodySchema,
         response: {
           201: z.null().describe('Cupom criado com sucesso.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
-          409: z
-            .object({ message: z.string() })
-            .describe('Código de cupom já existente.'),
+          409: z.object({ message: z.string() }).describe('Código de cupom já existente.'),
         },
       },
     },
@@ -44,6 +43,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'listCoupons',
         tags: ['coupons'],
         description: 'Lista todos os cupons com paginação.',
         querystring: listCouponsQuerySchema,
@@ -67,6 +67,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'getCouponById',
         tags: ['coupons'],
         description: 'Retorna os detalhes de um cupom pelo ID.',
         params: updateCouponParamsSchema,
@@ -84,6 +85,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'updateCoupon',
         tags: ['coupons'],
         description: 'Atualiza um cupom existente.',
         params: updateCouponParamsSchema,
@@ -103,6 +105,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'deleteCoupon',
         tags: ['coupons'],
         description: 'Deleta um cupom pelo ID.',
         params: updateCouponParamsSchema,
@@ -120,6 +123,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {
+        operationId: 'toggleCouponStatus',
         tags: ['coupons'],
         description: 'Ativa ou desativa o status de um cupom.',
         params: updateCouponParamsSchema,
