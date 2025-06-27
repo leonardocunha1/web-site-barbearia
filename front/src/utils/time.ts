@@ -1,3 +1,4 @@
+// passa o valor para milissegundos
 export const seconds = (value: number) => value * 1000
 export const minutes = (value: number) => value * seconds(60)
 export const hours = (value: number) => value * minutes(60)

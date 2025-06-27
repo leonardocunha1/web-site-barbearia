@@ -1,7 +1,7 @@
-import Hero from "@/components/home/hero";
-import { MarqueeDetails } from "@/components/home/marquee";
-import SejaUmBigodon from "@/components/home/seja-um-bigodon";
-import Servicos from "@/components/home/servicos";
+import Hero from "@/features/home/hero";
+import { MarqueeDetails } from "@/features/home/marquee";
+import SejaUmBigodon from "@/features/home/seja-um-bigodon";
+import Servicos from "@/features/home/servicos";
 
 export default function Page() {
   return (

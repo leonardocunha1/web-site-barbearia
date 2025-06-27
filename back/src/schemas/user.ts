@@ -17,7 +17,7 @@ export const loginUserSchema = z.object({
 export const userSchema = z.object({
   id: z.string().uuid(),
   nome: z.string(),
-  email: z.string().email().optional(),
+  email: z.string().email(),
   telefone: z.string().nullable().optional(),
   role: z.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
   emailVerified: z.boolean(),

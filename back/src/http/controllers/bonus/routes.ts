@@ -50,6 +50,7 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
               totalValue: z.number(),
             }),
           }),
+          400: z.object({ message: z.string() }).describe('Erro de validação'),
           401: z.object({ message: z.string() }).describe('Não autorizado'),
           404: z
             .object({ message: z.string() })
@@ -60,3 +61,4 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
     getBalance,
   );
 }
+
