@@ -1,22 +1,22 @@
 /**
- * Payload for creating new professional
+ * Dados para criação de novo profissional
  */
 export type CreateProfessionalBody = {
-  /** Existing user ID to associate with professional */
+  /** ID do usuário existente para associar ao profissional */
   userId: string;
   /**
-   * Professional specialty
+   * Especialidade do profissional
    * @minLength 3
    */
   especialidade: string;
-  /** Professional biography */
+  /** Biografia do profissional */
   bio?: string;
-  /** Professional document number */
+  /** Número do documento profissional */
   documento?: string;
-  /** Professional registration number */
+  /** Número de registro profissional */
   registro?: string;
   /**
-   * Professional avatar URL
+   * URL do avatar do profissional
    * @pattern ^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$
    */
   avatarUrl?: string;

@@ -1,10 +1,11 @@
 import type { CreateHolidayBodyServicesItem } from "./createHolidayBodyServicesItem";
 
 /**
- * CreateBookingBody
+ * Dados para criação de agendamento
  */
 export type CreateHolidayBody = {
   professionalId: string;
+  /** @minItems 1 */
   services: CreateHolidayBodyServicesItem[];
   startDateTime: string;
   /** @maxLength 500 */

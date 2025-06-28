@@ -4,7 +4,7 @@ import type { ListUserBookings200BookingsItemUser } from "./listUserBookings200B
 import type { ListUserBookings200BookingsItemItemsItem } from "./listUserBookings200BookingsItemItemsItem";
 
 /**
- * Booking
+ * Agendamento completo
  */
 export type ListUserBookings200BookingsItem = {
   id: string;
@@ -12,7 +12,10 @@ export type ListUserBookings200BookingsItem = {
   dataHoraInicio: string;
   dataHoraFim: string;
   status: ListUserBookings200BookingsItemStatus;
-  /** @nullable */
+  /**
+   * @maxLength 500
+   * @nullable
+   */
   observacoes?: string | null;
   /**
    * @minimum 0
@@ -28,5 +31,6 @@ export type ListUserBookings200BookingsItem = {
   createdAt: string;
   profissional: ListUserBookings200BookingsItemProfissional;
   user: ListUserBookings200BookingsItemUser;
+  /** @minItems 1 */
   items: ListUserBookings200BookingsItemItemsItem[];
 };

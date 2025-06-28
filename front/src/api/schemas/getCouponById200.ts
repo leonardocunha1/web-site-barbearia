@@ -1,6 +1,6 @@
 import type { GetCouponById200Coupon } from "./getCouponById200Coupon";
 
 export type GetCouponById200 = {
-  /** Coupon */
+  /** Modelo completo de cupom */
   coupon: GetCouponById200Coupon;
 };

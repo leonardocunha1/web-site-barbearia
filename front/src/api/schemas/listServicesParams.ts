@@ -22,7 +22,13 @@ export type ListServicesParams = {
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
   sortOrder?: ListServicesSortOrder;
+  /**
+   * @maxLength 100
+   */
   nome?: string;
+  /**
+   * @maxLength 50
+   */
   categoria?: string;
   ativo?: boolean;
   professionalId?: string;

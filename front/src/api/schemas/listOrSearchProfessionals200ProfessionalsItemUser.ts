@@ -1,18 +1,18 @@
 /**
- * User account details
+ * Detalhes da conta do usuário
  */
 export type ListOrSearchProfessionals200ProfessionalsItemUser = {
-  /** User ID */
+  /** ID do usuário */
   id: string;
   /**
-   * User full name
+   * Nome completo do usuário
    * @minLength 2
    */
   nome: string;
-  /** User email address */
+  /** Endereço de e-mail do usuário */
   email: string;
   /**
-   * User phone number
+   * Número de telefone do usuário
    * @nullable
    * @pattern ^\+?[0-9]{10,15}$
    */

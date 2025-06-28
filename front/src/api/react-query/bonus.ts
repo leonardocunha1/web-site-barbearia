@@ -24,6 +24,7 @@ import type {
   AssignBonusToUser404,
   AssignBonusToUserBody,
   GetBonusBalance200,
+  GetBonusBalance400,
   GetBonusBalance401,
   GetBonusBalance404,
 } from "../schemas";
@@ -131,7 +132,7 @@ export const getGetBonusBalanceQueryKey = () => {
 
 export const getGetBonusBalanceInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(options?: {
   query?: Partial<
     UseInfiniteQueryOptions<
@@ -160,12 +161,13 @@ export type GetBonusBalanceInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getBonusBalance>>
 >;
 export type GetBonusBalanceInfiniteQueryError =
+  | GetBonusBalance400
   | GetBonusBalance401
   | GetBonusBalance404;
 
 export function useGetBonusBalanceInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options: {
     query: Partial<
@@ -190,7 +192,7 @@ export function useGetBonusBalanceInfinite<
 };
 export function useGetBonusBalanceInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options?: {
     query?: Partial<
@@ -215,7 +217,7 @@ export function useGetBonusBalanceInfinite<
 };
 export function useGetBonusBalanceInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options?: {
     query?: Partial<
@@ -233,7 +235,7 @@ export function useGetBonusBalanceInfinite<
 
 export function useGetBonusBalanceInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getBonusBalance>>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options?: {
     query?: Partial<
@@ -264,7 +266,7 @@ export function useGetBonusBalanceInfinite<
 
 export const getGetBonusBalanceQueryOptions = <
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getBonusBalance>>, TError, TData>
@@ -288,11 +290,14 @@ export const getGetBonusBalanceQueryOptions = <
 export type GetBonusBalanceQueryResult = NonNullable<
   Awaited<ReturnType<typeof getBonusBalance>>
 >;
-export type GetBonusBalanceQueryError = GetBonusBalance401 | GetBonusBalance404;
+export type GetBonusBalanceQueryError =
+  | GetBonusBalance400
+  | GetBonusBalance401
+  | GetBonusBalance404;
 
 export function useGetBonusBalance<
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options: {
     query: Partial<
@@ -317,7 +322,7 @@ export function useGetBonusBalance<
 };
 export function useGetBonusBalance<
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options?: {
     query?: Partial<
@@ -342,7 +347,7 @@ export function useGetBonusBalance<
 };
 export function useGetBonusBalance<
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options?: {
     query?: Partial<
@@ -360,7 +365,7 @@ export function useGetBonusBalance<
 
 export function useGetBonusBalance<
   TData = Awaited<ReturnType<typeof getBonusBalance>>,
-  TError = GetBonusBalance401 | GetBonusBalance404,
+  TError = GetBonusBalance400 | GetBonusBalance401 | GetBonusBalance404,
 >(
   options?: {
     query?: Partial<

@@ -11,7 +11,7 @@ export const zodgetUserProfileResponse = zod.object({
   "user": zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
-  "email": zod.string().email().optional(),
+  "email": zod.string().email(),
   "telefone": zod.string().nullish(),
   "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
   "emailVerified": zod.boolean(),
@@ -58,7 +58,7 @@ export const zodlistUsersResponse = zod.object({
   "users": zod.array(zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
-  "email": zod.string().email().optional(),
+  "email": zod.string().email(),
   "telefone": zod.string().nullish(),
   "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
   "emailVerified": zod.boolean(),
@@ -132,7 +132,7 @@ export const zodresetUserPasswordBodyNewPasswordMin = 6;
 
 
 export const zodresetUserPasswordBody = zod.object({
-  "token": zod.string(),
+  "token": zod.string().min(1),
   "newPassword": zod.string().min(zodresetUserPasswordBodyNewPasswordMin)
 })
 

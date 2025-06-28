@@ -1,182 +1,199 @@
 import { z } from 'zod';
 import { paginationSchema } from './pagination';
 
-// Regex patterns for common validations
+// Padrões Regex para validações comuns
 const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
 
 export const professionalSchema = z.object({
   id: z.string()
-    .uuid()
-    .describe('Unique identifier for the professional'),
+    .uuid({ message: 'ID deve ser um UUID válido' })
+    .describe('Identificador único do profissional'),
     
   especialidade: z.string()
-    .min(3, 'Specialty must be at least 3 characters')
-    .describe('Professional specialty'),
+    .min(3, { message: 'A especialidade deve ter pelo menos 3 caracteres' })
+    .max(100, { message: 'A especialidade não pode exceder 100 caracteres' })
+    .describe('Especialidade do profissional'),
     
   bio: z.string()
-    .max(500, 'Bio cannot exceed 500 characters')
+    .max(500, { message: 'A biografia não pode exceder 500 caracteres' })
     .optional()
-    .describe('Professional biography'),
+    .describe('Biografia do profissional'),
     
   avatarUrl: z.string()
-    .regex(urlRegex, 'Invalid URL format')
+    .regex(urlRegex, { message: 'Formato de URL inválido' })
     .optional()
-    .describe('URL to professional avatar image'),
+    .describe('URL da imagem de avatar do profissional'),
     
   ativo: z.coerce.boolean()
-    .describe('Whether the professional is active'),
+    .describe('Indica se o profissional está ativo'),
     
   user: z.object({
-    id: z.string().uuid().describe('User ID'),
-    nome: z.string().min(2).describe('User full name'),
-    email: z.string().email().describe('User email address'),
+    id: z.string()
+      .uuid({ message: 'ID do usuário deve ser um UUID válido' })
+      .describe('ID do usuário'),
+    nome: z.string()
+      .min(2, { message: 'O nome deve ter pelo menos 2 caracteres' })
+      .describe('Nome completo do usuário'),
+    email: z.string()
+      .email({ message: 'E-mail inválido' })
+      .describe('Endereço de e-mail do usuário'),
     telefone: z.string()
-      .regex(/^\+?[0-9]{10,15}$/, 'Invalid phone number format')
+      .regex(/^\+?[0-9]{10,15}$/, { message: 'Formato de telefone inválido' })
       .nullable()
       .optional()
-      .describe('User phone number'),
-  }).describe('User account details'),
+      .describe('Número de telefone do usuário'),
+  }).describe('Detalhes da conta do usuário'),
   
   services: z.array(
     z.object({
-      id: z.string().uuid().describe('Service ID'),
-      nome: z.string().min(2).describe('Service name'),
+      id: z.string()
+        .uuid({ message: 'ID do serviço deve ser um UUID válido' })
+        .describe('ID do serviço'),
+      nome: z.string()
+        .min(2, { message: 'O nome do serviço deve ter pelo menos 2 caracteres' })
+        .describe('Nome do serviço'),
       descricao: z.string()
-        .max(200, 'Description cannot exceed 200 characters')
+        .max(200, { message: 'A descrição não pode exceder 200 caracteres' })
         .optional()
-        .describe('Service description'),
+        .describe('Descrição do serviço'),
     })
-  ).describe('List of services offered by the professional'),
-}).describe("Complete professional profile with user details and services");
+  ).describe('Lista de serviços oferecidos pelo profissional'),
+}).describe("Perfil completo do profissional com detalhes do usuário e serviços");
 
-// Search professionals with pagination
+// Buscar profissionais com paginação
 export const searchProfessionalsQuerySchema = paginationSchema.extend({
   query: z.string()
-    .min(2, 'Search query must be at least 2 characters')
-    .describe('Search term for professionals'),
+    .min(2, { message: 'A busca deve ter pelo menos 2 caracteres' })
+    .describe('Termo de busca para profissionais'),
     
-  ativo: z.coerce.boolean()
-    .optional()
-    .default(true)
-    .describe('Filter by active status (default: true)'),
-}).describe("Search professionals with pagination parameters");
+  ativo: z.coerce.boolean({
+    invalid_type_error: 'O status ativo deve ser verdadeiro ou falso'
+  })
+  .optional()
+  .default(true)
+  .describe('Filtrar por status ativo (padrão: verdadeiro)'),
+}).describe("Busca de profissionais com parâmetros de paginação");
 
-// List professionals with filters
+// Listar profissionais com filtros
 export const listProfessionalsQuerySchema = paginationSchema.extend({
   query: z.string()
-    .min(2, 'Search query must be at least 2 characters')
+    .min(2, { message: 'A busca deve ter pelo menos 2 caracteres' })
     .optional()
-    .describe('Optional search term'),
+    .describe('Termo de busca opcional'),
     
   especialidade: z.string()
     .optional()
-    .describe('Filter by professional specialty'),
+    .describe('Filtrar por especialidade do profissional'),
     
-  ativo: z.coerce.boolean()
-    .optional()
-    .describe('Filter by active status'),
-}).describe("List professionals with filtering and pagination");
+  ativo: z.coerce.boolean({
+    invalid_type_error: 'O status ativo deve ser verdadeiro ou falso'
+  })
+  .optional()
+  .describe('Filtrar por status ativo'),
+}).describe("Listagem de profissionais com filtros e paginação");
 
-// Professional status toggle
+// Alternar status do profissional
 export const toggleProfessionalStatusParamsSchema = z.object({
   id: z.string()
-    .uuid()
-    .describe('Professional ID to toggle status'),
-}).describe("Parameters for toggling professional status");
+    .uuid({ message: 'ID do profissional deve ser um UUID válido' })
+    .describe('ID do profissional para alternar status'),
+}).describe("Parâmetros para alternar status do profissional");
 
-// Update professional parameters
+// Parâmetros para atualizar profissional
 export const updateProfessionalParamsSchema = z.object({
   id: z.string()
-    .uuid()
-    .describe('Professional ID to update'),
-}).describe("Parameters for updating professional");
+    .uuid({ message: 'ID do profissional deve ser um UUID válido' })
+    .describe('ID do profissional para atualização'),
+}).describe("Parâmetros para atualização do profissional");
 
-// Update professional body
+// Corpo para atualizar profissional
 export const updateProfessionalBodySchema = z.object({
   especialidade: z.string()
-    .min(3, 'Specialty must be at least 3 characters')
+    .min(3, { message: 'A especialidade deve ter pelo menos 3 caracteres' })
     .optional()
-    .describe('Updated professional specialty'),
+    .describe('Especialidade atualizada do profissional'),
     
   bio: z.string()
     .nullable()
     .optional()
-    .describe('Updated professional biography'),
+    .describe('Biografia atualizada do profissional'),
     
   documento: z.string()
     .nullable()
     .optional()
-    .describe('Professional document number'),
+    .describe('Número do documento profissional'),
     
   registro: z.string()
     .nullable()
     .optional()
-    .describe('Professional registration number'),
+    .describe('Número de registro profissional'),
     
   ativo: z.boolean()
     .optional()
-    .describe('Set professional active status'),
+    .describe('Definir status ativo do profissional'),
     
   avatarUrl: z.string()
-    .regex(urlRegex, 'Invalid URL format')
+    .regex(urlRegex, { message: 'Formato de URL inválido' })
     .nullable()
     .optional()
-    .describe('Updated avatar URL'),
-}).describe("Professional profile update payload");
+    .describe('URL do avatar atualizado'),
+}).describe("Dados para atualização do perfil profissional");
 
-// Create professional body
+// Corpo para criar profissional
 export const createProfessionalBodySchema = z.object({
   userId: z.string()
-    .uuid()
-    .describe('Existing user ID to associate with professional'),
+    .uuid({ message: 'ID do usuário deve ser um UUID válido' })
+    .describe('ID do usuário existente para associar ao profissional'),
     
   especialidade: z.string()
-    .min(3, 'Specialty must be at least 3 characters')
-    .describe('Professional specialty'),
+    .min(3, { message: 'A especialidade deve ter pelo menos 3 caracteres' })
+    .describe('Especialidade do profissional'),
     
   bio: z.string()
     .optional()
-    .describe('Professional biography'),
+    .describe('Biografia do profissional'),
     
   documento: z.string()
     .optional()
-    .describe('Professional document number'),
+    .describe('Número do documento profissional'),
     
   registro: z.string()
     .optional()
-    .describe('Professional registration number'),
+    .describe('Número de registro profissional'),
     
   avatarUrl: z.string()
-    .regex(urlRegex, 'Invalid URL format')
+    .regex(urlRegex, { message: 'Formato de URL inválido' })
     .optional()
-    .describe('Professional avatar URL'),
-}).describe("Payload for creating new professional");
+    .describe('URL do avatar do profissional'),
+}).describe("Dados para criação de novo profissional");
 
-// Dashboard analytics query
+// Consulta para dashboard analítico
 export const dashboardQuerySchema = z.object({
-  range: z.enum(['today', 'week', 'month', 'custom'])
-    .describe('Time range for analytics'),
+  range: z.enum(['today', 'week', 'month', 'custom'], {
+    errorMap: () => ({ message: 'O período deve ser: today, week, month ou custom' })
+  })
+  .describe('Período de tempo para análise'),
     
   startDate: z.string()
-    .datetime({ offset: true })
+    .datetime({ offset: true, message: 'Data de início inválida' })
     .optional()
-    .describe('Custom start date (required for custom range)'),
+    .describe('Data de início personalizada (obrigatória para período custom)'),
     
   endDate: z.string()
-    .datetime({ offset: true })
+    .datetime({ offset: true, message: 'Data de término inválida' })
     .optional()
-    .describe('Custom end date (required for custom range)'),
+    .describe('Data de término personalizada (obrigatória para período custom)'),
 }).refine(data => {
   if (data.range === 'custom') {
     return data.startDate && data.endDate;
   }
   return true;
 }, {
-  message: 'Both startDate and endDate are required for custom range',
+  message: 'Ambas as datas (início e término) são obrigatórias para período customizado',
   path: ['startDate', 'endDate'],
-}).describe("Parameters for dashboard analytics");
+}).describe("Parâmetros para análise do dashboard");
 
-// Export inferred TypeScript types
+// Exportar tipos TypeScript inferidos
 export type Professional = z.infer<typeof professionalSchema>;
 export type SearchProfessionalsQuery = z.infer<typeof searchProfessionalsQuerySchema>;
 export type ListProfessionalsQuery = z.infer<typeof listProfessionalsQuerySchema>;

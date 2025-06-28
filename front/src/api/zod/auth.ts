@@ -34,7 +34,7 @@ export const zodloginUserResponse = zod.object({
   "user": zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
-  "email": zod.string().email().optional(),
+  "email": zod.string().email(),
   "telefone": zod.string().nullish(),
   "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
   "emailVerified": zod.boolean(),

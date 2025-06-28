@@ -15,12 +15,12 @@ export const zodcreateHolidayBody = zod.object({
   "professionalId": zod.string().uuid(),
   "services": zod.array(zod.object({
   "serviceId": zod.string().uuid()
-})),
+})).min(1),
   "startDateTime": zod.string().datetime({}),
   "notes": zod.string().max(zodcreateHolidayBodyNotesMax).optional(),
   "useBonusPoints": zod.boolean().optional(),
   "couponCode": zod.string().max(zodcreateHolidayBodyCouponCodeMax).optional()
-}).describe('CreateBookingBody')
+}).describe('Dados para criação de agendamento')
 
 /**
  * Listar feriados.

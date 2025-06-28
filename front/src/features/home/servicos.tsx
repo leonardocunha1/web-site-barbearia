@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import H4 from "@/components/ui/h4";
+import H2 from "@/components/ui/h2";
 
 export default async function Servicos() {
   const services = [
@@ -48,12 +50,8 @@ export default async function Servicos() {
       <div className="mx-auto max-w-7xl">
         {/* Cabeçalho */}
         <div className="mb-12 text-center md:mb-16">
-          <span className="text-sm font-semibold tracking-wider text-amber-600 uppercase">
-            Nossos Serviços
-          </span>
-          <h2 className="mt-4 font-serif text-3xl font-bold text-stone-900 sm:text-4xl md:text-5xl">
-            A Arte da Barbearia
-          </h2>
+          <H4>Nossos Serviços</H4>
+          <H2>A Arte da Barbearia</H2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-stone-600">
             Cada corte é uma assinatura, cada barba é uma obra-prima. Conheça
             nossos serviços exclusivos.

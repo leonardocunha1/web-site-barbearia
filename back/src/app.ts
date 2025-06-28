@@ -57,7 +57,7 @@ app.register(fastifyJwt, {
   },
 });
 app.register(fastifyCors, {
-  origin: '*',
+  origin: ['http://localhost:3000'],
   credentials: true,
 });
 

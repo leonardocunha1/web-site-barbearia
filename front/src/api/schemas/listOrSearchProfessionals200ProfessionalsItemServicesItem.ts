@@ -1,13 +1,13 @@
 export type ListOrSearchProfessionals200ProfessionalsItemServicesItem = {
-  /** Service ID */
+  /** ID do serviço */
   id: string;
   /**
-   * Service name
+   * Nome do serviço
    * @minLength 2
    */
   nome: string;
   /**
-   * Service description
+   * Descrição do serviço
    * @maxLength 200
    */
   descricao?: string;

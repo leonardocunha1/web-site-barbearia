@@ -26,6 +26,7 @@ export function TextInput({ field }: { field: TextField }) {
       required={field.required}
       description={field.description}
       icon={field.icon}
+      labelProps={field.labelProps}
     />
   );
 }

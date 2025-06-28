@@ -4,10 +4,17 @@ import {
 
 
 
+export const zodcreateServiceBodyNomeMin = 3;
+
+export const zodcreateServiceBodyNomeMax = 100;
+export const zodcreateServiceBodyDescricaoMax = 500;
+export const zodcreateServiceBodyCategoriaMax = 50;
+
+
 export const zodcreateServiceBody = zod.object({
-  "nome": zod.string(),
-  "descricao": zod.string().optional(),
-  "categoria": zod.string().optional()
+  "nome": zod.string().min(zodcreateServiceBodyNomeMin).max(zodcreateServiceBodyNomeMax),
+  "descricao": zod.string().max(zodcreateServiceBodyDescricaoMax).optional(),
+  "categoria": zod.string().max(zodcreateServiceBodyCategoriaMax).optional()
 })
 
 export const zodlistServicesQueryPageDefault = 1;
@@ -16,15 +23,17 @@ export const zodlistServicesQueryLimitDefault = 10;
 export const zodlistServicesQueryLimitMin = 0;
 
 export const zodlistServicesQueryLimitMax = 100;
-export const zodlistServicesQuerySortOrderDefault = "asc";
+export const zodlistServicesQuerySortOrderDefault = "asc";export const zodlistServicesQueryNomeMax = 100;
+export const zodlistServicesQueryCategoriaMax = 50;
+
 
 export const zodlistServicesQueryParams = zod.object({
   "page": zod.number().min(zodlistServicesQueryPageMin).default(zodlistServicesQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistServicesQueryLimitMin).max(zodlistServicesQueryLimitMax).default(zodlistServicesQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
   "sortOrder": zod.enum(['asc', 'desc']).default(zodlistServicesQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
-  "nome": zod.string().optional(),
-  "categoria": zod.string().optional(),
+  "nome": zod.string().max(zodlistServicesQueryNomeMax).optional(),
+  "categoria": zod.string().max(zodlistServicesQueryCategoriaMax).optional(),
   "ativo": zod.boolean().optional(),
   "professionalId": zod.string().uuid().optional()
 })
@@ -78,16 +87,20 @@ export const zodupdateServiceByIdParams = zod.object({
 })
 
 export const zodupdateServiceByIdBodyNomeMin = 3;
+
+export const zodupdateServiceByIdBodyNomeMax = 100;
+export const zodupdateServiceByIdBodyDescricaoMax = 500;
 export const zodupdateServiceByIdBodyPrecoPadraoMin = 0;
 export const zodupdateServiceByIdBodyDuracaoMin = 0;
+export const zodupdateServiceByIdBodyCategoriaMax = 50;
 
 
 export const zodupdateServiceByIdBody = zod.object({
-  "nome": zod.string().min(zodupdateServiceByIdBodyNomeMin).optional(),
-  "descricao": zod.string().optional(),
+  "nome": zod.string().min(zodupdateServiceByIdBodyNomeMin).max(zodupdateServiceByIdBodyNomeMax).optional(),
+  "descricao": zod.string().max(zodupdateServiceByIdBodyDescricaoMax).optional(),
   "precoPadrao": zod.number().min(zodupdateServiceByIdBodyPrecoPadraoMin).optional(),
   "duracao": zod.number().min(zodupdateServiceByIdBodyDuracaoMin).optional(),
-  "categoria": zod.string().optional(),
+  "categoria": zod.string().max(zodupdateServiceByIdBodyCategoriaMax).optional(),
   "ativo": zod.boolean().optional()
 })
 

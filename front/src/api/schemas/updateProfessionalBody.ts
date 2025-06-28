@@ -1,31 +1,31 @@
 /**
- * Professional profile update payload
+ * Dados para atualização do perfil profissional
  */
 export type UpdateProfessionalBody = {
   /**
-   * Updated professional specialty
+   * Especialidade atualizada do profissional
    * @minLength 3
    */
   especialidade?: string;
   /**
-   * Updated professional biography
+   * Biografia atualizada do profissional
    * @nullable
    */
   bio?: string | null;
   /**
-   * Professional document number
+   * Número do documento profissional
    * @nullable
    */
   documento?: string | null;
   /**
-   * Professional registration number
+   * Número de registro profissional
    * @nullable
    */
   registro?: string | null;
-  /** Set professional active status */
+  /** Definir status ativo do profissional */
   ativo?: boolean;
   /**
-   * Updated avatar URL
+   * URL do avatar atualizado
    * @nullable
    * @pattern ^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$
    */

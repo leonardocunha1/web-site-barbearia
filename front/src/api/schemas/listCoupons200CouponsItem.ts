@@ -5,23 +5,29 @@ import type { ListCoupons200CouponsItemProfessional } from "./listCoupons200Coup
 import type { ListCoupons200CouponsItemUser } from "./listCoupons200CouponsItemUser";
 
 /**
- * Coupon
+ * Modelo completo de cupom
  */
 export type ListCoupons200CouponsItem = {
   id: string;
+  /** @minLength 3 */
   code: string;
   /** @nullable */
   description: string | null;
   type: ListCoupons200CouponsItemType;
+  /** @minimum 0 */
   value: number;
   scope: ListCoupons200CouponsItemScope;
   /** @nullable */
   maxUses: number | null;
+  /** @minimum 0 */
   uses: number;
   startDate: string;
   /** @nullable */
   endDate: string | null;
-  /** @nullable */
+  /**
+   * @minimum 0
+   * @nullable
+   */
   minBookingValue: number | null;
   active: boolean;
   createdAt: string;

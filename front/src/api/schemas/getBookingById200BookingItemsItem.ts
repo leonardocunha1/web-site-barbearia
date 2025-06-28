@@ -1,7 +1,7 @@
 import type { GetBookingById200BookingItemsItemServiceProfessional } from "./getBookingById200BookingItemsItemServiceProfessional";
 
 /**
- * BookingItem
+ * Item de agendamento
  */
 export type GetBookingById200BookingItemsItem = {
   id: string;

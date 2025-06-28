@@ -8,109 +8,142 @@ import { paginationSchema } from './pagination';
  */
 export const bookingItemSchema = z
   .object({
-    id: z.string().uuid(),
-    duracao: z.number().int().nonnegative(),
-    preco: z.number().nonnegative(),
+    id: z.string().uuid({ message: 'ID do item de agendamento inválido' }),
+    duracao: z.number()
+      .int({ message: 'Duração deve ser um número inteiro' })
+      .nonnegative({ message: 'Duração não pode ser negativa' }),
+    preco: z.number()
+      .nonnegative({ message: 'Preço não pode ser negativo' }),
     serviceProfessional: z.object({
-      id: z.string().uuid(),
+      id: z.string().uuid({ message: 'ID do profissional de serviço inválido' }),
       service: z.object({
-        id: z.string().uuid(),
-        nome: z.string(),
+        id: z.string().uuid({ message: 'ID do serviço inválido' }),
+        nome: z.string().min(2, { message: 'Nome do serviço deve ter pelo menos 2 caracteres' }),
       }),
     }),
   })
-  .describe('BookingItem');
+  .describe('Item de agendamento');
 
 /**
  * Schema de um agendamento completo.
  */
 export const bookingSchema = z
   .object({
-    id: z.string().uuid(),
-    usuarioId: z.string().uuid(),
-    dataHoraInicio: z.string().datetime(),
-    dataHoraFim: z.string().datetime(),
-    status: z.nativeEnum(Status),
-    observacoes: z.string().nullable().optional(),
-    valorFinal: z.number().positive().nullable().optional(),
-    canceledAt: z.string().datetime().nullable().optional(),
-    confirmedAt: z.string().datetime().nullable().optional(),
-    updatedAt: z.string().datetime(),
-    createdAt: z.string().datetime(),
+    id: z.string().uuid({ message: 'ID do agendamento inválido' }),
+    usuarioId: z.string().uuid({ message: 'ID do usuário inválido' }),
+    dataHoraInicio: z.string().datetime({ message: 'Data/hora de início inválida' }),
+    dataHoraFim: z.string().datetime({ message: 'Data/hora de fim inválida' }),
+    status: z.nativeEnum(Status, {
+      errorMap: () => ({ message: 'Status do agendamento inválido' })
+    }),
+    observacoes: z.string()
+      .max(500, { message: 'Observações não podem exceder 500 caracteres' })
+      .nullable()
+      .optional(),
+    valorFinal: z.number()
+      .positive({ message: 'Valor final deve ser positivo' })
+      .nullable()
+      .optional(),
+    canceledAt: z.string().datetime({ message: 'Data de cancelamento inválida' })
+      .nullable()
+      .optional(),
+    confirmedAt: z.string().datetime({ message: 'Data de confirmação inválida' })
+      .nullable()
+      .optional(),
+    updatedAt: z.string().datetime({ message: 'Data de atualização inválida' }),
+    createdAt: z.string().datetime({ message: 'Data de criação inválida' }),
     profissional: z.object({
-      id: z.string().uuid(),
+      id: z.string().uuid({ message: 'ID do profissional inválido' }),
       user: z.object({
-        id: z.string().uuid(),
-        nome: z.string(),
+        id: z.string().uuid({ message: 'ID do usuário profissional inválido' }),
+        nome: z.string().min(2, { message: 'Nome do profissional deve ter pelo menos 2 caracteres' }),
       }),
     }),
     user: z.object({
-      id: z.string().uuid(),
-      nome: z.string(),
+      id: z.string().uuid({ message: 'ID do usuário cliente inválido' }),
+      nome: z.string().min(2, { message: 'Nome do cliente deve ter pelo menos 2 caracteres' }),
     }),
-    items: z.array(bookingItemSchema),
+    items: z.array(bookingItemSchema)
+      .min(1, { message: 'Agendamento deve ter pelo menos 1 serviço' }),
   })
-  .describe('Booking');
+  .describe('Agendamento completo');
 
 /**
  * Schema do corpo para criação de agendamento.
  */
 export const createBookingBodySchema = z
   .object({
-    professionalId: z.string().uuid(),
+    professionalId: z.string().uuid({ message: 'ID do profissional inválido' }),
     services: z.array(
       z.object({
-        serviceId: z.string().uuid(),
+        serviceId: z.string().uuid({ message: 'ID do serviço inválido' }),
       }),
-    ),
-    startDateTime: z.string().datetime({ offset: true }),
-    notes: z.string().max(500).optional(),
-    useBonusPoints: z.boolean().optional().default(false),
-    couponCode: z.string().max(50).optional(),
+    ).min(1, { message: 'Selecione pelo menos 1 serviço' }),
+    startDateTime: z.string()
+      .datetime({ offset: true, message: 'Data/hora de início inválida. Use formato ISO com timezone' }),
+    notes: z.string()
+      .max(500, { message: 'Observações não podem exceder 500 caracteres' })
+      .optional(),
+    useBonusPoints: z.boolean()
+      .optional()
+      .default(false),
+    couponCode: z.string()
+      .max(50, { message: 'Código do cupom não pode exceder 50 caracteres' })
+      .optional(),
   })
-  .describe('CreateBookingBody');
+  .describe('Dados para criação de agendamento');
 
 /**
  * Params de rota para busca ou alteração de status de agendamento.
  */
 export const getOrUpdateBookingStatusParamsSchema = z
   .object({
-    bookingId: z.string().uuid(),
+    bookingId: z.string().uuid({ message: 'ID do agendamento inválido' }),
   })
-  .describe('GetOrUpdateBookingStatusParams');
+  .describe('Parâmetros para busca/atualização de status de agendamento');
 
 /**
  * Schema para atualizar status do agendamento.
  */
 export const updateBookingStatusBodySchema = z
   .object({
-    status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']),
-    reason: z.string().max(255).optional(),
+    status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'], {
+      errorMap: () => ({ message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO' })
+    }),
+    reason: z.string()
+      .max(255, { message: 'Motivo não pode exceder 255 caracteres' })
+      .optional(),
   })
-  .describe('UpdateBookingStatusBody');
+  .describe('Dados para atualização de status de agendamento');
 
 /**
  * Filtros de listagem de reservas para o usuário.
  */
 export const listUserBookingsQuerySchema = paginationSchema
   .extend({
-    sort: z.array(sortSchema).optional(),
+    sort: z.array(sortSchema)
+      .optional(),
   })
-  .describe('ListUserBookingsQuery');
+  .describe('Filtros para listagem de agendamentos do usuário');
 
 /**
  * Filtros de listagem de reservas para o profissional.
  */
 export const listBookingsQuerySchema = paginationSchema
   .extend({
-    startDate: z.string().datetime().optional(),
-    endDate: z.string().datetime().optional(),
-    status: z
-      .enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'])
+    startDate: z.string()
+      .datetime({ message: 'Data de início inválida' })
       .optional(),
-    sort: z.array(sortSchema).optional(),
+    endDate: z.string()
+      .datetime({ message: 'Data de fim inválida' })
+      .optional(),
+    status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'], {
+      errorMap: () => ({ message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO' })
+    }).optional(),
+    sort: z.array(sortSchema)
+      .optional(),
   })
-  .describe('ListBookingsQuery');
+  .describe('Filtros para listagem de agendamentos do profissional');
 
 /**
  * Resposta paginada de reservas.
@@ -118,15 +151,23 @@ export const listBookingsQuerySchema = paginationSchema
 export const paginatedBookingResponseSchema = z
   .object({
     bookings: z.array(bookingSchema),
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-    totalPages: z.number(),
+    total: z.number()
+      .int({ message: 'Total deve ser inteiro' })
+      .nonnegative({ message: 'Total não pode ser negativo' }),
+    page: z.number()
+      .int({ message: 'Página deve ser inteira' })
+      .positive({ message: 'Página deve ser positiva' }),
+    limit: z.number()
+      .int({ message: 'Limite deve ser inteiro' })
+      .positive({ message: 'Limite deve ser positivo' }),
+    totalPages: z.number()
+      .int({ message: 'Total de páginas deve ser inteiro' })
+      .nonnegative({ message: 'Total de páginas não pode ser negativo' }),
   })
-  .describe('PaginatedBookingResponse');
+  .describe('Resposta paginada de agendamentos');
 
 // Tipos derivados
-export type getOrUpdateBookingStatusParams = z.infer<
+export type GetOrUpdateBookingStatusParams = z.infer<
   typeof getOrUpdateBookingStatusParamsSchema
 >;
 

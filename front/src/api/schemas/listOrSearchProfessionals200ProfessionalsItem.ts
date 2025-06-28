@@ -2,30 +2,31 @@ import type { ListOrSearchProfessionals200ProfessionalsItemUser } from "./listOr
 import type { ListOrSearchProfessionals200ProfessionalsItemServicesItem } from "./listOrSearchProfessionals200ProfessionalsItemServicesItem";
 
 /**
- * Complete professional profile with user details and services
+ * Perfil completo do profissional com detalhes do usuário e serviços
  */
 export type ListOrSearchProfessionals200ProfessionalsItem = {
-  /** Unique identifier for the professional */
+  /** Identificador único do profissional */
   id: string;
   /**
-   * Professional specialty
+   * Especialidade do profissional
    * @minLength 3
+   * @maxLength 100
    */
   especialidade: string;
   /**
-   * Professional biography
+   * Biografia do profissional
    * @maxLength 500
    */
   bio?: string;
   /**
-   * URL to professional avatar image
+   * URL da imagem de avatar do profissional
    * @pattern ^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$
    */
   avatarUrl?: string;
-  /** Whether the professional is active */
+  /** Indica se o profissional está ativo */
   ativo?: boolean;
-  /** User account details */
+  /** Detalhes da conta do usuário */
   user: ListOrSearchProfessionals200ProfessionalsItemUser;
-  /** List of services offered by the professional */
+  /** Lista de serviços oferecidos pelo profissional */
   services: ListOrSearchProfessionals200ProfessionalsItemServicesItem[];
 };

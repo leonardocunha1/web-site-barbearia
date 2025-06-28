@@ -29,6 +29,8 @@ export function DynamicForm<T extends z.ZodTypeAny>({
   button,
   defaultButton = true,
   buttonClassName = "",
+  buttonText = "Enviar",
+  submittingText = "Enviando...",
 }: DynamicFormProps<T>) {
   const methods = useForm<z.infer<T>>({
     resolver: zodResolver(schema),
@@ -81,10 +83,10 @@ export function DynamicForm<T extends z.ZodTypeAny>({
             {button || (
               <Button
                 type="submit"
-                className={cn("w-full", buttonClassName)}
+                className={cn("w-full cursor-pointer", buttonClassName)}
                 disabled={formState.isSubmitting}
               >
-                {formState.isSubmitting ? "Enviando..." : "Enviar"}
+                {formState.isSubmitting ? submittingText : buttonText}
               </Button>
             )}
           </div>

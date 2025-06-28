@@ -23,12 +23,12 @@ export type ListOrSearchProfessionalsParams = {
    */
   sortOrder?: ListOrSearchProfessionalsSortOrder;
   /**
-   * Search term for professionals
+   * Termo de busca para profissionais
    * @minLength 2
    */
   query: string;
   /**
-   * Filter by active status (default: true)
+   * Filtrar por status ativo (padrão: verdadeiro)
    */
   ativo?: boolean;
 };

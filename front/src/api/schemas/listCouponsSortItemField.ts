@@ -1,5 +1,5 @@
 /**
- * CouponSortField
+ * Campo para ordenação de cupons
  */
 export type ListCouponsSortItemField =
   (typeof ListCouponsSortItemField)[keyof typeof ListCouponsSortItemField];

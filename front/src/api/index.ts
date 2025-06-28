@@ -10,7 +10,6 @@ export * from "./react-query/bonus";
 export * from "./react-query/coupons";
 export * from "./schemas";
 export * from "./zod/users";
-export * from "./zod/aPIBarberShop.schemas";
 export * from "./zod/professionals";
 export * from "./zod/services";
 export * from "./zod/bookings";

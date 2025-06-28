@@ -1,12 +1,13 @@
 import type { AssignBonusToUserBodyType } from "./assignBonusToUserBodyType";
 
 /**
- * AssignBonusBody
+ * Dados necessários para atribuição de bônus a um usuário
  */
 export type AssignBonusToUserBody = {
   userId: string;
   bookingId?: string;
-  /** BonusType */
+  /** Tipo de bônus que pode ser atribuído */
   type: AssignBonusToUserBodyType;
+  /** @maxLength 255 */
   description?: string;
 };

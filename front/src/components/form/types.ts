@@ -62,6 +62,7 @@ export type BaseField<T = unknown, U extends FieldType = FieldType> = {
   name: string
   type: U
   label?: string
+  labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>
   required?: boolean
   className?: string
   defaultValue?: T
@@ -69,7 +70,7 @@ export type BaseField<T = unknown, U extends FieldType = FieldType> = {
 
 // Campos específicos
 export type TextField = BaseField<string, "text" | "email" | "password"> &
-  WithPlaceholder
+  WithPlaceholder 
 
 export type NumberField = BaseField<number, "number"> &
   WithPlaceholder & {
@@ -142,5 +143,7 @@ export type DynamicFormProps<T extends z.ZodTypeAny = z.ZodTypeAny> = {
   gridRows?: number
   button?: ReactNode
   defaultButton?: boolean
+  buttonText?: string
+  submittingText?: string
   buttonClassName?: string
 }

@@ -4,12 +4,15 @@ import {
   InputHTMLAttributes,
   JSXElementConstructor,
   LabelHTMLAttributes,
+  useState,
 } from "react";
 import { UseFormRegisterReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type BaseInputProps = InputHTMLAttributes<HTMLInputElement> & {
   register?: UseFormRegisterReturn;
@@ -20,6 +23,7 @@ type BaseInputProps = InputHTMLAttributes<HTMLInputElement> & {
   required?: boolean;
   icon?: React.ElementType | JSXElementConstructor<{ className?: string }>;
   onValueChange?: (value: string) => void;
+  showPasswordToggle?: boolean;
 };
 
 export function BaseInput({
@@ -33,12 +37,20 @@ export function BaseInput({
   id,
   icon: Icon,
   onValueChange,
+  type,
+  showPasswordToggle = type === "password", // Mostra toggle apenas para senhas
   ...props
 }: BaseInputProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     register?.onChange(e);
     onValueChange?.(e.target.value);
     props.onChange?.(e);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -62,13 +74,31 @@ export function BaseInput({
           id={id}
           {...register}
           {...props}
+          type={showPasswordToggle && showPassword ? "text" : type}
           className={cn(
-            error && "border-red-500 focus-visible:ring-red-500",
+            error && "border-destructive focus-visible:ring-destructive",
             Icon && "pl-10",
+            showPasswordToggle && "pr-10",
             className,
           )}
           onChange={handleChange}
         />
+
+        {showPasswordToggle && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute top-0 right-0 h-full cursor-pointer px-3 hover:bg-transparent"
+            onClick={togglePasswordVisibility}
+          >
+            {showPassword ? (
+              <EyeOff className="text-muted-foreground h-4 w-4" />
+            ) : (
+              <Eye className="text-muted-foreground h-4 w-4" />
+            )}
+          </Button>
+        )}
       </div>
 
       {error ? (

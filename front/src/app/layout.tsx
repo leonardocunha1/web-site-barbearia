@@ -3,6 +3,7 @@ import { Spectral, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/features/menu/header";
 import { ApplicationProviders } from "./providers"; // Importe o provider
+import { Footer } from "@/components/footer";
 
 const poppins = Poppins({
   variable: "--font-poppins-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
             {children}
+            <Footer />
           </div>
         </ApplicationProviders>
       </body>

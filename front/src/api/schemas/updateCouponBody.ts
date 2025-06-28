@@ -2,7 +2,7 @@ import type { UpdateCouponBodyType } from "./updateCouponBodyType";
 import type { UpdateCouponBodyScope } from "./updateCouponBodyScope";
 
 /**
- * UpdateCouponBody
+ * Dados para atualização de cupom
  */
 export type UpdateCouponBody = {
   /**

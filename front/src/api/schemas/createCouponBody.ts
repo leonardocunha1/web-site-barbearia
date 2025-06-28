@@ -2,7 +2,7 @@ import type { CreateCouponBodyType } from "./createCouponBodyType";
 import type { CreateCouponBodyScope } from "./createCouponBodyScope";
 
 /**
- * CreateCouponBody
+ * Dados para criação de cupom
  */
 export type CreateCouponBody = {
   /**

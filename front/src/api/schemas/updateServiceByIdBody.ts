@@ -1,6 +1,10 @@
 export type UpdateServiceByIdBody = {
-  /** @minLength 3 */
+  /**
+   * @minLength 3
+   * @maxLength 100
+   */
   nome?: string;
+  /** @maxLength 500 */
   descricao?: string;
   /**
    * @minimum 0
@@ -12,6 +16,7 @@ export type UpdateServiceByIdBody = {
    * @exclusiveMinimum
    */
   duracao?: number;
+  /** @maxLength 50 */
   categoria?: string;
   ativo?: boolean;
 };

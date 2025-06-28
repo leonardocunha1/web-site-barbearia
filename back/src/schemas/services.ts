@@ -2,47 +2,79 @@ import { z } from 'zod';
 import { paginationSchema } from './pagination';
 
 export const createServiceBodySchema = z.object({
-  nome: z.string(),
-  descricao: z.string().optional(),
-  categoria: z.string().optional(),
+  nome: z.string()
+    .min(3, { message: 'O nome do serviço deve ter pelo menos 3 caracteres' })
+    .max(100, { message: 'O nome do serviço não pode exceder 100 caracteres' }),
+  descricao: z.string()
+    .max(500, { message: 'A descrição não pode exceder 500 caracteres' })
+    .optional(),
+  categoria: z.string()
+    .max(50, { message: 'A categoria não pode exceder 50 caracteres' })
+    .optional(),
 });
 
 export const listServicesQuerySchema = paginationSchema.extend({
-  nome: z.string().optional(),
-  categoria: z.string().optional(),
-  ativo: z.coerce.boolean().optional(),
-  professionalId: z.string().uuid().optional(),
+  nome: z.string()
+    .max(100, { message: 'O termo de busca não pode exceder 100 caracteres' })
+    .optional(),
+  categoria: z.string()
+    .max(50, { message: 'O filtro de categoria não pode exceder 50 caracteres' })
+    .optional(),
+  ativo: z.coerce.boolean({
+    invalid_type_error: 'O filtro de status deve ser verdadeiro ou falso'
+  }).optional(),
+  professionalId: z.string()
+    .uuid({ message: 'ID do profissional deve ser um UUID válido' })
+    .optional(),
 });
 
 export const servicesSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string()
+    .uuid({ message: 'ID do serviço inválido' }),
   nome: z.string(),
   descricao: z.string().optional(),
   categoria: z.string().optional(),
   ativo: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string()
+    .datetime({ message: 'Data de criação inválida' }),
+  updatedAt: z.string()
+    .datetime({ message: 'Data de atualização inválida' }),
 });
 
 export const updateServiceBodySchema = z.object({
-  nome: z.string().min(3).optional(),
-  descricao: z.string().optional(),
-  precoPadrao: z.number().positive().optional(),
-  duracao: z.number().int().positive().optional(),
-  categoria: z.string().optional(),
-  ativo: z.boolean().optional(),
+  nome: z.string()
+    .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
+    .max(100, { message: 'O nome não pode exceder 100 caracteres' })
+    .optional(),
+  descricao: z.string()
+    .max(500, { message: 'A descrição não pode exceder 500 caracteres' })
+    .optional(),
+  precoPadrao: z.number()
+    .positive({ message: 'O preço deve ser um valor positivo' })
+    .optional(),
+  duracao: z.number()
+    .int({ message: 'A duração deve ser um número inteiro' })
+    .positive({ message: 'A duração deve ser um valor positivo' })
+    .optional(),
+  categoria: z.string()
+    .max(50, { message: 'A categoria não pode exceder 50 caracteres' })
+    .optional(),
+  ativo: z.boolean()
+    .optional(),
 });
 
 export const updateServiceParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string()
+    .uuid({ message: 'ID do serviço inválido' }),
 });
 
 export const deleteServiceQuerySchema = z.object({
-  permanent: z.coerce.boolean().default(false),
+  permanent: z.coerce.boolean({
+    invalid_type_error: 'O parâmetro permanent deve ser verdadeiro ou falso'
+  }).default(false),
 });
 
 // Schema para service-professional
-
 export const serviceSchemaWithProfessional = z.object({
   id: z.string().uuid(),
   nome: z.string(),
@@ -66,30 +98,43 @@ export const serviceSchemaWithProfessional = z.object({
 });
 
 export const addServiceToProfessionalBodySchema = z.object({
-  serviceId: z.string().uuid(),
-  preco: z.number().positive(),
-  duracao: z.number().int().positive(),
+  serviceId: z.string()
+    .uuid({ message: 'ID do serviço inválido' }),
+  preco: z.number()
+    .positive({ message: 'O preço deve ser um valor positivo' }),
+  duracao: z.number()
+    .int({ message: 'A duração deve ser um número inteiro' })
+    .positive({ message: 'A duração deve ser um valor positivo' }),
 });
 
 export const removeServiceFromProfessionalParamsSchema = z.object({
-  serviceId: z.string().uuid(),
-  professionalId: z.string().uuid(),
+  serviceId: z.string()
+    .uuid({ message: 'ID do serviço inválido' }),
+  professionalId: z.string()
+    .uuid({ message: 'ID do profissional inválido' }),
 });
 
 export const listProfessionalServicesParamsSchema = z.object({
-  professionalId: z.string().uuid(),
+  professionalId: z.string()
+    .uuid({ message: 'ID do profissional inválido' }),
 });
 
 export const listProfessionalServicesQuerySchema = paginationSchema.extend({
-  activeOnly: z.coerce.boolean().optional().default(true),
+  activeOnly: z.coerce.boolean({
+    invalid_type_error: 'O filtro activeOnly deve ser verdadeiro ou falso'
+  }).optional().default(true),
 });
 
 export const updateServiceProfessionalParamsSchema = z.object({
-  serviceId: z.string().uuid(),
-  professionalId: z.string().uuid(),
+  serviceId: z.string()
+    .uuid({ message: 'ID do serviço inválido' }),
+  professionalId: z.string()
+    .uuid({ message: 'ID do profissional inválido' }),
 });
 
 export const updateServiceProfessionalBodySchema = z.object({
-  preco: z.number().positive(),
-  duracao: z.number().positive(),
+  preco: z.number()
+    .positive({ message: 'O preço deve ser um valor positivo' }),
+  duracao: z.number()
+    .positive({ message: 'A duração deve ser um valor positivo' }),
 });

@@ -28,7 +28,7 @@ export const zodcreateCouponBody = zod.object({
   "minBookingValue": zod.number().min(zodcreateCouponBodyMinBookingValueMin).optional(),
   "serviceId": zod.string().uuid().optional(),
   "professionalId": zod.string().uuid().optional()
-}).describe('CreateCouponBody')
+}).describe('Dados para criação de cupom')
 
 /**
  * Lista todos os cupons com paginação.
@@ -53,26 +53,32 @@ export const zodlistCouponsQueryParams = zod.object({
   "startDate": zod.string().datetime({}).optional(),
   "endDate": zod.string().datetime({}).optional(),
   "sort": zod.array(zod.object({
-  "field": zod.enum(['code', 'type', 'scope', 'createdAt', 'startDate', 'endDate', 'active', 'uses']).describe('CouponSortField'),
-  "order": zod.enum(['asc', 'desc']).describe('CouponSortOrder')
-}).describe('CouponSort')).optional(),
+  "field": zod.enum(['code', 'type', 'scope', 'createdAt', 'startDate', 'endDate', 'active', 'uses']).describe('Campo para ordenação de cupons'),
+  "order": zod.enum(['asc', 'desc']).describe('Ordem de ordenação')
+}).describe('Configuração de ordenação para cupons')).optional(),
   "professionalId": zod.string().uuid().optional(),
   "serviceId": zod.string().uuid().optional()
 })
 
+export const zodlistCouponsResponseCouponsItemCodeMin = 3;
+export const zodlistCouponsResponseCouponsItemValueMin = 0;
+export const zodlistCouponsResponseCouponsItemUsesMin = 0;
+export const zodlistCouponsResponseCouponsItemMinBookingValueMin = 0;
+
+
 export const zodlistCouponsResponse = zod.object({
   "coupons": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "code": zod.string(),
+  "code": zod.string().min(zodlistCouponsResponseCouponsItemCodeMin),
   "description": zod.string().nullable(),
   "type": zod.enum(['PERCENTAGE', 'FIXED', 'FREE']),
-  "value": zod.number(),
+  "value": zod.number().min(zodlistCouponsResponseCouponsItemValueMin),
   "scope": zod.enum(['GLOBAL', 'SERVICE', 'PROFESSIONAL']),
   "maxUses": zod.number().nullable(),
-  "uses": zod.number(),
+  "uses": zod.number().min(zodlistCouponsResponseCouponsItemUsesMin),
   "startDate": zod.string().datetime({}),
   "endDate": zod.string().datetime({}).nullable(),
-  "minBookingValue": zod.number().nullable(),
+  "minBookingValue": zod.number().min(zodlistCouponsResponseCouponsItemMinBookingValueMin).nullable(),
   "active": zod.boolean(),
   "createdAt": zod.string().datetime({}),
   "updatedAt": zod.string().datetime({}),
@@ -91,7 +97,7 @@ export const zodlistCouponsResponse = zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string()
 }).nullish()
-}).describe('Coupon')),
+}).describe('Modelo completo de cupom')),
   "total": zod.number(),
   "page": zod.number(),
   "limit": zod.number(),
@@ -105,19 +111,25 @@ export const zodgetCouponByIdParams = zod.object({
   "couponId": zod.string().uuid()
 })
 
+export const zodgetCouponByIdResponseCouponCodeMin = 3;
+export const zodgetCouponByIdResponseCouponValueMin = 0;
+export const zodgetCouponByIdResponseCouponUsesMin = 0;
+export const zodgetCouponByIdResponseCouponMinBookingValueMin = 0;
+
+
 export const zodgetCouponByIdResponse = zod.object({
   "coupon": zod.object({
   "id": zod.string().uuid(),
-  "code": zod.string(),
+  "code": zod.string().min(zodgetCouponByIdResponseCouponCodeMin),
   "description": zod.string().nullable(),
   "type": zod.enum(['PERCENTAGE', 'FIXED', 'FREE']),
-  "value": zod.number(),
+  "value": zod.number().min(zodgetCouponByIdResponseCouponValueMin),
   "scope": zod.enum(['GLOBAL', 'SERVICE', 'PROFESSIONAL']),
   "maxUses": zod.number().nullable(),
-  "uses": zod.number(),
+  "uses": zod.number().min(zodgetCouponByIdResponseCouponUsesMin),
   "startDate": zod.string().datetime({}),
   "endDate": zod.string().datetime({}).nullable(),
-  "minBookingValue": zod.number().nullable(),
+  "minBookingValue": zod.number().min(zodgetCouponByIdResponseCouponMinBookingValueMin).nullable(),
   "active": zod.boolean(),
   "createdAt": zod.string().datetime({}),
   "updatedAt": zod.string().datetime({}),
@@ -136,7 +148,7 @@ export const zodgetCouponByIdResponse = zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string()
 }).nullish()
-}).describe('Coupon')
+}).describe('Modelo completo de cupom')
 })
 
 /**
@@ -166,7 +178,7 @@ export const zodupdateCouponBody = zod.object({
   "serviceId": zod.string().uuid().nullish(),
   "professionalId": zod.string().uuid().nullish(),
   "active": zod.boolean().optional()
-}).describe('UpdateCouponBody')
+}).describe('Dados para atualização de cupom')
 
 export const zodupdateCouponResponse = zod.object({
   "message": zod.string()

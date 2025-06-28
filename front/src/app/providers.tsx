@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { minutes } from "@/utils/time";
 import { AxiosError } from "axios";
+import { Toaster } from "sonner";
 
 export function ApplicationProviders({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient({
@@ -34,6 +35,9 @@ export function ApplicationProviders({ children }: { children: ReactNode }) {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <Toaster position="top-center" richColors />
+    </QueryClientProvider>
   );
 }

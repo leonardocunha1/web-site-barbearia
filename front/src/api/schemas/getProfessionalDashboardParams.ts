@@ -2,15 +2,15 @@ import type { GetProfessionalDashboardRange } from "./getProfessionalDashboardRa
 
 export type GetProfessionalDashboardParams = {
   /**
-   * Time range for analytics
+   * Período de tempo para análise
    */
   range: GetProfessionalDashboardRange;
   /**
-   * Custom start date (required for custom range)
+   * Data de início personalizada (obrigatória para período custom)
    */
   startDate?: string;
   /**
-   * Custom end date (required for custom range)
+   * Data de término personalizada (obrigatória para período custom)
    */
   endDate?: string;
 };

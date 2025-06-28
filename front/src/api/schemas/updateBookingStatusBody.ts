@@ -1,7 +1,7 @@
 import type { UpdateBookingStatusBodyStatus } from "./updateBookingStatusBodyStatus";
 
 /**
- * UpdateBookingStatusBody
+ * Dados para atualização de status de agendamento
  */
 export type UpdateBookingStatusBody = {
   status: UpdateBookingStatusBodyStatus;

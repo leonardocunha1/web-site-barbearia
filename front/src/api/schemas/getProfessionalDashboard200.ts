@@ -3,13 +3,16 @@ import type { GetProfessionalDashboard200Metrics } from "./getProfessionalDashbo
 import type { GetProfessionalDashboard200NextAppointmentsItem } from "./getProfessionalDashboard200NextAppointmentsItem";
 
 /**
- * Dashboard
+ * Dados completos do dashboard
  */
 export type GetProfessionalDashboard200 = {
-  /** Professional */
+  /** Dados do profissional */
   professional: GetProfessionalDashboard200Professional;
-  /** Metrics */
+  /** Métricas do dashboard */
   metrics: GetProfessionalDashboard200Metrics;
-  /** Lista dos próximos agendamentos */
+  /**
+   * Lista dos próximos agendamentos
+   * @maxItems 10
+   */
   nextAppointments: GetProfessionalDashboard200NextAppointmentsItem[];
 };

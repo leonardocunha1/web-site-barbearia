@@ -2,11 +2,11 @@ import type { ListCouponsSortItemField } from "./listCouponsSortItemField";
 import type { ListCouponsSortItemOrder } from "./listCouponsSortItemOrder";
 
 /**
- * CouponSort
+ * Configuração de ordenação para cupons
  */
 export type ListCouponsSortItem = {
-  /** CouponSortField */
+  /** Campo para ordenação de cupons */
   field: ListCouponsSortItemField;
-  /** CouponSortOrder */
+  /** Ordem de ordenação */
   order: ListCouponsSortItemOrder;
 };
