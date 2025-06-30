@@ -2,10 +2,26 @@
 
 import { useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { mask as masker, unMask } from "remask";
 import { BaseInput } from "./BaseInput";
 import { PhoneField } from "../types";
 import { cn } from "@/lib/utils";
+
+function formatPhoneNumber(inputValue: string | undefined | null): string {
+  if (!inputValue) return "";
+
+  inputValue = inputValue.replace(/\D/g, "");
+  inputValue = inputValue.replace(/(^\d{2})(\d)/, "($1) $2");
+  inputValue = inputValue.replace(/(\d{4,5})(\d{4}$)/, "$1-$2");
+
+  if (inputValue.length > 15) {
+    inputValue = inputValue.replace(/\D/g, "");
+    inputValue = inputValue.substring(0, 11);
+    inputValue = inputValue.replace(/(^\d{2})(\d)/, "($1) $2");
+    inputValue = inputValue.replace(/(\d{4,5})(\d{4}$)/, "$1-$2");
+  }
+
+  return inputValue;
+}
 
 export function PhoneInput({ field }: { field: PhoneField }) {
   const {
@@ -15,32 +31,28 @@ export function PhoneInput({ field }: { field: PhoneField }) {
     formState: { errors },
   } = useFormContext();
 
-  const phoneValue = watch(field.name) || "";
-  const [mask, setMask] = useState(
-    field.mask || ["(99) 9999-9999", "(99) 99999-9999"],
-  );
+  const formValue = watch(field.name) || "";
+  const [localValue, setLocalValue] = useState(formValue);
 
   useEffect(() => {
-    // Atualiza a máscara com base no tamanho do valor
-    const cleanValue = unMask(phoneValue);
-    if (cleanValue.length > 10) {
-      setMask("(99) 99999-9999");
-    } else {
-      setMask("(99) 9999-9999");
+    if (formValue !== localValue) {
+      setLocalValue(formValue);
     }
-  }, [phoneValue]);
+  }, [formValue, localValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const originalValue = unMask(e.target.value);
-    const maskedValue = masker(originalValue, mask);
-    setValue(field.name, maskedValue, { shouldValidate: true });
+    const rawValue = e.target.value;
+    const formattedValue = formatPhoneNumber(rawValue);
+
+    setLocalValue(formattedValue);
+    setValue(field.name, formattedValue, { shouldValidate: true });
   };
 
   return (
     <BaseInput
       id={field.name}
       type="tel"
-      value={phoneValue}
+      value={localValue}
       onChange={handleChange}
       onBlur={register(field.name).onBlur}
       placeholder={field.placeholder || "(00) 00000-0000"}
@@ -52,6 +64,7 @@ export function PhoneInput({ field }: { field: PhoneField }) {
       required={field.required}
       description={field.description}
       icon={field.icon}
+      labelProps={field.labelProps}
     />
   );
 }

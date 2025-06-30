@@ -38,7 +38,7 @@ export function BaseInput({
   icon: Icon,
   onValueChange,
   type,
-  showPasswordToggle = type === "password", // Mostra toggle apenas para senhas
+  showPasswordToggle = type === "password",
   ...props
 }: BaseInputProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -72,6 +72,7 @@ export function BaseInput({
         )}
         <Input
           id={id}
+          autoComplete={props.autoComplete || "on"}
           {...register}
           {...props}
           type={showPasswordToggle && showPassword ? "text" : type}

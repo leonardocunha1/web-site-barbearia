@@ -7,4 +7,9 @@ export type RegisterUserBody = {
   /** @minLength 6 */
   senha: string;
   role?: RegisterUserBodyRole;
+  /**
+   * @minLength 10
+   * @maxLength 11
+   */
+  telefone: string;
 };

@@ -10,12 +10,15 @@ import {
 export const zodregisterUserBodyNomeMin = 3;
 export const zodregisterUserBodySenhaMin = 6;
 
+export const zodregisterUserBodySenhaMax = 100;
+export const zodregisterUserBodyRoleDefault = "CLIENTE";
 
 export const zodregisterUserBody = zod.object({
   "nome": zod.string().min(zodregisterUserBodyNomeMin),
   "email": zod.string().email(),
-  "senha": zod.string().min(zodregisterUserBodySenhaMin),
-  "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional()
+  "senha": zod.string().min(zodregisterUserBodySenhaMin).max(zodregisterUserBodySenhaMax),
+  "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).default(zodregisterUserBodyRoleDefault),
+  "telefone": zod.string().min(1)
 })
 
 /**

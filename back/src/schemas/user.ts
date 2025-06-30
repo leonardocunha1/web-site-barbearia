@@ -4,14 +4,45 @@ import { Role } from '@prisma/client';
 
 export const registerUserSchema = z.object({
   nome: z.string()
-    .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
+    .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
+    .transform(nome => nome.trim()),
+    
   email: z.string()
-    .email({ message: 'Por favor, insira um e-mail válido' }),
+    .email({ message: 'Por favor, insira um e-mail válido' })
+    .toLowerCase()
+    .transform(email => email.trim()),
+    
   senha: z.string()
-    .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' }),
+    .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' })
+    .max(100, { message: 'Senha muito longa' }),
+    
   role: z.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN'], {
     message: 'O perfil deve ser CLIENTE, PROFISSIONAL ou ADMIN'
-  }).optional(),
+  }).default('CLIENTE'),
+    
+  telefone: z.string()
+    .min(1, { message: 'Telefone é obrigatório' })
+    // Validação do formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX
+    .refine((val) => /^\(\d{2}\) \d{4,5}-\d{4}$/.test(val), {
+      message: 'Formato inválido. Use (DDD) XXXXX-XXXX'
+    })
+    // Validação do comprimento (10 ou 11 dígitos)
+    .refine((val) => {
+      const digits = val.replace(/\D/g, '');
+      return digits.length === 10 || digits.length === 11;
+    }, {
+      message: 'Telefone deve ter 10 ou 11 dígitos (incluindo DDD)'
+    })
+    // Formatação consistente
+    .transform(val => {
+      const digits = val.replace(/\D/g, '');
+      const ddd = digits.substring(0, 2);
+      const numero = digits.substring(2);
+      
+      return numero.length === 8
+        ? `(${ddd}) ${numero.substring(0, 4)}-${numero.substring(4)}`
+        : `(${ddd}) ${numero.substring(0, 5)}-${numero.substring(5)}`;
+    })
 });
 
 export const loginUserSchema = z.object({

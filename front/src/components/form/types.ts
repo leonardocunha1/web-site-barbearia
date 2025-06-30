@@ -66,6 +66,7 @@ export type BaseField<T = unknown, U extends FieldType = FieldType> = {
   required?: boolean
   className?: string
   defaultValue?: T
+  autoComplete?: "on" | "off"
 } & WithDescription & WithDisabled & WithReadOnly & WithGrid & WithIcon
 
 // Campos específicos

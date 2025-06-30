@@ -38,7 +38,7 @@ export default function RootLayout({
         <ApplicationProviders>
           <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
-            {children}
+            <main className="flex items-center justify-center">{children}</main>
             <Footer />
           </div>
         </ApplicationProviders>

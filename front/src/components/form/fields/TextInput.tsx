@@ -27,6 +27,7 @@ export function TextInput({ field }: { field: TextField }) {
       description={field.description}
       icon={field.icon}
       labelProps={field.labelProps}
+      autoComplete={field.autoComplete}
     />
   );
 }
