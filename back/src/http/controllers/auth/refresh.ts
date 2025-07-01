@@ -29,6 +29,10 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
 }
 
 async function verifyRefreshToken(request: FastifyRequest) {
+  if (!request.cookies.refreshToken) {
+    throw new InvalidTokenError();
+  }
+
   try {
     await request.jwtVerify({ onlyCookie: true });
   } catch (err) {

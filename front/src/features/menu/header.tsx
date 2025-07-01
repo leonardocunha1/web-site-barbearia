@@ -1,11 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { AuthButtons } from "./authbuttons";
 import { MobileMenu } from "./mobile-menu";
 import NavLink from "./navlink";
+import { useUser } from "@/contexts/user";
 
-export default async function Header() {
-  const user = false;
+export default function Header() {
+  const user = useUser();
 
   return (
     <header className="fixed right-0 left-0 z-50 mx-auto w-full max-w-7xl px-6 py-4 xl:px-0">
@@ -31,12 +34,12 @@ export default async function Header() {
 
         {/* Botões de autenticação*/}
         <div className="hidden md:flex">
-          <AuthButtons user={user} />
+          <AuthButtons user={user.user} />
         </div>
 
         {/* Mobile */}
         <div className="md:hidden">
-          <MobileMenu user={user} />
+          <MobileMenu user={user.user} />
         </div>
       </nav>
     </header>

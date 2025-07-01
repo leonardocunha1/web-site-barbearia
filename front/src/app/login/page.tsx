@@ -102,7 +102,7 @@ export default function AuthPage() {
       {
         onSuccess: () => {
           toast.success("Login realizado com sucesso!");
-          router.push("/dashboard");
+          router.push("/");
         },
         onError: (error) => {
           console.error("Erro ao fazer login:", error);

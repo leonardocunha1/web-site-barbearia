@@ -13,71 +13,71 @@ interface TokenPayload {
 }
 
 export class TokenService {
-  constructor(private reply: FastifyReply) {}
+  private readonly isProduction: boolean;
+  private readonly refreshTokenExpiration = '7d';
+  private readonly accessTokenExpiration = '1h';
 
-  async generateTokens(user: UserForToken) {
-    // payload base
+  constructor(private reply: FastifyReply) {
+    this.isProduction = process.env.NODE_ENV === 'production';
+  }
+
+  private createTokenPayload(user: UserForToken | TokenPayload) {
     const payload: { role: string; profissionalId?: string } = {
       role: user.role,
     };
 
-    // Se for um PROFISSIONAL, e adicionado o profissionalId ao payload
     if (user.role === 'PROFISSIONAL' && user.profissionalId) {
       payload.profissionalId = user.profissionalId;
     }
 
-    const token = await this.reply.jwtSign(
-      payload, // payload modificado aqui
-      { sign: { sub: user.id } },
-    );
+    return payload;
+  }
 
-    const refreshToken = await this.reply.jwtSign(
-      payload, // Usar o mesmo payload para o refresh token
-      { sign: { sub: user.id, expiresIn: '7d' } },
-    );
+  async generateTokens(user: UserForToken) {
+    const payload = this.createTokenPayload(user);
+
+    const [token, refreshToken] = await Promise.all([
+      this.reply.jwtSign(payload, {
+        sign: { sub: user.id, expiresIn: this.accessTokenExpiration }
+      }),
+      this.reply.jwtSign(payload, {
+        sign: { sub: user.id, expiresIn: this.refreshTokenExpiration }
+      })
+    ]);
 
     return { token, refreshToken };
   }
 
   async generateTokensFromPayload(payload: TokenPayload) {
-    const tokenPayload: { role: string; profissionalId?: string } = {
-      role: payload.role,
-    };
-
-    if (payload.role === 'PROFISSIONAL' && payload.profissionalId) {
-      tokenPayload.profissionalId = payload.profissionalId;
-    }
-
-    const token = await this.reply.jwtSign(tokenPayload, {
-      sign: { sub: payload.id },
-    });
-
-    const refreshToken = await this.reply.jwtSign(tokenPayload, {
-      sign: { sub: payload.id, expiresIn: '7d' },
-    });
-
-    return { token, refreshToken };
+    return this.generateTokens(payload); // Reutiliza a mesma lógica
   }
 
   setAuthCookies(token: string, refreshToken: string) {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const sevenDaysInSeconds = 60 * 60 * 24 * 7;
-    const oneHourInSeconds = 60 * 60;
+    const cookieOptions = {
+      path: '/',
+      secure: this.isProduction,
+      httpOnly: true,
+      sameSite: 'strict' as const,
+    };
 
-    return this.reply
+    this.reply
       .setCookie('refreshToken', refreshToken, {
-        path: '/',
-        secure: isProduction,
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: sevenDaysInSeconds,
+        ...cookieOptions,
+        maxAge: 60 * 60 * 24 * 7, // 7 dias
       })
       .setCookie('accessToken', token, {
-        path: '/',
-        secure: isProduction,
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: oneHourInSeconds,
+        ...cookieOptions,
+        maxAge: 60 * 60, // 1 hora
       });
+
+    return this.reply;
+  }
+
+  clearAuthCookies() {
+    this.reply
+      .clearCookie('accessToken', { path: '/' })
+      .clearCookie('refreshToken', { path: '/' });
+    
+    return this.reply;
   }
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Spectral, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/features/menu/header";
-import { ApplicationProviders } from "./providers"; // Importe o provider
+import { ApplicationProviders } from "./providers";
 import { Footer } from "@/components/footer";
 
 const poppins = Poppins({
@@ -21,11 +21,10 @@ const type_second = Spectral({
 
 export const metadata: Metadata = {
   title: "El Bigódon Barber Shop",
-  description:
-    "Corte na régua, barba afiada e estilo de verdade. Atendimento de primeira em um ambiente moderno e descontraído. Vem pro Bigódon!",
+  description: "Corte na régua, barba afiada e estilo de verdade...",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -38,7 +37,9 @@ export default function RootLayout({
         <ApplicationProviders>
           <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
-            <main className="flex items-center justify-center">{children}</main>
+            <main className="animate-fadeIn flex items-center justify-center">
+              {children}
+            </main>
             <Footer />
           </div>
         </ApplicationProviders>
