@@ -12,3 +12,9 @@ export function USER_REFRESH_TOKEN() {
     url: API_URL + '/auth/refresh-token',
   };
 }
+
+export function USER_LOGIN() {
+  return {
+    url: API_URL + '/auth/login',
+  };
+}

@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { useLoginUser, useRegisterUser } from "@/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useUser } from "@/contexts/user";
+import userGet from "../api/actions/user-get";
 
 type AuthMode = "login" | "register";
 
@@ -23,6 +25,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>("login");
   const { mutateAsync: login } = useLoginUser();
   const { mutateAsync: register } = useRegisterUser();
+  const { setUser } = useUser();
 
   const commonFields: DynamicFormProps<typeof loginSchema>["fields"] = [
     {
@@ -100,9 +103,18 @@ export default function AuthPage() {
         },
       },
       {
-        onSuccess: () => {
-          toast.success("Login realizado com sucesso!");
-          router.push("/");
+        onSuccess: async () => {
+          try {
+            const { ok, data } = await userGet();
+            if (ok && data) {
+              setUser(data);
+            }
+            toast.success("Login realizado com sucesso!");
+            router.push("/");
+          } catch (error) {
+            console.error("Erro ao carregar dados do usuário:", error);
+            toast.error("Erro ao carregar dados do usuário");
+          }
         },
         onError: (error) => {
           console.error("Erro ao fazer login:", error);

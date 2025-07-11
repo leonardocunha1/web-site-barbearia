@@ -47,7 +47,7 @@ export function AuthButtons({
 
   // Se estiver logado
   return (
-    <Link href="/dashboard">
+    <Link href="/conta">
       <Button
         variant="default"
         size="sm"

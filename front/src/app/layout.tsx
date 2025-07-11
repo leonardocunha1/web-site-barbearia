@@ -37,7 +37,7 @@ export default async function RootLayout({
         <ApplicationProviders>
           <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
-            <main className="animate-fadeIn flex items-center justify-center">
+            <main className="animate-fadeIn flex flex-1 justify-center">
               {children}
             </main>
             <Footer />
