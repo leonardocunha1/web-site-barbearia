@@ -2,7 +2,7 @@ import verifyToken from '@/functions/verify-token';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('accessToken')?.value;
   const authenticated = token ? await verifyToken(token) : false;
 
   if (!authenticated && request.nextUrl.pathname.startsWith('/conta')) {
@@ -15,5 +15,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/conta/:path*', '/login/:path*'],
+  matcher: ['/conta/:path*', '/login/:path*', '/conta', '/login'],
 };

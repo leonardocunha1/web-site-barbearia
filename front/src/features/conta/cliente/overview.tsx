@@ -4,9 +4,9 @@ import { RecentAppointments } from "./recent-appoinments";
 
 export function OverviewSection() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
+      <Card className="w-full rounded-2xl shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">
             Próximo Agendamento
           </CardTitle>
@@ -18,8 +18,8 @@ export function OverviewSection() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="w-full rounded-2xl shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">
             Pontos Acumulados
           </CardTitle>
@@ -33,8 +33,8 @@ export function OverviewSection() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="w-full rounded-2xl shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Visitas Totais</CardTitle>
           <UserIcon className="text-muted-foreground h-4 w-4" />
         </CardHeader>
@@ -44,8 +44,8 @@ export function OverviewSection() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="w-full rounded-2xl shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Fidelidade</CardTitle>
           <HeartIcon className="text-muted-foreground h-4 w-4" />
         </CardHeader>
@@ -56,7 +56,7 @@ export function OverviewSection() {
       </Card>
 
       <div className="col-span-full">
-        <Card>
+        <Card className="w-full rounded-2xl shadow">
           <CardHeader>
             <CardTitle>Histórico Recente</CardTitle>
           </CardHeader>
