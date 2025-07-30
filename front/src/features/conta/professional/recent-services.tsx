@@ -1,78 +1,66 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Column, GenericTable } from "@/components/table/generic-table";
+import { StatusBadge } from "@/components/table/status-badge";
+
+type Service = {
+  id: string;
+  time: string;
+  client: string;
+  service: string;
+  duration: string;
+  status: "Confirmado" | "Pendente" | "Cancelado" | "Concluído";
+};
 
 export function RecentServices() {
-  const services = [
-    {
-      time: "10:00",
-      client: "João Silva",
-      service: "Corte Social",
-      duration: "45 min",
-      status: "Confirmado",
-    },
-    {
-      time: "11:00",
-      client: "Carlos Oliveira",
-      service: "Barba Completa",
-      duration: "30 min",
-      status: "Confirmado",
-    },
-    {
-      time: "14:30",
-      client: "Miguel Santos",
-      service: "Corte + Barba",
-      duration: "1h 15min",
-      status: "Pendente",
-    },
-    {
-      time: "16:00",
-      client: "Lucas Pereira",
-      service: "Hidratação",
-      duration: "20 min",
-      status: "Cancelado",
-    },
+  const services: Service[] = [
+    { id: "1", time: "10:00", client: "João Silva", service: "Corte Social", duration: "45 min", status: "Confirmado" },
+    { id: "2", time: "11:00", client: "Carlos Oliveira", service: "Barba Completa", duration: "30 min", status: "Confirmado" },
+    { id: "3", time: "14:30", client: "Miguel Santos", service: "Corte + Barba", duration: "1h 15min", status: "Pendente" },
+    { id: "4", time: "16:00", client: "Lucas Pereira", service: "Hidratação", duration: "20 min", status: "Cancelado" },
   ];
 
+  const columns: Column<Service>[] = [
+  { 
+    header: "Horário", 
+    accessor: "time",
+    width: "100px",
+    align: "center",
+  },
+  { 
+    header: "Cliente", 
+    accessor: "client",
+    className: "font-medium",
+  },
+  { 
+    header: "Serviço", 
+    accessor: "service",
+  },
+  { 
+    header: "Duração", 
+    accessor: "duration",
+    align: "center",
+  },
+  {
+    header: "Status",
+    accessor: "status",
+    render: (value) => (
+  <StatusBadge status={value} />
+),
+    align: "center",
+    width: "120px",
+  },
+];
+
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Horário</TableHead>
-          <TableHead>Cliente</TableHead>
-          <TableHead>Serviço</TableHead>
-          <TableHead>Duração</TableHead>
-          <TableHead>Status</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {services.map((service, index) => (
-          <TableRow key={index}>
-            <TableCell className="font-medium">{service.time}</TableCell>
-            <TableCell>{service.client}</TableCell>
-            <TableCell>{service.service}</TableCell>
-            <TableCell>{service.duration}</TableCell>
-            <TableCell>
-              <span
-                className={`rounded-full px-2 py-1 text-xs ${
-                  service.status === "Confirmado"
-                    ? "bg-green-100 text-green-800"
-                    : service.status === "Cancelado"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-yellow-100 text-yellow-800"
-                }`}
-              >
-                {service.status}
-              </span>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <GenericTable
+      data={services}
+      columns={columns}
+      rowKey="id"
+      onRowClick={(service) => console.log("Serviço clicado:", service)}
+      rowClassName={(service) => service.status === "Cancelado" ? "bg-rose-50" : ""}
+      emptyMessage="Nenhum serviço agendado recentemente"
+      className="rounded-lg border"
+      headerClassName="bg-gray-50"
+    />
   );
 }

@@ -1,66 +1,41 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Column, GenericTable } from "@/components/table/generic-table";
+import { StatusBadge } from "@/components/table/status-badge";
+
+type Appointment = {
+  date: string;
+  service: string;
+  barber: string;
+  status: "Concluído" | "Cancelado";
+};
 
 export function RecentAppointments() {
-  const appointments = [
+  const appointments: Appointment[] = [
+    { date: "15/07/2023", service: "Corte de Cabelo", barber: "João", status: "Concluído" },
+    { date: "10/07/2023", service: "Barba", barber: "Carlos", status: "Concluído" },
+    { date: "05/07/2023", service: "Corte + Barba", barber: "Miguel", status: "Cancelado" },
+  ];
+
+  const columns: Column<Appointment>[] = [
+    { header: "Data", accessor: "date" },
+    { header: "Serviço", accessor: "service" },
+    { header: "Barbeiro", accessor: "barber" },
     {
-      date: "15/07/2023",
-      service: "Corte de Cabelo",
-      barber: "João",
-      status: "Concluído",
-    },
-    {
-      date: "10/07/2023",
-      service: "Barba",
-      barber: "Carlos",
-      status: "Concluído",
-    },
-    {
-      date: "05/07/2023",
-      service: "Corte + Barba",
-      barber: "Miguel",
-      status: "Cancelado",
+      header: "Status",
+      accessor: "status",
+      render: (value) => <StatusBadge status={value} />,
+      align: "center",
+      width: "120px",
     },
   ];
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Data</TableHead>
-          <TableHead>Serviço</TableHead>
-          <TableHead>Barbeiro</TableHead>
-          <TableHead>Status</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {appointments.map((appointment, index) => (
-          <TableRow key={index}>
-            <TableCell>{appointment.date}</TableCell>
-            <TableCell>{appointment.service}</TableCell>
-            <TableCell>{appointment.barber}</TableCell>
-            <TableCell>
-              <span
-                className={`rounded-full px-2 py-1 text-xs ${
-                  appointment.status === "Concluído"
-                    ? "bg-green-100 text-green-800"
-                    : appointment.status === "Cancelado"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-yellow-100 text-yellow-800"
-                }`}
-              >
-                {appointment.status}
-              </span>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <GenericTable
+      data={appointments}
+      columns={columns}
+      rowKey="date"
+      className="rounded-lg border"
+      headerClassName="bg-gray-50"
+      emptyMessage="Nenhum agendamento encontrado"
+    />
   );
 }
