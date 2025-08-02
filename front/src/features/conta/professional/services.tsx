@@ -2,20 +2,22 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PencilIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { Column, GenericTable } from "@/components/table/generic-table";
+
+type Service = {
+  id: number;
+  name: string;
+  duration: string;
+  price: string;
+  category: string;
+  active: boolean;
+};
 
 export function ServicesSection() {
-  const [services, setServices] = useState([
+  const [services, setServices] = useState<Service[]>([
     {
       id: 1,
       name: "Corte Social",
@@ -43,65 +45,69 @@ export function ServicesSection() {
   ]);
 
   const toggleServiceStatus = (id: number) => {
-    setServices(
-      services.map((service) =>
+    setServices((prev) =>
+      prev.map((service) =>
         service.id === id ? { ...service, active: !service.active } : service,
       ),
     );
   };
+
+  const columns: Column<Service>[] = [
+    { header: "Serviço", accessor: "name" },
+    { header: "Duração", accessor: "duration" },
+    { header: "Preço", accessor: "price" },
+    {
+      header: "Categoria",
+      accessor: "category",
+      render: (value) => <Badge variant="outline">{value}</Badge>,
+    },
+    {
+      header: "Status",
+      accessor: "active",
+      render: (value) => (
+        <Badge variant={value ? "default" : "secondary"}>
+          {value ? "Ativo" : "Inativo"}
+        </Badge>
+      ),
+    },
+    {
+      header: "Ações",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      accessor: "action" as any,
+      align: "center",
+      render: (_, row) => (
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleServiceStatus(row.id)}
+          >
+            {row.active ? "Desativar" : "Ativar"}
+          </Button>
+          <Button variant="ghost" size="sm">
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" className="text-red-500">
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Meus Serviços</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Serviço</TableHead>
-              <TableHead>Duração</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {services.map((service) => (
-              <TableRow key={service.id}>
-                <TableCell className="font-medium">{service.name}</TableCell>
-                <TableCell>{service.duration}</TableCell>
-                <TableCell>{service.price}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{service.category}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={service.active ? "default" : "secondary"}>
-                    {service.active ? "Ativo" : "Inativo"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleServiceStatus(service.id)}
-                  >
-                    {service.active ? "Desativar" : "Ativar"}
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-red-500">
-                    <TrashIcon className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <div className="mt-4 flex justify-end">
+      <CardContent className="space-y-4">
+        <GenericTable
+          data={services}
+          columns={columns}
+          rowKey="id"
+          emptyMessage="Nenhum serviço cadastrado"
+        />
+        <div className="flex justify-end">
           <Button>
             <PlusIcon className="mr-2 h-4 w-4" />
             Adicionar Serviço

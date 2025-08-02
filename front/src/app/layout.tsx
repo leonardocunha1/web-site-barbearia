@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/features/menu/header";
 import { ApplicationProviders } from "./providers";
 import { Footer } from "@/components/footer";
+import { ModalPortal } from "@/components/modal-portal";
 
 const poppins = Poppins({
   variable: "--font-poppins-sans",
@@ -35,6 +36,7 @@ export default async function RootLayout({
         className={`${poppins.variable} ${type_second.variable} antialiased`}
       >
         <ApplicationProviders>
+          <div id="modal-root" />
           <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
             <main className="animate-fadeIn flex flex-1 justify-center">
@@ -42,6 +44,7 @@ export default async function RootLayout({
             </main>
             <Footer />
           </div>
+          <ModalPortal />
         </ApplicationProviders>
       </body>
     </html>
