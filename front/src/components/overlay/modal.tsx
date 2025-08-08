@@ -1,97 +1,80 @@
 "use client";
 
-import * as React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogClose,
-  DialogProps,
-} from "@radix-ui/react-dialog";
+} from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/utils/cn";
 
-type ModalSize = "full" | "semi-full" | "xl" | "lg" | "md" | "sm" | "xs";
-
-type ModalProps = DialogProps & {
-  title?: React.ReactNode;
+type ModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
   footer?: React.ReactNode;
-  size?: ModalSize;
-  classNames?: {
-    content?: string;
-    header?: string;
-    footer?: string;
-  };
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   removeCloseButton?: boolean;
-  hideOverlay?: boolean;
+  children: React.ReactNode;
+  className?: string;
 };
 
-const sizeClasses: Record<ModalSize, string> = {
-  full: "w-full h-full max-w-none",
-  "semi-full": "w-full h-5/6 max-w-none",
-  xl: "sm:w-[90vw] sm:max-w-[1200px]",
-  lg: "sm:w-[80vw] sm:max-w-[1000px]",
-  md: "sm:w-[70vw] sm:max-w-[800px]",
-  sm: "sm:w-[60vw] sm:max-w-[600px]",
-  xs: "sm:w-[50vw] sm:max-w-[400px]",
+const sizeClasses = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  full: "max-w-none w-full h-full",
 };
 
 export function Modal({
-  open,
-  onOpenChange,
+  isOpen,
+  onClose,
   title,
   footer,
   children,
   size = "md",
-  classNames,
   removeCloseButton = false,
-  ...props
+  className,
 }: ModalProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} {...props}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         className={cn(
-          "bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border p-6 shadow-lg duration-200 sm:rounded-lg",
-          "max-h-[90vh] overflow-y-auto",
           sizeClasses[size],
-          classNames?.content,
+          className,
+          size === "full" && "h-screen rounded-none"
         )}
+        onPointerDownOutside={(e) => e.preventDefault()}
       >
         {(title || !removeCloseButton) && (
-          <div
-            className={cn(
-              "flex items-center justify-between border-b pb-4",
-              classNames?.header,
-            )}
-          >
-            {title && (
-              <DialogTitle className="text-lg leading-none font-medium">
-                {title}
-              </DialogTitle>
-            )}
-            {!removeCloseButton && (
-              <DialogClose asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Fechar</span>
-                </Button>
-              </DialogClose>
-            )}
-          </div>
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              {title && <DialogTitle>{title}</DialogTitle>}
+              {!removeCloseButton && (
+                <DialogClose asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={onClose}
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Fechar</span>
+                  </Button>
+                </DialogClose>
+              )}
+            </div>
+          </DialogHeader>
         )}
 
-        {/* Conteúdo */}
-        <div>{children}</div>
+        <div className="py-4">{children}</div>
 
-        {/* Footer */}
         {footer && (
-          <div
-            className={cn(
-              "flex justify-end space-x-2 border-t pt-4",
-              classNames?.footer,
-            )}
-          >
+          <div className="flex justify-end space-x-2 border-t pt-4">
             {footer}
           </div>
         )}

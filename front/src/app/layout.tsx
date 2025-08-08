@@ -35,8 +35,8 @@ export default async function RootLayout({
       <body
         className={`${poppins.variable} ${type_second.variable} antialiased`}
       >
+        <div id="modal-root"></div>
         <ApplicationProviders>
-          <div id="modal-root" />
           <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
             <main className="animate-fadeIn flex flex-1 justify-center">
