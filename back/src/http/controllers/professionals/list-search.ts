@@ -35,6 +35,8 @@ export async function listOrSearchProfessionals(
       });
     }
 
+    console.log(response.professionals[0].user.telefone)
+
     return reply.status(200).send(response);
   } catch (error) {
     if (error instanceof z.ZodError) {

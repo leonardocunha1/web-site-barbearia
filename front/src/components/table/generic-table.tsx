@@ -30,6 +30,9 @@ type GenericTableProps<T> = {
   headerClassName?: string;
   rowClassName?: string | ((row: T) => string);
   cellClassName?: string | ((row: T, column: Column<T, keyof T>) => string);
+  actions?: (row: T) => ReactNode;
+  actionsHeader?: string;
+  actionsWidth?: string | number;
 };
 
 export function GenericTable<T>({
@@ -43,12 +46,15 @@ export function GenericTable<T>({
   headerClassName,
   rowClassName,
   cellClassName,
+  actions,
+  actionsHeader = "Ações",
+  actionsWidth = "120px",
 }: GenericTableProps<T>) {
   const getRowKey = (row: T, index: number): string => {
     if (rowKey) {
-      return typeof rowKey === "function" 
-        ? rowKey(row).toString() 
-        : row[rowKey]?.toString() ?? index.toString();
+      return typeof rowKey === "function"
+        ? rowKey(row).toString()
+        : (row[rowKey]?.toString() ?? index.toString());
     }
     return index.toString();
   };
@@ -73,10 +79,10 @@ export function GenericTable<T>({
         <TableHeader className={headerClassName}>
           <TableRow>
             {columns.map((col, i) => (
-              <TableHead 
+              <TableHead
                 key={col.accessor.toString() || i.toString()}
                 className={col.className}
-                style={{ 
+                style={{
                   width: col.width,
                   textAlign: col.align,
                 }}
@@ -84,22 +90,43 @@ export function GenericTable<T>({
                 {col.header}
               </TableHead>
             ))}
+            {actions && (
+              <TableHead
+                className="text-center"
+                style={{
+                  width: actionsWidth,
+                  textAlign: "center",
+                }}
+              >
+                {actionsHeader}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            Array(5).fill(0).map((_, i) => (
-              <TableRow key={`skeleton-${i}`}>
-                {columns.map((col, j) => (
-                  <TableCell key={`skeleton-cell-${i}-${j}`}>
-                    <Skeleton className="h-6 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+            Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  {columns.map((col, j) => (
+                    <TableCell key={`skeleton-cell-${i}-${j}`}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                  {actions && (
+                    <TableCell>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="text-center py-8">
+              <TableCell
+                colSpan={columns.length + (actions ? 1 : 0)}
+                className="py-8 text-center"
+              >
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -110,7 +137,7 @@ export function GenericTable<T>({
                 onClick={() => onRowClick?.(row)}
                 className={cn(
                   getRowClass(row),
-                  onRowClick && "cursor-pointer hover:bg-muted/50"
+                  onRowClick && "hover:bg-muted/50 cursor-pointer",
                 )}
               >
                 {columns.map((col, colIndex) => (
@@ -119,7 +146,7 @@ export function GenericTable<T>({
                     className={cn(
                       getCellClass(row, col),
                       col.align === "center" && "text-center",
-                      col.align === "right" && "text-right"
+                      col.align === "right" && "text-right",
                     )}
                     style={{ width: col.width }}
                   >
@@ -128,6 +155,14 @@ export function GenericTable<T>({
                       : (row[col.accessor] as ReactNode)}
                   </TableCell>
                 ))}
+                {actions && (
+                  <TableCell
+                    className="text-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex justify-center">{actions(row)}</div>
+                  </TableCell>
+                )}
               </TableRow>
             ))
           )}

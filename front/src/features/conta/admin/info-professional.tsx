@@ -1,124 +1,166 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Column, GenericTable } from "@/components/table/generic-table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
+import { useOverlay } from "@/hooks/useOverlay";
+import { z } from "zod";
+import { FormField } from "@/components/form/types";
+import {
+  useCreateProfessional,
+  useListOrSearchProfessionals,
+  ListOrSearchProfessionals200ProfessionalsItem,
+  CreateProfessionalBody,
+  useUpdateProfessional,
+} from "@/api";
+import { Edit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DialogDemo } from "./teste";
 
-type Profissional = {
+type Professional = {
   id: string;
-  nome: string;
+  name: string;
   email: string;
-  funcao: string;
+  role: string;
 };
 
-const profissionaisMock: Profissional[] = [
-  {
-    id: "1",
-    nome: "João Pedro",
-    email: "joao@example.com",
-    funcao: "Cabeleireiro",
-  },
-  {
-    id: "2",
-    nome: "Amanda Lima",
-    email: "amanda@example.com",
-    funcao: "Manicure",
-  },
-];
-
 export function InfoProfissionalSection() {
-  const [profissionais, setProfissionais] =
-    useState<Profissional[]>(profissionaisMock);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ nome: "", email: "", funcao: "" });
+  const { data: response, isLoading, refetch } = useListOrSearchProfessionals();
+  const { open } = useOverlay();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const novo = {
-      id: crypto.randomUUID(),
-      ...form,
-    };
-    setProfissionais((prev) => [...prev, novo]);
-    setForm({ nome: "", email: "", funcao: "" });
-    setOpen(false);
+  const professionals: Professional[] =
+    response?.professionals?.map(
+      (p: ListOrSearchProfessionals200ProfessionalsItem) => ({
+        id: p.id,
+        name: p.user.nome,
+        email: p.user.email,
+        role: p.especialidade,
+      }),
+    ) ?? [];
+
+  const { mutateAsync: createProfessional, isPending } =
+    useCreateProfessional();
+  const { mutateAsync: updateProfessional } = useUpdateProfessional();
+
+  const schema = z.object({
+    email: z.string().email("Email inválido"),
+    especialidade: z.string().min(1, "Informe a função"),
+  });
+
+  const fields: FormField[] = [
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Digite o email",
+    },
+    {
+      name: "especialidade",
+      label: "Especialidade",
+      type: "text",
+      placeholder: "Digite a especialidade",
+    },
+  ];
+
+  const handleAdd = () => {
+    open(
+      {
+        schema,
+        fields,
+        defaultButton: true,
+        buttonText: isPending ? "Enviando..." : "Adicionar",
+        resetAfterSubmit: true,
+        onSubmit: async (values: CreateProfessionalBody) => {
+          try {
+            await createProfessional({ data: values });
+            refetch();
+          } catch (error) {
+            console.error("Erro ao criar profissional:", error);
+            throw error;
+          }
+        },
+      },
+      {
+        type: "form",
+        renderAs: "modal",
+        title: "Adicionar Profissional",
+      },
+    );
   };
 
-  const columns: Column<Profissional>[] = [
-    { header: "Nome", accessor: "nome" },
+  const handleEdit = (professional: Professional) => {
+    open(
+      {
+        schema,
+        fields,
+        defaultButton: true,
+        buttonText: "Salvar",
+        initialValues: {
+          email: professional.email,
+          especialidade: professional.role,
+        },
+        onSubmit: async (values: CreateProfessionalBody) => {
+          try {
+            await updateProfessional({ data: values, id: professional.id });
+            refetch();
+            // Remove o close() direto aqui - será tratado pelo onSuccess no ModalPortal
+          } catch (error) {
+            console.error("Erro ao editar profissional:", error);
+            throw error;
+          }
+        },
+      },
+      {
+        type: "form",
+        renderAs: "modal",
+        title: "Editar Profissional",
+      },
+    );
+  };
+
+  const columns: Column<Professional>[] = [
+    { header: "Nome", accessor: "name" },
     { header: "Email", accessor: "email" },
-    { header: "Função", accessor: "funcao" },
+    { header: "Especialidade", accessor: "role" },
   ];
+
+  if (isLoading) return <div>Carregando...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Profissionais</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>Cadastrar Profissional</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Novo Profissional</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input
-                  id="nome"
-                  value={form.nome}
-                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="funcao">Função</Label>
-                <Input
-                  id="funcao"
-                  value={form.funcao}
-                  onChange={(e) => setForm({ ...form, funcao: e.target.value })}
-                  required
-                />
-              </div>
-              <Button type="submit" className="mt-4 w-full">
-                Cadastrar
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
       <Card className="p-5 shadow">
+        <div className="mb-4">
+          <Button
+            onClick={handleAdd}
+            disabled={isPending}
+            className="bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Novo Profissional
+          </Button>
+        </div>
         <GenericTable
-          data={profissionais}
+          data={professionals}
           columns={columns}
+          isLoading={isLoading}
           emptyMessage="Nenhum profissional cadastrado"
           rowKey="id"
           className="rounded-lg border"
           headerClassName="bg-gray-50"
+          actions={(row) => (
+            <div className="flex justify-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleEdit(row)}
+                className="h-8 w-8"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         />
       </Card>
+
+      <DialogDemo />
     </div>
   );
 }

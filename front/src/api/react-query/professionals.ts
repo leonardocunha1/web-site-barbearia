@@ -135,7 +135,7 @@ export const useCreateProfessional = <
   return useMutation(mutationOptions, queryClient);
 };
 export const listOrSearchProfessionals = (
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   signal?: AbortSignal,
 ) => {
   return axiosInstance<ListOrSearchProfessionals200>({
@@ -147,7 +147,7 @@ export const listOrSearchProfessionals = (
 };
 
 export const getListOrSearchProfessionalsQueryKey = (
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
 ) => {
   return [`/professionals`, ...(params ? [params] : [])] as const;
 };
@@ -156,7 +156,7 @@ export const getListOrSearchProfessionalsInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -193,7 +193,7 @@ export function useListOrSearchProfessionalsInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params: undefined | ListOrSearchProfessionalsParams,
   options: {
     query: Partial<
       UseInfiniteQueryOptions<
@@ -219,7 +219,7 @@ export function useListOrSearchProfessionalsInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -245,7 +245,7 @@ export function useListOrSearchProfessionalsInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -264,7 +264,7 @@ export function useListOrSearchProfessionalsInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof listOrSearchProfessionals>>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -299,7 +299,7 @@ export const getListOrSearchProfessionalsQueryOptions = <
   TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -335,7 +335,7 @@ export function useListOrSearchProfessionals<
   TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params: undefined | ListOrSearchProfessionalsParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -361,7 +361,7 @@ export function useListOrSearchProfessionals<
   TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -387,7 +387,7 @@ export function useListOrSearchProfessionals<
   TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -406,7 +406,7 @@ export function useListOrSearchProfessionals<
   TData = Awaited<ReturnType<typeof listOrSearchProfessionals>>,
   TError = ListOrSearchProfessionals400,
 >(
-  params: ListOrSearchProfessionalsParams,
+  params?: ListOrSearchProfessionalsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<

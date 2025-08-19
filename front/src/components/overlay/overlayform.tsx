@@ -36,19 +36,24 @@ export function OverlayForm<T extends z.ZodTypeAny>({
               onClick={onClose}
               className="h-8 w-8 p-0"
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
               <span className="sr-only">Fechar</span>
             </Button>
           )}
         </div>
       )}
 
-      {/* Form Content - flex-1 para ocupar espaço disponível */}
       <div className="flex-1 overflow-y-auto">
-        <DynamicForm<T> {...formProps} />
+        <DynamicForm<T>
+          {...formProps}
+          onSuccess={() => {
+            formProps.onSuccess?.(); // lógica do form
+            onClose?.(); // apenas sinaliza que quer fechar
+            // Modal intercepta o onClose e anima
+          }}
+        />
       </div>
 
-      {/* Footer */}
       {footer && <div className="mt-4 border-t pt-4">{footer}</div>}
     </div>
   );

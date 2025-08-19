@@ -4,11 +4,10 @@ import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserAlreadyProfessionalError } from '../errors/user-already-professional-error';
 
 interface CreateProfessionalUseCaseRequest {
-  userId: string;
+  email: string;
   especialidade: string;
   bio?: string;
   documento?: string;
-  registro?: string;
   avatarUrl?: string;
 }
 
@@ -19,19 +18,20 @@ export class CreateProfessionalUseCase {
   ) {}
 
   async execute(data: CreateProfessionalUseCaseRequest) {
-    const user = await this.usersRepository.findById(data.userId);
+    const user = await this.usersRepository.findByEmail(data.email);
 
     if (!user) {
       throw new UserNotFoundError();
     }
 
     const existingProfessional =
-      await this.professionalsRepository.findByUserId(data.userId);
+      await this.professionalsRepository.findByUserId(user.id);
+
     if (existingProfessional) {
       throw new UserAlreadyProfessionalError();
     }
 
-    await this.usersRepository.update(data.userId, { role: 'PROFISSIONAL' });
+    await this.usersRepository.update(user.id, { role: 'PROFISSIONAL' });
 
     return this.professionalsRepository.create({
       especialidade: data.especialidade,
@@ -39,7 +39,7 @@ export class CreateProfessionalUseCase {
       documento: data.documento,
       ativo: true,
       avatarUrl: data.avatarUrl,
-      user: { connect: { id: data.userId } },
+      user: { connect: { id: user.id } },
     });
   }
 }

@@ -47,8 +47,7 @@ export interface ModalStore<T extends OverlayTypes> {
   options?: ModalOverlayOptions<T>
   type: T
   open: (content: ContentType<T>, options?: ModalOverlayOptions<T>) => void
-  closeModal: () => void
-
+  close: () => void
   content: ContentType<T>
 }
 
@@ -59,29 +58,29 @@ export const useOverlay = create<ModalStore<OverlayTypes>>((set, get) => ({
   options: undefined,
   open: (content, options) => {
     if (get().isOpen === true) {
-      get().closeModal()
+      get().close();
       setTimeout(() => {
         set({
           isOpen: true,
           content,
           options,
           type: options?.type ?? 'drawer',
-        })
-      }, 200)
-      return
+        });
+      }, 200); 
+      return;
     }
     set({
       isOpen: true,
       content,
       options,
       type: options?.type ?? 'drawer',
-    })
+    });
   },
-  closeModal: () =>
+  // A função close está correta. Ela apenas muda o estado.
+  // O componente Modal vai interceptar essa mudança para animar.
+  close: () => {
     set({
       isOpen: false,
-      content: null,
-      options: undefined,
-      type: 'drawer',
-    }),
-}))
+    });
+  },
+}));

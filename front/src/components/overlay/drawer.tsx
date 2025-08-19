@@ -11,11 +11,11 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import type { ClassValue } from "clsx"; 
+import type { ClassValue } from "clsx";
 
 type DrawerProps = {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: () => void; // chamado depois da animação
   title?: React.ReactNode;
   footer?: React.ReactNode;
   children: React.ReactNode;
@@ -35,6 +35,8 @@ const sizeClasses = {
   full: "max-w-full",
 };
 
+const ANIMATION_MS = 200;
+
 export function Drawer({
   isOpen,
   onClose,
@@ -47,11 +49,53 @@ export function Drawer({
   removeCloseButton = false,
   disableOverlayClick = false,
 }: DrawerProps) {
+  const [localOpen, setLocalOpen] = React.useState(isOpen);
+  const closeTimeoutRef = React.useRef<number | null>(null);
+
+  // abrir instantâneo quando pai setar true
+  React.useEffect(() => {
+    if (isOpen) {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+      setLocalOpen(true);
+    }
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setLocalOpen(true);
+      return;
+    }
+    // começa animação de saída
+    setLocalOpen(false);
+
+    // chama onClose depois
+    if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = window.setTimeout(() => {
+      closeTimeoutRef.current = null;
+      onClose();
+    }, ANIMATION_MS);
+  };
+
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet open={localOpen} onOpenChange={handleOpenChange}>
       <SheetContent
         side={side}
-        className={cn(size !== "full" && sizeClasses[size], className)}
+        className={cn(
+          size !== "full" && sizeClasses[size],
+          "transition-all duration-200 [&>button]:hidden", // esconde o botão X padrão do shadcn
+          className,
+        )}
         onInteractOutside={(e) => {
           if (disableOverlayClick) {
             e.preventDefault();
@@ -62,13 +106,14 @@ export function Drawer({
         {(title || !removeCloseButton) && (
           <SheetHeader className="mb-4">
             <div className="flex items-center justify-between">
-              <SheetTitle>{title}</SheetTitle>
+              {title && <SheetTitle>{title}</SheetTitle>}
               {!removeCloseButton && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={onClose}
                   className="h-8 w-8 p-0"
+                  // ❌ não chamamos onClose direto — o Radix controla via handleOpenChange
+                  onClick={() => handleOpenChange(false)}
                 >
                   <X className="h-4 w-4" />
                   <span className="sr-only">Fechar</span>

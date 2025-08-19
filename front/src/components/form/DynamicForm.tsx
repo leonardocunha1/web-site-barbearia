@@ -31,17 +31,25 @@ export function DynamicForm<T extends z.ZodTypeAny>({
   buttonClassName = "",
   buttonText = "Enviar",
   submittingText = "Enviando...",
+  initialValues,
+  onSuccess,
 }: DynamicFormProps<T>) {
   const methods = useForm<z.infer<T>>({
     resolver: zodResolver(schema),
+    defaultValues: initialValues,
   });
 
   const { handleSubmit, reset, formState } = methods;
 
   const onFormSubmit: SubmitHandler<z.infer<T>> = async (data) => {
-    await onSubmit(data);
-    if (resetAfterSubmit) {
-      reset();
+    try {
+      await onSubmit(data);
+      onSuccess?.();
+      if (resetAfterSubmit) {
+        reset();
+      }
+    } catch (error) {
+      console.error("Erro no envio do formulário:", error);
     }
   };
 

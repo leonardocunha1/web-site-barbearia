@@ -134,7 +134,7 @@ export type FormField =
 // Props principais do formulário dinâmico
 export type DynamicFormProps<T extends z.ZodTypeAny = z.ZodTypeAny> = {
   fields?: FormField[]
-  sections?: { title?: string; fields: FormField[] }[] // opcional para agrupamento
+  // sections?: { title?: string; fields: FormField[] }[] // opcional para agrupamento
   onSubmit: SubmitHandler<z.infer<T>>
   schema: T
   children?: ReactNode
@@ -147,4 +147,6 @@ export type DynamicFormProps<T extends z.ZodTypeAny = z.ZodTypeAny> = {
   buttonText?: string
   submittingText?: string
   buttonClassName?: string
+  initialValues?: z.infer<T>
+  onSuccess?: () => void;
 }

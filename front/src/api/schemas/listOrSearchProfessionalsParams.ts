@@ -26,7 +26,7 @@ export type ListOrSearchProfessionalsParams = {
    * Termo de busca para profissionais
    * @minLength 2
    */
-  query: string;
+  query?: string;
   /**
    * Filtrar por status ativo (padrão: verdadeiro)
    */

@@ -21,6 +21,7 @@ export const createMockBookingsRepository = () => ({
 
 export const createMockUsersRepository = () => ({
   findById: vi.fn(),
+  findByPhone: vi.fn(),
   findByEmail: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),

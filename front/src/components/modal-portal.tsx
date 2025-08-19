@@ -10,46 +10,40 @@ import { DynamicFormProps } from "./form/types";
 import { ZodTypeAny } from "zod";
 
 export function ModalPortal() {
-  const { content, closeModal, isOpen, type, options } = useOverlay();
+  const { content, close, isOpen, type, options } = useOverlay();
   const formContent = content as DynamicFormProps<ZodTypeAny>;
 
   const modalRoot = document.getElementById("modal-root");
-  if (!modalRoot) return null;
-  if (!isOpen) return null;
+  if (!modalRoot || !isOpen) return null;
 
   const commonProps = {
     isOpen,
     onClose: () => {
-      closeModal();
+      close();
       options?.onAfterClose?.();
     },
     title: options?.title,
     footer: options?.footer,
     removeCloseButton: options?.removeCloseButton,
     className: options?.className,
-    classNames: options?.classNames,
   };
 
   const renderForm = () => (
     <OverlayForm
       {...formContent}
-      onClose={commonProps.onClose}
-      title={commonProps.title}
-      footer={commonProps.footer}
-      removeCloseButton={commonProps.removeCloseButton}
+      onClose={commonProps.onClose} // modal vai animar antes de fechar
+      onSuccess={formContent.onSuccess}
     />
   );
 
   if (type === "form") {
     const formOptions = options as ModalOverlayOptionsForm | undefined;
-
     if (formOptions?.renderAs === "drawer") {
       return ReactDOM.createPortal(
         <Drawer {...commonProps}>{renderForm()}</Drawer>,
         modalRoot,
       );
     }
-
     return ReactDOM.createPortal(
       <Modal {...commonProps}>{renderForm()}</Modal>,
       modalRoot,

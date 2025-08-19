@@ -9,7 +9,7 @@ export const zodcreateProfessionalBodyAvatarUrlRegExp = new RegExp('^(https?|ftp
 
 
 export const zodcreateProfessionalBody = zod.object({
-  "userId": zod.string().uuid().describe('ID do usuário existente para associar ao profissional'),
+  "email": zod.string().uuid().describe('ID do usuário existente para associar ao profissional'),
   "especialidade": zod.string().min(zodcreateProfessionalBodyEspecialidadeMin).describe('Especialidade do profissional'),
   "bio": zod.string().optional().describe('Biografia do profissional'),
   "documento": zod.string().optional().describe('Número do documento profissional'),
@@ -31,7 +31,7 @@ export const zodlistOrSearchProfessionalsQueryParams = zod.object({
   "limit": zod.number().min(zodlistOrSearchProfessionalsQueryLimitMin).max(zodlistOrSearchProfessionalsQueryLimitMax).default(zodlistOrSearchProfessionalsQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
   "sortOrder": zod.enum(['asc', 'desc']).default(zodlistOrSearchProfessionalsQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
-  "query": zod.string().min(zodlistOrSearchProfessionalsQueryQueryMin).describe('Termo de busca para profissionais'),
+  "query": zod.string().min(zodlistOrSearchProfessionalsQueryQueryMin).optional().describe('Termo de busca para profissionais'),
   "ativo": zod.boolean().default(zodlistOrSearchProfessionalsQueryAtivoDefault).describe('Filtrar por status ativo (padrão: verdadeiro)')
 })
 

@@ -3,7 +3,7 @@
  */
 export type CreateProfessionalBody = {
   /** ID do usuário existente para associar ao profissional */
-  userId: string;
+  email: string;
   /**
    * Especialidade do profissional
    * @minLength 3

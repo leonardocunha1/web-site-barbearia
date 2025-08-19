@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useOverlay } from "@/hooks/useOverlay";
 
@@ -11,19 +11,19 @@ export default function Page() {
         <p>Conteúdo do Modal</p>
       </div>,
       {
-        type: 'modal',
-        title: 'Título do Modal',
-        size: 'md',
-      }
+        type: "form",
+        title: "Título do Modal",
+        size: "md",
+      },
     );
   };
 
   return (
-    <div className="pt-[124px] flex-1 bg-stone-500">
+    <div className="flex-1 bg-stone-500 pt-[124px]">
       <h1>Teste</h1>
       <button
         onClick={handleOpenModal}
-        className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer"
+        className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
       >
         Abrir Modal
       </button>

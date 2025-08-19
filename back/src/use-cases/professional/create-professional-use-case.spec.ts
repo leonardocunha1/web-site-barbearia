@@ -15,7 +15,7 @@ type MockProfessionalsRepository = ProfessionalsRepository & {
 };
 
 type MockUsersRepository = UsersRepository & {
-  findById: ReturnType<typeof vi.fn>;
+  findByEmail: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
 };
 
@@ -52,8 +52,7 @@ describe('Create Professional Use Case', () => {
   };
 
   it('deve criar um profissional com sucesso', async () => {
-    // Configurar mocks
-    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
     mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
@@ -61,20 +60,16 @@ describe('Create Professional Use Case', () => {
     });
     mockProfessionalsRepository.create.mockResolvedValue(mockProfessional);
 
-    // Executar
     const result = await useCase.execute({
-      userId: 'user-123',
+      email: 'john@example.com',
       especialidade: 'Dentista',
       bio: 'Especialista em odontologia',
       documento: '123456',
     });
 
-    // Verificar
     expect(result).toEqual(mockProfessional);
-    expect(mockUsersRepository.findById).toHaveBeenCalledWith('user-123');
-    expect(mockProfessionalsRepository.findByUserId).toHaveBeenCalledWith(
-      'user-123',
-    );
+    expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('john@example.com');
+    expect(mockProfessionalsRepository.findByUserId).toHaveBeenCalledWith('user-123');
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
       role: 'PROFISSIONAL',
     });
@@ -89,37 +84,30 @@ describe('Create Professional Use Case', () => {
   });
 
   it('deve lançar erro quando usuário não existe', async () => {
-    // Configurar mocks
-    mockUsersRepository.findById.mockResolvedValue(null);
+    mockUsersRepository.findByEmail.mockResolvedValue(null);
 
-    // Executar e verificar
     await expect(
       useCase.execute({
-        userId: 'non-existent-user',
+        email: 'nonexistent@example.com',
         especialidade: 'Dentista',
       }),
     ).rejects.toThrow(UserNotFoundError);
   });
 
   it('deve lançar erro quando usuário já é profissional', async () => {
-    // Configurar mocks
-    mockUsersRepository.findById.mockResolvedValue(mockUser);
-    mockProfessionalsRepository.findByUserId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
+    mockProfessionalsRepository.findByUserId.mockResolvedValue(mockProfessional);
 
-    // Executar e verificar
     await expect(
       useCase.execute({
-        userId: 'user-123',
+        email: 'john@example.com',
         especialidade: 'Dentista',
       }),
     ).rejects.toThrow(UserAlreadyProfessionalError);
   });
 
   it('deve criar profissional com dados mínimos', async () => {
-    // Configurar mocks
-    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
     mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
@@ -131,13 +119,11 @@ describe('Create Professional Use Case', () => {
       documento: null,
     });
 
-    // Executar
     const result = await useCase.execute({
-      userId: 'user-123',
+      email: 'john@example.com',
       especialidade: 'Dentista',
     });
 
-    // Verificar
     expect(result).toEqual({
       ...mockProfessional,
       bio: null,
@@ -154,8 +140,7 @@ describe('Create Professional Use Case', () => {
   });
 
   it('deve atualizar role do usuário para PROFISSIONAL', async () => {
-    // Configurar mocks
-    mockUsersRepository.findById.mockResolvedValue(mockUser);
+    mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
     mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
@@ -163,31 +148,26 @@ describe('Create Professional Use Case', () => {
     });
     mockProfessionalsRepository.create.mockResolvedValue(mockProfessional);
 
-    // Executar
     await useCase.execute({
-      userId: 'user-123',
+      email: 'john@example.com',
       especialidade: 'Dentista',
     });
 
-    // Verificar se a role foi atualizada
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
       role: 'PROFISSIONAL',
     });
   });
 
   it('não deve chamar create se validações falharem', async () => {
-    // Configurar mocks para simular usuário não encontrado
-    mockUsersRepository.findById.mockResolvedValue(null);
+    mockUsersRepository.findByEmail.mockResolvedValue(null);
 
-    // Executar e verificar
     await expect(
       useCase.execute({
-        userId: 'user-123',
+        email: 'john@example.com',
         especialidade: 'Dentista',
       }),
     ).rejects.toThrow();
 
-    // Verificar que create não foi chamado
     expect(mockProfessionalsRepository.create).not.toHaveBeenCalled();
   });
 });

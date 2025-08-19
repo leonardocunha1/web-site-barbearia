@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,16 +11,17 @@ import {
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
+import { ClassValue } from "clsx";
 
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
+  title?: React.ReactNode;
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "full";
   removeCloseButton?: boolean;
   children: React.ReactNode;
-  className?: string;
+  className?: ClassValue;
 };
 
 const sizeClasses = {
@@ -29,6 +31,8 @@ const sizeClasses = {
   xl: "max-w-xl",
   full: "max-w-none w-full h-full",
 };
+
+const ANIMATION_MS = 200;
 
 export function Modal({
   isOpen,
@@ -40,27 +44,59 @@ export function Modal({
   removeCloseButton = false,
   className,
 }: ModalProps) {
+  const [localOpen, setLocalOpen] = useState(isOpen);
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+      setLocalOpen(true);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setLocalOpen(false);
+      closeTimeoutRef.current = window.setTimeout(() => {
+        closeTimeoutRef.current = null;
+        onClose(); // chamado DEPOIS da animação
+      }, ANIMATION_MS);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={localOpen} onOpenChange={handleOpenChange}>
       <DialogContent
+        showCloseButton={false}
         className={cn(
           sizeClasses[size],
+          "overflow-hidden rounded-xl border border-gray-200 bg-white p-0 shadow-lg transition-all duration-200",
+          "data-[state=closed]:animate-[var(--animate-fade-out)] data-[state=open]:animate-[var(--animate-fade-in)]",
+          "data-[state=closed]:animate-[var(--animate-zoom-out-95)] data-[state=open]:animate-[var(--animate-zoom-in-95)]",
+          size === "full" && "h-screen rounded-none",
           className,
-          size === "full" && "h-screen rounded-none"
         )}
-        onPointerDownOutside={(e) => e.preventDefault()}
       >
         {(title || !removeCloseButton) && (
-          <DialogHeader>
+          <DialogHeader className="bg-gray-50 px-6 py-4">
             <div className="flex items-center justify-between">
-              {title && <DialogTitle>{title}</DialogTitle>}
+              {title && (
+                <DialogTitle className="text-lg font-semibold text-gray-900">
+                  {title}
+                </DialogTitle>
+              )}
               {!removeCloseButton && (
                 <DialogClose asChild>
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={onClose}
+                    size="icon"
+                    className="rounded-full hover:bg-gray-200"
                   >
                     <X className="h-4 w-4" />
                     <span className="sr-only">Fechar</span>
@@ -71,10 +107,10 @@ export function Modal({
           </DialogHeader>
         )}
 
-        <div className="py-4">{children}</div>
+        <div className="px-6 py-4 text-gray-700">{children}</div>
 
         {footer && (
-          <div className="flex justify-end space-x-2 border-t pt-4">
+          <div className="flex justify-end space-x-2 border-t bg-gray-50 px-6 py-4">
             {footer}
           </div>
         )}
