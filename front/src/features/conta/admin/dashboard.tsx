@@ -21,7 +21,7 @@ export default function AdminDashboard() {
         },
         {
           value: "info-professional",
-          label: "Informações do Profissional",
+          label: "Gestão de Funcionários",
           content: <InfoProfissionalSection />,
         },
       ]}

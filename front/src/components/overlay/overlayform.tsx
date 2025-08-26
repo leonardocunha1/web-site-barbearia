@@ -47,9 +47,8 @@ export function OverlayForm<T extends z.ZodTypeAny>({
         <DynamicForm<T>
           {...formProps}
           onSuccess={() => {
-            formProps.onSuccess?.(); // lógica do form
-            onClose?.(); // apenas sinaliza que quer fechar
-            // Modal intercepta o onClose e anima
+            formProps.onSuccess?.();
+            onClose?.();
           }}
         />
       </div>

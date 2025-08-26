@@ -65,7 +65,7 @@ export function Modal({
       setLocalOpen(false);
       closeTimeoutRef.current = window.setTimeout(() => {
         closeTimeoutRef.current = null;
-        onClose(); // chamado DEPOIS da animação
+        onClose();
       }, ANIMATION_MS);
     }
   };
@@ -76,7 +76,7 @@ export function Modal({
         showCloseButton={false}
         className={cn(
           sizeClasses[size],
-          "overflow-hidden rounded-xl border border-gray-200 bg-white p-0 shadow-lg transition-all duration-200",
+          "w-[90%] overflow-hidden rounded-xl border border-gray-200 bg-white p-0 shadow-lg transition-all duration-200",
           "data-[state=closed]:animate-[var(--animate-fade-out)] data-[state=open]:animate-[var(--animate-fade-in)]",
           "data-[state=closed]:animate-[var(--animate-zoom-out-95)] data-[state=open]:animate-[var(--animate-zoom-in-95)]",
           size === "full" && "h-screen rounded-none",

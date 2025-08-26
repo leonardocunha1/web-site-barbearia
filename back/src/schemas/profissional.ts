@@ -98,8 +98,7 @@ export const searchProfessionalsQuerySchema = paginationSchema
         invalid_type_error: "O status ativo deve ser verdadeiro ou falso",
       })
       .optional()
-      .default(true)
-      .describe("Filtrar por status ativo (padrão: verdadeiro)"),
+      .describe("Filtrar por status ativo"),
   })
   .describe("Busca de profissionais com parâmetros de paginação");
 

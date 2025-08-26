@@ -11,6 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDown, Menu } from "lucide-react";
+import { useLogoutUser } from "@/api";
+import { useUser } from "@/contexts/user";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface TabItem {
   value: string;
@@ -31,7 +35,24 @@ export function DashboardLayout({
   tabs,
   defaultTab = "overview",
 }: DashboardLayoutProps) {
+  const router = useRouter();
   const [tab, setTab] = useState(defaultTab);
+  const { setUser } = useUser();
+  const { mutateAsync: logout } = useLogoutUser();
+
+  const handleLogout = async () => {
+    try {
+      await logout(undefined, {
+        onSuccess: () => {
+          toast.success("Logout realizado com sucesso");
+          setUser(null);
+          router.push("/");
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="w-full flex-1 space-y-4 px-4 lg:px-0">
@@ -40,7 +61,13 @@ export function DashboardLayout({
         <h1 className="text-3xl font-bold">{title}</h1>
         <div className="flex items-center gap-4">
           {iconGroup}
-          <Button variant="outline">Sair</Button>
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="cursor-pointer"
+          >
+            Sair
+          </Button>
         </div>
       </div>
 
@@ -49,7 +76,7 @@ export function DashboardLayout({
         <div className="flex items-center gap-2">
           {/* Tabs desktop */}
           <ScrollArea className="hidden w-full md:block">
-            <TabsList className="inline-flex flex-nowrap">
+            <TabsList className="inline-flex flex-nowrap bg-stone-200">
               {tabs.map((tabItem) => (
                 <TabsTrigger key={tabItem.value} value={tabItem.value}>
                   {tabItem.label}

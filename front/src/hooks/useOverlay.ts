@@ -76,8 +76,6 @@ export const useOverlay = create<ModalStore<OverlayTypes>>((set, get) => ({
       type: options?.type ?? 'drawer',
     });
   },
-  // A função close está correta. Ela apenas muda o estado.
-  // O componente Modal vai interceptar essa mudança para animar.
   close: () => {
     set({
       isOpen: false,

@@ -5,6 +5,7 @@ import { UserAlreadyProfessionalError } from '@/use-cases/errors/user-already-pr
 import { makeCreateProfessionalUseCase } from '@/use-cases/factories/make-create-professional-use-case';
 import { formatZodError } from '@/utils/formatZodError';
 import { createProfessionalBodySchema } from '@/schemas/profissional';
+import { UserCannotBeProfessionalError } from '@/use-cases/errors/user-cannot-be-professional-error';
 
 export async function createProfessional(
   request: FastifyRequest,
@@ -26,6 +27,10 @@ export async function createProfessional(
       return reply.status(409).send({ message: error.message });
     }
 
+    if (error instanceof UserCannotBeProfessionalError) {
+      return reply.status(409).send({ message: error.message });
+    }
+
     if (error instanceof z.ZodError) {
       return reply.status(400).send(formatZodError(error));
     }
@@ -33,3 +38,4 @@ export async function createProfessional(
     throw error;
   }
 }
+

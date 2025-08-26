@@ -1,6 +1,6 @@
-import { Prisma, Professional, Service, User } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
-import { ProfessionalsRepository } from '../professionals-repository';
+import { Prisma, Professional, Service, User } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { ProfessionalsRepository } from "../professionals-repository";
 
 export class PrismaProfessionalsRepository implements ProfessionalsRepository {
   async findById(id: string): Promise<Professional | null> {
@@ -16,7 +16,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
   }
 
   async findByProfessionalId(
-    id: string,
+    id: string
   ): Promise<(Professional & { user: User }) | null> {
     return prisma.professional.findUnique({
       where: { id },
@@ -32,7 +32,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
 
   async update(
     id: string,
-    data: Prisma.ProfessionalUncheckedUpdateInput,
+    data: Prisma.ProfessionalUncheckedUpdateInput
   ): Promise<Professional> {
     return prisma.professional.update({
       where: { id },
@@ -55,20 +55,22 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     const skip = (params.page - 1) * params.limit;
 
     const where: Prisma.ProfessionalWhereInput = {
-      especialidade: params.especialidade
-        ? {
-            contains: params.especialidade,
-            mode: Prisma.QueryMode.insensitive,
-          }
-        : undefined,
-      ativo: params.ativo,
+      ...(params.especialidade && {
+        especialidade: {
+          contains: params.especialidade,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      }),
+      ...(params.ativo !== undefined && { ativo: params.ativo }),
     };
+
+    console.log("Where clause:", where);
 
     const professionals = await prisma.professional.findMany({
       where,
       skip,
       take: params.limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         user: true,
         ServiceProfessional: {
@@ -90,13 +92,13 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     ativo?: boolean;
   }): Promise<number> {
     const where: Prisma.ProfessionalWhereInput = {
-      especialidade: params.especialidade
-        ? {
-            contains: params.especialidade,
-            mode: Prisma.QueryMode.insensitive,
-          }
-        : undefined,
-      ativo: params.ativo,
+      ...(params.especialidade && {
+        especialidade: {
+          contains: params.especialidade,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      }),
+      ...(params.ativo !== undefined && { ativo: params.ativo }),
     };
 
     return prisma.professional.count({ where });
@@ -107,41 +109,42 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     page: number;
     limit: number;
     ativo?: boolean;
-  }): Promise<
-    (Professional & {
-      user: User;
-      services: Service[];
-    })[]
-  > {
+  }): Promise<(Professional & { user: User; services: Service[] })[]> {
     const skip = (params.page - 1) * params.limit;
 
-    const results = await prisma.professional.findMany({
-      where: {
-        OR: [
-          { especialidade: { contains: params.query, mode: 'insensitive' } },
-          {
-            ServiceProfessional: {
-              some: {
-                service: {
-                  OR: [
-                    { nome: { contains: params.query, mode: 'insensitive' } },
-                    {
-                      descricao: {
-                        contains: params.query,
-                        mode: 'insensitive',
+    const where: Prisma.ProfessionalWhereInput = {
+      AND: [
+        {
+          OR: [
+            { especialidade: { contains: params.query, mode: "insensitive" } },
+            {
+              ServiceProfessional: {
+                some: {
+                  service: {
+                    OR: [
+                      { nome: { contains: params.query, mode: "insensitive" } },
+                      {
+                        descricao: {
+                          contains: params.query,
+                          mode: "insensitive",
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
               },
             },
-          },
-        ],
-        ativo: params.ativo,
-      },
+          ],
+        },
+        ...(params.ativo !== undefined ? [{ ativo: params.ativo }] : []),
+      ],
+    };
+
+    const results = await prisma.professional.findMany({
+      where,
       skip,
       take: params.limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         user: true,
         ServiceProfessional: {
@@ -162,30 +165,34 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     query: string;
     ativo?: boolean;
   }): Promise<number> {
-    return prisma.professional.count({
-      where: {
-        OR: [
-          { especialidade: { contains: params.query, mode: 'insensitive' } },
-          {
-            ServiceProfessional: {
-              some: {
-                service: {
-                  OR: [
-                    { nome: { contains: params.query, mode: 'insensitive' } },
-                    {
-                      descricao: {
-                        contains: params.query,
-                        mode: 'insensitive',
+    const where: Prisma.ProfessionalWhereInput = {
+      AND: [
+        {
+          OR: [
+            { especialidade: { contains: params.query, mode: "insensitive" } },
+            {
+              ServiceProfessional: {
+                some: {
+                  service: {
+                    OR: [
+                      { nome: { contains: params.query, mode: "insensitive" } },
+                      {
+                        descricao: {
+                          contains: params.query,
+                          mode: "insensitive",
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
               },
             },
-          },
-        ],
-        ativo: params.ativo,
-      },
-    });
+          ],
+        },
+        ...(params.ativo !== undefined ? [{ ativo: params.ativo }] : []),
+      ],
+    };
+
+    return prisma.professional.count({ where });
   }
 }

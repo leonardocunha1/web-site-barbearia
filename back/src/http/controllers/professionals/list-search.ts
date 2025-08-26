@@ -13,6 +13,7 @@ export async function listOrSearchProfessionals(
     const { page, limit, query, especialidade, ativo } =
       listProfessionalsQuerySchema.parse(request.query);
 
+
     let response: ListProfessionalsResponse;
 
     if (query) {
@@ -35,7 +36,6 @@ export async function listOrSearchProfessionals(
       });
     }
 
-    console.log(response.professionals[0].user.telefone)
 
     return reply.status(200).send(response);
   } catch (error) {

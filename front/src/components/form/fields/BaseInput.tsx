@@ -77,6 +77,7 @@ export function BaseInput({
           {...props}
           type={showPasswordToggle && showPassword ? "text" : type}
           className={cn(
+            "text-sm",
             error && "border-destructive focus-visible:ring-destructive",
             Icon && "pl-10",
             showPasswordToggle && "pr-10",

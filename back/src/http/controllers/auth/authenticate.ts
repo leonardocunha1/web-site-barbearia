@@ -34,6 +34,7 @@ export async function authenticate(
       active: user.active,
     };
 
+
     return tokenService
       .setAuthCookies(token, refreshToken)
       .status(200)
