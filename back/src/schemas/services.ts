@@ -29,17 +29,15 @@ export const listServicesQuerySchema = paginationSchema.extend({
 });
 
 export const servicesSchema = z.object({
-  id: z.string()
-    .uuid({ message: 'ID do serviço inválido' }),
+  id: z.string().uuid({ message: 'ID do serviço inválido' }),
   nome: z.string(),
-  descricao: z.string().optional(),
-  categoria: z.string().optional(),
+  descricao: z.string().nullable(),
+  categoria: z.string().nullable(),
   ativo: z.boolean(),
-  createdAt: z.string()
-    .datetime({ message: 'Data de criação inválida' }),
-  updatedAt: z.string()
-    .datetime({ message: 'Data de atualização inválida' }),
+  createdAt: z.date().transform((d) => d.toISOString()),
+  updatedAt: z.date().transform((d) => d.toISOString()),
 });
+
 
 export const updateServiceBodySchema = z.object({
   nome: z.string()

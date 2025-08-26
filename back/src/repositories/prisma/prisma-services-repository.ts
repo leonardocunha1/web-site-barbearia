@@ -13,14 +13,8 @@ export interface ListServicesParams {
 
 const includeProfessional = {
   profissionais: {
-    select: {
-      id: true,
-    },
     include: {
       professional: {
-        select: {
-          id: true,
-        },
         include: {
           user: {
             select: {
@@ -33,6 +27,7 @@ const includeProfessional = {
     },
   },
 };
+
 
 export class PrismaServicesRepository implements ServicesRepository {
   async create(data: Prisma.ServiceCreateInput): Promise<Service> {

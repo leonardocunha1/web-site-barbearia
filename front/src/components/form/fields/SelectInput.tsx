@@ -43,10 +43,17 @@ export function SelectInput({ field }: { field: SelectField }) {
         <SelectTrigger className={cn("w-full", field.className)}>
           <SelectValue placeholder={field.placeholder || "Selecione..."} />
         </SelectTrigger>
-        <SelectContent>
+        {/* <SelectContent>
           {field.placeholder && (
             <SelectItem value="">{field.placeholder}</SelectItem>
           )}
+          {field.options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent> */}
+        <SelectContent>
           {field.options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}

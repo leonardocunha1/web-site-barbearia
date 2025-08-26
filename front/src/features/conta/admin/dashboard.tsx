@@ -1,7 +1,8 @@
 import { Briefcase, UserCircle2 } from "lucide-react";
 import { OverviewSection } from "./overview";
 import { DashboardLayout } from "../layout/dashboard-layout";
-import { InfoProfissionalSection } from "./info-professional";
+import ServicosSection from "./servicos-section/layout";
+import { ProfissionalSection } from "./professional-section/layout";
 
 export default function AdminDashboard() {
   return (
@@ -21,9 +22,14 @@ export default function AdminDashboard() {
         },
         {
           value: "info-professional",
-          label: "Gestão de Funcionários",
-          content: <InfoProfissionalSection />,
+          label: "Funcionários",
+          content: <ProfissionalSection />,
         },
+        {
+          value: "servicos",
+          label: "Serviços",
+          content: <ServicosSection />,
+        }
       ]}
     />
   );
