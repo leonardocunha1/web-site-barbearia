@@ -210,6 +210,11 @@ export const createProfessionalBodySchema = z
       .regex(urlRegex, { message: "Formato de URL inválido" })
       .optional()
       .describe("URL do avatar do profissional"),
+
+    ativo: z
+      .boolean()
+      .default(true)
+      .describe("Status ativo do profissional"),
   })
   .describe("Dados para criação de novo profissional");
 

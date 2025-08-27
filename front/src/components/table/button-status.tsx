@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function ProfessionalStatus({ value }: { value: string }) {
+export function ButtonStatus({ value }: { value: string }) {
   return (
     <Button
       variant={value === "Ativo" ? "default" : "destructive"}

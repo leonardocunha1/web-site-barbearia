@@ -10,7 +10,7 @@ export async function createService(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { nome, descricao, categoria } = createServiceBodySchema.parse(
+  const { nome, descricao, categoria, ativo } = createServiceBodySchema.parse(
     request.body,
   );
 
@@ -21,6 +21,7 @@ export async function createService(
       nome,
       descricao,
       categoria,
+      ativo
     });
 
     return reply.status(201).send();

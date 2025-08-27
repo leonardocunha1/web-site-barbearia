@@ -4,7 +4,7 @@ import { FormField } from "@/components/form/types";
 export const professionalSchema = z.object({
   email: z.string().email("Email inválido"),
   especialidade: z.string().min(1, "Informe a função"),
-  status: z.enum(["Ativo", "Inativo"], {
+  ativo: z.enum(["Ativo", "Inativo"], {
     errorMap: () => ({ message: "Selecione um status" }),
   }),
 });
@@ -27,7 +27,7 @@ export const professionalFields: FormField[] = [
     ],
   },
   {
-    name: "status",
+    name: "ativo",
     label: "Status",
     type: "select",
     placeholder: "Selecione o status",

@@ -1,20 +1,27 @@
 "use client";
 
 import { useOverlay } from "@/hooks/useOverlay";
-
 import { CreateServiceBody } from "@/api";
 import { serviceFields, serviceSchema } from "./service-form-config";
 
+export type ServiceFormValues = Omit<CreateServiceBody, "ativo"> & {
+  ativo: "Ativo" | "Inativo";
+};
+
 type OpenServiceFormProps = {
   mode: "create" | "edit";
-  initialValues?: Partial<CreateServiceBody & { status: string }>;
-  onSubmit: (values: CreateServiceBody & { status: string }) => Promise<void>;
+  initialValues?: Partial<ServiceFormValues>;
+  onSubmit: (values: ServiceFormValues) => Promise<void>;
 };
 
 export function useServiceFormModal() {
   const { open } = useOverlay();
 
-  const openServiceForm = ({ mode, initialValues, onSubmit }: OpenServiceFormProps) => {
+  const openServiceForm = ({
+    mode,
+    initialValues,
+    onSubmit,
+  }: OpenServiceFormProps) => {
     open(
       {
         schema: serviceSchema,
@@ -25,7 +32,7 @@ export function useServiceFormModal() {
         initialValues: {
           nome: "",
           descricao: "",
-          categoria: "cabelo",
+          categoria: "",
           ...initialValues,
         },
         onSubmit,

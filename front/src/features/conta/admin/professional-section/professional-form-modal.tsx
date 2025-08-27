@@ -1,19 +1,30 @@
 "use client";
 
 import { useOverlay } from "@/hooks/useOverlay";
-import { professionalSchema, professionalFields } from "./professional-form-config";
+import {
+  professionalSchema,
+  professionalFields,
+} from "./professional-form-config";
 import { CreateProfessionalBody } from "@/api";
+
+export type ProfessionalFormValues = Omit<CreateProfessionalBody, "ativo"> & {
+  ativo: "Ativo" | "Inativo";
+};
 
 type OpenProfessionalFormProps = {
   mode: "create" | "edit";
-  initialValues?: Partial<CreateProfessionalBody & { status: string }>;
-  onSubmit: (values: CreateProfessionalBody & { status: string }) => Promise<void>;
+  initialValues?: Partial<ProfessionalFormValues>;
+  onSubmit: (values: ProfessionalFormValues) => Promise<void>;
 };
 
 export function useProfessionalFormModal() {
   const { open } = useOverlay();
 
-  const openProfessionalForm = ({ mode, initialValues, onSubmit }: OpenProfessionalFormProps) => {
+  const openProfessionalForm = ({
+    mode,
+    initialValues,
+    onSubmit,
+  }: OpenProfessionalFormProps) => {
     open(
       {
         schema: professionalSchema,
@@ -24,7 +35,7 @@ export function useProfessionalFormModal() {
         initialValues: {
           email: "",
           especialidade: "",
-          status: "Ativo",
+          ativo: "Ativo",
           ...initialValues,
         },
         onSubmit,
@@ -32,7 +43,8 @@ export function useProfessionalFormModal() {
       {
         type: "form",
         renderAs: "modal",
-        title: mode === "create" ? "Adicionar Profissional" : "Editar Profissional",
+        title:
+          mode === "create" ? "Adicionar Profissional" : "Editar Profissional",
       },
     );
   };

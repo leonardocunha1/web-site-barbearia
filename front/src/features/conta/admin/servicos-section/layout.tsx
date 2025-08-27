@@ -7,18 +7,19 @@ import { GenericTable, Column } from "@/components/table/generic-table";
 import {
   useCreateService,
   useUpdateServiceById,
-  useListServices, // supondo que exista essa query na API
-  CreateServiceBody,
+  useListServices,
   ListServices200ServicesItem,
 } from "@/api";
 import { toast } from "sonner";
-import { useServiceFormModal } from "./services-form-modal";
+import { useServiceFormModal, ServiceFormValues } from "./services-form-modal";
+import { ButtonStatus } from "@/components/table/button-status";
 
 type Service = {
   id: string;
   nome: string;
   descricao?: string;
-  categoria?: string;
+  categoria?: "Cabelo" | "Barba" | "Cabelo + Barba";
+  ativo: "Ativo" | "Inativo";
 };
 
 export default function ServicosSection() {
@@ -31,16 +32,27 @@ export default function ServicosSection() {
     response?.services?.map((s: ListServices200ServicesItem) => ({
       id: s.id,
       nome: s.nome,
-      descricao: s.descricao,
-      categoria: s.categoria === 'completo' ? "Cabelo + Barba" : s.categoria === 'cabelo' ? "Cabelo" : "Barba",
+      descricao: s.descricao ?? undefined,
+      categoria:
+        s.categoria === "completo"
+          ? "Cabelo + Barba"
+          : s.categoria === "cabelo"
+            ? "Cabelo"
+            : "Barba",
+      ativo: s.ativo ? "Ativo" : "Inativo",
     })) ?? [];
 
   const handleAdd = () => {
     openServiceForm({
       mode: "create",
-      onSubmit: async (values: CreateServiceBody) => {
+      onSubmit: async (values: ServiceFormValues) => {
         await createService(
-          { data: values },
+          {
+            data: {
+              ...values,
+              ativo: values.ativo === "Ativo",
+            },
+          },
           {
             onSuccess: () => {
               toast.success("Serviço criado com sucesso!");
@@ -61,11 +73,23 @@ export default function ServicosSection() {
       initialValues: {
         nome: service.nome,
         descricao: service.descricao,
-        categoria: service.categoria,
+        categoria:
+          service.categoria === "Cabelo + Barba"
+            ? "completo"
+            : service.categoria === "Cabelo"
+              ? "cabelo"
+              : "barba",
+        ativo: service.ativo,
       },
-      onSubmit: async (values: CreateServiceBody) => {
+      onSubmit: async (values: ServiceFormValues) => {
         await updateService(
-          { data: values, id: service.id },
+          {
+            id: service.id,
+            data: {
+              ...values,
+              ativo: values.ativo === "Ativo",
+            },
+          },
           {
             onSuccess: () => {
               toast.success("Serviço atualizado com sucesso!");
@@ -84,13 +108,21 @@ export default function ServicosSection() {
     { header: "Nome", accessor: "nome" },
     { header: "Descrição", accessor: "descricao" },
     { header: "Categoria", accessor: "categoria" },
+    {
+      header: "Status",
+      accessor: "ativo",
+      render: (value) => <ButtonStatus value={value as string} />,
+      align: "center",
+    },
   ];
 
   if (isLoading) {
     return (
       <div className="text-center">
         <div className="border-principal-500 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-t-transparent" />
-        <p className="text-principal-600 mt-2 text-sm">Carregando serviços...</p>
+        <p className="text-principal-600 mt-2 text-sm">
+          Carregando serviços...
+        </p>
       </div>
     );
   }

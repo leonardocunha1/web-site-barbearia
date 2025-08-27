@@ -42,8 +42,8 @@ export const zodlistProfessionalServicesResponse = zod.object({
   "services": zod.array(zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
-  "descricao": zod.string().optional(),
-  "categoria": zod.string().optional(),
+  "descricao": zod.string().nullable(),
+  "categoria": zod.string().nullable(),
   "ativo": zod.boolean(),
   "createdAt": zod.string().datetime({}),
   "updatedAt": zod.string().datetime({})

@@ -14,7 +14,7 @@ export type ListOrSearchProfessionals200ProfessionalsItemUser = {
   /**
    * Número de telefone do usuário
    * @nullable
-   * @pattern ^\+?[0-9]{10,15}$
+   * @pattern ^\+?[\d\s()-]{10,20}$
    */
   telefone?: string | null;
 };

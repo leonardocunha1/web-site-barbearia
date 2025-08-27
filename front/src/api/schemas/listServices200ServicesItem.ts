@@ -1,8 +1,10 @@
 export type ListServices200ServicesItem = {
   id: string;
   nome: string;
-  descricao?: string;
-  categoria?: string;
+  /** @nullable */
+  descricao: string | null;
+  /** @nullable */
+  categoria: string | null;
   ativo: boolean;
   createdAt: string;
   updatedAt: string;

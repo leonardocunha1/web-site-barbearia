@@ -11,6 +11,7 @@ export const createServiceBodySchema = z.object({
   categoria: z.string()
     .max(50, { message: 'A categoria não pode exceder 50 caracteres' })
     .optional(),
+  ativo: z.boolean().default(true),
 });
 
 export const listServicesQuerySchema = paginationSchema.extend({

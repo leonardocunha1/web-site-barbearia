@@ -28,7 +28,7 @@ export type ListOrSearchProfessionalsParams = {
    */
   query?: string;
   /**
-   * Filtrar por status ativo (padrão: verdadeiro)
+   * Filtrar por status ativo
    */
   ativo?: boolean;
 };

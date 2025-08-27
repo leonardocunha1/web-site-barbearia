@@ -2,7 +2,7 @@
  * Dados para criação de novo profissional
  */
 export type CreateProfessionalBody = {
-  /** ID do usuário existente para associar ao profissional */
+  /** Email do profissional */
   email: string;
   /**
    * Especialidade do profissional
@@ -20,4 +20,6 @@ export type CreateProfessionalBody = {
    * @pattern ^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$
    */
   avatarUrl?: string;
+  /** Status ativo do profissional */
+  ativo?: boolean;
 };

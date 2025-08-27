@@ -1,15 +1,14 @@
 import { ServicesRepository } from '@/repositories/services-repository';
 import type { Service } from '@prisma/client';
 import { ServiceAlreadyExistsError } from '../errors/service-already-exists-error';
-
+interface CreateServiceResponse {
+  service: Service;
+}
 interface CreateServiceRequest {
   nome: string;
   descricao?: string;
   categoria?: string;
-}
-
-interface CreateServiceResponse {
-  service: Service;
+  ativo: boolean; 
 }
 
 export class CreateServiceUseCase {
@@ -19,6 +18,7 @@ export class CreateServiceUseCase {
     nome,
     descricao,
     categoria,
+    ativo,
   }: CreateServiceRequest): Promise<CreateServiceResponse> {
     const existingService = await this.servicesRepository.findByName(nome);
     if (existingService) {
@@ -29,6 +29,7 @@ export class CreateServiceUseCase {
       nome,
       descricao,
       categoria,
+      ativo,
     });
 
     return { service };

@@ -10,6 +10,7 @@ interface CreateProfessionalUseCaseRequest {
   bio?: string;
   documento?: string;
   avatarUrl?: string;
+  ativo?: boolean;
 }
 
 export class CreateProfessionalUseCase {
@@ -42,7 +43,7 @@ export class CreateProfessionalUseCase {
       especialidade: data.especialidade,
       bio: data.bio,
       documento: data.documento,
-      ativo: true,
+      ativo: data.ativo,
       avatarUrl: data.avatarUrl,
       user: { connect: { id: user.id } },
     });

@@ -11,6 +11,9 @@ export const serviceSchema = z.object({
   categoria: z.string()
     .max(50, { message: 'A categoria não pode exceder 50 caracteres' })
     .optional(),
+  ativo: z.enum(["Ativo", "Inativo"], {
+    errorMap: () => ({ message: "Selecione um status" }),
+  }),
 });
 
 export const serviceFields: FormField[] = [
@@ -18,9 +21,15 @@ export const serviceFields: FormField[] = [
   { name: "descricao", label: "Descrição", type: "textarea" },
   { name: "categoria", label: "Categoria", type: "select",
     options: [
-        { value: "cabelo", label: "Cabelo" },
-        { value: "barba", label: "Barba" },
-        { value: "completo", label: "Cabelo + Barba" }
+      { value: "cabelo", label: "Cabelo" },
+      { value: "barba", label: "Barba" },
+      { value: "completo", label: "Cabelo + Barba" }
     ]
   },
+  { name: "ativo", label: "Status", type: "select",
+    options: [
+      { value: "Ativo", label: "Ativo" },
+      { value: "Inativo", label: "Inativo" }
+    ]
+  }
 ];

@@ -6,15 +6,16 @@ import {
 
 export const zodcreateProfessionalBodyEspecialidadeMin = 3;
 export const zodcreateProfessionalBodyAvatarUrlRegExp = new RegExp('^(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$');
-
+export const zodcreateProfessionalBodyAtivoDefault = true;
 
 export const zodcreateProfessionalBody = zod.object({
-  "email": zod.string().uuid().describe('ID do usuário existente para associar ao profissional'),
+  "email": zod.string().describe('Email do profissional'),
   "especialidade": zod.string().min(zodcreateProfessionalBodyEspecialidadeMin).describe('Especialidade do profissional'),
   "bio": zod.string().optional().describe('Biografia do profissional'),
   "documento": zod.string().optional().describe('Número do documento profissional'),
   "registro": zod.string().optional().describe('Número de registro profissional'),
-  "avatarUrl": zod.string().regex(zodcreateProfessionalBodyAvatarUrlRegExp).optional().describe('URL do avatar do profissional')
+  "avatarUrl": zod.string().regex(zodcreateProfessionalBodyAvatarUrlRegExp).optional().describe('URL do avatar do profissional'),
+  "ativo": zod.boolean().default(zodcreateProfessionalBodyAtivoDefault).describe('Status ativo do profissional')
 }).describe('Dados para criação de novo profissional')
 
 export const zodlistOrSearchProfessionalsQueryPageDefault = 1;
@@ -24,7 +25,7 @@ export const zodlistOrSearchProfessionalsQueryLimitMin = 0;
 
 export const zodlistOrSearchProfessionalsQueryLimitMax = 100;
 export const zodlistOrSearchProfessionalsQuerySortOrderDefault = "asc";export const zodlistOrSearchProfessionalsQueryQueryMin = 2;
-export const zodlistOrSearchProfessionalsQueryAtivoDefault = true;
+
 
 export const zodlistOrSearchProfessionalsQueryParams = zod.object({
   "page": zod.number().min(zodlistOrSearchProfessionalsQueryPageMin).default(zodlistOrSearchProfessionalsQueryPageDefault).describe('Número da página atual (começa em 1)'),
@@ -32,7 +33,7 @@ export const zodlistOrSearchProfessionalsQueryParams = zod.object({
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
   "sortOrder": zod.enum(['asc', 'desc']).default(zodlistOrSearchProfessionalsQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "query": zod.string().min(zodlistOrSearchProfessionalsQueryQueryMin).optional().describe('Termo de busca para profissionais'),
-  "ativo": zod.boolean().default(zodlistOrSearchProfessionalsQueryAtivoDefault).describe('Filtrar por status ativo (padrão: verdadeiro)')
+  "ativo": zod.boolean().optional().describe('Filtrar por status ativo')
 })
 
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeMin = 3;
@@ -41,7 +42,7 @@ export const zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeM
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemBioMax = 500;
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemAvatarUrlRegExp = new RegExp('^(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$');
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserNomeMin = 2;
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserTelefoneRegExp = new RegExp('^\\+?[0-9]{10,15}$');
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserTelefoneRegExp = new RegExp('^\\+?[\\d\\s()-]{10,20}$');
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemNomeMin = 2;
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescricaoMax = 200;
 

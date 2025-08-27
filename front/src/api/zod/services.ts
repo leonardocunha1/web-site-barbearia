@@ -9,12 +9,13 @@ export const zodcreateServiceBodyNomeMin = 3;
 export const zodcreateServiceBodyNomeMax = 100;
 export const zodcreateServiceBodyDescricaoMax = 500;
 export const zodcreateServiceBodyCategoriaMax = 50;
-
+export const zodcreateServiceBodyAtivoDefault = true;
 
 export const zodcreateServiceBody = zod.object({
   "nome": zod.string().min(zodcreateServiceBodyNomeMin).max(zodcreateServiceBodyNomeMax),
   "descricao": zod.string().max(zodcreateServiceBodyDescricaoMax).optional(),
-  "categoria": zod.string().max(zodcreateServiceBodyCategoriaMax).optional()
+  "categoria": zod.string().max(zodcreateServiceBodyCategoriaMax).optional(),
+  "ativo": zod.boolean().default(zodcreateServiceBodyAtivoDefault)
 })
 
 export const zodlistServicesQueryPageDefault = 1;
@@ -42,8 +43,8 @@ export const zodlistServicesResponse = zod.object({
   "services": zod.array(zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
-  "descricao": zod.string().optional(),
-  "categoria": zod.string().optional(),
+  "descricao": zod.string().nullable(),
+  "categoria": zod.string().nullable(),
   "ativo": zod.boolean(),
   "createdAt": zod.string().datetime({}),
   "updatedAt": zod.string().datetime({})
@@ -108,8 +109,8 @@ export const zodupdateServiceByIdResponse = zod.object({
   "service": zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
-  "descricao": zod.string().optional(),
-  "categoria": zod.string().optional(),
+  "descricao": zod.string().nullable(),
+  "categoria": zod.string().nullable(),
   "ativo": zod.boolean(),
   "createdAt": zod.string().datetime({}),
   "updatedAt": zod.string().datetime({})

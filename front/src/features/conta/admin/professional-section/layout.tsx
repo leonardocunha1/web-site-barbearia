@@ -9,41 +9,46 @@ import {
   useListOrSearchProfessionals,
   useUpdateProfessional,
   ListOrSearchProfessionals200ProfessionalsItem,
-  CreateProfessionalBody,
 } from "@/api";
 import { toast } from "sonner";
-import { ProfessionalStatus } from "./professional-status";
-import { useProfessionalFormModal } from "./professional-form-modal";
+import { ButtonStatus } from "../../../../components/table/button-status";
+import {
+  ProfessionalFormValues,
+  useProfessionalFormModal,
+} from "./professional-form-modal";
 
 type Professional = {
   id: string;
   name: string;
   email: string;
   role: string;
-  status: string;
+  ativo: string;
 };
 
 export function ProfissionalSection() {
   const { data: response, isLoading, refetch } = useListOrSearchProfessionals();
-  const { mutateAsync: createProfessional, isPending } = useCreateProfessional();
+  const { mutateAsync: createProfessional, isPending } =
+    useCreateProfessional();
   const { mutateAsync: updateProfessional } = useUpdateProfessional();
   const { openProfessionalForm } = useProfessionalFormModal();
 
   const professionals: Professional[] =
-    response?.professionals?.map((p: ListOrSearchProfessionals200ProfessionalsItem) => ({
-      id: p.id,
-      name: p.user.nome,
-      email: p.user.email,
-      role: p.especialidade,
-      status: p.ativo ? "Ativo" : "Inativo",
-    })) ?? [];
+    response?.professionals?.map(
+      (p: ListOrSearchProfessionals200ProfessionalsItem) => ({
+        id: p.id,
+        name: p.user.nome,
+        email: p.user.email,
+        role: p.especialidade,
+        ativo: p.ativo ? "Ativo" : "Inativo",
+      }),
+    ) ?? [];
 
   const handleAdd = () => {
     openProfessionalForm({
       mode: "create",
-      onSubmit: async (values: CreateProfessionalBody & { status: string }) => {
+      onSubmit: async (values: ProfessionalFormValues) => {
         await createProfessional(
-          { data: values },
+          { data: { ...values, ativo: values.ativo === "Ativo" } },
           {
             onSuccess: () => {
               toast.success("Profissional criado com sucesso!");
@@ -64,13 +69,13 @@ export function ProfissionalSection() {
       initialValues: {
         email: professional.email,
         especialidade: professional.role,
-        status: professional.status,
+        ativo: professional.ativo === "Ativo" ? "Ativo" : "Inativo",
       },
-      onSubmit: async (values) => {
+      onSubmit: async (values: ProfessionalFormValues) => {
         await updateProfessional(
           {
-            data: { ...values, ativo: values.status === "Ativo" },
             id: professional.id,
+            data: { ...values, ativo: values.ativo === "Ativo" },
           },
           {
             onSuccess: () => {
@@ -92,8 +97,8 @@ export function ProfissionalSection() {
     { header: "Especialidade", accessor: "role" },
     {
       header: "Status",
-      accessor: "status",
-      render: (value) => <ProfessionalStatus value={value} />,
+      accessor: "ativo",
+      render: (value) => <ButtonStatus value={value} />,
       align: "center",
     },
   ];
@@ -128,7 +133,12 @@ export function ProfissionalSection() {
           className="rounded-lg border"
           headerClassName="bg-gray-50"
           actions={(row) => (
-            <Button variant="outline" size="icon" onClick={() => handleEdit(row)} className="h-8 w-8">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleEdit(row)}
+              className="h-8 w-8"
+            >
               <Edit className="h-4 w-4" />
             </Button>
           )}

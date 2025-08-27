@@ -8,4 +8,5 @@ export type CreateServiceBody = {
   descricao?: string;
   /** @maxLength 50 */
   categoria?: string;
+  ativo?: boolean;
 };
