@@ -48,4 +48,8 @@ export interface ServiceProfessionalRepository {
     preco: number;
     duracao: number;
   }): Promise<void>;
+  deleteByServiceAndProfessional(
+    serviceId: string,
+    professionalId: string,
+  ): Promise<void>;
 }

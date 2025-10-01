@@ -9,12 +9,12 @@ import {
   listProfessionalServicesQuerySchema,
   removeServiceFromProfessionalParamsSchema,
   servicesSchema,
-  updateServiceProfessionalBodySchema,
-  updateServiceProfessionalParamsSchema,
+  updateProfessionalServicesBodySchema,
+  updateProfessionalServicesParamsSchema,
 } from '@/schemas/services';
 import { z } from 'zod';
-import { updateServiceProfessional } from './update-service-professional';
 import { addToProfessional } from './add-to-professional-service';
+import { updateProfessionalServices } from './update-service-professional';
 
 export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
   app.post(
@@ -87,8 +87,8 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
       schema: {
         operationId: 'updateServiceProfessional',
         tags: ['service-professional'],
-        body: updateServiceProfessionalBodySchema,
-        params: updateServiceProfessionalParamsSchema,
+        body: updateProfessionalServicesBodySchema,
+        params: updateProfessionalServicesParamsSchema,
         response: {
           204: z.null().describe('Serviço atualizado com sucesso.'),
           400: z.object({ message: z.string() }),
@@ -96,6 +96,6 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
         },
       },
     },
-    updateServiceProfessional,
+    updateProfessionalServices,
   );
 }

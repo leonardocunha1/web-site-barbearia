@@ -3,16 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { ProfessionalsRepository } from "../professionals-repository";
 
 export class PrismaProfessionalsRepository implements ProfessionalsRepository {
-  async findById(id: string): Promise<Professional | null> {
-    return prisma.professional.findUnique({
-      where: { id },
+  async listAllServices(): Promise<Service[]> {
+    return prisma.service.findMany({
+      where: { ativo: true },
+      orderBy: { nome: "asc" },
     });
   }
 
+  async findById(id: string): Promise<Professional | null> {
+    return prisma.professional.findUnique({ where: { id } });
+  }
+
   async findByUserId(userId: string): Promise<Professional | null> {
-    return prisma.professional.findUnique({
-      where: { userId },
-    });
+    return prisma.professional.findUnique({ where: { userId } });
   }
 
   async findByProfessionalId(
@@ -25,25 +28,18 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
   }
 
   async create(data: Prisma.ProfessionalCreateInput): Promise<Professional> {
-    return prisma.professional.create({
-      data,
-    });
+    return prisma.professional.create({ data });
   }
 
   async update(
     id: string,
     data: Prisma.ProfessionalUncheckedUpdateInput
   ): Promise<Professional> {
-    return prisma.professional.update({
-      where: { id },
-      data,
-    });
+    return prisma.professional.update({ where: { id }, data });
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.professional.delete({
-      where: { id },
-    });
+    await prisma.professional.delete({ where: { id } });
   }
 
   async list(params: {
@@ -51,7 +47,9 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     limit: number;
     especialidade?: string;
     ativo?: boolean;
-  }): Promise<(Professional & { user: User; services: Service[] })[]> {
+  }): Promise<
+    (Professional & { user: User; services: (Service & { linked: boolean })[] })[]
+  > {
     const skip = (params.page - 1) * params.limit;
 
     const where: Prisma.ProfessionalWhereInput = {
@@ -64,39 +62,34 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
       ...(params.ativo !== undefined && { ativo: params.ativo }),
     };
 
-    console.log("Where clause:", where);
-
     const professionals = await prisma.professional.findMany({
       where,
       skip,
       take: params.limit,
       orderBy: { createdAt: "desc" },
-      include: {
-        user: true,
-        ServiceProfessional: {
-          select: {
-            service: true,
-          },
-        },
-      },
+      include: { user: true, ServiceProfessional: { select: { service: true } } },
     });
 
-    return professionals.map((professional) => ({
-      ...professional,
-      services: professional.ServiceProfessional.map((sp) => sp.service),
-    }));
+    const allServices = await this.listAllServices();
+
+    return professionals.map((professional) => {
+      const linkedIds = professional.ServiceProfessional.map(sp => sp.service.id);
+      const servicesWithLinked = allServices.map(service => ({
+        ...service,
+        linked: linkedIds.includes(service.id),
+      }));
+
+      return {
+        ...professional,
+        services: servicesWithLinked,
+      };
+    });
   }
 
-  async count(params: {
-    especialidade?: string;
-    ativo?: boolean;
-  }): Promise<number> {
+  async count(params: { especialidade?: string; ativo?: boolean }): Promise<number> {
     const where: Prisma.ProfessionalWhereInput = {
       ...(params.especialidade && {
-        especialidade: {
-          contains: params.especialidade,
-          mode: Prisma.QueryMode.insensitive,
-        },
+        especialidade: { contains: params.especialidade, mode: Prisma.QueryMode.insensitive },
       }),
       ...(params.ativo !== undefined && { ativo: params.ativo }),
     };
@@ -109,7 +102,9 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     page: number;
     limit: number;
     ativo?: boolean;
-  }): Promise<(Professional & { user: User; services: Service[] })[]> {
+  }): Promise<
+    (Professional & { user: User; services: (Service & { linked: boolean })[] })[]
+  > {
     const skip = (params.page - 1) * params.limit;
 
     const where: Prisma.ProfessionalWhereInput = {
@@ -123,12 +118,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
                   service: {
                     OR: [
                       { nome: { contains: params.query, mode: "insensitive" } },
-                      {
-                        descricao: {
-                          contains: params.query,
-                          mode: "insensitive",
-                        },
-                      },
+                      { descricao: { contains: params.query, mode: "insensitive" } },
                     ],
                   },
                 },
@@ -145,26 +135,26 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
       skip,
       take: params.limit,
       orderBy: { createdAt: "desc" },
-      include: {
-        user: true,
-        ServiceProfessional: {
-          select: {
-            service: true,
-          },
-        },
-      },
+      include: { user: true, ServiceProfessional: { select: { service: true } } },
     });
 
-    return results.map((professional) => ({
-      ...professional,
-      services: professional.ServiceProfessional.map((sp) => sp.service),
-    }));
+    const allServices = await this.listAllServices();
+
+    return results.map((professional) => {
+      const linkedIds = professional.ServiceProfessional.map(sp => sp.service.id);
+      const servicesWithLinked = allServices.map(service => ({
+        ...service,
+        linked: linkedIds.includes(service.id),
+      }));
+
+      return {
+        ...professional,
+        services: servicesWithLinked,
+      };
+    });
   }
 
-  async countSearch(params: {
-    query: string;
-    ativo?: boolean;
-  }): Promise<number> {
+  async countSearch(params: { query: string; ativo?: boolean }): Promise<number> {
     const where: Prisma.ProfessionalWhereInput = {
       AND: [
         {
@@ -176,12 +166,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
                   service: {
                     OR: [
                       { nome: { contains: params.query, mode: "insensitive" } },
-                      {
-                        descricao: {
-                          contains: params.query,
-                          mode: "insensitive",
-                        },
-                      },
+                      { descricao: { contains: params.query, mode: "insensitive" } },
                     ],
                   },
                 },

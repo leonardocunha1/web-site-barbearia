@@ -10,15 +10,23 @@ export interface ProfessionalsRepository {
   update(
     id: string,
     data: Prisma.ProfessionalUncheckedUpdateInput,
-  ): Promise<Professional | null>;
+  ): Promise<Professional>; 
   delete(id: string): Promise<void>;
+
   list(params: {
     page: number;
     limit: number;
     especialidade?: string;
     ativo?: boolean;
-  }): Promise<(Professional & { user: User; services: Service[] })[]>;
+  }): Promise<
+    (Professional & {
+      user: User;
+      services: (Service & { linked: boolean })[];
+    })[]
+  >;
+
   count(params: { especialidade?: string; ativo?: boolean }): Promise<number>;
+
   search(params: {
     query: string;
     page: number;
@@ -27,7 +35,7 @@ export interface ProfessionalsRepository {
   }): Promise<
     (Professional & {
       user: User;
-      services: Service[];
+      services: (Service & { linked: boolean })[];
     })[]
   >;
 

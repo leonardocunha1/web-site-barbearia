@@ -1,39 +1,31 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { z } from 'zod';
+import { FastifyRequest, FastifyReply } from "fastify";
+import { z } from "zod";
 import {
-  updateServiceProfessionalBodySchema,
-  updateServiceProfessionalParamsSchema,
-} from '@/schemas/services';
-import { InvalidServicePriceDurationError } from '@/use-cases/errors/invalid-service-price-duration';
-import { makeUpdateServiceProfessionalUseCase } from '@/use-cases/factories/make-update-service-professional-use-case';
-import { formatZodError } from '@/utils/formatZodError';
+  updateProfessionalServicesBodySchema,
+  updateProfessionalServicesParamsSchema,
+} from "@/schemas/services";
+import { formatZodError } from "@/utils/formatZodError";
+import { makeUpdateProfessionalServicesUseCase } from "@/use-cases/factories/make-update-service-professional-use-case";
 
-export async function updateServiceProfessional(
+export async function updateProfessionalServices(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   try {
-    const { professionalId, serviceId } =
-      updateServiceProfessionalParamsSchema.parse(request.params);
-    const { preco, duracao } = updateServiceProfessionalBodySchema.parse(
-      request.body,
+    const { professionalId } = updateProfessionalServicesParamsSchema.parse(
+      request.params
     );
 
-    const useCase = makeUpdateServiceProfessionalUseCase();
+    const { services } = updateProfessionalServicesBodySchema.parse(
+      request.body
+    );
 
-    await useCase.execute({
-      serviceId,
-      professionalId,
-      preco,
-      duracao,
-    });
+    const useCase = makeUpdateProfessionalServicesUseCase();
+
+    await useCase.execute({ professionalId, services });
 
     return reply.status(204).send();
   } catch (err) {
-    if (err instanceof InvalidServicePriceDurationError) {
-      return reply.status(400).send({ message: err.message });
-    }
-
     if (err instanceof z.ZodError) {
       return reply.status(400).send(formatZodError(err));
     }

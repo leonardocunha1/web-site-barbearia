@@ -16,13 +16,14 @@ export type ProfessionalDTO = {
     id: string;
     nome: string;
     descricao?: string;
+    linked: boolean;
   }[];
 };
 
 export function toProfessionalDTO(
   professional: Professional & {
     user: User;
-    services: Service[];
+    services: (Service & { linked: boolean })[];
   },
 ): ProfessionalDTO {
   return {
@@ -41,9 +42,11 @@ export function toProfessionalDTO(
       id: service.id,
       nome: service.nome,
       descricao: service.descricao ?? undefined,
+      linked: service.linked, 
     })),
   };
 }
+
 
 export type ListProfessionalsResponse = {
   professionals: ProfessionalDTO[];

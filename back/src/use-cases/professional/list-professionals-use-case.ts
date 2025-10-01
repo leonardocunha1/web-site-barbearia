@@ -73,6 +73,8 @@ export class ListOrSearchProfessionalsUseCase {
       }),
     ]);
 
+    console.log(professionals[0].services)
+
     return {
       professionals: professionals.map(toProfessionalDTO),
       total,

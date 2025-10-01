@@ -65,17 +65,16 @@ export const professionalSchema = z
             .describe("ID do serviço"),
           nome: z
             .string()
-            .min(2, {
-              message: "O nome do serviço deve ter pelo menos 2 caracteres",
-            })
+            .min(2, { message: "O nome do serviço deve ter pelo menos 2 caracteres" })
             .describe("Nome do serviço"),
           descricao: z
             .string()
-            .max(200, {
-              message: "A descrição não pode exceder 200 caracteres",
-            })
+            .max(200, { message: "A descrição não pode exceder 200 caracteres" })
             .optional()
             .describe("Descrição do serviço"),
+          linked: z
+            .boolean()
+            .describe("Indica se o serviço está vinculado ao profissional"),
         })
       )
       .describe("Lista de serviços oferecidos pelo profissional"),
@@ -83,6 +82,7 @@ export const professionalSchema = z
   .describe(
     "Perfil completo do profissional com detalhes do usuário e serviços"
   );
+
 
 // Buscar profissionais com paginação
 export const searchProfessionalsQuerySchema = paginationSchema

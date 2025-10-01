@@ -31,6 +31,16 @@ export class PrismaServiceProfessionalRepository
     });
   }
 
+  async deleteByServiceAndProfessional(
+  serviceId: string,
+  professionalId: string,
+): Promise<void> {
+  await prisma.serviceProfessional.deleteMany({
+    where: { serviceId, professionalId },
+  });
+}
+
+
   async findByServiceAndProfessional(
     serviceId: string,
     professionalId: string,

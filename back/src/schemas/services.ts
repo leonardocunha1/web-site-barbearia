@@ -124,16 +124,17 @@ export const listProfessionalServicesQuerySchema = paginationSchema.extend({
   }).optional().default(true),
 });
 
-export const updateServiceProfessionalParamsSchema = z.object({
-  serviceId: z.string()
-    .uuid({ message: 'ID do serviço inválido' }),
-  professionalId: z.string()
-    .uuid({ message: 'ID do profissional inválido' }),
+export const updateProfessionalServicesParamsSchema = z.object({
+  professionalId: z.string().uuid(),
 });
 
-export const updateServiceProfessionalBodySchema = z.object({
-  preco: z.number()
-    .positive({ message: 'O preço deve ser um valor positivo' }),
-  duracao: z.number()
-    .positive({ message: 'A duração deve ser um valor positivo' }),
+export const updateProfessionalServicesBodySchema = z.object({
+  services: z.array(
+    z.object({
+      serviceId: z.string().uuid(),
+      preco: z.number().positive(),
+      duracao: z.number().positive(),
+      linked: z.boolean(),
+    })
+  ),
 });

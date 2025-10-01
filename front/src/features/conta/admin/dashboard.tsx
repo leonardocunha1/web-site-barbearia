@@ -2,7 +2,7 @@ import { Briefcase, UserCircle2 } from "lucide-react";
 import { OverviewSection } from "./overview";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import ServicosSection from "./servicos-section/layout";
-import { ProfissionalSection } from "./professional-section/layout";
+import { ProfissionalSection } from "./professional-section/page";
 
 export default function AdminDashboard() {
   return (
@@ -29,7 +29,7 @@ export default function AdminDashboard() {
           value: "servicos",
           label: "Serviços",
           content: <ServicosSection />,
-        }
+        },
       ]}
     />
   );
