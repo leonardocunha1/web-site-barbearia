@@ -33,6 +33,9 @@ type GenericTableProps<T> = {
   actions?: (row: T) => ReactNode;
   actionsHeader?: string;
   actionsWidth?: string | number;
+  sortBy?: string;
+  sortDirection?: "asc" | "desc";
+  onSort?: (column: keyof T) => void;
 };
 
 export function GenericTable<T>({
@@ -49,6 +52,9 @@ export function GenericTable<T>({
   actions,
   actionsHeader = "Ações",
   actionsWidth = "120px",
+  sortBy,
+  sortDirection,
+  onSort,
 }: GenericTableProps<T>) {
   const getRowKey = (row: T, index: number): string => {
     if (rowKey) {
@@ -73,6 +79,18 @@ export function GenericTable<T>({
     return cellClassName || "";
   };
 
+  const handleHeaderClick = (column: Column<T, keyof T>) => {
+    if (onSort && column.accessor) {
+      onSort(column.accessor);
+    }
+  };
+
+  const getSortIcon = (column: Column<T, keyof T>) => {
+    if (sortBy !== column.accessor) return null;
+
+    return sortDirection === "asc" ? "↑" : "↓";
+  };
+
   return (
     <div className={cn("overflow-auto", className)}>
       <Table>
@@ -81,13 +99,26 @@ export function GenericTable<T>({
             {columns.map((col, i) => (
               <TableHead
                 key={col.accessor.toString() || i.toString()}
-                className={col.className}
+                className={cn(
+                  col.className,
+                  onSort && "hover:bg-muted/50 cursor-pointer",
+                )}
                 style={{
                   width: col.width,
                   textAlign: col.align,
                 }}
+                onClick={() => handleHeaderClick(col)}
               >
-                {col.header}
+                <div
+                  className={cn(
+                    "flex items-center gap-1",
+                    col.align === "center" && "justify-center",
+                    col.align === "right" && "justify-end",
+                  )}
+                >
+                  {col.header}
+                  {getSortIcon(col)}
+                </div>
               </TableHead>
             ))}
             {actions && (
@@ -104,6 +135,7 @@ export function GenericTable<T>({
           </TableRow>
         </TableHeader>
         <TableBody>
+          {/* ... resto do código permanece igual */}
           {isLoading ? (
             Array(5)
               .fill(0)

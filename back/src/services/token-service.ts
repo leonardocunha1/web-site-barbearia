@@ -14,8 +14,8 @@ interface TokenPayload {
 
 export class TokenService {
   private readonly isProduction: boolean;
-  private readonly refreshTokenExpiration = '7d';
-  private readonly accessTokenExpiration = '1h';
+  private readonly refreshTokenExpiration = 60 * 60 * 24 * 7; // 7 dias em segundos
+  private readonly accessTokenExpiration = 60 * 60; // 1 hora em segundos
 
   constructor(private reply: FastifyReply) {
     this.isProduction = process.env.NODE_ENV === 'production';
@@ -36,39 +36,41 @@ export class TokenService {
   async generateTokens(user: UserForToken) {
     const payload = this.createTokenPayload(user);
 
-    const [token, refreshToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.reply.jwtSign(payload, {
-        sign: { sub: user.id, expiresIn: this.accessTokenExpiration }
+        sign: { sub: user.id, expiresIn: `${this.accessTokenExpiration}s` },
       }),
       this.reply.jwtSign(payload, {
-        sign: { sub: user.id, expiresIn: this.refreshTokenExpiration }
-      })
+        sign: { sub: user.id, expiresIn: `${this.refreshTokenExpiration}s` },
+      }),
     ]);
 
-    return { token, refreshToken };
+    return { token: accessToken, refreshToken };
   }
 
   async generateTokensFromPayload(payload: TokenPayload) {
-    return this.generateTokens(payload); // Reutiliza a mesma lógica
+    return this.generateTokens(payload);
   }
 
-  setAuthCookies(token: string, refreshToken: string) {
+  setAuthCookies(accessToken: string, refreshToken: string) {
     const cookieOptions = {
       path: '/',
-      secure: this.isProduction,
       httpOnly: true,
-      sameSite: 'strict' as const,
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'strict' as const : 'lax' as const, 
     };
 
-    this.reply
-      .setCookie('refreshToken', refreshToken, {
-        ...cookieOptions,
-        maxAge: 60 * 60 * 24 * 7, // 7 dias
-      })
-      .setCookie('accessToken', token, {
-        ...cookieOptions,
-        maxAge: 60 * 60, // 1 hora
-      });
+    // Refresh token -> sempre cookie
+    this.reply.setCookie('refreshToken', refreshToken, {
+      ...cookieOptions,
+      maxAge: this.refreshTokenExpiration,
+    });
+
+    // Access token -> cookie opcional, mas pode ser útil para SSR
+    this.reply.setCookie('accessToken', accessToken, {
+      ...cookieOptions,
+      maxAge: this.accessTokenExpiration,
+    });
 
     return this.reply;
   }
@@ -77,7 +79,6 @@ export class TokenService {
     this.reply
       .clearCookie('accessToken', { path: '/' })
       .clearCookie('refreshToken', { path: '/' });
-    
     return this.reply;
   }
 }

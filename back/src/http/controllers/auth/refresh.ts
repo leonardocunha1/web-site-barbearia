@@ -12,10 +12,14 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
       role: request.user.role,
     });
 
+    console.log("Generated new tokens");
+    console.log("Access Token:", token);
+    console.log("Refresh Token:", refreshToken);
+
     return tokenService
       .setAuthCookies(token, refreshToken)
       .status(200)
-      .send({ token });
+      .send({ token, refreshToken });
   } catch (err) {
     if (err instanceof InvalidTokenError) {
       return reply
@@ -29,6 +33,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
 }
 
 async function verifyRefreshToken(request: FastifyRequest) {
+  console.log(request.cookies.refreshToken)
   if (!request.cookies.refreshToken) {
     throw new InvalidTokenError();
   }

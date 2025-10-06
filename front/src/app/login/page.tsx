@@ -10,7 +10,7 @@ import { useLoginUser, useRegisterUser } from "@/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useUser } from "@/contexts/user";
-import userGet from "../api/actions/user-get";
+import userGet from "../api/actions/user";
 
 type AuthMode = "login" | "register";
 

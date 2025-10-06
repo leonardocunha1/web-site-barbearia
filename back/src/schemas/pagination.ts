@@ -1,20 +1,19 @@
 import { z } from 'zod';
 
 export const paginationSchema = z.object({
-  page: z.number()
+  page: z.coerce.number()
     .int('A página deve ser um número inteiro')
     .positive('A página deve ser maior que zero')
     .default(1)
     .describe('Número da página atual (começa em 1)'),
     
-  limit: z.number()
+  limit: z.coerce.number()
     .int('O limite deve ser um número inteiro')
     .positive('O limite deve ser maior que zero')
     .max(100, 'O limite máximo por página é 100')
     .default(10)
     .describe('Quantidade de itens por página (máximo 100)'),
     
-  // Campos opcionais para ordenação
   sortBy: z.string()
     .optional()
     .describe('Campo para ordenação (opcional)'),

@@ -53,7 +53,7 @@ app.register(fastifyJwt, {
     signed: false,
   },
   sign: {
-    expiresIn: '50m',
+    expiresIn: '7d',
   },
 });
 app.register(fastifyCors, {

@@ -51,6 +51,7 @@ export function ProfissionalSection() {
       <Card className="bg-stone-50 p-5 shadow">
         <ProfessionalActions onAdd={handleAdd} isPending={isPending} />
         <ProfessionalTable
+          totalCount={professionals.length}
           professionals={professionals}
           isLoading={isLoading}
           onEdit={handleEdit}

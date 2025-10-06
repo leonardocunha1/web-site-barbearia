@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import userGet from './user-get';
+import userGet from './user';
 import axiosInstance from '@/api/http/axios-instance';
 import { AxiosResponse } from 'axios';
 

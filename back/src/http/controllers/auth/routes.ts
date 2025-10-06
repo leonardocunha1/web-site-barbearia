@@ -112,6 +112,7 @@ export async function authRoutes(app: FastifyTypedInstance) {
           200: z
             .object({
               token: z.string(),
+              refreshToken: z.string(),
             })
             .describe('Novo token gerado com sucesso.'),
           401: z

@@ -1,13 +1,17 @@
+"use client";
+
 import { useEffect } from "react";
 import { GetUsersMe200, useLogoutUser } from "@/api";
-import userGet from "@/app/api/actions/user-get";
+import userGet from "@/app/api/actions/user";
+import { usePathname } from "next/navigation";
 
 export const useAuthValidation = (
-  _user: GetUsersMe200 | null | undefined,
+  user: GetUsersMe200 | null | undefined,
   setUser: React.Dispatch<React.SetStateAction<GetUsersMe200 | null | undefined>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   const { mutateAsync: logout } = useLogoutUser();
+  const pathname = usePathname();
 
   useEffect(() => {
     let isMounted = true;
@@ -15,7 +19,6 @@ export const useAuthValidation = (
     const validateAuth = async () => {
       try {
         const { ok, data } = await userGet();
-        console.log("Dados do usuário:", data);
 
         if (!ok || !data) {
           if (isMounted) {
@@ -32,6 +35,10 @@ export const useAuthValidation = (
         }
       } catch (error) {
         console.error("Erro inesperado na validação:", error);
+        if (isMounted) {
+          await logout();
+          setUser(null);
+        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -44,5 +51,5 @@ export const useAuthValidation = (
     return () => {
       isMounted = false;
     };
-  }, [logout, setUser, setIsLoading]);
+  }, [logout, setUser, setIsLoading, pathname]); 
 };
