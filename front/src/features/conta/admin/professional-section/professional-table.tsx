@@ -7,14 +7,8 @@ import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TableControls } from "@/components/table/table-controls";
 import { TablePagination } from "@/components/table/table-pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useTableParams } from "@/hooks/useTableParams";
+import { StatusFilter } from "@/components/table/status-filter";
 
 interface Professional {
   id: string;
@@ -63,16 +57,6 @@ export function ProfessionalTable({
     },
   ];
 
-  const handleStatusFilter = (value: string) => {
-    updateParams({
-      page: 1,
-      filters: {
-        ...params.filters,
-        status: value,
-      },
-    });
-  };
-
   const handleSort = (column: keyof Professional) => {
     const newDirection =
       params.sortBy === column && params.sortDirection === "asc"
@@ -87,19 +71,15 @@ export function ProfessionalTable({
   return (
     <div className="space-y-4">
       <TableControls>
-        <Select
-          value={params.filters.status || ""}
-          onValueChange={handleStatusFilter}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
-            <SelectItem value="ativo">Ativo</SelectItem>
-            <SelectItem value="inativo">Inativo</SelectItem>
-          </SelectContent>
-        </Select>
+        <StatusFilter
+          value={params.filters.status ?? ""}
+          onChange={(value) =>
+            updateParams({
+              page: 1,
+              filters: { ...params.filters, status: value ?? "" },
+            })
+          }
+        />
       </TableControls>
 
       <GenericTable

@@ -106,6 +106,7 @@ export default function AuthPage() {
         onSuccess: async () => {
           try {
             const { ok, data } = await userGet();
+            
             if (ok && data) {
               setUser(data);
             }

@@ -10,17 +10,21 @@ export default async function userGet() {
     const cookieStore = await cookies();
     let token = cookieStore.get("accessToken")?.value;
     const refreshToken = cookieStore.get("refreshToken")?.value;
+    console.log("Access Token:", token);
 
     const { url } = USER_GET();
 
     let response: Response;
 
     if (token) {
+      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       response = await fetch(url, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
+
     } else {
+      console.log('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
       response = new Response(null, { status: 401 });
     }
 
@@ -86,8 +90,10 @@ export default async function userGet() {
 
     const json = await response.json();
     const data = zodgetUserProfileResponse.parse(json);
+    console.log("User Data:", data);
     return { ok: true, data, error: "" };
   } catch (error) {
+    console.error("Erro na função userGet:", error);
     return apiError(error);
   }
 }
