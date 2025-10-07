@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = "asc" | "desc" | null;
 
 export interface TableParams {
   page: number;
   limit: number;
-  sortBy: string;
-  sortDirection: SortDirection;
+  sortBy?: string | null;
+  sortDirection?: SortDirection;
   filters: Record<string, string>;
 }
 
@@ -17,16 +17,21 @@ export function useTableParams(defaultParams: Partial<TableParams> = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // 🔹 Parse dos parâmetros da URL
   const params = useMemo((): TableParams => {
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const sortBy = searchParams.get('sortBy') || defaultParams.sortBy || 'id';
-    const sortDirection = (searchParams.get('sortDirection') as SortDirection) || 
-                         defaultParams.sortDirection || 'asc';
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const sortBy = searchParams.get("sortBy") || defaultParams.sortBy || null;
+
+    const sortDirectionRaw = searchParams.get("sortDirection");
+    const sortDirection =
+      sortDirectionRaw === "asc" || sortDirectionRaw === "desc"
+        ? (sortDirectionRaw as SortDirection)
+        : null;
 
     const filters: Record<string, string> = {};
     searchParams.forEach((value, key) => {
-      if (!['page', 'limit', 'sortBy', 'sortDirection'].includes(key)) {
+      if (!["page", "limit", "sortBy", "sortDirection"].includes(key)) {
         filters[key] = value;
       }
     });
@@ -40,51 +45,69 @@ export function useTableParams(defaultParams: Partial<TableParams> = {}) {
     };
   }, [searchParams, defaultParams]);
 
-  const updateParams = useCallback((updates: Partial<TableParams>) => {
-    const newParams = new URLSearchParams(searchParams);
+  // 🔹 Função interna para atualizar a URL
+  const pushParams = useCallback(
+    (paramsToPush: URLSearchParams) => {
+      const queryString = paramsToPush.toString();
+      const baseUrl = window.location.pathname; // mantém a rota atual
+      router.push(queryString ? `?${queryString}` : baseUrl, { scroll: false });
+    },
+    [router]
+  );
 
-    Object.entries(updates).forEach(([key, value]) => {
-      if (key === 'page') {
-        if (value === 1) newParams.delete('page');
-        else newParams.set('page', value.toString());
-      } 
-      else if (key === 'limit') {
-        if (value === 10) newParams.delete('limit');
-        else newParams.set('limit', value.toString());
-      }
-      else if (key === 'sortBy') {
-        if (!value) newParams.delete('sortBy');
-        else newParams.set('sortBy', value.toString());
-      }
-      else if (key === 'sortDirection') {
-        if (value === 'asc') newParams.delete('sortDirection');
-        else newParams.set('sortDirection', value.toString());
-      }
-      else if (key === 'filters') {
-        // Remove existing filters
-        newParams.forEach((_, key) => {
-          if (!['page', 'limit', 'sortBy', 'sortDirection'].includes(key)) {
+  // 🔹 Atualiza parâmetros na URL
+  const updateParams = useCallback(
+    (updates: Partial<TableParams>) => {
+      const newParams = new URLSearchParams(searchParams);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (key === "page" || key === "limit") {
+          if (value == null || (key === "page" && value === 1) || (key === "limit" && value === 10)) {
             newParams.delete(key);
+          } else {
+            newParams.set(key, value.toString());
           }
-        });
-        
-        // Add new filters
-        Object.entries(value as Record<string, string>).forEach(([filterKey, filterValue]) => {
-          if (filterValue) {
-            newParams.set(filterKey, filterValue);
+        } else if (key === "sortBy") {
+          if (!value) {
+            newParams.delete("sortBy");
+            newParams.delete("sortDirection");
+          } else {
+            newParams.set("sortBy", value.toString());
           }
-        });
-      }
-    });
+        } else if (key === "sortDirection") {
+          if (!value) {
+            newParams.delete("sortDirection");
+          } else {
+            newParams.set("sortDirection", value.toString());
+          }
+        } else if (key === "filters") {
+          // Remove filtros antigos
+          Object.keys(value as Record<string, string>).forEach((filterKey) => {
+            newParams.delete(filterKey);
+          });
+          // Adiciona novos filtros
+          Object.entries(value as Record<string, string>).forEach(([filterKey, filterValue]) => {
+            if (filterValue) newParams.set(filterKey, filterValue);
+          });
+        }
+      });
 
-    const queryString = newParams.toString();
-    const newUrl = queryString ? `?${queryString}` : '';
-    
-    router.push(newUrl, { scroll: false });
-  }, [router, searchParams]);
+      pushParams(newParams);
+    },
+    [searchParams, pushParams]
+  );
+
+  // 🔹 Limpa apenas a ordenação
+  const clearSorting = useCallback(() => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("sortBy");
+    newParams.delete("sortDirection");
+    pushParams(newParams);
+  }, [searchParams, pushParams]);
 
   return {
     params,
     updateParams,
+    clearSorting,
   };
 }

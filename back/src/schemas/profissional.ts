@@ -87,7 +87,7 @@ export const professionalSchema = z
 // Buscar profissionais com paginação
 export const searchProfessionalsQuerySchema = paginationSchema
   .extend({
-    query: z
+    search: z
       .string()
       .min(2, { message: "A busca deve ter pelo menos 2 caracteres" })
       .describe("Termo de busca para profissionais")
@@ -105,7 +105,7 @@ export const searchProfessionalsQuerySchema = paginationSchema
 // Listar profissionais com filtros
 export const listProfessionalsQuerySchema = paginationSchema
   .extend({
-    query: z
+    search: z
       .string()
       .min(2, { message: "A busca deve ter pelo menos 2 caracteres" })
       .optional()

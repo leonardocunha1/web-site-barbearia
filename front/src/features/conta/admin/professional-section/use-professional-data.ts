@@ -1,28 +1,46 @@
-import { useListOrSearchProfessionals, ListOrSearchProfessionals200ProfessionalsItem } from "@/api";
+import { Professional, servicesProfessionalsList } from "@/app/api/actions/professional";
+import { useState, useEffect, useCallback } from "react";
 
-interface Professional {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  ativo: string;
+interface UseProfessionalDataParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  especialidade?: string;
+  status?: string;
+  sortBy?: string;
+  sortDirection?: "asc" | "desc";
 }
 
-export function useProfessionalData() {
-  const { data: response, isLoading, refetch } = useListOrSearchProfessionals();
+export function useProfessionalData(params?: UseProfessionalDataParams) {
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const professionals: Professional[] = 
-    response?.professionals?.map((p: ListOrSearchProfessionals200ProfessionalsItem) => ({
-      id: p.id,
-      name: p.user.nome,
-      email: p.user.email,
-      role: p.especialidade,
-      ativo: p.ativo ? "Ativo" : "Inativo",
-    })) ?? [];
+  const fetchData = useCallback(async (queryParams?: UseProfessionalDataParams) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, ok, error } = await servicesProfessionalsList(queryParams);
+      if (ok && data) {
+        setProfessionals(data.professionals);
+      } else {
+        setError(error || "Erro ao carregar profissionais");
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData(params);
+  }, [params, fetchData]);
 
   return {
     professionals,
     isLoading,
-    refetch,
+    error,
+    refetch: () => fetchData(params),
   };
 }

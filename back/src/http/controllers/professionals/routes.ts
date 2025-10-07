@@ -100,7 +100,6 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.get(
     '/professionals',
     {
-      onRequest: [verifyJwt],
       schema: {
         operationId: 'listOrSearchProfessionals',
         tags: ['professionals'],

@@ -38,7 +38,7 @@ export async function authenticate(
     return tokenService
       .setAuthCookies(token, refreshToken)
       .status(200)
-      .send({ token, user: userWithoutPassword });
+      .send({ token, refreshToken, user: userWithoutPassword });
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
       return reply.status(401).send({ message: err.message });

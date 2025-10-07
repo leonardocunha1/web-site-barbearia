@@ -13,6 +13,8 @@ interface ListOrSearchProfessionalsUseCaseRequest {
   limit?: number;
   especialidade?: string;
   ativo?: boolean;
+  sortBy?: string; 
+  sortDirection?: "asc" | "desc";
 }
 
 export class ListOrSearchProfessionalsUseCase {
@@ -23,29 +25,35 @@ export class ListOrSearchProfessionalsUseCase {
     page = 1,
     limit = 10,
     especialidade,
-    ativo, 
+    ativo,
+    sortBy,
+    sortDirection,
   }: ListOrSearchProfessionalsUseCaseRequest): Promise<ListProfessionalsResponse> {
     // Validação de página e limite
-    if (page < 1) {
-      throw new InvalidPageError();
-    }
+    if (page < 1) throw new InvalidPageError();
+    if (limit < 1 || limit > 100) throw new InvalidLimitError();
 
-    if (limit < 1 || limit > 100) {
-      throw new InvalidLimitError();
-    }
+    // CORREÇÃO: Passe os parâmetros de ordenação diretamente, sem usar o objeto "order"
+    const repositoryParams = {
+      page,
+      limit,
+      ...(especialidade && { especialidade }),
+      ...(ativo !== undefined && { ativo }),
+      sortBy, // ← passe diretamente
+      sortDirection, // ← passe diretamente
+    };
 
-    // Se houver o parâmetro de busca
+    console.log("🚀 UseCase - Repository params:", repositoryParams);
+
     if (query && query.trim() !== "") {
       const [professionals, total] = await Promise.all([
         this.professionalsRepository.search({
+          ...repositoryParams,
           query,
-          page,
-          limit,
-          ...(ativo !== undefined ? { ativo } : {}), 
         }),
         this.professionalsRepository.countSearch({
           query,
-          ...(ativo !== undefined ? { ativo } : {}),
+          ...(ativo !== undefined && { ativo }),
         }),
       ]);
 
@@ -58,22 +66,13 @@ export class ListOrSearchProfessionalsUseCase {
       };
     }
 
-    validatePagination(page, limit);
-
     const [professionals, total] = await Promise.all([
-      this.professionalsRepository.list({
-        page,
-        limit,
-        especialidade,
-        ...(ativo !== undefined ? { ativo } : {}),
-      }),
+      this.professionalsRepository.list(repositoryParams),
       this.professionalsRepository.count({
-        especialidade,
-        ...(ativo !== undefined ? { ativo } : {}),
+        ...(especialidade && { especialidade }),
+        ...(ativo !== undefined && { ativo }),
       }),
     ]);
-
-    console.log(professionals[0].services)
 
     return {
       professionals: professionals.map(toProfessionalDTO),

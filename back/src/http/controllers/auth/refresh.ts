@@ -11,11 +11,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
       id: request.user.sub,
       role: request.user.role,
     });
-
-    console.log("Generated new tokens");
-    console.log("Access Token:", token);
-    console.log("Refresh Token:", refreshToken);
-
+    
     return tokenService
       .setAuthCookies(token, refreshToken)
       .status(200)

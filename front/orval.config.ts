@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const API_URL = process.env.API_URL || 'http://localhost:3333';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 console.log({ ORVAL_API_URL: API_URL });
 

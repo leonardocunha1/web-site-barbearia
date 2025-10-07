@@ -9,7 +9,7 @@ export function SERVICE_PROFESSIONALS_GET(
   if (query?.activeOnly !== undefined) params.append("activeOnly", String(query.activeOnly));
 
   const queryString = params.toString();
-  const url = `${process.env.API_URL}/professionals/${professionalId}/services${
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/professionals/${professionalId}/services${
     queryString ? `?${queryString}` : ""
   }`;
 

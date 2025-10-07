@@ -5,8 +5,6 @@ import { ButtonStatus } from "@/components/table/button-status";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { TableControls } from "@/components/table/table-controls";
-import { TablePagination } from "@/components/table/table-pagination";
 import { useTableParams } from "@/hooks/useTableParams";
 import { StatusFilter } from "@/components/table/status-filter";
 
@@ -14,7 +12,7 @@ interface Professional {
   id: string;
   name: string;
   email: string;
-  role: string;
+  especialidade: string;
   ativo: string;
 }
 
@@ -34,21 +32,12 @@ export function ProfessionalTable({
   isEditing,
 }: ProfessionalTableProps) {
   const router = useRouter();
-  const { params, updateParams } = useTableParams();
+  const { params, updateParams, clearSorting } = useTableParams();
 
   const columns: Column<Professional>[] = [
-    {
-      header: "Nome",
-      accessor: "name",
-    },
-    {
-      header: "Email",
-      accessor: "email",
-    },
-    {
-      header: "Especialidade",
-      accessor: "role",
-    },
+    { header: "Nome", accessor: "name" },
+    { header: "Email", accessor: "email" },
+    { header: "Especialidade", accessor: "especialidade" },
     {
       header: "Status",
       accessor: "ativo",
@@ -57,20 +46,25 @@ export function ProfessionalTable({
     },
   ];
 
-  const handleSort = (column: keyof Professional) => {
-    const newDirection =
-      params.sortBy === column && params.sortDirection === "asc"
-        ? "desc"
-        : "asc";
-    updateParams({
-      sortBy: column as string,
-      sortDirection: newDirection,
-    });
-  };
-
   return (
-    <div className="space-y-4">
-      <TableControls>
+    <GenericTable
+      currentSort={params.sortBy as keyof Professional | null}
+      currentSortDirection={params.sortDirection}
+      data={professionals}
+      columns={columns}
+      totalItems={totalCount}
+      isLoading={isLoading}
+      rowKey="id"
+      showControls
+      showPagination
+      searchPlaceholder="Buscar profissional..."
+      onSearch={(value) =>
+        updateParams({
+          page: 1,
+          filters: { ...params.filters, search: value },
+        })
+      }
+      controlsChildren={
         <StatusFilter
           value={params.filters.status ?? ""}
           onChange={(value) =>
@@ -80,40 +74,31 @@ export function ProfessionalTable({
             })
           }
         />
-      </TableControls>
-
-      <GenericTable
-        data={professionals}
-        columns={columns}
-        isLoading={isLoading}
-        emptyMessage="Nenhum profissional encontrado"
-        rowKey="id"
-        onRowClick={(row) => {
-          router.push(`conta/admin/professional-section/${row.id}`);
-        }}
-        // Conectando a ordenação
-        sortBy={params.sortBy}
-        sortDirection={params.sortDirection}
-        onSort={handleSort}
-        className="rounded-lg border"
-        headerClassName="bg-gray-50"
-        actions={(row) => (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(row);
-            }}
-            disabled={isEditing}
-            className="h-8 w-8"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        )}
-      />
-
-      <TablePagination totalItems={totalCount} className="mt-4" />
-    </div>
+      }
+      actions={(row) => (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(row);
+          }}
+          disabled={isEditing}
+          className="h-8 w-8"
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+      )}
+      onRowClick={(row) =>
+        router.push(`conta/admin/professional-section/${row.id}`)
+      }
+      onSort={(column, direction) => {
+        if (!column || !direction) {
+          clearSorting();
+        } else {
+          updateParams({ sortBy: column as string, sortDirection: direction });
+        }
+      }}
+    />
   );
 }

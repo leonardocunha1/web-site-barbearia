@@ -7,7 +7,7 @@ interface Professional {
   id: string;
   name: string;
   email: string;
-  role: string;
+  especialidade: string;
   ativo: string;
 }
 

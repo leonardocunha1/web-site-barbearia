@@ -6,11 +6,11 @@ import { DynamicFormProps } from "@/components/form/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useLoginUser, useRegisterUser } from "@/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useUser } from "@/contexts/user";
 import userGet from "../api/actions/user";
+import axios from "axios";
 
 type AuthMode = "login" | "register";
 
@@ -23,8 +23,6 @@ const classNames = {
 export default function AuthPage() {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>("login");
-  const { mutateAsync: login } = useLoginUser();
-  const { mutateAsync: register } = useRegisterUser();
   const { setUser } = useUser();
 
   const commonFields: DynamicFormProps<typeof loginSchema>["fields"] = [
@@ -34,9 +32,7 @@ export default function AuthPage() {
       placeholder: "Digite seu email",
       type: "email",
       className: classNames.input,
-      labelProps: {
-        className: classNames.label,
-      },
+      labelProps: { className: classNames.label },
     },
     {
       name: "password",
@@ -44,9 +40,7 @@ export default function AuthPage() {
       placeholder: "Digite sua senha",
       type: "password",
       className: classNames.input,
-      labelProps: {
-        className: classNames.label,
-      },
+      labelProps: { className: classNames.label },
     },
   ];
 
@@ -57,9 +51,7 @@ export default function AuthPage() {
       placeholder: "Digite seu nome completo",
       type: "text",
       className: classNames.input,
-      labelProps: {
-        className: classNames.label,
-      },
+      labelProps: { className: classNames.label },
     },
     ...commonFields,
     {
@@ -68,9 +60,7 @@ export default function AuthPage() {
       placeholder: "Confirme sua senha",
       type: "password",
       className: classNames.input,
-      labelProps: {
-        className: classNames.label,
-      },
+      labelProps: { className: classNames.label },
     },
     {
       name: "phone",
@@ -78,9 +68,7 @@ export default function AuthPage() {
       placeholder: "Digite seu telefone",
       type: "phone",
       className: classNames.input,
-      labelProps: {
-        className: classNames.label,
-      },
+      labelProps: { className: classNames.label },
     },
   ];
 
@@ -94,63 +82,78 @@ export default function AuthPage() {
     }
   };
 
+  // 🧠 LOGIN AJUSTADO
   const loginHandler = async (data: z.infer<typeof loginSchema>) => {
-    await login(
-      {
-        data: {
-          email: data.email,
-          senha: data.password,
-        },
-      },
-      {
-        onSuccess: async () => {
-          try {
-            const { ok, data } = await userGet();
-            
-            if (ok && data) {
-              setUser(data);
-            }
-            toast.success("Login realizado com sucesso!");
-            router.push("/");
-          } catch (error) {
-            console.error("Erro ao carregar dados do usuário:", error);
-            toast.error("Erro ao carregar dados do usuário");
-          }
-        },
-        onError: (error) => {
-          console.error("Erro ao fazer login:", error);
-          const errorMessage = error.message || "Erro ao fazer login";
-          toast.error(errorMessage);
-        },
-      },
-    );
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        { email: data.email, senha: data.password },
+        { withCredentials: true },
+      );
+
+      if (res.status === 200) {
+        // tenta buscar o usuário logado
+        const { ok, data: userData } = await userGet();
+
+        if (ok && userData) {
+          setUser(userData);
+        }
+
+        toast.success("Login realizado com sucesso!");
+        router.push("/");
+      } else {
+        toast.error("Falha no login, tente novamente.");
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao registrar:", error);
+
+      let message = "Erro ao registrar";
+
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      toast.error(message);
+    }
   };
 
   const registerHandler = async (data: z.infer<typeof registerSchema>) => {
-    await register(
-      {
-        data: {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+        {
           nome: data.name,
           email: data.email,
           senha: data.password,
           role: "CLIENTE",
           telefone: data.phone,
         },
-      },
-      {
-        onSuccess: () => {
-          toast.success(
-            "Registro realizado com sucesso! Faça login para continuar.",
-          );
-          setMode("login");
-        },
-        onError: (error) => {
-          console.error("Erro ao registrar:", error);
-          const errorMessage = error.message || "Erro ao registrar";
-          toast.error(errorMessage);
-        },
-      },
-    );
+        { withCredentials: true },
+      );
+
+      if (res.status === 201) {
+        toast.success(
+          "Registro realizado com sucesso! Faça login para continuar.",
+        );
+        setMode("login");
+      } else {
+        toast.error("Falha ao registrar. Tente novamente.");
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao registrar:", error);
+
+      let message = "Erro ao registrar";
+
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      toast.error(message);
+    }
   };
 
   return (
@@ -218,15 +221,12 @@ export const registerSchema = loginSchema
       .string()
       .min(3, "Nome deve ter no mínimo 3 caracteres")
       .transform((name) => name.trim()),
-
     phone: z
       .string()
       .min(1, "Telefone é obrigatório")
-      // Validação do formato (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
       .refine((val) => /^\(\d{2}\) \d{4,5}-\d{4}$/.test(val), {
         message: "Formato inválido. Use (DDD) XXXXX-XXXX",
       })
-      // Validação do comprimento (10 ou 11 dígitos)
       .refine(
         (val) => {
           const digits = val.replace(/\D/g, "");
@@ -236,7 +236,6 @@ export const registerSchema = loginSchema
           message: "Telefone deve ter 10 ou 11 dígitos (incluindo DDD)",
         },
       )
-      // Formatação consistente
       .transform((val) => {
         const digits = val.replace(/\D/g, "");
         const ddd = digits.substring(0, 2);
@@ -246,7 +245,6 @@ export const registerSchema = loginSchema
           ? `(${ddd}) ${number.substring(0, 4)}-${number.substring(4)}`
           : `(${ddd}) ${number.substring(0, 5)}-${number.substring(5)}`;
       }),
-
     confirmPassword: z.string().min(6, "Confirmação de senha inválida"),
   })
   .refine((data) => data.password === data.confirmPassword, {

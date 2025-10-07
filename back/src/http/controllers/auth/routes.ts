@@ -57,6 +57,7 @@ export async function authRoutes(app: FastifyTypedInstance) {
           200: z
             .object({
               token: z.string(),
+              refreshToken: z.string(),
               user: userSchema,
             })
             .describe('Login bem-sucedido'),

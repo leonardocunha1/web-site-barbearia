@@ -8,9 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useTableParams } from "@/hooks/useTableParams";
 import { Search } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 
 interface TableControlsProps {
   searchPlaceholder?: string;
@@ -18,6 +19,7 @@ interface TableControlsProps {
   limitOptions?: number[];
   onSearch?: (value: string) => void;
   children?: ReactNode;
+  debounceMs?: number;
 }
 
 export function TableControls({
@@ -26,19 +28,35 @@ export function TableControls({
   limitOptions = [10, 25, 50, 100],
   onSearch,
   children,
+  debounceMs = 1000,
 }: TableControlsProps) {
   const { params, updateParams } = useTableParams();
 
-  const handleSearch = (value: string) => {
+  // Inicializa com o valor do filtro da URL, mas depois só muda pelo input
+  const [searchValue, setSearchValue] = useState(
+    params.filters[searchKey] || "",
+  );
+  const debouncedSearchValue = useDebounce(searchValue, debounceMs);
+
+  // Atualiza a URL e dispara o onSearch apenas quando o debounced muda
+  useEffect(() => {
+    // Se já é o mesmo valor do filtro, não faz nada
+    if (debouncedSearchValue === (params.filters[searchKey] || "")) return;
+
     updateParams({
       page: 1,
       filters: {
         ...params.filters,
-        [searchKey]: value,
+        [searchKey]: debouncedSearchValue,
       },
     });
-    onSearch?.(value);
-  };
+
+    onSearch?.(debouncedSearchValue);
+  }, [debouncedSearchValue, updateParams, params.filters, searchKey, onSearch]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, []);
 
   return (
     <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -47,8 +65,8 @@ export function TableControls({
           <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
           <Input
             placeholder={searchPlaceholder}
-            value={params.filters[searchKey] || ""}
-            onChange={(e) => handleSearch(e.target.value)}
+            value={searchValue}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-8"
           />
         </div>

@@ -18,6 +18,8 @@ export interface ProfessionalsRepository {
     limit: number;
     especialidade?: string;
     ativo?: boolean;
+    sortBy?: string;
+    sortDirection?: "asc" | "desc";
   }): Promise<
     (Professional & {
       user: User;
@@ -32,6 +34,8 @@ export interface ProfessionalsRepository {
     page: number;
     limit: number;
     ativo?: boolean;
+    sortBy?: string;
+    sortDirection?: "asc" | "desc";
   }): Promise<
     (Professional & {
       user: User;

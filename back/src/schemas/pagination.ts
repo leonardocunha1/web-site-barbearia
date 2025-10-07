@@ -18,7 +18,7 @@ export const paginationSchema = z.object({
     .optional()
     .describe('Campo para ordenação (opcional)'),
     
-  sortOrder: z.enum(['asc', 'desc'])
+  sortDirection: z.enum(['asc', 'desc'])
     .default('asc')
     .describe('Direção da ordenação: asc (crescente) ou desc (decrescente)')
 }).describe("Schema para parâmetros de paginação e ordenação");
