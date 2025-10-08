@@ -7,16 +7,20 @@ import Servicos from "@/features/home/servicos";
 
 export default function Page() {
   return (
-    <div className="from-principal-50 to-principal-100 flex flex-1 flex-col items-center overflow-x-hidden bg-gradient-to-br pt-[104px]">
+    <div className="flex flex-1 flex-col items-center overflow-x-hidden bg-gradient-to-br from-stone-100 to-stone-200 pt-[104px]">
       <Container>
         <Hero />
       </Container>
 
       <MarqueeDetails />
 
+      <SejaUmBigodon />
+
       <Container>
-        <SejaUmBigodon />
         <Servicos />
+      </Container>
+
+      <Container>
         <Faq />
       </Container>
     </div>

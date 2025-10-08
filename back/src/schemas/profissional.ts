@@ -93,12 +93,8 @@ export const searchProfessionalsQuerySchema = paginationSchema
       .describe("Termo de busca para profissionais")
       .optional(),
 
-    ativo: z.coerce
-      .boolean({
-        invalid_type_error: "O status ativo deve ser verdadeiro ou falso",
-      })
-      .optional()
-      .describe("Filtrar por status ativo"),
+    status: z.enum(['ativo', 'inativo']).optional().describe("Filtrar por status ativo ou inativo")
+
   })
   .describe("Busca de profissionais com parâmetros de paginação");
 

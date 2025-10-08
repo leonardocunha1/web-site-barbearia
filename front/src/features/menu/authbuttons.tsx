@@ -18,7 +18,7 @@ export function AuthButtons({
           <Button
             variant="default"
             size="sm"
-            className="text-principal-100 border-principal-900 cursor-pointer border"
+            className="border-principal-500 cursor-pointer border text-stone-100"
           >
             Entrar
             <SignInIcon className="size-4" />
@@ -33,7 +33,7 @@ export function AuthButtons({
       <Button
         variant="default"
         size="sm"
-        className="text-principal-100 border-principal-900 cursor-pointer border"
+        className="border-principal-500 hover:bg-principal-600 cursor-pointer border text-stone-200 duration-300"
       >
         Minha conta
       </Button>

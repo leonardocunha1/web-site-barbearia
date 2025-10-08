@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Spectral, Poppins } from "next/font/google";
+import { Spectral, Poppins, Calistoga } from "next/font/google";
 import "./globals.css";
 import Header from "@/features/menu/header";
 import { ApplicationProviders } from "./providers";
@@ -20,6 +20,13 @@ const type_second = Spectral({
   display: "swap",
 });
 
+const type_third = Calistoga({
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--type-third-calistoga",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "El Bigódon Barber Shop",
   description: "Corte na régua, barba afiada e estilo de verdade...",
@@ -33,11 +40,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} ${type_second.variable} antialiased`}
+        className={`${poppins.variable} ${type_second.variable} ${type_third.variable} antialiased`}
       >
         <div id="modal-root"></div>
         <ApplicationProviders>
-          <div className="flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
+          <div className="font-poppins flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
             <Header />
             <main className="animate-fadeIn flex flex-1 justify-center">
               {children}

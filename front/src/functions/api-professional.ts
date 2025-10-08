@@ -13,7 +13,7 @@ export function PROFESSIONALS_LIST(query?: {
   if (query?.limit) params.append("limit", String(query.limit));
   if (query?.search) params.append("search", query.search);
   if (query?.especialidade) params.append("especialidade", query.especialidade);
-  if (query?.status) params.append("ativo", query.status);
+  if (query?.status) params.append("status", query.status);
   if (query?.sortBy) params.append("sortBy", query.sortBy);
   if (query?.sortDirection) params.append("sortDirection", query.sortDirection);
 

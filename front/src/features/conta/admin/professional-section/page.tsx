@@ -33,7 +33,6 @@ export function ProfissionalSection() {
       });
 
       if (ok && data) {
-        console.log("DATAAAAAAA", data);
         setProfessionals(data.professionals);
         setTotalCount(data.total);
       } else {

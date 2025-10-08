@@ -23,7 +23,6 @@ export async function professionalsList(query?: {
 }) {
   try {
     const { url, options } = PROFESSIONALS_LIST(query);
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", url)
 
     const response = await fetch(url, { ...options, cache: "no-store" });
 

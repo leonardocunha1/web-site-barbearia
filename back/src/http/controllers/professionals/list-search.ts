@@ -9,7 +9,7 @@ export const listProfessionalsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(10),
   search: z.coerce.string().min(2).optional(),
   especialidade: z.string().optional(),
-  status: z.enum(['Ativo', 'Inativo']).optional(), 
+  status: z.enum(['ativo', 'inativo']).optional(),
   sortBy: z.string().optional(),
   sortDirection: z.enum(['asc', 'desc']).optional(),
 });
@@ -22,10 +22,9 @@ export async function listOrSearchProfessionals(
     const { page, limit, search, especialidade, status, sortBy, sortDirection } =
       listProfessionalsQuerySchema.parse(request.query);
 
-    console.log('request.query', request.query);
+    console.log('request.query AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', request.query);
 
-    // converte status string para boolean esperado pelo use case
-    const ativo = status === "Ativo" ? true : status === "Inativo" ? false : undefined;
+    const ativo = status === "ativo" ? true : status === "inativo" ? false : undefined;
 
     const useCase = makeListProfessionalsUseCase();
 

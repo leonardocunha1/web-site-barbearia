@@ -43,8 +43,6 @@ export class ListOrSearchProfessionalsUseCase {
       sortDirection, // ← passe diretamente
     };
 
-    console.log("🚀 UseCase - Repository params:", repositoryParams);
-
     if (query && query.trim() !== "") {
       const [professionals, total] = await Promise.all([
         this.professionalsRepository.search({
