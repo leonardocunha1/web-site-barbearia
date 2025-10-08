@@ -242,9 +242,9 @@ export function GenericTable<T>({
         </Table>
       </div>
 
-      {showPagination && totalItems && totalItems > 0 && (
-        <TablePagination totalItems={totalItems} />
-      )}
+      {showPagination && totalItems! > 0 ? (
+        <TablePagination totalItems={totalItems ?? 0} />
+      ) : null}
     </div>
   );
 }

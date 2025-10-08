@@ -28,7 +28,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="min-h-[calc(100vh-104px)] w-full px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <section className="min-h-[calc(100vh-104px)] w-full py-12 md:py-16 ">
       <motion.div
         className="mx-auto max-w-7xl"
         variants={containerVariants}
@@ -49,7 +49,7 @@ export default function Hero() {
             </motion.h1>
 
             <motion.h2
-              className="font-calistoga text-3xl leading-tight font-semibold text-stone-900 md:text-4xl lg:text-5xl xl:text-7xl"
+              className="font-calistoga text-3xl leading-tight font-semibold text-stone-900 md:text-5xl xl:text-7xl"
               variants={fadeInUp}
             >
               Onde o estilo é clássico, e o{" "}

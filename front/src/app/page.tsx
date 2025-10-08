@@ -1,6 +1,6 @@
 import Container from "@/components/ui/container";
-import { Faq } from "@/features/home/faq";
 import Hero from "@/features/home/hero";
+import Localizacao from "@/features/home/localizacao";
 import { MarqueeDetails } from "@/features/home/marquee";
 import SejaUmBigodon from "@/features/home/seja-um-bigodon";
 import Servicos from "@/features/home/servicos";
@@ -20,8 +20,12 @@ export default function Page() {
         <Servicos />
       </Container>
 
-      <Container>
+      {/* <Container>
         <Faq />
+      </Container> */}
+
+      <Container>
+        <Localizacao />
       </Container>
     </div>
   );
