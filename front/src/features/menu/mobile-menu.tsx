@@ -57,14 +57,14 @@ export function MobileMenu({ user }: { user: unknown | null }) {
               </Button>
             </Link>
           ) : (
-            <Link href="/dashboard">
+            <Link href="/conta">
               <Button
                 variant="outline"
                 size="sm"
                 className="w-full gap-2 border-stone-300 font-medium text-stone-800 hover:bg-stone-100"
               >
                 <UserCircleIcon className="size-4" />
-                Meu Painel
+                Minha conta
               </Button>
             </Link>
           )}

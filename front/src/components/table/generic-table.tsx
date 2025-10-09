@@ -221,6 +221,7 @@ export function GenericTable<T>({
                           : cellClassName,
                         col.align === "center" && "text-center",
                         col.align === "right" && "text-right",
+                        "text-sm",
                       )}
                       style={{ width: col.width }}
                     >

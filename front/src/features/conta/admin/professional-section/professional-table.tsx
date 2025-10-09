@@ -67,6 +67,7 @@ export function ProfessionalTable({
       controlsChildren={
         <StatusFilter
           value={params.filters.status ?? ""}
+          className="w-full sm:w-32"
           onChange={(value) =>
             updateParams({
               page: 1,

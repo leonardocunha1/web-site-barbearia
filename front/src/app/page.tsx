@@ -1,4 +1,5 @@
 import Container from "@/components/ui/container";
+import Feedbacks from "@/features/home/feedbacks";
 import Hero from "@/features/home/hero";
 import Localizacao from "@/features/home/localizacao";
 import { MarqueeDetails } from "@/features/home/marquee";
@@ -20,12 +21,10 @@ export default function Page() {
         <Servicos />
       </Container>
 
-      {/* <Container>
-        <Faq />
-      </Container> */}
+      <Localizacao />
 
       <Container>
-        <Localizacao />
+        <Feedbacks />
       </Container>
     </div>
   );

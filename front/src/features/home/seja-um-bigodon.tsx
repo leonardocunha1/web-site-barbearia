@@ -35,7 +35,7 @@ const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.3, 
+      staggerChildren: 0.3,
     },
   },
 };
@@ -52,7 +52,7 @@ const imageVariants = {
     rotate: 0,
     transition: {
       duration: 0.8,
-      ease: easeOut, 
+      ease: easeOut,
     },
   },
 };
@@ -67,7 +67,7 @@ const titleVariants = {
     y: 0,
     transition: {
       duration: 0.8,
-      ease: easeOut, 
+      ease: easeOut,
     },
   },
 };
@@ -84,7 +84,7 @@ const cardVariants = {
     scale: 1,
     transition: {
       duration: 0.7,
-      ease: easeOut
+      ease: easeOut,
     },
   },
 };
@@ -103,7 +103,7 @@ export default function SejaUmBigodon() {
         ></path>
       </svg>
 
-      <section className="ssm:py-24 -m-10 w-full bg-stone-900 px-8 py-16">
+      <section className="w-full bg-stone-900 px-8 py-16 sm:py-24 md:-m-10">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-24">
           {/* Esquerda */}
           <motion.div
@@ -135,7 +135,7 @@ export default function SejaUmBigodon() {
                 alt="Barber pole"
                 width={1024}
                 height={1536}
-                className="mx-auto w-full max-w-[200px] rounded-2xl object-cover  md:max-w-[300px]"
+                className="mx-auto w-full max-w-[200px] rounded-2xl object-cover md:max-w-[300px]"
               />
             </motion.div>
           </motion.div>
@@ -148,14 +148,14 @@ export default function SejaUmBigodon() {
             whileInView="visible"
             viewport={{ once: false, amount: 0.2 }} // once: false para reanimar sempre
           >
-            <div className="hidden sm:block absolute inset-y-0 left-6 w-1 rounded-full bg-gradient-to-b from-amber-500 via-amber-700 to-amber-900 shadow-lg"></div>
+            <div className="absolute inset-y-0 left-6 hidden w-1 rounded-full bg-gradient-to-b from-amber-500 via-amber-700 to-amber-900 shadow-lg sm:block"></div>
 
             <div className="space-y-16 text-justify">
               {offerings.map((offering, idx) => (
                 <motion.div
                   key={idx}
                   variants={cardVariants}
-                  className="group relative flex cursor-pointer items-start gap-6 rounded-xl bg-stone-900  ring-1 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+                  className="group relative flex cursor-pointer items-start gap-6 rounded-xl bg-stone-900 ring-1 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
                 >
                   <motion.div
                     whileHover={{
@@ -165,7 +165,7 @@ export default function SejaUmBigodon() {
                     className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-stone-800 p-3 shadow-inner"
                   >
                     {offering.icon}
-                    <span className="bg-principal-500 hidden lg:block absolute top-1/2 -left-6 h-4 w-4 -translate-y-1/2 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110"></span>
+                    <span className="bg-principal-500 absolute top-1/2 -left-6 hidden h-4 w-4 -translate-y-1/2 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110 lg:block"></span>
                   </motion.div>
 
                   <div className="flex-1">
