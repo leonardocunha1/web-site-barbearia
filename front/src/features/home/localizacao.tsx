@@ -4,6 +4,7 @@ import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { motion } from "framer-motion";
 
 // Correção do ícone padrão do Leaflet (Next.js + Webpack precisa disso)
 L.Icon.Default.mergeOptions({
@@ -30,35 +31,44 @@ export default function Localizacao() {
           fill="#1c1917"
         ></path>
       </svg>
-      <section className="w-full bg-stone-900 px-8 py-16 md:-m-10">
-        <div className="mx-auto max-w-7xl text-center">
-          <h2 className="font-calistoga text-4xl font-bold text-stone-100 sm:text-5xl md:text-6xl">
-            Localização
-          </h2>
-          <p className="mt-4 text-base text-stone-400">
-            Nossa barbearia está localizada no coração da cidade na Rua Exemplo,
-            123. Venha já nos visitar!
-          </p>
-        </div>
+      <section className="w-full bg-stone-900 px-8 py-16 md:-my-10">
+        <motion.div
+          initial={{ opacity: 0, x: 100 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full"
+        >
+          <div className="mx-auto max-w-7xl text-center">
+            <h2 className="font-calistoga text-4xl font-bold text-stone-100 sm:text-5xl md:text-6xl">
+              Localização
+            </h2>
+            <p className="mt-4 text-base text-stone-400">
+              Nossa barbearia está localizada no coração da cidade na Rua
+              Exemplo, 123. Venha já nos visitar!
+            </p>
+          </div>
 
-        <div className="mx-auto mt-12 h-[500px] max-w-5xl overflow-hidden rounded-2xl shadow-lg">
-          <MapContainer
-            center={position}
-            zoom={16}
-            scrollWheelZoom={false}
-            className="h-full w-full"
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={position}>
-              <Popup>
-                Aqui está a nossa barbearia! <br /> Venha nos visitar.
-              </Popup>
-            </Marker>
-          </MapContainer>
-        </div>
+          <div className="relative z-0 mx-auto mt-12 h-[500px] max-w-5xl overflow-hidden rounded-2xl shadow-lg">
+            <MapContainer
+              center={position}
+              zoom={16}
+              scrollWheelZoom={false}
+              className="h-full w-full"
+              style={{ zIndex: 0 }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={position}>
+                <Popup>
+                  Aqui está a nossa barbearia! <br /> Venha nos visitar.
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        </motion.div>
       </section>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100">
         <path

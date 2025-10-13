@@ -61,6 +61,7 @@ export default function Servicos() {
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
       variants={containerVariants}
+      className="pt-16 pb-16 sm:pt-0 sm:pb-0"
     >
       <div className="mx-auto max-w-7xl">
         {/* Cabeçalho */}
@@ -68,7 +69,7 @@ export default function Servicos() {
           className="mb-8 text-center md:mb-16"
           variants={itemVariants}
         >
-          <h4 className="text-base font-semibold text-stone-600">
+          <h4 className="text-base font-semibold text-stone-600 uppercase">
             A Arte da Barbearia
           </h4>
           <h2 className="font-calistoga pt-5 text-5xl font-bold text-stone-900 sm:text-6xl">

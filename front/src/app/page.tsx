@@ -5,6 +5,7 @@ import Localizacao from "@/features/home/localizacao";
 import { MarqueeDetails } from "@/features/home/marquee";
 import SejaUmBigodon from "@/features/home/seja-um-bigodon";
 import Servicos from "@/features/home/servicos";
+import { WhatsAppFloat } from "@/features/home/wpp";
 
 export default function Page() {
   return (
@@ -26,6 +27,8 @@ export default function Page() {
       <Container>
         <Feedbacks />
       </Container>
+
+      <WhatsAppFloat />
     </div>
   );
 }

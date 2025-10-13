@@ -2,13 +2,11 @@
 
 import { motion, easeOut } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectFlip, Pagination, Navigation, Autoplay } from "swiper/modules";
-import Image from "next/image";
+import { Pagination, Autoplay } from "swiper/modules";
+import { Smile, Laugh, Meh, Frown } from "lucide-react";
 
 import "swiper/css";
-import "swiper/css/effect-flip";
 import "swiper/css/pagination";
-import "swiper/css/navigation";
 
 export default function Avaliacoes() {
   const reviews = [
@@ -16,29 +14,25 @@ export default function Avaliacoes() {
       id: 1,
       name: "Lucas Almeida",
       text: "O corte ficou simplesmente impecável! Atendimento de primeira e ambiente top. Recomendo demais!",
-      image: "/clientes/cliente-1.jpg",
       rating: 5,
     },
     {
       id: 2,
       name: "Rafael Santos",
       text: "Fui atendido pelo João e saí novo em folha. Barba feita com muito cuidado, voltarei com certeza.",
-      image: "/clientes/cliente-2.jpg",
       rating: 5,
     },
     {
       id: 3,
       name: "Pedro Henrique",
       text: "Excelente experiência! O barbeiro entende exatamente o que você quer e ainda dá boas dicas.",
-      image: "/clientes/cliente-3.jpg",
       rating: 4,
     },
     {
       id: 4,
       name: "Tiago Silva",
       text: "Ambiente aconchegante e profissionais muito atenciosos. Corte de alto nível!",
-      image: "/clientes/cliente-4.jpg",
-      rating: 5,
+      rating: 3,
     },
   ];
 
@@ -58,67 +52,112 @@ export default function Avaliacoes() {
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
       variants={containerVariants}
-      className="py-16"
+      className="pt-16 pb-16 sm:pt-0"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Cabeçalho */}
-        <motion.div
-          className="mb-10 text-center md:mb-16"
-          variants={itemVariants}
-        >
-          <h4 className="text-base font-semibold text-stone-600">
+        <motion.div className="text-center" variants={itemVariants}>
+          <h4 className="text-base font-semibold tracking-wider text-stone-600 uppercase">
             A Opinião de Quem Confia
           </h4>
-          <h2 className="font-calistoga pt-5 text-5xl font-bold text-stone-900 sm:text-6xl">
+          <h2 className="font-calistoga pt-5 text-4xl font-bold text-stone-900 sm:text-6xl">
             Nossos Clientes
             <span className="from-principal-500 to-principal-600 bg-gradient-to-r bg-clip-text pl-2 text-transparent">
               Falam!
             </span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-stone-600">
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-stone-600">
             Cada cliente sai com um sorriso no rosto e uma história pra contar.
             Veja o que dizem sobre nossos serviços.
           </p>
         </motion.div>
 
         {/* Swiper */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="px-2">
           <Swiper
-            effect="flip"
             grabCursor
-            pagination={{ clickable: true }}
-            navigation
+            pagination={{
+              clickable: true,
+              bulletClass: "swiper-pagination-bullet bg-stone-300 opacity-50",
+              bulletActiveClass:
+                "swiper-pagination-bullet-active !bg-principal-500 !opacity-100",
+            }}
             autoplay={{
-              delay: 5000,
+              delay: 5500,
               disableOnInteraction: false,
             }}
-            modules={[EffectFlip, Pagination, Navigation, Autoplay]}
-            className="mySwiper"
+            modules={[Pagination, Autoplay]}
+            className="relative pb-10"
+            style={{ paddingTop: "20px", paddingBottom: "20px" }}
           >
             {reviews.map((review) => (
               <SwiperSlide key={review.id}>
-                <div className="flex flex-col items-center justify-center rounded-2xl bg-stone-100/70 px-6 py-10 shadow-md backdrop-blur-sm sm:px-10">
-                  <div className="ring-principal-500/30 relative mb-6 h-20 w-20 overflow-hidden rounded-full ring-4">
-                    <Image
-                      src={review.image}
-                      alt={review.name}
-                      fill
-                      className="object-cover"
-                    />
+                <div className="mx-auto w-full max-w-sm px-4 py-8 sm:max-w-md md:max-w-lg">
+                  <div className="relative rounded-2xl bg-white p-8 pt-16 pb-12 shadow-2xl ring-1 shadow-stone-200/60 ring-stone-200/80">
+                    {/* Ícone de Aspas */}
+                    <div className="absolute -top-6 left-10 -translate-x-1/2">
+                      <div className="from-principal-500 to-principal-600 rounded-full bg-gradient-to-r p-4 shadow-lg">
+                        <svg
+                          className="h-7 w-7 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Ícone baseado no rating */}
+                    <div className="mb-4 flex justify-center">
+                      {review.rating === 5 && (
+                        <Laugh size={36} className="text-principal-500" />
+                      )}
+                      {review.rating === 4 && (
+                        <Smile size={36} className="text-principal-500" />
+                      )}
+                      {review.rating === 3 && (
+                        <Smile size={36} className="text-stone-500" />
+                      )}
+                      {review.rating === 2 && (
+                        <Meh size={36} className="text-stone-400" />
+                      )}
+                      {review.rating === 1 && (
+                        <Frown size={36} className="text-stone-400" />
+                      )}
+                    </div>
+
+                    {/* Texto */}
+                    <p className="mb-6 pt-4 text-center text-sm leading-relaxed text-stone-700 sm:text-base">
+                      {review.text}
+                    </p>
+
+                    {/* Estrelas */}
+                    <div className="mb-4 flex items-center justify-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-xl ${
+                            i < review.rating
+                              ? "text-yellow-400 drop-shadow-sm"
+                              : "text-stone-300"
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Nome */}
+                    <div className="text-center">
+                      <div className="inline-flex items-center gap-3">
+                        <div className="from-principal-500 to-principal-600 h-1 w-8 rounded-full bg-gradient-to-r"></div>
+                        <h3 className="text-base font-semibold text-stone-900 sm:text-lg">
+                          {review.name}
+                        </h3>
+                        <div className="from-principal-500 to-principal-600 h-1 w-8 rounded-full bg-gradient-to-r"></div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-center leading-relaxed text-stone-700 italic">
-                    “{review.text}”
-                  </p>
-                  <div className="mt-4 flex items-center justify-center gap-1">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <span key={i} className="text-lg text-yellow-500">
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <h3 className="mt-3 font-semibold text-stone-900">
-                    {review.name}
-                  </h3>
                 </div>
               </SwiperSlide>
             ))}

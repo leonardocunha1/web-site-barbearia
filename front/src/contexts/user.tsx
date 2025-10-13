@@ -26,7 +26,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   if (isLoading) {
     return (
-      <div className="bg-principal-50 flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-stone-50">
         <div className="text-center">
           <div className="border-principal-500 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-t-transparent">
             <span className="sr-only">Carregando...</span>

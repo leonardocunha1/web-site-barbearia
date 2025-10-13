@@ -1,5 +1,3 @@
-import { SocialButton } from "@/features/home/faq/SocialButton";
-
 export function Footer() {
   return (
     <footer className="bg-stone-900 text-gray-300">
@@ -12,18 +10,7 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="flex gap-4">
-            <SocialButton
-              href="https://wa.me/5516999999999"
-              colorClass="bg-green-800 hover:bg-green-700"
-              type="whatsapp"
-            />
-            <SocialButton
-              href="https://instagram.com/sua_barbearia"
-              colorClass="bg-blue-800 hover:bg-pink-700"
-              type="instagram"
-            />
-          </div>
+          <div className="flex gap-4"></div>
         </div>
 
         <div className="mt-6 border-t border-stone-700 pt-6 text-center text-sm text-gray-500">
