@@ -3,10 +3,16 @@
 import { GenericTable, Column } from "@/components/table/generic-table";
 import { ButtonStatus } from "@/components/table/button-status";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTableParams } from "@/hooks/useTableParams";
 import { StatusFilter } from "@/components/table/status-filter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical, Edit, Link } from "lucide-react";
 
 interface Professional {
   id: string;
@@ -77,22 +83,38 @@ export function ProfessionalTable({
         />
       }
       actions={(row) => (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(row);
-          }}
-          disabled={isEditing}
-          className="h-8 w-8"
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 cursor-pointer"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() =>
+                router.push(`conta/admin/professional-section/${row.id}`)
+              }
+            >
+              <Link className="mr-2 h-4 w-4" />
+              Associar Serviços
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(row);
+              }}
+              disabled={isEditing}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Editar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
-      onRowClick={(row) =>
-        router.push(`conta/admin/professional-section/${row.id}`)
-      }
       onSort={(column, direction) => {
         if (!column || !direction) {
           clearSorting();

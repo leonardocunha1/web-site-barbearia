@@ -6,7 +6,7 @@ interface ListProfessionalServicesRequest {
   professionalId: string;
   page: number;
   limit: number;
-  activeOnly?: boolean;
+  activeOnly?: boolean; 
 }
 
 interface ListProfessionalServicesResponse {
@@ -32,22 +32,20 @@ export class ListProfessionalServicesUseCase {
     professionalId,
     page,
     limit,
-    activeOnly = true,
+    activeOnly = true, // default continua true
   }: ListProfessionalServicesRequest): Promise<ListProfessionalServicesResponse> {
+    // verifica se o profissional existe
     const professionalExists =
       await this.professionalsRepository.findById(professionalId);
     if (!professionalExists) {
       throw new ProfessionalNotFoundError();
     }
 
+    // busca serviços, filtrando apenas ativos se activeOnly=true
     const { services, total } =
       await this.serviceProfessionalRepository.findByProfessional(
         professionalId,
-        {
-          page,
-          limit,
-          activeOnly,
-        },
+        { page, limit, activeOnly },
       );
 
     return {

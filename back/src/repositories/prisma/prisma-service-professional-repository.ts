@@ -167,4 +167,43 @@ export class PrismaServiceProfessionalRepository
       },
     });
   }
+
+  async findAllActiveWithProfessionalData(
+  professionalId: string,
+  options: { page?: number; limit?: number } = {}
+) {
+  const { page = 1, limit = 10 } = options;
+
+  const [services, total] = await Promise.all([
+    prisma.service.findMany({
+      where: { ativo: true },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { nome: 'asc' },
+      include: {
+        profissionais: {
+          where: { professionalId },
+          select: { preco: true, duracao: true },
+        },
+      },
+    }),
+    prisma.service.count({ where: { ativo: true } }),
+  ]);
+
+  return {
+    services: services.map((s) => ({
+      service: {
+        id: s.id,
+        nome: s.nome,
+        descricao: s.descricao,
+        categoria: s.categoria,
+        ativo: s.ativo,
+      },
+      preco: s.profissionais[0]?.preco ?? 0,
+      duracao: s.profissionais[0]?.duracao ?? 0,
+    })),
+    total,
+  };
+}
+
 }
