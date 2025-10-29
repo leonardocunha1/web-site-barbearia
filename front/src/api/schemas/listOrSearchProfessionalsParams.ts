@@ -1,4 +1,5 @@
-import type { ListOrSearchProfessionalsSortOrder } from "./listOrSearchProfessionalsSortOrder";
+import type { ListOrSearchProfessionalsSortDirection } from "./listOrSearchProfessionalsSortDirection";
+import type { ListOrSearchProfessionalsStatus } from "./listOrSearchProfessionalsStatus";
 
 export type ListOrSearchProfessionalsParams = {
   /**
@@ -21,14 +22,14 @@ export type ListOrSearchProfessionalsParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListOrSearchProfessionalsSortOrder;
+  sortDirection?: ListOrSearchProfessionalsSortDirection;
   /**
    * Termo de busca para profissionais
    * @minLength 2
    */
-  query?: string;
+  search?: string;
   /**
-   * Filtrar por status ativo
+   * Filtrar por status ativo ou inativo
    */
-  ativo?: boolean;
+  status?: ListOrSearchProfessionalsStatus;
 };

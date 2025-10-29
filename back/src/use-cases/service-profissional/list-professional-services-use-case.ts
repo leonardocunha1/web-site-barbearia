@@ -14,8 +14,8 @@ interface ListProfessionalServicesResponse {
     id: string;
     nome: string;
     descricao: string | null;
-    preco: number;
-    duracao: number;
+    preco: number | null;
+    duracao: number | null;
     categoria: string | null;
     ativo: boolean;
   }>;
@@ -32,31 +32,43 @@ export class ListProfessionalServicesUseCase {
     professionalId,
     page,
     limit,
-    activeOnly = true, // default continua true
+    activeOnly = true,
   }: ListProfessionalServicesRequest): Promise<ListProfessionalServicesResponse> {
-    // verifica se o profissional existe
     const professionalExists =
       await this.professionalsRepository.findById(professionalId);
     if (!professionalExists) {
       throw new ProfessionalNotFoundError();
     }
 
-    // busca serviços, filtrando apenas ativos se activeOnly=true
-    const { services, total } =
-      await this.serviceProfessionalRepository.findByProfessional(
+    // 🔽 Novo trecho
+    let data;
+
+    if (activeOnly) {
+      // Pega todos os serviços ativos (vinculados ou não)
+      data =
+        await this.serviceProfessionalRepository.findAllActiveWithProfessionalData(
+          professionalId,
+          { page, limit },
+        );
+    } else {
+      //  listar todos (ativos + inativos)
+      data = await this.serviceProfessionalRepository.findAllWithProfessionalData(
         professionalId,
-        { page, limit, activeOnly },
+        { page, limit },
       );
+    }
+
+    const { services, total } = data;
 
     return {
-      services: services.map((sp) => ({
-        id: sp.service.id,
-        nome: sp.service.nome,
-        descricao: sp.service.descricao,
-        categoria: sp.service.categoria,
-        ativo: sp.service.ativo,
-        preco: sp.preco,
-        duracao: sp.duracao,
+      services: services.map((s) => ({
+        id: s.service.id,
+        nome: s.service.nome,
+        descricao: s.service.descricao,
+        categoria: s.service.categoria,
+        ativo: s.service.ativo,
+        preco: s.preco ?? null, // se não tiver vínculo
+        duracao: s.duracao ?? null, // se não tiver vínculo
       })),
       total,
     };

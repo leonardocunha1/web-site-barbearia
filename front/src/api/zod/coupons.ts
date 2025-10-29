@@ -39,13 +39,13 @@ export const zodlistCouponsQueryLimitDefault = 10;
 export const zodlistCouponsQueryLimitMin = 0;
 
 export const zodlistCouponsQueryLimitMax = 100;
-export const zodlistCouponsQuerySortOrderDefault = "asc";
+export const zodlistCouponsQuerySortDirectionDefault = "asc";
 
 export const zodlistCouponsQueryParams = zod.object({
   "page": zod.number().min(zodlistCouponsQueryPageMin).default(zodlistCouponsQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistCouponsQueryLimitMin).max(zodlistCouponsQueryLimitMax).default(zodlistCouponsQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(zodlistCouponsQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistCouponsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "code": zod.string().optional(),
   "type": zod.enum(['PERCENTAGE', 'FIXED', 'FREE']).optional(),
   "scope": zod.enum(['GLOBAL', 'SERVICE', 'PROFESSIONAL']).optional(),

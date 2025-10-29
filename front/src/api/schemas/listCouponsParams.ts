@@ -1,4 +1,4 @@
-import type { ListCouponsSortOrder } from "./listCouponsSortOrder";
+import type { ListCouponsSortDirection } from "./listCouponsSortDirection";
 import type { ListCouponsType } from "./listCouponsType";
 import type { ListCouponsScope } from "./listCouponsScope";
 import type { ListCouponsSortItem } from "./listCouponsSortItem";
@@ -24,7 +24,7 @@ export type ListCouponsParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListCouponsSortOrder;
+  sortDirection?: ListCouponsSortDirection;
   code?: string;
   type?: ListCouponsType;
   scope?: ListCouponsScope;

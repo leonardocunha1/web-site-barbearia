@@ -15,6 +15,7 @@ export const professionalFields: FormField[] = [
     label: "Email",
     type: "email",
     placeholder: "Digite o email",
+    disabled: true
   },
   {
     name: "especialidade",

@@ -8,6 +8,7 @@ import {
   listProfessionalServicesParamsSchema,
   listProfessionalServicesQuerySchema,
   removeServiceFromProfessionalParamsSchema,
+  servicesProfessionalSchema,
   servicesSchema,
   updateProfessionalServicesBodySchema,
   updateProfessionalServicesParamsSchema,
@@ -65,7 +66,7 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
         querystring: listProfessionalServicesQuerySchema,
         response: {
           200: z.object({
-            services: z.array(servicesSchema),
+            services: z.array(servicesProfessionalSchema),
             pagination: z.object({
               page: z.number(),
               limit: z.number(),

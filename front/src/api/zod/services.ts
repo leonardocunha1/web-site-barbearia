@@ -24,7 +24,7 @@ export const zodlistServicesQueryLimitDefault = 10;
 export const zodlistServicesQueryLimitMin = 0;
 
 export const zodlistServicesQueryLimitMax = 100;
-export const zodlistServicesQuerySortOrderDefault = "asc";export const zodlistServicesQueryNomeMax = 100;
+export const zodlistServicesQuerySortDirectionDefault = "asc";export const zodlistServicesQueryNomeMax = 100;
 export const zodlistServicesQueryCategoriaMax = 50;
 
 
@@ -32,7 +32,7 @@ export const zodlistServicesQueryParams = zod.object({
   "page": zod.number().min(zodlistServicesQueryPageMin).default(zodlistServicesQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistServicesQueryLimitMin).max(zodlistServicesQueryLimitMax).default(zodlistServicesQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(zodlistServicesQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistServicesQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "nome": zod.string().max(zodlistServicesQueryNomeMax).optional(),
   "categoria": zod.string().max(zodlistServicesQueryCategoriaMax).optional(),
   "ativo": zod.boolean().optional(),
@@ -46,8 +46,8 @@ export const zodlistServicesResponse = zod.object({
   "descricao": zod.string().nullable(),
   "categoria": zod.string().nullable(),
   "ativo": zod.boolean(),
-  "createdAt": zod.string().datetime({}),
-  "updatedAt": zod.string().datetime({})
+  "preco": zod.number().nullable(),
+  "duracao": zod.number().nullable()
 })),
   "pagination": zod.object({
   "page": zod.number(),
@@ -112,8 +112,8 @@ export const zodupdateServiceByIdResponse = zod.object({
   "descricao": zod.string().nullable(),
   "categoria": zod.string().nullable(),
   "ativo": zod.boolean(),
-  "createdAt": zod.string().datetime({}),
-  "updatedAt": zod.string().datetime({})
+  "preco": zod.number().nullable(),
+  "duracao": zod.number().nullable()
 })
 })
 

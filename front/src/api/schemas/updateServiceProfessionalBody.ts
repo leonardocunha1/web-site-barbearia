@@ -1,12 +1,5 @@
+import type { UpdateServiceProfessionalBodyServicesItem } from "./updateServiceProfessionalBodyServicesItem";
+
 export type UpdateServiceProfessionalBody = {
-  /**
-   * @minimum 0
-   * @exclusiveMinimum
-   */
-  preco: number;
-  /**
-   * @minimum 0
-   * @exclusiveMinimum
-   */
-  duracao: number;
+  services: UpdateServiceProfessionalBodyServicesItem[];
 };

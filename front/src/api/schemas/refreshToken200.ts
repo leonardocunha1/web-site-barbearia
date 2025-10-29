@@ -3,4 +3,5 @@
  */
 export type RefreshToken200 = {
   token: string;
+  refreshToken: string;
 };

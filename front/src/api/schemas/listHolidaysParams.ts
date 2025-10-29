@@ -1,4 +1,4 @@
-import type { ListHolidaysSortOrder } from "./listHolidaysSortOrder";
+import type { ListHolidaysSortDirection } from "./listHolidaysSortDirection";
 
 export type ListHolidaysParams = {
   /**
@@ -21,5 +21,5 @@ export type ListHolidaysParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListHolidaysSortOrder;
+  sortDirection?: ListHolidaysSortDirection;
 };

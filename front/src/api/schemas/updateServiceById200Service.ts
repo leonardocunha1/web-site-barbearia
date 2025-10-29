@@ -6,6 +6,8 @@ export type UpdateServiceById200Service = {
   /** @nullable */
   categoria: string | null;
   ativo: boolean;
-  createdAt: string;
-  updatedAt: string;
+  /** @nullable */
+  preco: number | null;
+  /** @nullable */
+  duracao: number | null;
 };

@@ -43,13 +43,13 @@ export const zodlistUsersQueryLimitDefault = 10;
 export const zodlistUsersQueryLimitMin = 0;
 
 export const zodlistUsersQueryLimitMax = 100;
-export const zodlistUsersQuerySortOrderDefault = "asc";
+export const zodlistUsersQuerySortDirectionDefault = "asc";
 
 export const zodlistUsersQueryParams = zod.object({
   "page": zod.number().min(zodlistUsersQueryPageMin).default(zodlistUsersQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistUsersQueryLimitMin).max(zodlistUsersQueryLimitMax).default(zodlistUsersQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(zodlistUsersQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistUsersQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "role": zod.enum(['ADMIN', 'CLIENTE', 'PROFISSIONAL']).optional(),
   "name": zod.string().optional()
 })

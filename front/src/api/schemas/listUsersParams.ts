@@ -1,4 +1,4 @@
-import type { ListUsersSortOrder } from "./listUsersSortOrder";
+import type { ListUsersSortDirection } from "./listUsersSortDirection";
 import type { ListUsersRole } from "./listUsersRole";
 
 export type ListUsersParams = {
@@ -22,7 +22,7 @@ export type ListUsersParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListUsersSortOrder;
+  sortDirection?: ListUsersSortDirection;
   role?: ListUsersRole;
   name?: string;
 };

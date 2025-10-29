@@ -34,6 +34,7 @@ export const zodloginUserBody = zod.object({
 
 export const zodloginUserResponse = zod.object({
   "token": zod.string(),
+  "refreshToken": zod.string(),
   "user": zod.object({
   "id": zod.string().uuid(),
   "nome": zod.string(),
@@ -57,6 +58,7 @@ export const zodlogoutUserResponse = zod.object({
  * Geração de um novo token de acesso com base no refresh token válido presente nos cookies.
  */
 export const zodrefreshTokenResponse = zod.object({
-  "token": zod.string()
+  "token": zod.string(),
+  "refreshToken": zod.string()
 }).describe('Novo token gerado com sucesso.')
 

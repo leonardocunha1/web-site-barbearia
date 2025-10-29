@@ -24,16 +24,16 @@ export const zodlistOrSearchProfessionalsQueryLimitDefault = 10;
 export const zodlistOrSearchProfessionalsQueryLimitMin = 0;
 
 export const zodlistOrSearchProfessionalsQueryLimitMax = 100;
-export const zodlistOrSearchProfessionalsQuerySortOrderDefault = "asc";export const zodlistOrSearchProfessionalsQueryQueryMin = 2;
+export const zodlistOrSearchProfessionalsQuerySortDirectionDefault = "asc";export const zodlistOrSearchProfessionalsQuerySearchMin = 2;
 
 
 export const zodlistOrSearchProfessionalsQueryParams = zod.object({
   "page": zod.number().min(zodlistOrSearchProfessionalsQueryPageMin).default(zodlistOrSearchProfessionalsQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistOrSearchProfessionalsQueryLimitMin).max(zodlistOrSearchProfessionalsQueryLimitMax).default(zodlistOrSearchProfessionalsQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(zodlistOrSearchProfessionalsQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
-  "query": zod.string().min(zodlistOrSearchProfessionalsQueryQueryMin).optional().describe('Termo de busca para profissionais'),
-  "ativo": zod.boolean().optional().describe('Filtrar por status ativo')
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistOrSearchProfessionalsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "search": zod.string().min(zodlistOrSearchProfessionalsQuerySearchMin).optional().describe('Termo de busca para profissionais'),
+  "status": zod.enum(['ativo', 'inativo']).optional().describe('Filtrar por status ativo ou inativo')
 })
 
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeMin = 3;
@@ -63,7 +63,8 @@ export const zodlistOrSearchProfessionalsResponse = zod.object({
   "services": zod.array(zod.object({
   "id": zod.string().uuid().describe('ID do serviço'),
   "nome": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemNomeMin).describe('Nome do serviço'),
-  "descricao": zod.string().max(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescricaoMax).optional().describe('Descrição do serviço')
+  "descricao": zod.string().max(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescricaoMax).optional().describe('Descrição do serviço'),
+  "linked": zod.boolean().describe('Indica se o serviço está vinculado ao profissional')
 })).describe('Lista de serviços oferecidos pelo profissional')
 }).describe('Perfil completo do profissional com detalhes do usuário e serviços')),
   "total": zod.number(),

@@ -31,13 +31,13 @@ export const zodlistHolidaysQueryLimitDefault = 10;
 export const zodlistHolidaysQueryLimitMin = 0;
 
 export const zodlistHolidaysQueryLimitMax = 100;
-export const zodlistHolidaysQuerySortOrderDefault = "asc";
+export const zodlistHolidaysQuerySortDirectionDefault = "asc";
 
 export const zodlistHolidaysQueryParams = zod.object({
   "page": zod.number().min(zodlistHolidaysQueryPageMin).default(zodlistHolidaysQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistHolidaysQueryLimitMin).max(zodlistHolidaysQueryLimitMax).default(zodlistHolidaysQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(zodlistHolidaysQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)')
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistHolidaysQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)')
 })
 
 export const zodlistHolidaysResponseTotalMin = 0;

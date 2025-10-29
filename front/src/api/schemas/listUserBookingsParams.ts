@@ -1,4 +1,4 @@
-import type { ListUserBookingsSortOrder } from "./listUserBookingsSortOrder";
+import type { ListUserBookingsSortDirection } from "./listUserBookingsSortDirection";
 import type { ListUserBookingsStatus } from "./listUserBookingsStatus";
 import type { ListUserBookingsSortItem } from "./listUserBookingsSortItem";
 
@@ -23,7 +23,7 @@ export type ListUserBookingsParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListUserBookingsSortOrder;
+  sortDirection?: ListUserBookingsSortDirection;
   startDate?: string;
   endDate?: string;
   status?: ListUserBookingsStatus;

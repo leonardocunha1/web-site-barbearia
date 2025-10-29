@@ -1,4 +1,4 @@
-import type { ListProfessionalBookingsSortOrder } from "./listProfessionalBookingsSortOrder";
+import type { ListProfessionalBookingsSortDirection } from "./listProfessionalBookingsSortDirection";
 import type { ListProfessionalBookingsStatus } from "./listProfessionalBookingsStatus";
 import type { ListProfessionalBookingsSortItem } from "./listProfessionalBookingsSortItem";
 
@@ -23,7 +23,7 @@ export type ListProfessionalBookingsParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListProfessionalBookingsSortOrder;
+  sortDirection?: ListProfessionalBookingsSortDirection;
   startDate?: string;
   endDate?: string;
   status?: ListProfessionalBookingsStatus;

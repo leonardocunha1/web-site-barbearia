@@ -28,13 +28,13 @@ export const zodlistProfessionalServicesQueryLimitDefault = 10;
 export const zodlistProfessionalServicesQueryLimitMin = 0;
 
 export const zodlistProfessionalServicesQueryLimitMax = 100;
-export const zodlistProfessionalServicesQuerySortOrderDefault = "asc";export const zodlistProfessionalServicesQueryActiveOnlyDefault = true;
+export const zodlistProfessionalServicesQuerySortDirectionDefault = "asc";export const zodlistProfessionalServicesQueryActiveOnlyDefault = true;
 
 export const zodlistProfessionalServicesQueryParams = zod.object({
   "page": zod.number().min(zodlistProfessionalServicesQueryPageMin).default(zodlistProfessionalServicesQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistProfessionalServicesQueryLimitMin).max(zodlistProfessionalServicesQueryLimitMax).default(zodlistProfessionalServicesQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(zodlistProfessionalServicesQuerySortOrderDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistProfessionalServicesQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "activeOnly": zod.boolean().default(zodlistProfessionalServicesQueryActiveOnlyDefault)
 })
 
@@ -45,8 +45,8 @@ export const zodlistProfessionalServicesResponse = zod.object({
   "descricao": zod.string().nullable(),
   "categoria": zod.string().nullable(),
   "ativo": zod.boolean(),
-  "createdAt": zod.string().datetime({}),
-  "updatedAt": zod.string().datetime({})
+  "preco": zod.number().nullable(),
+  "duracao": zod.number().nullable()
 })),
   "pagination": zod.object({
   "page": zod.number(),
@@ -62,16 +62,20 @@ export const zodremoveServiceFromProfessionalParams = zod.object({
 })
 
 export const zodupdateServiceProfessionalParams = zod.object({
-  "serviceId": zod.string().uuid(),
-  "professionalId": zod.string().uuid()
+  "professionalId": zod.string().uuid(),
+  "serviceId": zod.string().uuid()
 })
 
-export const zodupdateServiceProfessionalBodyPrecoMin = 0;
-export const zodupdateServiceProfessionalBodyDuracaoMin = 0;
+export const zodupdateServiceProfessionalBodyServicesItemPrecoMin = 0;
+export const zodupdateServiceProfessionalBodyServicesItemDuracaoMin = 0;
 
 
 export const zodupdateServiceProfessionalBody = zod.object({
-  "preco": zod.number().min(zodupdateServiceProfessionalBodyPrecoMin),
-  "duracao": zod.number().min(zodupdateServiceProfessionalBodyDuracaoMin)
+  "services": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "preco": zod.number().min(zodupdateServiceProfessionalBodyServicesItemPrecoMin),
+  "duracao": zod.number().min(zodupdateServiceProfessionalBodyServicesItemDuracaoMin),
+  "linked": zod.boolean()
+}))
 })
 

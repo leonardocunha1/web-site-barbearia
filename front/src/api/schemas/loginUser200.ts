@@ -5,5 +5,6 @@ import type { LoginUser200User } from "./loginUser200User";
  */
 export type LoginUser200 = {
   token: string;
+  refreshToken: string;
   user: LoginUser200User;
 };

@@ -1,4 +1,4 @@
-import type { ListProfessionalServicesSortOrder } from "./listProfessionalServicesSortOrder";
+import type { ListProfessionalServicesSortDirection } from "./listProfessionalServicesSortDirection";
 
 export type ListProfessionalServicesParams = {
   /**
@@ -21,6 +21,6 @@ export type ListProfessionalServicesParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListProfessionalServicesSortOrder;
+  sortDirection?: ListProfessionalServicesSortDirection;
   activeOnly?: boolean;
 };

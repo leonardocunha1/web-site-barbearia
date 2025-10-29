@@ -15,8 +15,8 @@ export default async function ProfissionalPage({
   params,
   searchParams,
 }: ProfissionalPageProps) {
-  const { id } = params;
-  const sp = searchParams;
+  const { id } = await params;
+  const sp = await searchParams;
 
   const page = Number(sp?.page ?? 1);
   const limit = Number(sp?.limit ?? 10);

@@ -11,4 +11,6 @@ export type ListOrSearchProfessionals200ProfessionalsItemServicesItem = {
    * @maxLength 200
    */
   descricao?: string;
+  /** Indica se o serviço está vinculado ao profissional */
+  linked: boolean;
 };

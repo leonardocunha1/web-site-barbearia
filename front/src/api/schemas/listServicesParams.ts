@@ -1,4 +1,4 @@
-import type { ListServicesSortOrder } from "./listServicesSortOrder";
+import type { ListServicesSortDirection } from "./listServicesSortDirection";
 
 export type ListServicesParams = {
   /**
@@ -21,7 +21,7 @@ export type ListServicesParams = {
   /**
    * Direção da ordenação: asc (crescente) ou desc (decrescente)
    */
-  sortOrder?: ListServicesSortOrder;
+  sortDirection?: ListServicesSortDirection;
   /**
    * @maxLength 100
    */
