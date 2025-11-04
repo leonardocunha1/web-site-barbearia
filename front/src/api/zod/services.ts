@@ -45,9 +45,7 @@ export const zodlistServicesResponse = zod.object({
   "nome": zod.string(),
   "descricao": zod.string().nullable(),
   "categoria": zod.string().nullable(),
-  "ativo": zod.boolean(),
-  "preco": zod.number().nullable(),
-  "duracao": zod.number().nullable()
+  "ativo": zod.boolean()
 })),
   "pagination": zod.object({
   "page": zod.number(),

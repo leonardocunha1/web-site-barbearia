@@ -1,18 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { GenericTable, Column } from "@/components/table/generic-table";
-import {
-  useCreateService,
-  useUpdateServiceById,
-  useListServices,
-  ListServices200ServicesItem,
-} from "@/api";
 import { toast } from "sonner";
-import { useServiceFormModal, ServiceFormValues } from "./services-form-modal";
 import { ButtonStatus } from "@/components/table/button-status";
+
+import { useServiceFormModal, ServiceFormValues } from "./services-form-modal";
+import {
+  servicesCreate,
+  servicesGet,
+  servicesUpdate,
+} from "@/app/api/actions/services";
 
 type Service = {
   id: string;
@@ -23,46 +24,64 @@ type Service = {
 };
 
 export default function ServicosSection() {
-  const { data: response, isLoading, refetch } = useListServices();
-  const { mutateAsync: createService, isPending } = useCreateService();
-  const { mutateAsync: updateService } = useUpdateServiceById();
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+
   const { openServiceForm } = useServiceFormModal();
 
-  const services: Service[] =
-    response?.services?.map((s: ListServices200ServicesItem) => ({
-      id: s.id,
-      nome: s.nome,
-      descricao: s.descricao ?? undefined,
-      categoria:
-        s.categoria === "completo"
-          ? "Cabelo + Barba"
-          : s.categoria === "cabelo"
-            ? "Cabelo"
-            : "Barba",
-      ativo: s.ativo ? "Ativo" : "Inativo",
-    })) ?? [];
+  async function fetchServices() {
+    setLoading(true);
+    const { data, ok, error } = await servicesGet();
+
+    if (!ok || !data) {
+      toast.error(error || "Erro ao carregar serviços");
+      setLoading(false);
+      return;
+    }
+
+    const mappedServices: Service[] =
+      data.services?.map((s) => ({
+        id: s.id,
+        nome: s.nome,
+        descricao: s.descricao ?? undefined,
+        categoria:
+          s.categoria === "completo"
+            ? "Cabelo + Barba"
+            : s.categoria === "cabelo"
+              ? "Cabelo"
+              : "Barba",
+        ativo: s.ativo ? "Ativo" : "Inativo",
+      })) ?? [];
+
+    setServices(mappedServices);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   const handleAdd = () => {
     openServiceForm({
       mode: "create",
       onSubmit: async (values: ServiceFormValues) => {
-        await createService(
-          {
-            data: {
-              ...values,
-              ativo: values.ativo === "Ativo",
-            },
-          },
-          {
-            onSuccess: () => {
-              toast.success("Serviço criado com sucesso!");
-              refetch();
-            },
-            onError: (error) => {
-              toast.error(error?.message || "Erro ao criar serviço");
-            },
-          },
-        );
+        setCreating(true);
+        const { ok, error } = await servicesCreate({
+          nome: values.nome,
+          descricao: values.descricao,
+          categoria: values.categoria,
+          ativo: values.ativo === "Ativo",
+        });
+
+        if (ok) {
+          toast.success("Serviço criado com sucesso!");
+          await fetchServices();
+        } else {
+          toast.error(error || "Erro ao criar serviço");
+        }
+
+        setCreating(false);
       },
     });
   };
@@ -82,24 +101,19 @@ export default function ServicosSection() {
         ativo: service.ativo,
       },
       onSubmit: async (values: ServiceFormValues) => {
-        await updateService(
-          {
-            id: service.id,
-            data: {
-              ...values,
-              ativo: values.ativo === "Ativo",
-            },
-          },
-          {
-            onSuccess: () => {
-              toast.success("Serviço atualizado com sucesso!");
-              refetch();
-            },
-            onError: (error) => {
-              toast.error(error?.message || "Erro ao atualizar serviço");
-            },
-          },
-        );
+        const { ok, error } = await servicesUpdate(service.id, {
+          nome: values.nome,
+          descricao: values.descricao,
+          categoria: values.categoria,
+          ativo: values.ativo === "Ativo",
+        });
+
+        if (ok) {
+          toast.success("Serviço atualizado com sucesso!");
+          await fetchServices();
+        } else {
+          toast.error(error || "Erro ao atualizar serviço");
+        }
       },
     });
   };
@@ -116,7 +130,7 @@ export default function ServicosSection() {
     },
   ];
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="text-center">
         <div className="border-principal-500 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-t-transparent" />
@@ -133,7 +147,7 @@ export default function ServicosSection() {
         <div>
           <Button
             onClick={handleAdd}
-            disabled={isPending}
+            disabled={creating}
             className="bg-principal-500 hover:bg-principal-600 cursor-pointer text-white"
           >
             Novo Serviço
@@ -142,7 +156,7 @@ export default function ServicosSection() {
         <GenericTable
           data={services}
           columns={columns}
-          isLoading={isLoading}
+          isLoading={loading}
           emptyMessage="Nenhum serviço cadastrado"
           rowKey="id"
           className="rounded-lg border"
