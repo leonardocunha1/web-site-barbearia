@@ -1,7 +1,7 @@
 "use server";
 
-import { PROFESSIONALS_LIST } from "@/functions/api-professional";
-import apiError from "@/functions/api-error";
+import { PROFESSIONALS_LIST } from "@/shared/services/api-professional";
+import apiError from "@/shared/services/api-error";
 import { zodlistOrSearchProfessionalsResponse } from "@/api";
 
 export type Professional = {
@@ -46,3 +46,4 @@ export async function professionalsList(query?: {
     return apiError(error);
   }
 }
+

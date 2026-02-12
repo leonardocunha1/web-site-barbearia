@@ -84,18 +84,18 @@ export const zodlistCouponsResponse = zod.object({
   "updatedAt": zod.string().datetime({}),
   "service": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string()
+  "name": zod.string()
 }).nullish(),
   "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string()
+  "name": zod.string()
 })
 }).nullish(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string()
+  "name": zod.string()
 }).nullish()
 }).describe('Modelo completo de cupom')),
   "total": zod.number(),
@@ -135,18 +135,18 @@ export const zodgetCouponByIdResponse = zod.object({
   "updatedAt": zod.string().datetime({}),
   "service": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string()
+  "name": zod.string()
 }).nullish(),
   "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string()
+  "name": zod.string()
 })
 }).nullish(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string()
+  "name": zod.string()
 }).nullish()
 }).describe('Modelo completo de cupom')
 })
@@ -180,8 +180,44 @@ export const zodupdateCouponBody = zod.object({
   "active": zod.boolean().optional()
 }).describe('Dados para atualização de cupom')
 
+export const zodupdateCouponResponseCouponCodeMin = 3;
+export const zodupdateCouponResponseCouponValueMin = 0;
+export const zodupdateCouponResponseCouponUsesMin = 0;
+export const zodupdateCouponResponseCouponMinBookingValueMin = 0;
+
+
 export const zodupdateCouponResponse = zod.object({
-  "message": zod.string()
+  "coupon": zod.object({
+  "id": zod.string().uuid(),
+  "code": zod.string().min(zodupdateCouponResponseCouponCodeMin),
+  "description": zod.string().nullable(),
+  "type": zod.enum(['PERCENTAGE', 'FIXED', 'FREE']),
+  "value": zod.number().min(zodupdateCouponResponseCouponValueMin),
+  "scope": zod.enum(['GLOBAL', 'SERVICE', 'PROFESSIONAL']),
+  "maxUses": zod.number().nullable(),
+  "uses": zod.number().min(zodupdateCouponResponseCouponUsesMin),
+  "startDate": zod.string().datetime({}),
+  "endDate": zod.string().datetime({}).nullable(),
+  "minBookingValue": zod.number().min(zodupdateCouponResponseCouponMinBookingValueMin).nullable(),
+  "active": zod.boolean(),
+  "createdAt": zod.string().datetime({}),
+  "updatedAt": zod.string().datetime({}),
+  "service": zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string()
+}).nullish(),
+  "professional": zod.object({
+  "id": zod.string().uuid(),
+  "user": zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string()
+})
+}).nullish(),
+  "user": zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string()
+}).nullish()
+}).describe('Modelo completo de cupom')
 })
 
 /**
@@ -191,6 +227,10 @@ export const zoddeleteCouponParams = zod.object({
   "couponId": zod.string().uuid()
 })
 
+export const zoddeleteCouponResponse = zod.object({
+  "success": zod.boolean()
+}).describe('Cupom deletado com sucesso.')
+
 /**
  * Ativa ou desativa o status de um cupom.
  */
@@ -199,6 +239,9 @@ export const zodtoggleCouponStatusParams = zod.object({
 })
 
 export const zodtoggleCouponStatusResponse = zod.object({
-  "message": zod.string()
+  "coupon": zod.object({
+  "id": zod.string(),
+  "active": zod.boolean()
+})
 })
 

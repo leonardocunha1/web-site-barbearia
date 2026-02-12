@@ -3,5 +3,5 @@
  */
 export type GetCouponById200CouponUser = {
   id: string;
-  nome: string;
+  name: string;
 } | null;

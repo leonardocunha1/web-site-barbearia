@@ -2,10 +2,10 @@ import type { ListUsers200UsersItemRole } from "./listUsers200UsersItemRole";
 
 export type ListUsers200UsersItem = {
   id: string;
-  nome: string;
+  name: string;
   email: string;
   /** @nullable */
-  telefone?: string | null;
+  phone?: string | null;
   role?: ListUsers200UsersItemRole;
   emailVerified: boolean;
   active: boolean;

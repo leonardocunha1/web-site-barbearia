@@ -2,9 +2,9 @@ export type ListHolidays200HolidaysItem = {
   /** ID do feriado */
   id: string;
   /** Data no formato ISO 8601 */
-  data: string;
+  date: string;
   /** Motivo do feriado */
-  motivo: string;
+  reason: string;
   /** ID do profissional */
-  profissionalId: string;
+  professionalId: string;
 };

@@ -11,21 +11,21 @@ export type ListBusinessHours200BusinessHoursItem = {
    * @minimum 0
    * @maximum 6
    */
-  diaSemana: number;
+  dayOfWeek: number;
   /** Horário de abertura */
-  abreAs: string;
+  opensAt: string;
   /** Horário de fechamento */
-  fechaAs: string;
+  closesAt: string;
   /**
    * Início da pausa
    * @nullable
    */
-  pausaInicio: string | null;
+  breakStart: string | null;
   /**
    * Fim da pausa
    * @nullable
    */
-  pausaFim: string | null;
+  breakEnd: string | null;
   /** ID do profissional associado */
-  profissionalId: string;
+  professionalId: string;
 };

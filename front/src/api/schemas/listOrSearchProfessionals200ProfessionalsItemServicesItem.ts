@@ -5,12 +5,12 @@ export type ListOrSearchProfessionals200ProfessionalsItemServicesItem = {
    * Nome do serviço
    * @minLength 2
    */
-  nome: string;
+  name: string;
   /**
    * Descrição do serviço
    * @maxLength 200
    */
-  descricao?: string;
+  description?: string;
   /** Indica se o serviço está vinculado ao profissional */
   linked: boolean;
 };

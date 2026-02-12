@@ -16,11 +16,11 @@ export type ListOrSearchProfessionalsParams = {
    */
   limit?: number;
   /**
-   * Campo para ordenação (opcional)
+   * Campo para ordenacao
    */
   sortBy?: string;
   /**
-   * Direção da ordenação: asc (crescente) ou desc (decrescente)
+   * Direcao da ordenacao
    */
   sortDirection?: ListOrSearchProfessionalsSortDirection;
   /**
@@ -28,6 +28,10 @@ export type ListOrSearchProfessionalsParams = {
    * @minLength 2
    */
   search?: string;
+  /**
+   * Filtrar por especialidade do profissional
+   */
+  specialty?: string;
   /**
    * Filtrar por status ativo ou inativo
    */

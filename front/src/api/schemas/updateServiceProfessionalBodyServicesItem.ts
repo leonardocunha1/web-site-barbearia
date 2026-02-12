@@ -4,11 +4,11 @@ export type UpdateServiceProfessionalBodyServicesItem = {
    * @minimum 0
    * @exclusiveMinimum
    */
-  preco: number;
+  price: number;
   /**
    * @minimum 0
    * @exclusiveMinimum
    */
-  duracao: number;
+  duration: number;
   linked: boolean;
 };

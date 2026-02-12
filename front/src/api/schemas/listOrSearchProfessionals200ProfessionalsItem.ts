@@ -12,7 +12,7 @@ export type ListOrSearchProfessionals200ProfessionalsItem = {
    * @minLength 3
    * @maxLength 100
    */
-  especialidade: string;
+  specialty: string;
   /**
    * Biografia do profissional
    * @maxLength 500
@@ -24,7 +24,7 @@ export type ListOrSearchProfessionals200ProfessionalsItem = {
    */
   avatarUrl?: string;
   /** Indica se o profissional está ativo */
-  ativo?: boolean;
+  active?: boolean;
   /** Detalhes da conta do usuário */
   user: ListOrSearchProfessionals200ProfessionalsItemUser;
   /** Lista de serviços oferecidos pelo profissional */

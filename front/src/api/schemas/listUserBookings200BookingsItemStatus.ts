@@ -3,8 +3,8 @@ export type ListUserBookings200BookingsItemStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ListUserBookings200BookingsItemStatus = {
-  PENDENTE: "PENDENTE",
-  CONFIRMADO: "CONFIRMADO",
-  CANCELADO: "CANCELADO",
-  CONCLUIDO: "CONCLUIDO",
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  CANCELED: "CANCELED",
+  COMPLETED: "COMPLETED",
 } as const;

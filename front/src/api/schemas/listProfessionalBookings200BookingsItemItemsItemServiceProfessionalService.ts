@@ -2,5 +2,5 @@ export type ListProfessionalBookings200BookingsItemItemsItemServiceProfessionalS
   {
     id: string;
     /** @minLength 2 */
-    nome: string;
+    name: string;
   };

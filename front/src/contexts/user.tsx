@@ -1,12 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-import { GetUsersMe200 } from "@/api";
-import { useAuthValidation } from "@/hooks/useAuth";
+import { GetUserProfile200 } from "@/api";
+import { useAuthValidation } from "@/shared/hooks/useAuth";
 
 type UserContextType = {
-  user: GetUsersMe200 | null | undefined;
-  setUser: (user: GetUsersMe200 | null) => void;
+  user: GetUserProfile200 | null | undefined;
+  setUser: React.Dispatch<
+    React.SetStateAction<GetUserProfile200 | null | undefined>
+  >;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -18,7 +20,7 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<GetUsersMe200 | null | undefined>();
+  const [user, setUser] = useState<GetUserProfile200 | null | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
   // gerenciar a validação

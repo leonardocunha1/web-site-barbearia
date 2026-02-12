@@ -33,7 +33,7 @@ export const zodupdateBookingStatusBodyReasonMax = 255;
 
 
 export const zodupdateBookingStatusBody = zod.object({
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']),
+  "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']),
   "reason": zod.string().max(zodupdateBookingStatusBodyReasonMax).optional()
 }).describe('Dados para atualização de status de agendamento')
 
@@ -59,20 +59,20 @@ export const zodlistUserBookingsQueryParams = zod.object({
   "sortDirection": zod.enum(['asc', 'desc']).default(zodlistUserBookingsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "startDate": zod.string().datetime({}).optional(),
   "endDate": zod.string().datetime({}).optional(),
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']).optional(),
+  "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']).optional(),
   "sort": zod.array(zod.object({
-  "field": zod.enum(['dataHoraInicio', 'profissional', 'status', 'valorFinal']).describe('SortField'),
+  "field": zod.enum(['startDateTime', 'PROFESSIONAL', 'status', 'totalAmount']).describe('SortField'),
   "order": zod.enum(['asc', 'desc']).describe('SortOrder')
 }).describe('SortSchema')).optional()
 })
 
-export const zodlistUserBookingsResponseBookingsItemObservacoesMax = 500;
-export const zodlistUserBookingsResponseBookingsItemValorFinalMin = 0;
-export const zodlistUserBookingsResponseBookingsItemProfissionalUserNomeMin = 2;
-export const zodlistUserBookingsResponseBookingsItemUserNomeMin = 2;
-export const zodlistUserBookingsResponseBookingsItemItemsItemDuracaoMin = 0;
-export const zodlistUserBookingsResponseBookingsItemItemsItemPrecoMin = 0;
-export const zodlistUserBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNomeMin = 2;
+export const zodlistUserBookingsResponseBookingsItemNotesMax = 500;
+export const zodlistUserBookingsResponseBookingsItemTotalAmountMin = 0;
+export const zodlistUserBookingsResponseBookingsItemProfessionalUserNameMin = 2;
+export const zodlistUserBookingsResponseBookingsItemUserNameMin = 2;
+export const zodlistUserBookingsResponseBookingsItemItemsItemDurationMin = 0;
+export const zodlistUserBookingsResponseBookingsItemItemsItemPriceMin = 0;
+export const zodlistUserBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNameMin = 2;
 export const zodlistUserBookingsResponseTotalMin = 0;
 export const zodlistUserBookingsResponsePageMin = 0;
 export const zodlistUserBookingsResponseLimitMin = 0;
@@ -82,36 +82,36 @@ export const zodlistUserBookingsResponseTotalPagesMin = 0;
 export const zodlistUserBookingsResponse = zod.object({
   "bookings": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "usuarioId": zod.string().uuid(),
-  "dataHoraInicio": zod.string().datetime({}),
-  "dataHoraFim": zod.string().datetime({}),
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']),
-  "observacoes": zod.string().max(zodlistUserBookingsResponseBookingsItemObservacoesMax).nullish(),
-  "valorFinal": zod.number().min(zodlistUserBookingsResponseBookingsItemValorFinalMin).nullish(),
+  "userId": zod.string().uuid(),
+  "startDateTime": zod.string().datetime({}),
+  "endDateTime": zod.string().datetime({}),
+  "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']),
+  "notes": zod.string().max(zodlistUserBookingsResponseBookingsItemNotesMax).nullish(),
+  "totalAmount": zod.number().min(zodlistUserBookingsResponseBookingsItemTotalAmountMin).nullish(),
   "canceledAt": zod.string().datetime({}).nullish(),
   "confirmedAt": zod.string().datetime({}).nullish(),
   "updatedAt": zod.string().datetime({}),
   "createdAt": zod.string().datetime({}),
-  "profissional": zod.object({
+  "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodlistUserBookingsResponseBookingsItemProfissionalUserNomeMin)
+  "name": zod.string().min(zodlistUserBookingsResponseBookingsItemProfessionalUserNameMin)
 })
 }),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodlistUserBookingsResponseBookingsItemUserNomeMin)
+  "name": zod.string().min(zodlistUserBookingsResponseBookingsItemUserNameMin)
 }),
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "duracao": zod.number().min(zodlistUserBookingsResponseBookingsItemItemsItemDuracaoMin),
-  "preco": zod.number().min(zodlistUserBookingsResponseBookingsItemItemsItemPrecoMin),
+  "duration": zod.number().min(zodlistUserBookingsResponseBookingsItemItemsItemDurationMin),
+  "price": zod.number().min(zodlistUserBookingsResponseBookingsItemItemsItemPriceMin),
   "serviceProfessional": zod.object({
   "id": zod.string().uuid(),
   "service": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodlistUserBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNomeMin)
+  "name": zod.string().min(zodlistUserBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNameMin)
 })
 })
 }).describe('Item de agendamento')).min(1)
@@ -140,20 +140,20 @@ export const zodlistProfessionalBookingsQueryParams = zod.object({
   "sortDirection": zod.enum(['asc', 'desc']).default(zodlistProfessionalBookingsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
   "startDate": zod.string().datetime({}).optional(),
   "endDate": zod.string().datetime({}).optional(),
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']).optional(),
+  "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']).optional(),
   "sort": zod.array(zod.object({
-  "field": zod.enum(['dataHoraInicio', 'profissional', 'status', 'valorFinal']).describe('SortField'),
+  "field": zod.enum(['startDateTime', 'PROFESSIONAL', 'status', 'totalAmount']).describe('SortField'),
   "order": zod.enum(['asc', 'desc']).describe('SortOrder')
 }).describe('SortSchema')).optional()
 })
 
-export const zodlistProfessionalBookingsResponseBookingsItemObservacoesMax = 500;
-export const zodlistProfessionalBookingsResponseBookingsItemValorFinalMin = 0;
-export const zodlistProfessionalBookingsResponseBookingsItemProfissionalUserNomeMin = 2;
-export const zodlistProfessionalBookingsResponseBookingsItemUserNomeMin = 2;
-export const zodlistProfessionalBookingsResponseBookingsItemItemsItemDuracaoMin = 0;
-export const zodlistProfessionalBookingsResponseBookingsItemItemsItemPrecoMin = 0;
-export const zodlistProfessionalBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNomeMin = 2;
+export const zodlistProfessionalBookingsResponseBookingsItemNotesMax = 500;
+export const zodlistProfessionalBookingsResponseBookingsItemTotalAmountMin = 0;
+export const zodlistProfessionalBookingsResponseBookingsItemProfessionalUserNameMin = 2;
+export const zodlistProfessionalBookingsResponseBookingsItemUserNameMin = 2;
+export const zodlistProfessionalBookingsResponseBookingsItemItemsItemDurationMin = 0;
+export const zodlistProfessionalBookingsResponseBookingsItemItemsItemPriceMin = 0;
+export const zodlistProfessionalBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNameMin = 2;
 export const zodlistProfessionalBookingsResponseTotalMin = 0;
 export const zodlistProfessionalBookingsResponsePageMin = 0;
 export const zodlistProfessionalBookingsResponseLimitMin = 0;
@@ -163,36 +163,36 @@ export const zodlistProfessionalBookingsResponseTotalPagesMin = 0;
 export const zodlistProfessionalBookingsResponse = zod.object({
   "bookings": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "usuarioId": zod.string().uuid(),
-  "dataHoraInicio": zod.string().datetime({}),
-  "dataHoraFim": zod.string().datetime({}),
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']),
-  "observacoes": zod.string().max(zodlistProfessionalBookingsResponseBookingsItemObservacoesMax).nullish(),
-  "valorFinal": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemValorFinalMin).nullish(),
+  "userId": zod.string().uuid(),
+  "startDateTime": zod.string().datetime({}),
+  "endDateTime": zod.string().datetime({}),
+  "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']),
+  "notes": zod.string().max(zodlistProfessionalBookingsResponseBookingsItemNotesMax).nullish(),
+  "totalAmount": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemTotalAmountMin).nullish(),
   "canceledAt": zod.string().datetime({}).nullish(),
   "confirmedAt": zod.string().datetime({}).nullish(),
   "updatedAt": zod.string().datetime({}),
   "createdAt": zod.string().datetime({}),
-  "profissional": zod.object({
+  "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodlistProfessionalBookingsResponseBookingsItemProfissionalUserNomeMin)
+  "name": zod.string().min(zodlistProfessionalBookingsResponseBookingsItemProfessionalUserNameMin)
 })
 }),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodlistProfessionalBookingsResponseBookingsItemUserNomeMin)
+  "name": zod.string().min(zodlistProfessionalBookingsResponseBookingsItemUserNameMin)
 }),
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "duracao": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemItemsItemDuracaoMin),
-  "preco": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemItemsItemPrecoMin),
+  "duration": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemItemsItemDurationMin),
+  "price": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemItemsItemPriceMin),
   "serviceProfessional": zod.object({
   "id": zod.string().uuid(),
   "service": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodlistProfessionalBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNomeMin)
+  "name": zod.string().min(zodlistProfessionalBookingsResponseBookingsItemItemsItemServiceProfessionalServiceNameMin)
 })
 })
 }).describe('Item de agendamento')).min(1)
@@ -210,48 +210,48 @@ export const zodgetBookingByIdParams = zod.object({
   "bookingId": zod.string().uuid()
 })
 
-export const zodgetBookingByIdResponseBookingObservacoesMax = 500;
-export const zodgetBookingByIdResponseBookingValorFinalMin = 0;
-export const zodgetBookingByIdResponseBookingProfissionalUserNomeMin = 2;
-export const zodgetBookingByIdResponseBookingUserNomeMin = 2;
-export const zodgetBookingByIdResponseBookingItemsItemDuracaoMin = 0;
-export const zodgetBookingByIdResponseBookingItemsItemPrecoMin = 0;
-export const zodgetBookingByIdResponseBookingItemsItemServiceProfessionalServiceNomeMin = 2;
+export const zodgetBookingByIdResponseBookingNotesMax = 500;
+export const zodgetBookingByIdResponseBookingTotalAmountMin = 0;
+export const zodgetBookingByIdResponseBookingProfessionalUserNameMin = 2;
+export const zodgetBookingByIdResponseBookingUserNameMin = 2;
+export const zodgetBookingByIdResponseBookingItemsItemDurationMin = 0;
+export const zodgetBookingByIdResponseBookingItemsItemPriceMin = 0;
+export const zodgetBookingByIdResponseBookingItemsItemServiceProfessionalServiceNameMin = 2;
 
 
 export const zodgetBookingByIdResponse = zod.object({
   "booking": zod.object({
   "id": zod.string().uuid(),
-  "usuarioId": zod.string().uuid(),
-  "dataHoraInicio": zod.string().datetime({}),
-  "dataHoraFim": zod.string().datetime({}),
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO']),
-  "observacoes": zod.string().max(zodgetBookingByIdResponseBookingObservacoesMax).nullish(),
-  "valorFinal": zod.number().min(zodgetBookingByIdResponseBookingValorFinalMin).nullish(),
+  "userId": zod.string().uuid(),
+  "startDateTime": zod.string().datetime({}),
+  "endDateTime": zod.string().datetime({}),
+  "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']),
+  "notes": zod.string().max(zodgetBookingByIdResponseBookingNotesMax).nullish(),
+  "totalAmount": zod.number().min(zodgetBookingByIdResponseBookingTotalAmountMin).nullish(),
   "canceledAt": zod.string().datetime({}).nullish(),
   "confirmedAt": zod.string().datetime({}).nullish(),
   "updatedAt": zod.string().datetime({}),
   "createdAt": zod.string().datetime({}),
-  "profissional": zod.object({
+  "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodgetBookingByIdResponseBookingProfissionalUserNomeMin)
+  "name": zod.string().min(zodgetBookingByIdResponseBookingProfessionalUserNameMin)
 })
 }),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodgetBookingByIdResponseBookingUserNomeMin)
+  "name": zod.string().min(zodgetBookingByIdResponseBookingUserNameMin)
 }),
   "items": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "duracao": zod.number().min(zodgetBookingByIdResponseBookingItemsItemDuracaoMin),
-  "preco": zod.number().min(zodgetBookingByIdResponseBookingItemsItemPrecoMin),
+  "duration": zod.number().min(zodgetBookingByIdResponseBookingItemsItemDurationMin),
+  "price": zod.number().min(zodgetBookingByIdResponseBookingItemsItemPriceMin),
   "serviceProfessional": zod.object({
   "id": zod.string().uuid(),
   "service": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string().min(zodgetBookingByIdResponseBookingItemsItemServiceProfessionalServiceNomeMin)
+  "name": zod.string().min(zodgetBookingByIdResponseBookingItemsItemServiceProfessionalServiceNameMin)
 })
 })
 }).describe('Item de agendamento')).min(1)

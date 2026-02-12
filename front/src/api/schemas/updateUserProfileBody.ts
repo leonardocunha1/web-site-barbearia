@@ -1,7 +1,7 @@
 export type UpdateUserProfileBody = {
   /** @minLength 3 */
-  nome?: string;
+  name?: string;
   email?: string;
   /** @nullable */
-  telefone?: string | null;
+  phone?: string | null;
 };

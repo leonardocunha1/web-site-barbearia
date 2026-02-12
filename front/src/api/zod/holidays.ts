@@ -7,20 +7,15 @@ import {
 /**
  * Criação de um novo feriado.
  */
-export const zodcreateHolidayBodyNotesMax = 500;
-export const zodcreateHolidayBodyUseBonusPointsDefault = false;export const zodcreateHolidayBodyCouponCodeMax = 50;
+export const zodcreateHolidayBodyReasonMin = 3;
+
+export const zodcreateHolidayBodyReasonMax = 100;
 
 
 export const zodcreateHolidayBody = zod.object({
-  "professionalId": zod.string().uuid(),
-  "services": zod.array(zod.object({
-  "serviceId": zod.string().uuid()
-})).min(1),
-  "startDateTime": zod.string().datetime({}),
-  "notes": zod.string().max(zodcreateHolidayBodyNotesMax).optional(),
-  "useBonusPoints": zod.boolean().optional(),
-  "couponCode": zod.string().max(zodcreateHolidayBodyCouponCodeMax).optional()
-}).describe('Dados para criação de agendamento')
+  "date": zod.string().datetime({}).describe('Data do feriado no formato ISO 8601 com timezone'),
+  "reason": zod.string().min(zodcreateHolidayBodyReasonMin).max(zodcreateHolidayBodyReasonMax).describe('Motivo do feriado (3-100 caracteres)')
+}).describe('Schema para criação de feriados')
 
 /**
  * Listar feriados.
@@ -51,9 +46,9 @@ export const zodlistHolidaysResponseTotalPagesMin = 0;
 export const zodlistHolidaysResponse = zod.object({
   "holidays": zod.array(zod.object({
   "id": zod.string().uuid().describe('ID do feriado'),
-  "data": zod.string().datetime({}).describe('Data no formato ISO 8601'),
-  "motivo": zod.string().describe('Motivo do feriado'),
-  "profissionalId": zod.string().uuid().describe('ID do profissional')
+  "date": zod.string().datetime({}).describe('Data no formato ISO 8601'),
+  "reason": zod.string().describe('Motivo do feriado'),
+  "professionalId": zod.string().uuid().describe('ID do profissional')
 })).describe('Lista de feriados'),
   "total": zod.number().min(zodlistHolidaysResponseTotalMin).describe('Total de registros'),
   "page": zod.number().min(zodlistHolidaysResponsePageMin).describe('Página atual'),

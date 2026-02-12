@@ -1,6 +1,6 @@
 import { servicesProfessionalGet } from "@/app/api/actions/services-professional";
-import ProfessionalServicesTable from "@/features/conta/admin/professional-section/id/professional-service-table";
-import { GoBackButton } from "@/components/ui/go-back-button";
+import ProfessionalServicesTable from "@/features/dashboard/admin/professional-section/id/professional-service-table";
+import { GoBackButton } from "@/shared/components/ui/go-back-button";
 
 interface ProfissionalPageProps {
   params: { id: string };

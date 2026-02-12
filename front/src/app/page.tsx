@@ -1,11 +1,11 @@
-import Container from "@/components/ui/container";
-import Feedbacks from "@/features/home/feedbacks";
-import Hero from "@/features/home/hero";
-import Localizacao from "@/features/home/localizacao";
-import { MarqueeDetails } from "@/features/home/marquee";
-import SejaUmBigodon from "@/features/home/seja-um-bigodon";
-import Servicos from "@/features/home/servicos";
-import { WhatsAppFloat } from "@/features/home/wpp";
+import Container from "@/shared/components/ui/container";
+import Feedbacks from "@/features/marketing/home/feedbacks";
+import Hero from "@/features/marketing/home/hero";
+import Localizacao from "@/features/marketing/home/localizacao";
+import { MarqueeDetails } from "@/features/marketing/home/marquee";
+import SejaUmBigodon from "@/features/marketing/home/seja-um-bigodon";
+import Servicos from "@/features/marketing/home/servicos";
+import { WhatsAppFloat } from "@/features/marketing/home/wpp";
 
 export default function Page() {
   return (
@@ -32,3 +32,4 @@ export default function Page() {
     </div>
   );
 }
+

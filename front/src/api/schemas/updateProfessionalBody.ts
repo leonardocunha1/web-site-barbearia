@@ -6,7 +6,7 @@ export type UpdateProfessionalBody = {
    * Especialidade atualizada do profissional
    * @minLength 3
    */
-  especialidade?: string;
+  specialty?: string;
   /**
    * Biografia atualizada do profissional
    * @nullable
@@ -16,14 +16,14 @@ export type UpdateProfessionalBody = {
    * Número do documento profissional
    * @nullable
    */
-  documento?: string | null;
+  document?: string | null;
   /**
    * Número de registro profissional
    * @nullable
    */
-  registro?: string | null;
+  registration?: string | null;
   /** Definir status ativo do profissional */
-  ativo?: boolean;
+  active?: boolean;
   /**
    * URL do avatar atualizado
    * @nullable

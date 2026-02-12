@@ -8,12 +8,12 @@ import {
   zodupdateServiceByIdParams,
   zodupdateServiceByIdResponse,
 } from "@/api";
-import apiError from "@/functions/api-error";
+import apiError from "@/shared/services/api-error";
 import {
   SERVICES_CREATE,
   SERVICES_GET,
   SERVICES_UPDATE,
-} from "@/functions/api-services";
+} from "@/shared/services/api-services";
 
 export async function servicesGet(query?: {
   page?: number;
@@ -141,3 +141,4 @@ export async function servicesCreate(data: {
     return apiError(error);
   }
 }
+

@@ -7,27 +7,27 @@ export type UpdateBusinessHourBody = {
    * @minimum 0
    * @maximum 6
    */
-  diaSemana?: number;
+  dayOfWeek?: number;
   /**
    * Novo horário de abertura (opcional)
    * @pattern ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
    */
-  abreAs?: string;
+  opensAt?: string;
   /**
    * Novo horário de fechamento (opcional)
    * @pattern ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
    */
-  fechaAs?: string;
+  closesAt?: string;
   /**
    * Novo início de pausa (opcional)
    * @nullable
    * @pattern ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
    */
-  pausaInicio?: string | null;
+  breakStart?: string | null;
   /**
    * Novo fim de pausa (opcional)
    * @nullable
    * @pattern ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
    */
-  pausaFim?: string | null;
+  breakEnd?: string | null;
 };

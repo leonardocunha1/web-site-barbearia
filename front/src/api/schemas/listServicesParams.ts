@@ -25,11 +25,11 @@ export type ListServicesParams = {
   /**
    * @maxLength 100
    */
-  nome?: string;
+  name?: string;
   /**
    * @maxLength 50
    */
-  categoria?: string;
-  ativo?: boolean;
+  category?: string;
+  active?: boolean;
   professionalId?: string;
 };

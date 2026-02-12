@@ -3,8 +3,8 @@ export type UpdateBookingStatusBodyStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdateBookingStatusBodyStatus = {
-  PENDENTE: "PENDENTE",
-  CONFIRMADO: "CONFIRMADO",
-  CANCELADO: "CANCELADO",
-  CONCLUIDO: "CONCLUIDO",
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  CANCELED: "CANCELED",
+  COMPLETED: "COMPLETED",
 } as const;

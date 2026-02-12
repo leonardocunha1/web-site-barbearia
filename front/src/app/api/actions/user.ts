@@ -1,9 +1,9 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { USER_GET, USER_REFRESH_TOKEN } from "@/functions/api-users";
+import { USER_GET, USER_REFRESH_TOKEN } from "@/shared/services/api-users";
 import { zodgetUserProfileResponse } from "@/api";
-import apiError from "@/functions/api-error";
+import apiError from "@/shared/services/api-error";
 
 export default async function userGet() {
   try {
@@ -93,3 +93,4 @@ export default async function userGet() {
     return apiError(error);
   }
 }
+

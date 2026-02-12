@@ -1,9 +1,9 @@
 "use client";
 
 import { useUser } from "@/contexts/user";
-import AdminDashboard from "@/features/conta/admin/dashboard";
-import ClientDashboard from "@/features/conta/cliente/dashboard";
-import ProfessionalDashboard from "@/features/conta/professional/dashboard";
+import AdminDashboard from "@/features/dashboard/admin/dashboard";
+import ClientDashboard from "@/features/dashboard/cliente/dashboard";
+import ProfessionalDashboard from "@/features/dashboard/professional/dashboard";
 
 export default function Page() {
   const { user } = useUser();
@@ -18,3 +18,4 @@ export default function Page() {
     </section>
   );
 }
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useOverlay } from "@/hooks/useOverlay";
+import { useOverlay } from "@/shared/hooks/useOverlay";
 
 export default function Page() {
   const overlay = useOverlay();
@@ -30,3 +30,4 @@ export default function Page() {
     </div>
   );
 }
+

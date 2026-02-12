@@ -1,16 +1,13 @@
-import type { CreateHolidayBodyServicesItem } from "./createHolidayBodyServicesItem";
-
 /**
- * Dados para criação de agendamento
+ * Schema para criação de feriados
  */
 export type CreateHolidayBody = {
-  professionalId: string;
-  /** @minItems 1 */
-  services: CreateHolidayBodyServicesItem[];
-  startDateTime: string;
-  /** @maxLength 500 */
-  notes?: string;
-  useBonusPoints?: boolean;
-  /** @maxLength 50 */
-  couponCode?: string;
+  /** Data do feriado no formato ISO 8601 com timezone */
+  date: string;
+  /**
+   * Motivo do feriado (3-100 caracteres)
+   * @minLength 3
+   * @maxLength 100
+   */
+  reason: string;
 };

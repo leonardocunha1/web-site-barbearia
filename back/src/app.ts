@@ -48,13 +48,8 @@ app.register(fastifySwaggerUi, {
 app.register(fastifyCookie);
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
-  cookie: {
-    cookieName: 'accessToken',
-    signed: false,
-  },
-  sign: {
-    expiresIn: '7d',
-  },
+  cookie: { cookieName: 'accessToken', signed: false },
+  sign: { expiresIn: '7d' },
 });
 app.register(fastifyCors, {
   origin: ['http://localhost:3000'],

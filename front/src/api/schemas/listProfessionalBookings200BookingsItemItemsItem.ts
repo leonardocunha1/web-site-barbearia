@@ -6,8 +6,8 @@ import type { ListProfessionalBookings200BookingsItemItemsItemServiceProfessiona
 export type ListProfessionalBookings200BookingsItemItemsItem = {
   id: string;
   /** @minimum 0 */
-  duracao: number;
+  duration: number;
   /** @minimum 0 */
-  preco: number;
+  price: number;
   serviceProfessional: ListProfessionalBookings200BookingsItemItemsItemServiceProfessional;
 };

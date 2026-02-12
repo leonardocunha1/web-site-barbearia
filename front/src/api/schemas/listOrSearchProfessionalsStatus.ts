@@ -3,6 +3,6 @@ export type ListOrSearchProfessionalsStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ListOrSearchProfessionalsStatus = {
-  ativo: "ativo",
-  inativo: "inativo",
+  active: "active",
+  inactive: "inactive",
 } as const;

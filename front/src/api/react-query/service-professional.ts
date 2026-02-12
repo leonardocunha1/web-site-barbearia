@@ -457,6 +457,87 @@ export function useListProfessionalServices<
   return query;
 }
 
+export const updateServiceProfessional = (
+  professionalId: string,
+  updateServiceProfessionalBody: UpdateServiceProfessionalBody,
+) => {
+  return axiosInstance<UpdateServiceProfessional204>({
+    url: `/professionals/${professionalId}/services`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    data: updateServiceProfessionalBody,
+  });
+};
+
+export const getUpdateServiceProfessionalMutationOptions = <
+  TError = UpdateServiceProfessional400 | UpdateServiceProfessional500,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateServiceProfessional>>,
+    TError,
+    { professionalId: string; data: UpdateServiceProfessionalBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateServiceProfessional>>,
+  TError,
+  { professionalId: string; data: UpdateServiceProfessionalBody },
+  TContext
+> => {
+  const mutationKey = ["updateServiceProfessional"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateServiceProfessional>>,
+    { professionalId: string; data: UpdateServiceProfessionalBody }
+  > = (props) => {
+    const { professionalId, data } = props ?? {};
+
+    return updateServiceProfessional(professionalId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateServiceProfessionalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateServiceProfessional>>
+>;
+export type UpdateServiceProfessionalMutationBody =
+  UpdateServiceProfessionalBody;
+export type UpdateServiceProfessionalMutationError =
+  | UpdateServiceProfessional400
+  | UpdateServiceProfessional500;
+
+export const useUpdateServiceProfessional = <
+  TError = UpdateServiceProfessional400 | UpdateServiceProfessional500,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateServiceProfessional>>,
+      TError,
+      { professionalId: string; data: UpdateServiceProfessionalBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateServiceProfessional>>,
+  TError,
+  { professionalId: string; data: UpdateServiceProfessionalBody },
+  TContext
+> => {
+  const mutationOptions = getUpdateServiceProfessionalMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 export const removeServiceFromProfessional = (
   professionalId: string,
   serviceId: string,
@@ -533,108 +614,6 @@ export const useRemoveServiceFromProfessional = <
 > => {
   const mutationOptions =
     getRemoveServiceFromProfessionalMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-export const updateServiceProfessional = (
-  professionalId: string,
-  serviceId: string,
-  updateServiceProfessionalBody: UpdateServiceProfessionalBody,
-) => {
-  return axiosInstance<UpdateServiceProfessional204>({
-    url: `/professionals/${professionalId}/services/${serviceId}`,
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    data: updateServiceProfessionalBody,
-  });
-};
-
-export const getUpdateServiceProfessionalMutationOptions = <
-  TError = UpdateServiceProfessional400 | UpdateServiceProfessional500,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateServiceProfessional>>,
-    TError,
-    {
-      professionalId: string;
-      serviceId: string;
-      data: UpdateServiceProfessionalBody;
-    },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof updateServiceProfessional>>,
-  TError,
-  {
-    professionalId: string;
-    serviceId: string;
-    data: UpdateServiceProfessionalBody;
-  },
-  TContext
-> => {
-  const mutationKey = ["updateServiceProfessional"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateServiceProfessional>>,
-    {
-      professionalId: string;
-      serviceId: string;
-      data: UpdateServiceProfessionalBody;
-    }
-  > = (props) => {
-    const { professionalId, serviceId, data } = props ?? {};
-
-    return updateServiceProfessional(professionalId, serviceId, data);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type UpdateServiceProfessionalMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateServiceProfessional>>
->;
-export type UpdateServiceProfessionalMutationBody =
-  UpdateServiceProfessionalBody;
-export type UpdateServiceProfessionalMutationError =
-  | UpdateServiceProfessional400
-  | UpdateServiceProfessional500;
-
-export const useUpdateServiceProfessional = <
-  TError = UpdateServiceProfessional400 | UpdateServiceProfessional500,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateServiceProfessional>>,
-      TError,
-      {
-        professionalId: string;
-        serviceId: string;
-        data: UpdateServiceProfessionalBody;
-      },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof updateServiceProfessional>>,
-  TError,
-  {
-    professionalId: string;
-    serviceId: string;
-    data: UpdateServiceProfessionalBody;
-  },
-  TContext
-> => {
-  const mutationOptions = getUpdateServiceProfessionalMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

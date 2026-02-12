@@ -4,18 +4,18 @@ import {
 
 
 
-export const zodcreateProfessionalBodyEspecialidadeMin = 3;
+export const zodcreateProfessionalBodySpecialtyMin = 3;
 export const zodcreateProfessionalBodyAvatarUrlRegExp = new RegExp('^(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$');
-export const zodcreateProfessionalBodyAtivoDefault = true;
+export const zodcreateProfessionalBodyActiveDefault = true;
 
 export const zodcreateProfessionalBody = zod.object({
   "email": zod.string().describe('Email do profissional'),
-  "especialidade": zod.string().min(zodcreateProfessionalBodyEspecialidadeMin).describe('Especialidade do profissional'),
+  "specialty": zod.string().min(zodcreateProfessionalBodySpecialtyMin).describe('Especialidade do profissional'),
   "bio": zod.string().optional().describe('Biografia do profissional'),
-  "documento": zod.string().optional().describe('Número do documento profissional'),
-  "registro": zod.string().optional().describe('Número de registro profissional'),
+  "document": zod.string().optional().describe('Número do documento profissional'),
+  "registration": zod.string().optional().describe('Número de registro profissional'),
   "avatarUrl": zod.string().regex(zodcreateProfessionalBodyAvatarUrlRegExp).optional().describe('URL do avatar do profissional'),
-  "ativo": zod.boolean().default(zodcreateProfessionalBodyAtivoDefault).describe('Status ativo do profissional')
+  "active": zod.boolean().default(zodcreateProfessionalBodyActiveDefault).describe('Status ativo do profissional')
 }).describe('Dados para criação de novo profissional')
 
 export const zodlistOrSearchProfessionalsQueryPageDefault = 1;
@@ -24,46 +24,47 @@ export const zodlistOrSearchProfessionalsQueryLimitDefault = 10;
 export const zodlistOrSearchProfessionalsQueryLimitMin = 0;
 
 export const zodlistOrSearchProfessionalsQueryLimitMax = 100;
-export const zodlistOrSearchProfessionalsQuerySortDirectionDefault = "asc";export const zodlistOrSearchProfessionalsQuerySearchMin = 2;
+export const zodlistOrSearchProfessionalsQuerySearchMin = 2;
 
 
 export const zodlistOrSearchProfessionalsQueryParams = zod.object({
   "page": zod.number().min(zodlistOrSearchProfessionalsQueryPageMin).default(zodlistOrSearchProfessionalsQueryPageDefault).describe('Número da página atual (começa em 1)'),
   "limit": zod.number().min(zodlistOrSearchProfessionalsQueryLimitMin).max(zodlistOrSearchProfessionalsQueryLimitMax).default(zodlistOrSearchProfessionalsQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
-  "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistOrSearchProfessionalsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "sortBy": zod.string().optional().describe('Campo para ordenacao'),
+  "sortDirection": zod.enum(['asc', 'desc']).optional().describe('Direcao da ordenacao'),
   "search": zod.string().min(zodlistOrSearchProfessionalsQuerySearchMin).optional().describe('Termo de busca para profissionais'),
-  "status": zod.enum(['ativo', 'inativo']).optional().describe('Filtrar por status ativo ou inativo')
+  "specialty": zod.string().optional().describe('Filtrar por especialidade do profissional'),
+  "status": zod.enum(['active', 'inactive']).optional().describe('Filtrar por status ativo ou inativo')
 })
 
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeMin = 3;
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemSpecialtyMin = 3;
 
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeMax = 100;
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemSpecialtyMax = 100;
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemBioMax = 500;
 export const zodlistOrSearchProfessionalsResponseProfessionalsItemAvatarUrlRegExp = new RegExp('^(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$');
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserNomeMin = 2;
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserTelefoneRegExp = new RegExp('^\\+?[\\d\\s()-]{10,20}$');
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemNomeMin = 2;
-export const zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescricaoMax = 200;
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserNameMin = 2;
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemUserPhoneRegExp = new RegExp('^\\+?[\\d\\s()-]{10,20}$');
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemNameMin = 2;
+export const zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescriptionMax = 200;
 
 
 export const zodlistOrSearchProfessionalsResponse = zod.object({
   "professionals": zod.array(zod.object({
   "id": zod.string().uuid().describe('Identificador único do profissional'),
-  "especialidade": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeMin).max(zodlistOrSearchProfessionalsResponseProfessionalsItemEspecialidadeMax).describe('Especialidade do profissional'),
+  "specialty": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemSpecialtyMin).max(zodlistOrSearchProfessionalsResponseProfessionalsItemSpecialtyMax).describe('Especialidade do profissional'),
   "bio": zod.string().max(zodlistOrSearchProfessionalsResponseProfessionalsItemBioMax).optional().describe('Biografia do profissional'),
   "avatarUrl": zod.string().regex(zodlistOrSearchProfessionalsResponseProfessionalsItemAvatarUrlRegExp).optional().describe('URL da imagem de avatar do profissional'),
-  "ativo": zod.boolean().optional().describe('Indica se o profissional está ativo'),
+  "active": zod.boolean().optional().describe('Indica se o profissional está ativo'),
   "user": zod.object({
   "id": zod.string().uuid().describe('ID do usuário'),
-  "nome": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemUserNomeMin).describe('Nome completo do usuário'),
+  "name": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemUserNameMin).describe('Nome completo do usuário'),
   "email": zod.string().email().describe('Endereço de e-mail do usuário'),
-  "telefone": zod.string().regex(zodlistOrSearchProfessionalsResponseProfessionalsItemUserTelefoneRegExp).nullish().describe('Número de telefone do usuário')
+  "phone": zod.string().regex(zodlistOrSearchProfessionalsResponseProfessionalsItemUserPhoneRegExp).nullish().describe('Número de telefone do usuário')
 }).describe('Detalhes da conta do usuário'),
   "services": zod.array(zod.object({
   "id": zod.string().uuid().describe('ID do serviço'),
-  "nome": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemNomeMin).describe('Nome do serviço'),
-  "descricao": zod.string().max(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescricaoMax).optional().describe('Descrição do serviço'),
+  "name": zod.string().min(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemNameMin).describe('Nome do serviço'),
+  "description": zod.string().max(zodlistOrSearchProfessionalsResponseProfessionalsItemServicesItemDescriptionMax).optional().describe('Descrição do serviço'),
   "linked": zod.boolean().describe('Indica se o serviço está vinculado ao profissional')
 })).describe('Lista de serviços oferecidos pelo profissional')
 }).describe('Perfil completo do profissional com detalhes do usuário e serviços')),
@@ -77,16 +78,16 @@ export const zodupdateProfessionalParams = zod.object({
   "id": zod.string().uuid().describe('ID do profissional para atualização')
 })
 
-export const zodupdateProfessionalBodyEspecialidadeMin = 3;
+export const zodupdateProfessionalBodySpecialtyMin = 3;
 export const zodupdateProfessionalBodyAvatarUrlRegExp = new RegExp('^(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$');
 
 
 export const zodupdateProfessionalBody = zod.object({
-  "especialidade": zod.string().min(zodupdateProfessionalBodyEspecialidadeMin).optional().describe('Especialidade atualizada do profissional'),
+  "specialty": zod.string().min(zodupdateProfessionalBodySpecialtyMin).optional().describe('Especialidade atualizada do profissional'),
   "bio": zod.string().nullish().describe('Biografia atualizada do profissional'),
-  "documento": zod.string().nullish().describe('Número do documento profissional'),
-  "registro": zod.string().nullish().describe('Número de registro profissional'),
-  "ativo": zod.boolean().optional().describe('Definir status ativo do profissional'),
+  "document": zod.string().nullish().describe('Número do documento profissional'),
+  "registration": zod.string().nullish().describe('Número de registro profissional'),
+  "active": zod.boolean().optional().describe('Definir status ativo do profissional'),
   "avatarUrl": zod.string().regex(zodupdateProfessionalBodyAvatarUrlRegExp).nullish().describe('URL do avatar atualizado')
 }).describe('Dados para atualização do perfil profissional')
 
@@ -140,7 +141,7 @@ export const zodgetProfessionalDashboardResponse = zod.object({
   "date": zod.string().datetime({}).describe('Data e hora do agendamento no formato ISO'),
   "clientName": zod.string().min(zodgetProfessionalDashboardResponseNextAppointmentsItemClientNameMin).describe('Nome do cliente'),
   "service": zod.string().min(zodgetProfessionalDashboardResponseNextAppointmentsItemServiceMin).describe('Serviço agendado'),
-  "status": zod.enum(['PENDENTE', 'CONFIRMADO']).describe('Status do agendamento')
+  "status": zod.enum(['PENDING', 'CONFIRMED']).describe('Status do agendamento')
 }).describe('Próximo agendamento')).max(zodgetProfessionalDashboardResponseNextAppointmentsMax).describe('Lista dos próximos agendamentos')
 }).describe('Dados completos do dashboard')
 

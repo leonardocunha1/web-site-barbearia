@@ -1,3 +1,5 @@
+import type { ToggleCouponStatus200Coupon } from "./toggleCouponStatus200Coupon";
+
 export type ToggleCouponStatus200 = {
-  message: string;
+  coupon: ToggleCouponStatus200Coupon;
 };

@@ -8,14 +8,14 @@ export const zodaddServiceToProfessionalParams = zod.object({
   "professionalId": zod.string().uuid()
 })
 
-export const zodaddServiceToProfessionalBodyPrecoMin = 0;
-export const zodaddServiceToProfessionalBodyDuracaoMin = 0;
+export const zodaddServiceToProfessionalBodyPriceMin = 0;
+export const zodaddServiceToProfessionalBodyDurationMin = 0;
 
 
 export const zodaddServiceToProfessionalBody = zod.object({
   "serviceId": zod.string().uuid(),
-  "preco": zod.number().min(zodaddServiceToProfessionalBodyPrecoMin),
-  "duracao": zod.number().min(zodaddServiceToProfessionalBodyDuracaoMin)
+  "price": zod.number().min(zodaddServiceToProfessionalBodyPriceMin),
+  "duration": zod.number().min(zodaddServiceToProfessionalBodyDurationMin)
 })
 
 export const zodlistProfessionalServicesParams = zod.object({
@@ -41,12 +41,12 @@ export const zodlistProfessionalServicesQueryParams = zod.object({
 export const zodlistProfessionalServicesResponse = zod.object({
   "services": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string(),
-  "descricao": zod.string().nullable(),
-  "categoria": zod.string().nullable(),
-  "ativo": zod.boolean(),
-  "preco": zod.number().nullable(),
-  "duracao": zod.number().nullable()
+  "name": zod.string(),
+  "description": zod.string().nullable(),
+  "category": zod.string().nullable(),
+  "active": zod.boolean(),
+  "price": zod.number().nullable(),
+  "duration": zod.number().nullable()
 })),
   "pagination": zod.object({
   "page": zod.number(),
@@ -56,26 +56,25 @@ export const zodlistProfessionalServicesResponse = zod.object({
 })
 })
 
-export const zodremoveServiceFromProfessionalParams = zod.object({
-  "serviceId": zod.string().uuid(),
+export const zodupdateServiceProfessionalParams = zod.object({
   "professionalId": zod.string().uuid()
 })
 
-export const zodupdateServiceProfessionalParams = zod.object({
-  "professionalId": zod.string().uuid(),
-  "serviceId": zod.string().uuid()
-})
-
-export const zodupdateServiceProfessionalBodyServicesItemPrecoMin = 0;
-export const zodupdateServiceProfessionalBodyServicesItemDuracaoMin = 0;
+export const zodupdateServiceProfessionalBodyServicesItemPriceMin = 0;
+export const zodupdateServiceProfessionalBodyServicesItemDurationMin = 0;
 
 
 export const zodupdateServiceProfessionalBody = zod.object({
   "services": zod.array(zod.object({
   "serviceId": zod.string().uuid(),
-  "preco": zod.number().min(zodupdateServiceProfessionalBodyServicesItemPrecoMin),
-  "duracao": zod.number().min(zodupdateServiceProfessionalBodyServicesItemDuracaoMin),
+  "price": zod.number().min(zodupdateServiceProfessionalBodyServicesItemPriceMin),
+  "duration": zod.number().min(zodupdateServiceProfessionalBodyServicesItemDurationMin),
   "linked": zod.boolean()
 }))
+})
+
+export const zodremoveServiceFromProfessionalParams = zod.object({
+  "serviceId": zod.string().uuid(),
+  "professionalId": zod.string().uuid()
 })
 

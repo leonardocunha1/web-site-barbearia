@@ -6,6 +6,6 @@ export type GetProfessionalDashboard200NextAppointmentsItemStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetProfessionalDashboard200NextAppointmentsItemStatus = {
-  PENDENTE: "PENDENTE",
-  CONFIRMADO: "CONFIRMADO",
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
 } as const;

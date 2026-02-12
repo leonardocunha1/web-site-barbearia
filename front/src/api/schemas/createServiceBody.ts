@@ -3,10 +3,10 @@ export type CreateServiceBody = {
    * @minLength 3
    * @maxLength 100
    */
-  nome: string;
+  name: string;
   /** @maxLength 500 */
-  descricao?: string;
+  description?: string;
   /** @maxLength 50 */
-  categoria?: string;
-  ativo?: boolean;
+  category?: string;
+  active?: boolean;
 };

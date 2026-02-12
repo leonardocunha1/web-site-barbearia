@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Spectral, Poppins, Calistoga } from "next/font/google";
 import "./globals.css";
-import Header from "@/features/menu/header";
+import Header from "@/features/marketing/menu/header";
 import { ApplicationProviders } from "./providers";
-import { Footer } from "@/components/footer";
-import { ModalPortal } from "@/components/modal-portal";
+import { Footer } from "@/shared/components/footer";
+import { ModalPortal } from "@/shared/components/modal-portal";
 
 const poppins = Poppins({
   variable: "--font-poppins-sans",
@@ -57,3 +57,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

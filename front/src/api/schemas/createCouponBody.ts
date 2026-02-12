@@ -11,10 +11,7 @@ export type CreateCouponBody = {
    */
   code: string;
   type: CreateCouponBodyType;
-  /**
-   * @minimum 0
-   * @exclusiveMinimum
-   */
+  /** @minimum 0 */
   value: number;
   scope: CreateCouponBodyScope;
   /** @maxLength 255 */

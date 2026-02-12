@@ -1,3 +1,6 @@
+import type { UpdateCoupon200Coupon } from "./updateCoupon200Coupon";
+
 export type UpdateCoupon200 = {
-  message: string;
+  /** Modelo completo de cupom */
+  coupon: UpdateCoupon200Coupon;
 };

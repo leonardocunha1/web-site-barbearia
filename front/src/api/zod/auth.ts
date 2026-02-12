@@ -7,29 +7,29 @@ import {
 /**
  * Registro de novo usuário.
  */
-export const zodregisterUserBodyNomeMin = 3;
-export const zodregisterUserBodySenhaMin = 6;
+export const zodregisterUserBodyNameMin = 3;
+export const zodregisterUserBodyPasswordMin = 6;
 
-export const zodregisterUserBodySenhaMax = 100;
-export const zodregisterUserBodyRoleDefault = "CLIENTE";
+export const zodregisterUserBodyPasswordMax = 100;
+export const zodregisterUserBodyRoleDefault = "CLIENT";
 
 export const zodregisterUserBody = zod.object({
-  "nome": zod.string().min(zodregisterUserBodyNomeMin),
+  "name": zod.string().min(zodregisterUserBodyNameMin),
   "email": zod.string().email(),
-  "senha": zod.string().min(zodregisterUserBodySenhaMin).max(zodregisterUserBodySenhaMax),
-  "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).default(zodregisterUserBodyRoleDefault),
-  "telefone": zod.string().min(1)
+  "password": zod.string().min(zodregisterUserBodyPasswordMin).max(zodregisterUserBodyPasswordMax),
+  "role": zod.enum(['CLIENT', 'PROFESSIONAL', 'ADMIN']).default(zodregisterUserBodyRoleDefault),
+  "phone": zod.string().min(1)
 })
 
 /**
  * Autenticação do usuário.
  */
-export const zodloginUserBodySenhaMin = 6;
+export const zodloginUserBodyPasswordMin = 6;
 
 
 export const zodloginUserBody = zod.object({
   "email": zod.string().email(),
-  "senha": zod.string().min(zodloginUserBodySenhaMin)
+  "password": zod.string().min(zodloginUserBodyPasswordMin)
 })
 
 export const zodloginUserResponse = zod.object({
@@ -37,10 +37,10 @@ export const zodloginUserResponse = zod.object({
   "refreshToken": zod.string(),
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string(),
+  "name": zod.string(),
   "email": zod.string().email(),
-  "telefone": zod.string().nullish(),
-  "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
+  "phone": zod.string().nullish(),
+  "role": zod.enum(['CLIENT', 'PROFESSIONAL', 'ADMIN']).optional(),
   "emailVerified": zod.boolean(),
   "active": zod.boolean(),
   "createdAt": zod.string().datetime({})

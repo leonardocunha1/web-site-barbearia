@@ -23,7 +23,7 @@ import type {
   CreateCoupon400,
   CreateCoupon409,
   CreateCouponBody,
-  DeleteCoupon204,
+  DeleteCoupon200,
   DeleteCoupon404,
   GetCouponById200,
   GetCouponById404,
@@ -759,7 +759,7 @@ export const useUpdateCoupon = <
  * Deleta um cupom pelo ID.
  */
 export const deleteCoupon = (couponId: string) => {
-  return axiosInstance<DeleteCoupon204>({
+  return axiosInstance<DeleteCoupon200>({
     url: `/coupons/${couponId}`,
     method: "DELETE",
   });

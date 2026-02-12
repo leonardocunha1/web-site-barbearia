@@ -1,13 +1,13 @@
 export type ListProfessionalServices200ServicesItem = {
   id: string;
-  nome: string;
+  name: string;
   /** @nullable */
-  descricao: string | null;
+  description: string | null;
   /** @nullable */
-  categoria: string | null;
-  ativo: boolean;
+  category: string | null;
+  active: boolean;
   /** @nullable */
-  preco: number | null;
+  price: number | null;
   /** @nullable */
-  duracao: number | null;
+  duration: number | null;
 };

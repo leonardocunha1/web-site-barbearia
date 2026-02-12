@@ -6,8 +6,8 @@ import type { GetBookingById200BookingItemsItemServiceProfessional } from "./get
 export type GetBookingById200BookingItemsItem = {
   id: string;
   /** @minimum 0 */
-  duracao: number;
+  duration: number;
   /** @minimum 0 */
-  preco: number;
+  price: number;
   serviceProfessional: GetBookingById200BookingItemsItemServiceProfessional;
 };

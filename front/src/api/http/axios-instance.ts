@@ -1,76 +1,129 @@
-// import { seconds } from '@/utils/time';
-// import Axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { API_BASE_URL } from "@/shared/constants";
+import { seconds } from "@/shared/utils/time";
+import Axios, { AxiosError, AxiosRequestConfig } from "axios";
 
-// export const AXIOS_INSTANCE = Axios.create({
-//   baseURL: 'http://localhost:3333',
-//   withCredentials: true,
-//   timeout: seconds(30),
-// });
+type ApiErrorPayload = {
+  message?: string;
+  error?: string;
+  detail?: string;
+};
 
-// export const axiosInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-//   const source = Axios.CancelToken.source();
-
-//   const promise = AXIOS_INSTANCE({ ...config, cancelToken: source.token }).then(
-//     ({ data }) => data
-//   );
-
-//   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//   // @ts-ignore
-//   promise.cancel = () => {
-//     source.cancel('Query was cancelled by Vue Query');
-//   };
-
-//   return promise;
-// };
-
-// export default axiosInstance;
-
-// // Agora, quando quiser usar o tipo de erro, use diretamente:
-// export type { AxiosError }; // Opcional, se quiser reexportar para facilitar uso em outros arquivos
-
-import { seconds } from '@/utils/time';
-import Axios, { AxiosError, AxiosRequestConfig } from 'axios';
-
-// Criação da instância do Axios com configurações padrões
 export const AXIOS_INSTANCE = Axios.create({
-  baseURL: 'http://localhost:3333',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: seconds(30),
 });
 
-// Interceptor para capturar e personalizar mensagens de erro da API
+const getErrorMessage = (error: AxiosError<ApiErrorPayload>) => {
+  const data = error.response?.data;
+
+  if (data?.message) return data.message;
+  if (data?.error) return data.error;
+  if (data?.detail) return data.detail;
+  if (error.code === "ERR_NETWORK") return "Erro de rede";
+
+  return "Erro inesperado no servidor";
+};
+
+type RetryConfig = AxiosRequestConfig & {
+  _retry?: boolean;
+  skipAuthRefresh?: boolean;
+};
+
+let refreshPromise: Promise<void> | null = null;
+let logoutPromise: Promise<void> | null = null;
+
+const runRefreshToken = async () => {
+  await AXIOS_INSTANCE.post("/auth/refresh-token", undefined, {
+    skipAuthRefresh: true,
+  } as RetryConfig);
+};
+
+const runRefreshOnce = () => {
+  if (!refreshPromise) {
+    refreshPromise = runRefreshToken().finally(() => {
+      refreshPromise = null;
+    });
+  }
+
+  return refreshPromise;
+};
+
+const runLogout = async () => {
+  try {
+    await AXIOS_INSTANCE.post("/auth/logout", undefined, {
+      skipAuthRefresh: true,
+    } as RetryConfig);
+  } catch {
+    // ignore logout errors
+  }
+
+  if (typeof window !== "undefined") {
+    window.location.href = "/login";
+  }
+};
+
+const runLogoutOnce = async () => {
+  if (!logoutPromise) {
+    logoutPromise = runLogout().finally(() => {
+      logoutPromise = null;
+    });
+  }
+
+  return logoutPromise;
+};
+
 AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ message: string }>) => {
-    const customMessage =
-      error.response?.data?.message || "Erro inesperado no servidor";
+  async (error: AxiosError<ApiErrorPayload>) => {
+    error.message = getErrorMessage(error);
 
-    // Sobrescreve a mensagem do erro com a que veio da API
-    error.message = customMessage;
+    const config = error.config as RetryConfig | undefined;
 
+    if (!config || config.skipAuthRefresh) {
+      return Promise.reject(error);
+    }
+
+    const status = error.response?.status;
+    const isUnauthorized = status === 401;
+    const isRefreshEndpoint = config.url?.includes("/auth/refresh-token");
+    const isLogoutEndpoint = config.url?.includes("/auth/logout");
+
+    if (!isUnauthorized || isRefreshEndpoint || isLogoutEndpoint) {
+      return Promise.reject(error);
+    }
+
+    if (!config._retry) {
+      config._retry = true;
+
+      try {
+        await runRefreshOnce();
+        return AXIOS_INSTANCE(config);
+      } catch (refreshError) {
+        await runLogoutOnce();
+        return Promise.reject(refreshError);
+      }
+    }
+
+    await runLogoutOnce();
     return Promise.reject(error);
-  }
+  },
 );
 
-// Função auxiliar para fazer requisições tipadas com suporte a cancelamento
 export const axiosInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
   const source = Axios.CancelToken.source();
 
   const promise = AXIOS_INSTANCE({ ...config, cancelToken: source.token }).then(
-    ({ data }) => data
+    ({ data }) => data,
   );
 
-  // Adiciona método para cancelamento opcional da requisição
   // @ts-expect-error: adicionando método customizado `cancel` à promise
-promise.cancel = () => {
-  source.cancel('Query was cancelled by Vue Query');
-};
+  promise.cancel = () => {
+    source.cancel("Query was cancelled by React Query");
+  };
 
   return promise;
 };
 
-// Exporta como padrão
 export default axiosInstance;
-
-// Exporta o tipo AxiosError se quiser usar em outros lugares
 export type { AxiosError };

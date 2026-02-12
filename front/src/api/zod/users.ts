@@ -10,10 +10,10 @@ import {
 export const zodgetUserProfileResponse = zod.object({
   "user": zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string(),
+  "name": zod.string(),
   "email": zod.string().email(),
-  "telefone": zod.string().nullish(),
-  "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
+  "phone": zod.string().nullish(),
+  "role": zod.enum(['CLIENT', 'PROFESSIONAL', 'ADMIN']).optional(),
   "emailVerified": zod.boolean(),
   "active": zod.boolean(),
   "createdAt": zod.string().datetime({})
@@ -23,13 +23,13 @@ export const zodgetUserProfileResponse = zod.object({
 /**
  * Atualiza o perfil do usuário logado.
  */
-export const zodupdateUserProfileBodyNomeMin = 3;
+export const zodupdateUserProfileBodyNameMin = 3;
 
 
 export const zodupdateUserProfileBody = zod.object({
-  "nome": zod.string().min(zodupdateUserProfileBodyNomeMin).optional(),
+  "name": zod.string().min(zodupdateUserProfileBodyNameMin).optional(),
   "email": zod.string().email().optional(),
-  "telefone": zod.string().nullish()
+  "phone": zod.string().nullish()
 })
 
 export const zodupdateUserProfileResponse = zod.enum(['null']).nullable().describe('Usuário atualizado com sucesso.')
@@ -50,17 +50,17 @@ export const zodlistUsersQueryParams = zod.object({
   "limit": zod.number().min(zodlistUsersQueryLimitMin).max(zodlistUsersQueryLimitMax).default(zodlistUsersQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
   "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
   "sortDirection": zod.enum(['asc', 'desc']).default(zodlistUsersQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
-  "role": zod.enum(['ADMIN', 'CLIENTE', 'PROFISSIONAL']).optional(),
+  "role": zod.enum(['ADMIN', 'CLIENT', 'PROFESSIONAL']).optional(),
   "name": zod.string().optional()
 })
 
 export const zodlistUsersResponse = zod.object({
   "users": zod.array(zod.object({
   "id": zod.string().uuid(),
-  "nome": zod.string(),
+  "name": zod.string(),
   "email": zod.string().email(),
-  "telefone": zod.string().nullish(),
-  "role": zod.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN']).optional(),
+  "phone": zod.string().nullish(),
+  "role": zod.enum(['CLIENT', 'PROFESSIONAL', 'ADMIN']).optional(),
   "emailVerified": zod.boolean(),
   "active": zod.boolean(),
   "createdAt": zod.string().datetime({})

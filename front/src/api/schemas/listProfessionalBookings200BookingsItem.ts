@@ -1,5 +1,5 @@
 import type { ListProfessionalBookings200BookingsItemStatus } from "./listProfessionalBookings200BookingsItemStatus";
-import type { ListProfessionalBookings200BookingsItemProfissional } from "./listProfessionalBookings200BookingsItemProfissional";
+import type { ListProfessionalBookings200BookingsItemProfessional } from "./listProfessionalBookings200BookingsItemProfessional";
 import type { ListProfessionalBookings200BookingsItemUser } from "./listProfessionalBookings200BookingsItemUser";
 import type { ListProfessionalBookings200BookingsItemItemsItem } from "./listProfessionalBookings200BookingsItemItemsItem";
 
@@ -8,28 +8,28 @@ import type { ListProfessionalBookings200BookingsItemItemsItem } from "./listPro
  */
 export type ListProfessionalBookings200BookingsItem = {
   id: string;
-  usuarioId: string;
-  dataHoraInicio: string;
-  dataHoraFim: string;
+  userId: string;
+  startDateTime: string;
+  endDateTime: string;
   status: ListProfessionalBookings200BookingsItemStatus;
   /**
    * @maxLength 500
    * @nullable
    */
-  observacoes?: string | null;
+  notes?: string | null;
   /**
    * @minimum 0
    * @exclusiveMinimum
    * @nullable
    */
-  valorFinal?: number | null;
+  totalAmount?: number | null;
   /** @nullable */
   canceledAt?: string | null;
   /** @nullable */
   confirmedAt?: string | null;
   updatedAt: string;
   createdAt: string;
-  profissional: ListProfessionalBookings200BookingsItemProfissional;
+  professional: ListProfessionalBookings200BookingsItemProfessional;
   user: ListProfessionalBookings200BookingsItemUser;
   /** @minItems 1 */
   items: ListProfessionalBookings200BookingsItemItemsItem[];

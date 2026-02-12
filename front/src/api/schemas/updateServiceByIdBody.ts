@@ -3,20 +3,20 @@ export type UpdateServiceByIdBody = {
    * @minLength 3
    * @maxLength 100
    */
-  nome?: string;
+  name?: string;
   /** @maxLength 500 */
-  descricao?: string;
+  description?: string;
   /**
    * @minimum 0
    * @exclusiveMinimum
    */
-  precoPadrao?: number;
+  defaultPrice?: number;
   /**
    * @minimum 0
    * @exclusiveMinimum
    */
-  duracao?: number;
+  duration?: number;
   /** @maxLength 50 */
-  categoria?: string;
-  ativo?: boolean;
+  category?: string;
+  active?: boolean;
 };

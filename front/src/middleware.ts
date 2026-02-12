@@ -29,7 +29,7 @@ export const config = {
 
 
   // import { NextResponse, type NextRequest } from 'next/server';
-  // import verifyToken from '@/functions/verify-token';
+  // import verifyToken from '@/shared/services/verify-token';
   
   // export async function middleware(request: NextRequest) {
   //   const token = request.cookies.get('accessToken')?.value;
@@ -57,3 +57,4 @@ export const config = {
   //   return NextResponse.next();
   // }
 };
+

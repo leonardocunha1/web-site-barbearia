@@ -1,12 +1,12 @@
-import type { GetServiceById200ServiceProfissionaisItem } from "./getServiceById200ServiceProfissionaisItem";
+import type { GetServiceById200ServiceProfessionalsItem } from "./getServiceById200ServiceProfessionalsItem";
 
 export type GetServiceById200Service = {
   id: string;
-  nome: string;
-  descricao?: string;
-  categoria?: string;
-  ativo: boolean;
+  name: string;
+  description?: string;
+  category?: string;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
-  profissionais: GetServiceById200ServiceProfissionaisItem[];
+  professionals: GetServiceById200ServiceProfessionalsItem[];
 };

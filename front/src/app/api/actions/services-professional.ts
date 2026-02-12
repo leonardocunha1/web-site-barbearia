@@ -1,8 +1,8 @@
 "use server";
 
 import { zodlistProfessionalServicesResponse } from "@/api";
-import apiError from "@/functions/api-error";
-import { SERVICE_PROFESSIONALS_GET } from "@/functions/api-services-professional";
+import apiError from "@/shared/services/api-error";
+import { SERVICE_PROFESSIONALS_GET } from "@/shared/services/api-services-professional";
 
 
 export async function servicesProfessionalGet(
@@ -33,3 +33,4 @@ export async function servicesProfessionalGet(
     return apiError(error);
   }
 }
+

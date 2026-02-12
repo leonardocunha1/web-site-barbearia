@@ -6,8 +6,8 @@ export type ListProfessionalBookingsSortItemField =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ListProfessionalBookingsSortItemField = {
-  dataHoraInicio: "dataHoraInicio",
-  profissional: "profissional",
+  startDateTime: "startDateTime",
+  PROFESSIONAL: "PROFESSIONAL",
   status: "status",
-  valorFinal: "valorFinal",
+  totalAmount: "totalAmount",
 } as const;

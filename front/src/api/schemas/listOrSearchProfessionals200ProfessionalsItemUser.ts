@@ -8,7 +8,7 @@ export type ListOrSearchProfessionals200ProfessionalsItemUser = {
    * Nome completo do usuário
    * @minLength 2
    */
-  nome: string;
+  name: string;
   /** Endereço de e-mail do usuário */
   email: string;
   /**
@@ -16,5 +16,5 @@ export type ListOrSearchProfessionals200ProfessionalsItemUser = {
    * @nullable
    * @pattern ^\+?[\d\s()-]{10,20}$
    */
-  telefone?: string | null;
+  phone?: string | null;
 };
