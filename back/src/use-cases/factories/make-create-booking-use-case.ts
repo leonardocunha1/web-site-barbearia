@@ -11,8 +11,7 @@ export function makeCreateBookingUseCase() {
   const bookingsRepository = new PrismaBookingsRepository();
   const usersRepository = new PrismaUsersRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
-  const serviceProfessionalRepository =
-    new PrismaServiceProfessionalRepository();
+  const serviceProfessionalRepository = new PrismaServiceProfessionalRepository();
   const userBonusRepository = new PrismaUserBonusRepository();
   const bonusRedemptionRepository = new PrismaBonusRedemptionRepository();
 

@@ -3,8 +3,7 @@ import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-prof
 import { ListProfessionalServicesUseCase } from '../service-professional/list-professional-services-use-case';
 
 export function makeListProfessionalServicesUseCase() {
-  const serviceProfessionalRepository =
-    new PrismaServiceProfessionalRepository();
+  const serviceProfessionalRepository = new PrismaServiceProfessionalRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
 
   return new ListProfessionalServicesUseCase(
@@ -12,4 +11,3 @@ export function makeListProfessionalServicesUseCase() {
     professionalsRepository,
   );
 }
-

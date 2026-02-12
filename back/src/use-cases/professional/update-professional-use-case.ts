@@ -13,13 +13,12 @@ export class UpdateProfessionalUseCase {
     }
 
     return this.professionalsRepository.update(data.id, {
-      especialidade: data.specialty,
+      specialty: data.specialty,
       bio: data.bio,
-      documento: data.document,
-      ativo: data.active,
+      document: data.document,
+      active: data.active,
       updatedAt: new Date(),
       avatarUrl: data.avatarUrl,
     });
   }
 }
-

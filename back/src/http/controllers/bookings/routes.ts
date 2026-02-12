@@ -29,12 +29,8 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
         response: {
           201: z.null().describe('Agendamento criado com sucesso.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado'),
-          409: z
-            .object({ message: z.string() })
-            .describe('Conflito de horário'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
+          409: z.object({ message: z.string() }).describe('Conflito de horário'),
         },
       },
     },
@@ -48,8 +44,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
       schema: {
         operationId: 'updateBookingStatus',
         tags: ['bookings'],
-        description:
-          'Atualiza o status de um agendamento (apenas para profissionais)',
+        description: 'Atualiza o status de um agendamento (apenas para profissionais)',
         params: getOrUpdateBookingStatusParamsSchema,
         body: updateBookingStatusBodySchema,
         response: {

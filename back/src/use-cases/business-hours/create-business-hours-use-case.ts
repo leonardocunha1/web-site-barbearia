@@ -1,7 +1,4 @@
-import {
-  BusinessHours,
-  IBusinessHoursRepository,
-} from '@/repositories/business-hours-repository';
+import { BusinessHours, IBusinessHoursRepository } from '@/repositories/business-hours-repository';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { InvalidTimeFormatError } from '../errors/invalid-time-format-error';
@@ -16,12 +13,9 @@ export class CreateBusinessHoursUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute( date: CreateBusinessHoursUseCaseRequest,
-  ): Promise<BusinessHours> {
+  async execute(data: CreateBusinessHoursUseCaseRequest): Promise<BusinessHours> {
     // Validação 1: Profissional existe
-    const professional = await this.professionalsRepository.findById(
-      data.professionalId,
-    );
+    const professional = await this.professionalsRepository.findById(data.professionalId);
     if (!professional) {
       throw new ProfessionalNotFoundError();
     }
@@ -33,12 +27,7 @@ export class CreateBusinessHoursUseCase {
     if (data.breakEnd) this.validateTimeFormat(data.breakEnd);
 
     // Validação 3: Lógica de horários
-    this.validateBusinessHoursLogic(
-      data.opensAt,
-      data.closesAt,
-      data.breakStart,
-      data.breakEnd,
-    );
+    this.validateBusinessHoursLogic(data.opensAt, data.closesAt, data.breakStart, data.breakEnd);
 
     // Validação 4: Dia da semana válido
     if (data.dayOfWeek < 0 || data.dayOfWeek > 6) {
@@ -46,24 +35,24 @@ export class CreateBusinessHoursUseCase {
     }
 
     // Validação 5: Não existe horário duplicado para este dia
-    const existingHours =
-      await this.businessHoursRepository.findByProfessionalAndDay(
-        data.professionalId,
-        data.dayOfWeek,
-      );
+    const existingHours = await this.businessHoursRepository.findByProfessionalAndDay(
+      data.professionalId,
+      data.dayOfWeek,
+    );
 
     if (existingHours) {
       throw new DuplicateBusinessHoursError();
     }
 
     // Todas as validações passaram, criar o horário
-    return this.businessHoursRepository.create({ professional: { connect: { id: data.professionalId } },
+    return this.businessHoursRepository.create({
+      professional: { connect: { id: data.professionalId } },
       dayOfWeek: data.dayOfWeek,
       opensAt: data.opensAt,
       closesAt: data.closesAt,
       breakStart: data.breakStart || null,
       breakEnd: data.breakEnd || null,
-      ativo: true,
+      active: true,
     });
   }
 
@@ -85,9 +74,7 @@ export class CreateBusinessHoursUseCase {
 
     // Validação: Horário de abertura deve ser antes do fechamento
     if (!isBefore(opens, closes)) {
-      throw new InvalidBusinessHoursError(
-        'Horário de abertura deve ser antes do fechamento',
-      );
+      throw new InvalidBusinessHoursError('Horário de abertura deve ser antes do fechamento');
     }
 
     // Validação de pausa
@@ -96,23 +83,14 @@ export class CreateBusinessHoursUseCase {
       const breakEndDate = parse(breakEnd, 'HH:mm', new Date());
 
       if (!isBefore(breakStartDate, breakEndDate)) {
-        throw new InvalidBusinessHoursError(
-          'Início da pausa deve ser antes do fim',
-        );
+        throw new InvalidBusinessHoursError('Início da pausa deve ser antes do fim');
       }
 
       if (isBefore(breakStartDate, opens) || isAfter(breakEndDate, closes)) {
-        throw new InvalidBusinessHoursError(
-          'Pausa deve estar dentro do horário de funcionamento',
-        );
+        throw new InvalidBusinessHoursError('Pausa deve estar dentro do horário de funcionamento');
       }
     } else if (breakStart || breakEnd) {
-      throw new InvalidBusinessHoursError(
-        'Pausa deve ter início e fim definidos',
-      );
+      throw new InvalidBusinessHoursError('Pausa deve ter início e fim definidos');
     }
   }
 }
-
-
-

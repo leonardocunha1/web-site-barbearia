@@ -5,12 +5,7 @@ import { CreateBusinessHoursUseCase } from '../business-hours/create-business-ho
 export function makeCreateBusinessHoursUseCase() {
   const professionalsRepository = new PrismaProfessionalsRepository();
   const businessHoursRepository = new PrismaBusinessHoursRepository();
-  const useCase = new CreateBusinessHoursUseCase(
-    businessHoursRepository,
-    professionalsRepository,
-  );
+  const useCase = new CreateBusinessHoursUseCase(businessHoursRepository, professionalsRepository);
 
   return useCase;
 }
-
-

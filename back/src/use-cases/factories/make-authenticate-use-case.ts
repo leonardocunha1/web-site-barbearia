@@ -7,7 +7,7 @@ export function makeAuthenticateUseCase() {
   const prismaProfessionalsRepository = new PrismaProfessionalsRepository();
   const authenticateUseCase = new AuthenticateUseCase(
     prismaUsersRepository,
-    prismaProfessionalsRepository
+    prismaProfessionalsRepository,
   );
 
   return authenticateUseCase;

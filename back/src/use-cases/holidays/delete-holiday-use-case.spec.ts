@@ -12,6 +12,7 @@ import {
   createMockHolidaysRepository,
   createMockProfessionalsRepository,
 } from '@/mock/mock-repositories';
+import { makeHoliday, makeProfessional } from '@/test/factories';
 
 // Tipos para os mocks
 type MockHolidaysRepository = IHolidaysRepository & {
@@ -34,10 +35,7 @@ describe('DeleteHolidayUseCase', () => {
     mockHolidaysRepository = createMockHolidaysRepository();
     mockProfessionalsRepository = createMockProfessionalsRepository();
 
-    useCase = new DeleteHolidayUseCase(
-      mockHolidaysRepository,
-      mockProfessionalsRepository,
-    );
+    useCase = new DeleteHolidayUseCase(mockHolidaysRepository, mockProfessionalsRepository);
   });
 
   const today = startOfToday();
@@ -46,14 +44,16 @@ describe('DeleteHolidayUseCase', () => {
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  const mockHoliday = {
+  const mockHoliday = makeHoliday({
     id: 'feriado-123',
-    professionalId: 'pro-123', date: tomorrow, reason: 'Feriado teste',
-  };
+    professionalId: 'pro-123',
+    date: tomorrow,
+    reason: 'Feriado teste',
+  });
 
   it('deve deletar um feriado com sucesso', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockProfessionalsRepository.findById.mockResolvedValue(makeProfessional({ id: 'pro-123' }));
     mockHolidaysRepository.findById.mockResolvedValue(mockHoliday);
 
     // Executar
@@ -78,7 +78,7 @@ describe('DeleteHolidayUseCase', () => {
   });
 
   it('deve lançar erro quando feriado não existe', async () => {
-    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockProfessionalsRepository.findById.mockResolvedValue(makeProfessional({ id: 'pro-123' }));
     mockHolidaysRepository.findById.mockResolvedValue(null);
 
     await expect(
@@ -90,7 +90,7 @@ describe('DeleteHolidayUseCase', () => {
   });
 
   it('deve lançar erro quando profissional não é o dono do feriado', async () => {
-    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockProfessionalsRepository.findById.mockResolvedValue(makeProfessional({ id: 'pro-123' }));
     mockHolidaysRepository.findById.mockResolvedValue({
       ...mockHoliday,
       professionalId: 'pro-456', // ID diferente
@@ -105,9 +105,10 @@ describe('DeleteHolidayUseCase', () => {
   });
 
   it('deve lançar erro quando tentar deletar feriado passado', async () => {
-    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockProfessionalsRepository.findById.mockResolvedValue(makeProfessional({ id: 'pro-123' }));
     mockHolidaysRepository.findById.mockResolvedValue({
-      ...mockHoliday, date: yesterday, // Data no passado
+      ...mockHoliday,
+      date: yesterday, // Data no passado
     });
 
     await expect(
@@ -119,9 +120,10 @@ describe('DeleteHolidayUseCase', () => {
   });
 
   it('não deve lançar erro quando data do feriado é hoje', async () => {
-    mockProfessionalsRepository.findById.mockResolvedValue({ id: 'pro-123' });
+    mockProfessionalsRepository.findById.mockResolvedValue(makeProfessional({ id: 'pro-123' }));
     mockHolidaysRepository.findById.mockResolvedValue({
-      ...mockHoliday, date: today, // Data é hoje
+      ...mockHoliday,
+      date: today, // Data é hoje
     });
 
     await useCase.execute({
@@ -132,6 +134,3 @@ describe('DeleteHolidayUseCase', () => {
     expect(mockHolidaysRepository.delete).toHaveBeenCalled();
   });
 });
-
-
-

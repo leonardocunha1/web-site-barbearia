@@ -23,7 +23,3 @@ export class DeleteBusinessHoursUseCase {
     await this.businessHoursRepository.delete(businessHoursId);
   }
 }
-
-
-
-

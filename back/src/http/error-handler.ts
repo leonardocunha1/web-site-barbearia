@@ -14,7 +14,7 @@ export type ErrorResponse = {
 /**
  * Resolves errors into HTTP responses
  * Uses AppError base class for consistent error handling
- * 
+ *
  * @param error - Error thrown by application
  * @returns HTTP status and response body
  */

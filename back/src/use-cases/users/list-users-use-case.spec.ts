@@ -4,6 +4,7 @@ import { IUsersRepository } from '@/repositories/users-repository';
 import { Role, User } from '@prisma/client';
 import { ListUsersResponse } from '@/dtos/user-dto';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
+import { makeUser } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockUsersRepository = IUsersRepository & {
@@ -23,28 +24,20 @@ describe('ListUsersUseCase', () => {
 
   it('deve listar usuários com paginação padrão', async () => {
     const mockUsers: User[] = [
-      {
-        id: 'user-1', name: 'John Doe',
+      makeUser({
+        id: 'user-1',
+        name: 'John Doe',
         email: 'john@example.com',
-        senha: 'hashed-password',
-        telefone: '123456789',
-        role: Role.CLIENTE,
-        emailVerified: true,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 'user-2', name: 'Jane Smith',
+        phone: '123456789',
+        role: Role.CLIENT,
+      }),
+      makeUser({
+        id: 'user-2',
+        name: 'Jane Smith',
         email: 'jane@example.com',
-        senha: 'hashed-password',
-        telefone: '987654321',
-        role: Role.CLIENTE,
-        emailVerified: true,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        phone: '987654321',
+        role: Role.CLIENT,
+      }),
     ];
 
     const expectedResponse: ListUsersResponse = {
@@ -75,17 +68,13 @@ describe('ListUsersUseCase', () => {
 
   it('deve listar usuários com paginação personalizada', async () => {
     const mockUsers: User[] = [
-      {
-        id: 'user-1', name: 'John Doe',
+      makeUser({
+        id: 'user-1',
+        name: 'John Doe',
         email: 'john@example.com',
-        senha: 'hashed-password',
-        telefone: '123456789',
-        role: Role.CLIENTE,
-        emailVerified: true,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        phone: '123456789',
+        role: Role.CLIENT,
+      }),
     ];
 
     const expectedResponse: ListUsersResponse = {
@@ -112,17 +101,13 @@ describe('ListUsersUseCase', () => {
 
   it('deve filtrar usuários por role', async () => {
     const mockUsers: User[] = [
-      {
-        id: 'admin-1', name: 'Admin User',
+      makeUser({
+        id: 'admin-1',
+        name: 'Admin User',
         email: 'admin@example.com',
-        senha: 'hashed-password',
-        telefone: '111111111',
+        phone: '111111111',
         role: Role.ADMIN,
-        emailVerified: true,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      }),
     ];
 
     usersRepository.listUsers.mockResolvedValue(mockUsers);
@@ -146,17 +131,13 @@ describe('ListUsersUseCase', () => {
 
   it('deve filtrar usuários por nome', async () => {
     const mockUsers: User[] = [
-      {
-        id: 'user-1', name: 'John Doe',
+      makeUser({
+        id: 'user-1',
+        name: 'John Doe',
         email: 'john@example.com',
-        senha: 'hashed-password',
-        telefone: '123456789',
-        role: Role.CLIENTE,
-        emailVerified: true,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        phone: '123456789',
+        role: Role.CLIENT,
+      }),
     ];
 
     usersRepository.listUsers.mockResolvedValue(mockUsers);
@@ -194,4 +175,3 @@ describe('ListUsersUseCase', () => {
     await expect(sut.execute({ page: 1, limit: -5 })).rejects.toThrow();
   });
 });
-

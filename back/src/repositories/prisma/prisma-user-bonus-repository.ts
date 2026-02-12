@@ -3,12 +3,7 @@ import { IUserBonusRepository } from '../user-bonus-repository';
 import { BonusType } from '@prisma/client';
 
 export class PrismaUserBonusRepository implements IUserBonusRepository {
-  async upsert(data: {
-    userId: string;
-    type: BonusType;
-    points: number;
-    expiresAt: Date;
-  }) {
+  async upsert(data: { userId: string; type: BonusType; points: number; expiresAt: Date }) {
     const existingBonus = await prisma.userBonus.findUnique({
       where: {
         userId_type: {
@@ -20,10 +15,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
 
     const newExpiresAt = data.expiresAt;
 
-    if (
-      !existingBonus ||
-      (existingBonus.expiresAt && existingBonus.expiresAt < new Date())
-    ) {
+    if (!existingBonus || (existingBonus.expiresAt && existingBonus.expiresAt < new Date())) {
       // Sem registro anterior ou pontos expirados: sobrescreve com novos pontos
       await prisma.userBonus.upsert({
         where: {
@@ -51,7 +43,8 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
             userId: data.userId,
             type: data.type,
           },
-        }, date: {
+        },
+        date: {
           points: {
             increment: data.points,
           },
@@ -70,10 +63,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
     });
   }
 
-  async getPointsByType(
-    userId: string,
-    type: BonusType,
-  ): Promise<number | null> {
+  async getPointsByType(userId: string, type: BonusType): Promise<number | null> {
     const userBonus = await prisma.userBonus.findUnique({
       where: {
         userId_type: {
@@ -86,11 +76,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
     return userBonus?.points || null;
   }
 
-  async getValidPointsByType(
-    userId: string,
-    type: BonusType,
-    currentDate: Date,
-  ): Promise<number> {
+  async getValidPointsByType(userId: string, type: BonusType, currentDate: Date): Promise<number> {
     const userBonus = await prisma.userBonus.findUnique({
       where: {
         userId_type: {
@@ -124,10 +110,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
       },
     });
 
-    if (
-      userBonus &&
-      (!userBonus.expiresAt || userBonus.expiresAt >= currentDate)
-    ) {
+    if (userBonus && (!userBonus.expiresAt || userBonus.expiresAt >= currentDate)) {
       return {
         points: userBonus.points,
         expiresAt: userBonus.expiresAt ?? undefined,
@@ -137,11 +120,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
     return { points: 0, expiresAt: undefined };
   }
 
-  async consumePoints(
-    userId: string,
-    quantity: number,
-    type: BonusType,
-  ): Promise<void> {
+  async consumePoints(userId: string, quantity: number, type: BonusType): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const updated = await tx.userBonus.updateMany({
         where: {
@@ -150,7 +129,8 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
           points: {
             gte: quantity,
           },
-        }, date: {
+        },
+        date: {
           points: {
             decrement: quantity,
           },
@@ -158,11 +138,8 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
       });
 
       if (updated.count === 0) {
-        throw new Error(
-          `Pontos insuficientes do tipo ${type} ou não encontrados`,
-        );
+        throw new Error(`Pontos insuficientes do tipo ${type} ou não encontrados`);
       }
     });
   }
 }
-

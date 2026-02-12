@@ -11,10 +11,11 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
 
   const userWithoutPassword: UserDTO = {
     id: user.id,
-    email: user.email, name: user.name,
+    email: user.email,
+    name: user.name,
     role: user.role,
     createdAt: user.createdAt,
-    telefone: user.phone,
+    phone: user.phone,
     emailVerified: user.emailVerified,
     active: user.active,
   };

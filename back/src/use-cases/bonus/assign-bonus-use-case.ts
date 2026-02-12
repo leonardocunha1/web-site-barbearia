@@ -67,20 +67,13 @@ export class AssignBonusUseCase {
 
       type,
       points: calculatedPoints,
-      description:
-        description ||
-        this.generateBonusDescription(type, calculatedPoints, bookingId),
+      description: description || this.generateBonusDescription(type, calculatedPoints, bookingId),
     });
   }
 
-  private async handleBookingPoints(
-    userId: string,
-    bookingId: string,
-  ): Promise<number> {
+  private async handleBookingPoints(userId: string, bookingId: string): Promise<number> {
     if (!bookingId) {
-      throw new InvalidBonusAssignmentError(
-        'bookingId é obrigatório para BOOKING_POINTS',
-      );
+      throw new InvalidBonusAssignmentError('bookingId é obrigatório para BOOKING_POINTS');
     }
 
     const booking = await this.bookingsRepository.findById(bookingId);
@@ -89,17 +82,14 @@ export class AssignBonusUseCase {
     }
 
     if (booking.userId !== userId) {
-      throw new InvalidBonusAssignmentError(
-        'Agendamento não pertence ao usuário',
-      );
+      throw new InvalidBonusAssignmentError('Agendamento não pertence ao usuário');
     }
 
     if (booking.status !== 'COMPLETED') {
       throw new InvalidBookingStatusError(booking.status, 'COMPLETED');
     }
 
-    const existingTransaction =
-      await this.bonusTransactionRepository.findByBookingId(bookingId);
+    const existingTransaction = await this.bonusTransactionRepository.findByBookingId(bookingId);
     if (existingTransaction) {
       throw new BonusAlreadyAssignedError();
     }
@@ -112,17 +102,17 @@ export class AssignBonusUseCase {
 
     const points = Math.floor((booking.totalAmount / 10) * POINTS_PER_10_REAIS);
     if (points <= 0) {
-      throw new InvalidBonusAssignmentError(
-        'Agendamento com valor insuficiente para gerar pontos',
-      );
+      throw new InvalidBonusAssignmentError('Agendamento com valor insuficiente para gerar pontos');
     }
 
     return points;
   }
 
   private async handleLoyaltyPoints(userId: string): Promise<number> {
-    const totalCompletedBookings =
-      await this.bookingsRepository.countByUserIdAndStatus(userId, 'COMPLETED');
+    const totalCompletedBookings = await this.bookingsRepository.countByUserIdAndStatus(
+      userId,
+      'COMPLETED',
+    );
 
     if (totalCompletedBookings < LOYALTY_BOOKINGS_REQUIRED) {
       throw new InvalidBonusAssignmentError(
@@ -130,17 +120,10 @@ export class AssignBonusUseCase {
       );
     }
 
-    return (
-      Math.floor(totalCompletedBookings / LOYALTY_BOOKINGS_REQUIRED) *
-      LOYALTY_POINTS
-    );
+    return Math.floor(totalCompletedBookings / LOYALTY_BOOKINGS_REQUIRED) * LOYALTY_POINTS;
   }
 
-  private generateBonusDescription(
-    type: string,
-    points: number,
-    bookingId?: string,
-  ): string {
+  private generateBonusDescription(type: string, points: number, bookingId?: string): string {
     return type === 'BOOKING_POINTS'
       ? `Pontos por agendamento concluído (ID: ${bookingId})`
       : `Bônus de fidelidade: ${points} pontos`;
@@ -164,4 +147,3 @@ export class AssignBonusUseCase {
     return expirationDate;
   }
 }
-

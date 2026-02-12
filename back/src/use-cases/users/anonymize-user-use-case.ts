@@ -16,15 +16,15 @@ export class AnonymizeUserUseCase {
   }): Promise<void> {
     const userExists = await this.usersRepository.findById(userIdToAnonymize);
 
-    if (role === 'CLIENT' && userId !== userIdToAnonymize) {
-      throw new UsuarioTentandoPegarInformacoesDeOutro();
-    }
-
     if (!userExists) {
       throw new UserNotFoundError();
+    }
+
+    // Only CLIENTE (CLIENT) role users are restricted to anonymize only themselves
+    if (role === 'CLIENTE' && userId !== userIdToAnonymize) {
+      throw new UsuarioTentandoPegarInformacoesDeOutro();
     }
 
     await this.usersRepository.anonymize(userIdToAnonymize);
   }
 }
-

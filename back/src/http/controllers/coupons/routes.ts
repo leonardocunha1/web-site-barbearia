@@ -128,7 +128,9 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
         description: 'Ativa ou desativa o status de um cupom.',
         params: updateCouponParamsSchema,
         response: {
-          200: z.object({ coupon: z.object({ id: z.string(), active: z.boolean() }) }),
+          200: z.object({
+            coupon: z.object({ id: z.string(), active: z.boolean() }),
+          }),
           404: z.object({ message: z.string() }),
         },
       },

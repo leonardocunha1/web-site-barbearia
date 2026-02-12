@@ -5,8 +5,7 @@ import { PrismaHolidaysRepository } from '@/repositories/prisma/prisma-holidays-
 
 export function makeGetProfessionalScheduleUseCase() {
   const bookingsRepository = new PrismaBookingsRepository();
-  const businessHoursRepository =
-    new PrismaBusinessHoursRepository();
+  const businessHoursRepository = new PrismaBusinessHoursRepository();
   const holidaysRepository = new PrismaHolidaysRepository();
 
   return new GetProfessionalScheduleUseCase(
@@ -15,4 +14,3 @@ export function makeGetProfessionalScheduleUseCase() {
     holidaysRepository,
   );
 }
-

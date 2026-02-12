@@ -14,10 +14,7 @@ export class DeleteHolidayUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute({
-    holidayId,
-    professionalId,
-  }: DeleteHolidayUseCaseRequest): Promise<void> {
+  async execute({ holidayId, professionalId }: DeleteHolidayUseCaseRequest): Promise<void> {
     // Fail-fast: validate all conditions before operations
     await this.validateProfessionalExists(professionalId);
     const holiday = await this.validateHolidayExists(holidayId);
@@ -32,11 +29,8 @@ export class DeleteHolidayUseCase {
    * Validates that professional exists
    * @throws {ProfessionalNotFoundError} If professional is not found
    */
-  private async validateProfessionalExists(
-    professionalId: string,
-  ): Promise<Professional> {
-    const professional =
-      await this.professionalsRepository.findById(professionalId);
+  private async validateProfessionalExists(professionalId: string): Promise<Professional> {
+    const professional = await this.professionalsRepository.findById(professionalId);
     if (!professional) {
       throw new ProfessionalNotFoundError();
     }
@@ -59,10 +53,7 @@ export class DeleteHolidayUseCase {
    * Validates that holiday belongs to the specified professional
    * @throws {ProfissionalTentandoPegarInformacoesDeOutro} If holiday belongs to different professional
    */
-  private validateHolidayBelongsToProfessional(
-    holiday: Holiday,
-    professionalId: string,
-  ): void {
+  private validateHolidayBelongsToProfessional(holiday: Holiday, professionalId: string): void {
     if (holiday.professionalId !== professionalId) {
       throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }
@@ -79,5 +70,3 @@ export class DeleteHolidayUseCase {
     }
   }
 }
-
-

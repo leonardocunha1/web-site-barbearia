@@ -11,7 +11,9 @@ import { BookingDTO } from '@/dtos/booking-dto';
 const bookingInclude = {
   items: {
     select: {
-      id: true, duration: true, price: true,
+      id: true,
+      duration: true,
+      price: true,
     },
     include: {
       serviceProfessional: {
@@ -21,34 +23,36 @@ const bookingInclude = {
         include: {
           service: {
             select: {
-              id: true, name: true,
+              id: true,
+              name: true,
             },
           },
         },
       },
     },
-  }, professional: {
+  },
+  professional: {
     select: {
       id: true,
     },
     include: {
       user: {
         select: {
-          id: true, name: true,
+          id: true,
+          name: true,
         },
       },
     },
   },
   user: {
     select: {
-      id: true, name: true,
+      id: true,
+      name: true,
     },
   },
 } satisfies Prisma.BookingInclude;
 
-function mapSortToOrderBy(
-  sort: SortBookingSchema[],
-): Prisma.BookingOrderByWithRelationInput[] {
+function mapSortToOrderBy(sort: SortBookingSchema[]): Prisma.BookingOrderByWithRelationInput[] {
   return sort.map(({ field, order }) => {
     if (field === 'PROFESSIONAL') {
       return { professional: { user: { name: order } } };
@@ -79,7 +83,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
   ): Promise<BookingDTO | null> {
     return prisma.booking.findFirst({
       where: {
-        professionalId: professionalId,
+        professionalId,
         canceledAt: null,
         startDateTime: { lt: end },
         endDateTime: { gt: start },
@@ -97,7 +101,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     const orderBy = mapSortToOrderBy(sort);
 
     const where: Prisma.BookingWhereInput = {
-      professionalId: professionalId,
+      professionalId,
       ...(filters.status && { status: filters.status }),
       ...(filters.startDate && { startDateTime: { gte: filters.startDate } }),
       ...(filters.endDate && { endDateTime: { lte: filters.endDate } }),
@@ -122,7 +126,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     },
   ): Promise<number> {
     const where: Prisma.BookingWhereInput = {
-      professionalId: professionalId,
+      professionalId,
       ...(filters?.status && { status: filters.status }),
       ...(filters?.startDate && { startDateTime: { gte: filters.startDate } }),
       ...(filters?.endDate && { endDateTime: { lte: filters.endDate } }),
@@ -138,7 +142,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     const orderBy = mapSortToOrderBy(sort);
 
     const where: Prisma.BookingWhereInput = {
-      userId: userId,
+      userId,
       ...(filters?.status && { status: filters.status }),
       ...(filters?.startDate && { startDateTime: { gte: filters.startDate } }),
       ...(filters?.endDate && { endDateTime: { lte: filters.endDate } }),
@@ -163,7 +167,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     },
   ): Promise<number> {
     const where: Prisma.BookingWhereInput = {
-      userId: userId,
+      userId,
       ...(filters?.status && { status: filters.status }),
       ...(filters?.startDate && { startDateTime: { gte: filters.startDate } }),
       ...(filters?.endDate && { endDateTime: { lte: filters.endDate } }),
@@ -172,9 +176,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     return prisma.booking.count({ where });
   }
 
-  async update(
-    id: string, date: Prisma.BookingUpdateInput,
-  ): Promise<BookingDTO> {
+  async update(id: string, data: Prisma.BookingUpdateInput): Promise<BookingDTO> {
     return prisma.booking.update({
       where: { id },
       data,
@@ -195,7 +197,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
   ): Promise<number> {
     return prisma.booking.count({
       where: {
-        professionalId: professionalId,
+        professionalId,
         items: { some: { serviceId } },
         status: { not: 'CANCELED' },
         endDateTime: { gt: new Date() },
@@ -225,7 +227,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     status?: Status,
   ): Promise<number> {
     const where: Prisma.BookingWhereInput = {
-      professionalId: professionalId,
+      professionalId,
       startDateTime: { gte: start, lte: end },
     };
 
@@ -262,7 +264,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     filters?: { startDate?: Date; endDate?: Date },
   ): Promise<BookingDTO[]> {
     const where: Prisma.BookingWhereInput = {
-      professionalId: professionalId,
+      professionalId,
       startDateTime: {
         gte: filters?.startDate || new Date(),
         ...(filters?.endDate ? { lte: filters.endDate } : {}),
@@ -280,10 +282,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     });
   }
 
-  async findByProfessionalAndDate(
-    professionalId: string,
-    date: Date,
-  ): Promise<BookingDTO[]> {
+  async findByProfessionalAndDate(professionalId: string, date: Date): Promise<BookingDTO[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -292,7 +291,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
 
     return prisma.booking.findMany({
       where: {
-        professionalId: professionalId,
+        professionalId,
         startDateTime: { gte: startOfDay, lte: endOfDay },
         status: { not: 'CANCELED' },
         canceledAt: null,
@@ -303,16 +302,12 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     });
   }
 
-  async countByUserIdAndStatus(
-    userId: string,
-    status: Status,
-  ): Promise<number> {
+  async countByUserIdAndStatus(userId: string, status: Status): Promise<number> {
     const where: Prisma.BookingWhereInput = {
-      userId: userId,
+      userId,
       status,
     };
 
     return prisma.booking.count({ where });
   }
 }
-

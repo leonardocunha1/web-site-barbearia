@@ -8,8 +8,7 @@ export function makeRegisterUserUseCase() {
 
   const registerUserUseCase = new RegisterUserUseCase({
     usersRepository,
-    sendVerificationEmail: (email) =>
-      sendVerificationEmailUseCase.execute({ email }),
+    sendVerificationEmail: (email) => sendVerificationEmailUseCase.execute({ email }),
   });
 
   return registerUserUseCase;

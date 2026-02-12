@@ -3,12 +3,10 @@ import { makeListUserBookingsUseCase } from '@/use-cases/factories/make-list-use
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 import { listBookingsQuerySchema } from '@/schemas/bookings';
 
-export async function listUserBookings(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const { page, limit, sort, startDate, endDate, status } =
-    listBookingsQuerySchema.parse(request.query);
+export async function listUserBookings(request: FastifyRequest, reply: FastifyReply) {
+  const { page, limit, sort, startDate, endDate, status } = listBookingsQuerySchema.parse(
+    request.query,
+  );
 
   const sortCriteria: SortBookingSchema[] = sort?.length
     ? sort

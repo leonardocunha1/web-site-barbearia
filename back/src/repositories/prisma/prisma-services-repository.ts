@@ -5,9 +5,9 @@ import { IServicesRepository } from '../services-repository';
 export interface ListServicesParams {
   page: number;
   limit: number;
-  nome?: string;
-  categoria?: string;
-  ativo?: boolean;
+  name?: string;
+  category?: string;
+  active?: boolean;
   professionalId?: string;
 }
 
@@ -18,7 +18,8 @@ const includeProfessional = {
         include: {
           user: {
             select: {
-              id: true, name: true,
+              id: true,
+              name: true,
             },
           },
         },
@@ -26,7 +27,6 @@ const includeProfessional = {
     },
   },
 };
-
 
 export class PrismaServicesRepository implements IServicesRepository {
   async create(data: Prisma.ServiceCreateInput): Promise<Service> {
@@ -48,15 +48,14 @@ export class PrismaServicesRepository implements IServicesRepository {
 
   async findByName(name: string) {
     const service = await prisma.service.findFirst({
-      where: { name: name,
-      },
+      where: { name },
       include: includeProfessional,
     });
 
     return service;
   }
 
-  async update(id: string, date: Prisma.ServiceUpdateInput): Promise<Service> {
+  async update(id: string, data: Prisma.ServiceUpdateInput): Promise<Service> {
     const service = await prisma.service.update({
       where: { id },
       data,
@@ -73,43 +72,38 @@ export class PrismaServicesRepository implements IServicesRepository {
 
   async softDelete(id: string): Promise<void> {
     await prisma.service.update({
-      where: { id }, date: {
-        ativo: false,
+      where: { id },
+      data: {
+        active: false,
       },
     });
   }
 
   async toggleStatus(id: string, newStatus: boolean): Promise<Service> {
     return prisma.service.update({
-      where: { id }, date: {
-        ativo: newStatus,
+      where: { id },
+      data: {
+        active: newStatus,
       },
     });
   }
 
-  async list({
-    page,
-    limit,
-    nome,
-    categoria,
-    ativo,
-    professionalId,
-  }: ListServicesParams) {
+  async list({ page, limit, name, category, active, professionalId }: ListServicesParams) {
     const where: Prisma.ServiceWhereInput = {};
 
-    if (nome) {
+    if (name) {
       where.name = {
-        contains: nome,
+        contains: name,
         mode: 'insensitive',
       };
     }
 
-    if (categoria) {
-      where.category = categoria;
+    if (category) {
+      where.category = category;
     }
 
-    if (ativo !== undefined) {
-      where.active = ativo;
+    if (active !== undefined) {
+      where.active = active;
     }
 
     if (professionalId) {
@@ -145,4 +139,3 @@ export class PrismaServicesRepository implements IServicesRepository {
     return count > 0;
   }
 }
-

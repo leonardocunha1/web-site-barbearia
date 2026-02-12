@@ -4,6 +4,7 @@ import { IServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { Service } from '@prisma/client';
 import { createMockServicesRepository } from '@/mock/mock-repositories';
+import { makeService } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = IServicesRepository & {
@@ -16,17 +17,17 @@ describe('ToggleServiceStatusUseCase', () => {
   let sut: ToggleServiceStatusUseCase;
 
   // Dados mockados para os testes
-  const mockActiveService: Service = {
-    id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-    categoria: 'Cabelo',
-    ativo: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const mockActiveService: Service = makeService({
+    id: 'service-1',
+    name: 'Corte de Cabelo',
+    description: 'Corte básico',
+    category: 'Cabelo',
+    active: true,
+  });
 
   const mockInactiveService: Service = {
     ...mockActiveService,
-    ativo: false,
+    active: false,
   };
 
   beforeEach(() => {
@@ -48,10 +49,7 @@ describe('ToggleServiceStatusUseCase', () => {
     // Verifica se findById foi chamado com o ID correto
     expect(servicesRepository.findById).toHaveBeenCalledWith('service-1');
     // Verifica se toggleStatus foi chamado com os parâmetros corretos
-    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
-      'service-1',
-      false,
-    );
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith('service-1', false);
   });
 
   it('deve alternar o status de inativo para ativo', async () => {
@@ -65,19 +63,14 @@ describe('ToggleServiceStatusUseCase', () => {
     // Verifica se o serviço retornado está ativo
     expect(result.service.active).toBe(true);
     // Verifica se toggleStatus foi chamado com os parâmetros corretos
-    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
-      'service-1',
-      true,
-    );
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith('service-1', true);
   });
 
   it('deve lançar erro quando o serviço não existe', async () => {
     // Configura o mock para retornar null (serviço não encontrado)
     servicesRepository.findById.mockResolvedValue(null);
 
-    await expect(sut.execute({ id: 'non-existent-id' })).rejects.toThrow(
-      ServiceNotFoundError,
-    );
+    await expect(sut.execute({ id: 'non-existent-id' })).rejects.toThrow(ServiceNotFoundError);
 
     // Verifica se findById foi chamado com o ID correto
     expect(servicesRepository.findById).toHaveBeenCalledWith('non-existent-id');
@@ -108,10 +101,7 @@ describe('ToggleServiceStatusUseCase', () => {
     servicesRepository.toggleStatus.mockResolvedValueOnce(mockInactiveService);
 
     await sut.execute({ id: 'service-1' });
-    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
-      'service-1',
-      false,
-    );
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith('service-1', false);
 
     // Limpa os mocks para o próximo teste
     vi.clearAllMocks();
@@ -121,10 +111,6 @@ describe('ToggleServiceStatusUseCase', () => {
     servicesRepository.toggleStatus.mockResolvedValueOnce(mockActiveService);
 
     await sut.execute({ id: 'service-1' });
-    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith(
-      'service-1',
-      true,
-    );
+    expect(servicesRepository.toggleStatus).toHaveBeenCalledWith('service-1', true);
   });
 });
-

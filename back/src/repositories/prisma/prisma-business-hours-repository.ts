@@ -2,9 +2,7 @@ import { IBusinessHoursRepository } from '@/repositories/business-hours-reposito
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
-export class PrismaBusinessHoursRepository
-  implements IBusinessHoursRepository
-{
+export class PrismaBusinessHoursRepository implements IBusinessHoursRepository {
   async findById(id: string) {
     return prisma.businessHours.findUnique({
       where: { id },
@@ -20,8 +18,8 @@ export class PrismaBusinessHoursRepository
   async findByProfessionalAndDay(professionalId: string, dayOfWeek: number) {
     return prisma.businessHours.findFirst({
       where: {
-        professionalId: professionalId,
-        dayOfWeek: dayOfWeek,
+        professionalId,
+        dayOfWeek,
       },
     });
   }
@@ -34,9 +32,10 @@ export class PrismaBusinessHoursRepository
     return businessHours;
   }
 
-  async update(id: string, date: Prisma.BusinessHoursUpdateInput) {
+  async update(id: string, data: Prisma.BusinessHoursUpdateInput) {
     return prisma.businessHours.update({
-      where: { id }, date: {
+      where: { id },
+      data: {
         opensAt: data.opensAt,
         closesAt: data.closesAt,
         breakStart: data.breakStart,
@@ -48,7 +47,7 @@ export class PrismaBusinessHoursRepository
   async listByProfessional(professionalId: string) {
     return prisma.businessHours.findMany({
       where: {
-        professionalId: professionalId,
+        professionalId,
         ativo: true,
       },
       orderBy: {
@@ -57,6 +56,3 @@ export class PrismaBusinessHoursRepository
     });
   }
 }
-
-
-

@@ -7,4 +7,3 @@ export function makeListServicesUseCase() {
   const professionalsRepository = new PrismaProfessionalsRepository();
   return new ListServicesUseCase(servicesRepository, professionalsRepository);
 }
-

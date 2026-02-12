@@ -3,6 +3,7 @@ import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
 import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
 import { IUsersRepository } from '@/repositories/users-repository';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
+import { makeUser } from '@/test/factories';
 
 import bcrypt from 'bcryptjs';
 import { RegisterUserUseCase } from './register-use-case';
@@ -44,30 +45,36 @@ describe('Register User Use Case', () => {
     });
   });
 
-  const userInput = { name: 'Alice',
+  const userInput = {
+    name: 'Alice',
     email: 'alice@example.com',
-    senha: 'secure-password',
+    password: 'secure-password',
+    phone: '(11) 99999-9999',
   };
 
   it('deve registrar um usuário com sucesso', async () => {
     mockUsersRepository.findByEmail.mockResolvedValue(null);
     bcryptHash.mockResolvedValue('hashed-password');
-    mockUsersRepository.create.mockResolvedValue({
-      ...userInput,
-      id: 'user-1',
-      senha: 'hashed-password',
-      role: 'CLIENT',
-    });
+    mockUsersRepository.create.mockResolvedValue(
+      makeUser({
+        id: 'user-1',
+        name: userInput.name,
+        email: userInput.email,
+        password: 'hashed-password',
+        phone: userInput.phone,
+        role: 'CLIENT' as any,
+      }),
+    );
 
     await useCase.execute(userInput);
 
-    expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(
-      'alice@example.com',
-    );
+    expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('alice@example.com');
     expect(bcryptHash).toHaveBeenCalledWith('secure-password', 6);
-    expect(mockUsersRepository.create).toHaveBeenCalledWith({ name: 'Alice',
+    expect(mockUsersRepository.create).toHaveBeenCalledWith({
+      name: 'Alice',
       email: 'alice@example.com',
-      senha: 'hashed-password',
+      password: 'hashed-password',
+      phone: '(11) 99999-9999',
       role: 'CLIENT',
     });
     expect(sendVerificationEmail).toHaveBeenCalledWith('alice@example.com');
@@ -76,9 +83,7 @@ describe('Register User Use Case', () => {
   it('não deve permitir registro se o e-mail já estiver em uso', async () => {
     mockUsersRepository.findByEmail.mockResolvedValue({ id: 'existing-id' });
 
-    await expect(useCase.execute(userInput)).rejects.toThrow(
-      UserAlreadyExistsError,
-    );
+    await expect(useCase.execute(userInput)).rejects.toThrow(UserAlreadyExistsError);
     expect(mockUsersRepository.create).not.toHaveBeenCalled();
     expect(sendVerificationEmail).not.toHaveBeenCalled();
   });
@@ -99,12 +104,16 @@ describe('Register User Use Case', () => {
   it('deve permitir criação de ADMIN se o requestRole for ADMIN', async () => {
     mockUsersRepository.findByEmail.mockResolvedValue(null);
     bcryptHash.mockResolvedValue('hashed-password');
-    mockUsersRepository.create.mockResolvedValue({
-      ...userInput,
-      id: 'admin-1',
-      senha: 'hashed-password',
-      role: 'ADMIN',
-    });
+    mockUsersRepository.create.mockResolvedValue(
+      makeUser({
+        id: 'admin-1',
+        name: userInput.name,
+        email: userInput.email,
+        password: 'hashed-password',
+        phone: userInput.phone,
+        role: 'ADMIN' as any,
+      }),
+    );
 
     await useCase.execute({
       ...userInput,
@@ -118,4 +127,3 @@ describe('Register User Use Case', () => {
     expect(sendVerificationEmail).toHaveBeenCalledWith('alice@example.com');
   });
 });
-

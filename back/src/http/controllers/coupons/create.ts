@@ -2,10 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { createCouponBodySchema } from '@/schemas/coupon';
 import { makeCreateCouponUseCase } from '@/use-cases/factories/make-create-coupon-use-case';
 
-export async function createCoupon(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function createCoupon(request: FastifyRequest, reply: FastifyReply) {
   const {
     code,
     type,

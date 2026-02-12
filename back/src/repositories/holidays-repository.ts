@@ -1,8 +1,5 @@
 export interface IHolidaysRepository {
-  isProfessionalHoliday(
-    professionalId: string,
-    date: Date,
-  ): Promise<{ reason: string } | null>;
+  isProfessionalHoliday(professionalId: string, date: Date): Promise<{ reason: string } | null>;
 
   addHoliday(professionalId: string, date: Date, reason: string): Promise<void>;
 
@@ -13,7 +10,9 @@ export interface IHolidaysRepository {
 
   findById(id: string): Promise<{
     id: string;
-    professionalId: string; date: Date; reason: string;
+    professionalId: string;
+    date: Date;
+    reason: string;
   } | null>;
 
   delete(id: string): Promise<void>;
@@ -24,11 +23,11 @@ export interface IHolidaysRepository {
   ): Promise<
     {
       id: string;
-      professionalId: string; date: Date; reason: string;
+      professionalId: string;
+      date: Date;
+      reason: string;
     }[]
   >;
 
   countByProfessionalId(professionalId: string): Promise<number>;
 }
-
-

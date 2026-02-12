@@ -13,11 +13,7 @@ export class CreateHolidayUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute({
-    professionalId,
-    date,
-    motivo,
-  }: CreateHolidayUseCaseRequest): Promise<void> {
+  async execute({ professionalId, date, motivo }: CreateHolidayUseCaseRequest): Promise<void> {
     // Fail-fast: validate all business rules before any database operation
     await this.validateProfessionalExists(professionalId);
     this.validateDateNotInPast(date);
@@ -31,11 +27,8 @@ export class CreateHolidayUseCase {
    * Validates if professional exists
    * @throws {ProfessionalNotFoundError} If professional not found
    */
-  private async validateProfessionalExists(
-    professionalId: string
-  ): Promise<void> {
-    const professional =
-      await this.professionalsRepository.findById(professionalId);
+  private async validateProfessionalExists(professionalId: string): Promise<void> {
+    const professional = await this.professionalsRepository.findById(professionalId);
     if (!professional) {
       throw new ProfessionalNotFoundError();
     }
@@ -66,20 +59,14 @@ export class CreateHolidayUseCase {
    * Validates no duplicate holiday exists for the same professional and date
    * @throws {DuplicateHolidayError} If holiday already exists
    */
-  private async validateNoDuplicateHoliday(
-    professionalId: string,
-    date: Date
-  ): Promise<void> {
-    const existingHoliday =
-      await this.holidaysRepository.findByProfessionalAndDate(
-        professionalId,
-        date
-      );
+  private async validateNoDuplicateHoliday(professionalId: string, date: Date): Promise<void> {
+    const existingHoliday = await this.holidaysRepository.findByProfessionalAndDate(
+      professionalId,
+      date,
+    );
 
     if (existingHoliday) {
       throw new DuplicateHolidayError();
     }
   }
 }
-
-

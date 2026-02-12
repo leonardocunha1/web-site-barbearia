@@ -4,6 +4,7 @@ import { IServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ServiceDTO } from '@/dtos/service-dto';
 import { createMockServicesRepository } from '@/mock/mock-repositories';
+import { makeService } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = IServicesRepository & {
@@ -22,11 +23,13 @@ describe('GetServiceUseCase', () => {
 
   it('deve retornar um serviço existente', async () => {
     const mockService: ServiceDTO = {
-      id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-      categoria: 'Cabelo',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      ...makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Corte básico',
+        category: 'Cabelo',
+        active: true,
+      }),
       profissionais: [],
     };
 
@@ -41,20 +44,20 @@ describe('GetServiceUseCase', () => {
   it('deve lançar erro quando o serviço não existe', async () => {
     servicesRepository.findById.mockResolvedValue(null);
 
-    await expect(sut.execute({ id: 'non-existent-id' })).rejects.toThrow(
-      ServiceNotFoundError,
-    );
+    await expect(sut.execute({ id: 'non-existent-id' })).rejects.toThrow(ServiceNotFoundError);
 
     expect(servicesRepository.findById).toHaveBeenCalledWith('non-existent-id');
   });
 
   it('deve retornar um serviço inativo se existir', async () => {
     const mockInactiveService: ServiceDTO = {
-      id: 'service-2', name: 'Manicure', description: 'Manicure completa',
-      categoria: 'Unhas',
-      ativo: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      ...makeService({
+        id: 'service-2',
+        name: 'Manicure',
+        description: 'Manicure completa',
+        category: 'Unhas',
+        active: false,
+      }),
       profissionais: [],
     };
 
@@ -68,11 +71,13 @@ describe('GetServiceUseCase', () => {
 
   it('deve retornar um serviço sem descrição e categoria', async () => {
     const mockService: ServiceDTO = {
-      id: 'service-3', name: 'Depilação', description: null,
-      categoria: null,
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      ...makeService({
+        id: 'service-3',
+        name: 'Depilação',
+        description: null,
+        category: null,
+        active: true,
+      }),
       profissionais: [],
     };
 
@@ -86,18 +91,21 @@ describe('GetServiceUseCase', () => {
 
   it('deve retornar um serviço com profissionais associados', async () => {
     const mockServiceWithProfessionals: ServiceDTO = {
-      id: 'service-4', name: 'Massagem', description: 'Massagem relaxante',
-      categoria: 'Bem-estar',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      profissionais: [
+      ...makeService({
+        id: 'service-4',
+        name: 'Massagem',
+        description: 'Massagem relaxante',
+        category: 'Bem-estar',
+        active: true,
+      }),
+      professionals: [
         {
-          id: 'professional-1',
+          id: 'sp-1',
           professional: {
             id: 'prof-1',
             user: {
-              id: 'user-1', name: 'João Massagista',
+              id: 'user-1',
+              name: 'João Massagista',
             },
           },
         },
@@ -109,9 +117,6 @@ describe('GetServiceUseCase', () => {
     const result = await sut.execute({ id: 'service-4' });
 
     expect(result.service.professionals).toHaveLength(1);
-    expect(result.service.professionals[0].professional.user.name).toBe(
-      'João Massagista',
-    );
+    expect(result.service.professionals[0].professional.user.name).toBe('João Massagista');
   });
 });
-

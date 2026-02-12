@@ -7,5 +7,3 @@ export function makeDeleteBusinessHoursUseCase() {
 
   return useCase;
 }
-
-

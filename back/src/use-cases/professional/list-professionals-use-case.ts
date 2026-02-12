@@ -1,12 +1,11 @@
-import { IProfessionalsRepository } from "@/repositories/professionals-repository";
-import { toProfessionalDTO } from "@/dtos/professional-dto";
-import { validatePagination } from "@/utils/validate-pagination";
-import { InvalidPageError } from "../errors/invalid-page-error";
-import { InvalidLimitError } from "../errors/invalid-limit-error";
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
+import { toProfessionalDTO } from '@/dtos/professional-dto';
+import { InvalidPageError } from '../errors/invalid-page-error';
+import { InvalidLimitError } from '../errors/invalid-limit-error';
 import {
   ListOrSearchProfessionalsUseCaseRequest,
   ListOrSearchProfessionalsUseCaseResponse,
-} from "./types";
+} from './types';
 
 export class ListOrSearchProfessionalsUseCase {
   constructor(private professionalsRepository: IProfessionalsRepository) {}
@@ -15,8 +14,8 @@ export class ListOrSearchProfessionalsUseCase {
     query,
     page = 1,
     limit = 10,
-    especialidade,
-    ativo,
+    specialty,
+    active = true,
     sortBy,
     sortDirection,
   }: ListOrSearchProfessionalsUseCaseRequest): Promise<ListOrSearchProfessionalsUseCaseResponse> {
@@ -24,25 +23,27 @@ export class ListOrSearchProfessionalsUseCase {
     if (page < 1) throw new InvalidPageError();
     if (limit < 1 || limit > 100) throw new InvalidLimitError();
 
-    // CORREÇÃO: Passe os parâmetros de ordenação diretamente, sem usar o objeto "order"
+    // Passe os parâmetros de ordenação diretamente
     const repositoryParams = {
       page,
       limit,
-      ...(especialidade && { especialidade }),
-      ...(ativo !== undefined && { ativo }),
-      sortBy, // ← passe diretamente
-      sortDirection, // ← passe diretamente
+      ...(specialty && { specialty }),
+      active,
+      ...(sortBy && { sortBy }),
+      ...(sortDirection && { sortDirection }),
     };
 
-    if (query && query.trim() !== "") {
+    if (query && query.trim() !== '') {
       const [professionals, total] = await Promise.all([
         this.professionalsRepository.search({
-          ...repositoryParams,
           query,
+          page,
+          limit,
+          active,
         }),
         this.professionalsRepository.countSearch({
           query,
-          ...(ativo !== undefined && { ativo }),
+          active,
         }),
       ]);
 
@@ -58,8 +59,8 @@ export class ListOrSearchProfessionalsUseCase {
     const [professionals, total] = await Promise.all([
       this.professionalsRepository.list(repositoryParams),
       this.professionalsRepository.count({
-        ...(especialidade && { especialidade }),
-        ...(ativo !== undefined && { ativo }),
+        ...(specialty && { specialty }),
+        active,
       }),
     ]);
 

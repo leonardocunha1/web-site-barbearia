@@ -12,7 +12,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
       role: payload.role,
       professionalId: payload.professionalId,
     });
-    
+
     return tokenService
       .setAuthCookies(token, refreshToken)
       .status(200)

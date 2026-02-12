@@ -1,9 +1,6 @@
 import { Coupon, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import {
-  CouponFilters,
-  ICouponRepository,
-} from '@/repositories/coupon-repository';
+import { CouponFilters, ICouponRepository } from '@/repositories/coupon-repository';
 import { CouponSortField, CouponSortOrder } from '@/schemas/coupon';
 
 export class PrismaCouponRepository implements ICouponRepository {
@@ -21,7 +18,8 @@ export class PrismaCouponRepository implements ICouponRepository {
     discount: number;
   }) {
     await prisma.$transaction([
-      prisma.couponRedemption.create({ date: {
+      prisma.couponRedemption.create({
+        data: {
           couponId: data.couponId,
           userId: data.userId,
           bookingId: data.bookingId,
@@ -29,14 +27,16 @@ export class PrismaCouponRepository implements ICouponRepository {
         },
       }),
       prisma.coupon.update({
-        where: { id: data.couponId }, date: { uses: { increment: 1 } },
+        where: { id: data.couponId },
+        data: { uses: { increment: 1 } },
       }),
     ]);
   }
 
   async incrementUses(couponId: string) {
     await prisma.coupon.update({
-      where: { id: couponId }, date: { uses: { increment: 1 } },
+      where: { id: couponId },
+      data: { uses: { increment: 1 } },
     });
   }
 
@@ -52,18 +52,14 @@ export class PrismaCouponRepository implements ICouponRepository {
     });
   }
 
-  async update(id: string, date: Prisma.CouponUpdateInput) {
+  async update(id: string, data: Prisma.CouponUpdateInput) {
     return prisma.coupon.update({
       where: { id },
       data,
     });
   }
 
-  async listValidCoupons(
-    professionalId: string,
-    serviceIds: string[],
-    currentDate: Date,
-  ) {
+  async listValidCoupons(professionalId: string, serviceIds: string[], currentDate: Date) {
     return prisma.coupon.findMany({
       where: {
         active: true,
@@ -73,10 +69,7 @@ export class PrismaCouponRepository implements ICouponRepository {
             OR: [{ endDate: null }, { endDate: { gte: currentDate } }],
           },
           {
-            OR: [
-              { maxUses: null },
-              { maxUses: { gt: 0 }, uses: { lt: 99999 } },
-            ],
+            OR: [{ maxUses: null }, { maxUses: { gt: 0 }, uses: { lt: 99999 } }],
           },
           {
             OR: [
@@ -117,9 +110,7 @@ export class PrismaCouponRepository implements ICouponRepository {
     });
   }
 
-  private buildWhereClause(
-    filters: CouponFilters = {},
-  ): Prisma.CouponWhereInput {
+  private buildWhereClause(filters: CouponFilters = {}): Prisma.CouponWhereInput {
     return {
       ...(filters.code && {
         code: { contains: filters.code, mode: 'insensitive' },
@@ -142,4 +133,3 @@ export class PrismaCouponRepository implements ICouponRepository {
     });
   }
 }
-

@@ -3,9 +3,7 @@ import { makeProfessionalDashboardUseCase } from '@/use-cases/factories/make-das
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 export async function dashboard(request: FastifyRequest, reply: FastifyReply) {
-  const { range, startDate, endDate } = dashboardQuerySchema.parse(
-    request.query,
-  );
+  const { range, startDate, endDate } = dashboardQuerySchema.parse(request.query);
 
   const getDashboard = makeProfessionalDashboardUseCase();
   const dashboard = await getDashboard.execute(request.user.sub, {

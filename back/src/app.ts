@@ -62,7 +62,6 @@ app.register(fastifyCors, {
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
 });
 
-
 app.register(usersRoutes);
 app.register(professionalsRoutes);
 app.register(servicesRoutes);
@@ -85,4 +84,3 @@ app.setErrorHandler((error, _request, reply) => {
   const { status, body } = resolveHttpError(error);
   return reply.status(status).send(body);
 });
-

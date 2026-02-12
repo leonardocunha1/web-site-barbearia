@@ -5,4 +5,3 @@ export function makeToggleServiceStatusUseCase() {
   const servicesRepository = new PrismaServicesRepository();
   return new ToggleServiceStatusUseCase(servicesRepository);
 }
-

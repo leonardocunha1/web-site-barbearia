@@ -30,13 +30,10 @@ export class SendVerificationEmailUseCase {
     }
 
     const token = randomUUID();
-    const expiresAt = dayjs()
-      .add(EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS, 'hours')
-      .toDate();
+    const expiresAt = dayjs().add(EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS, 'hours').toDate();
 
     await this.verificationTokensRepository.create(token, user.id, expiresAt);
 
     await this.emailService.sendVerificationEmail(user.email, token);
   }
 }
-

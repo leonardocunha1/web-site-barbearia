@@ -1,8 +1,5 @@
 import { FastifyReply } from 'fastify';
-import {
-  ACCESS_TOKEN_EXPIRATION_SECONDS,
-  REFRESH_TOKEN_EXPIRATION_SECONDS,
-} from '@/consts/const';
+import { ACCESS_TOKEN_EXPIRATION_SECONDS, REFRESH_TOKEN_EXPIRATION_SECONDS } from '@/consts/const';
 
 interface UserForToken {
   id: string;
@@ -61,7 +58,7 @@ export class TokenService {
       path: '/',
       httpOnly: true,
       secure: this.isProduction,
-      sameSite: this.isProduction ? 'strict' as const : 'lax' as const, 
+      sameSite: this.isProduction ? ('strict' as const) : ('lax' as const),
     };
 
     // Refresh token -> sempre cookie
@@ -80,9 +77,7 @@ export class TokenService {
   }
 
   clearAuthCookies() {
-    this.reply
-      .clearCookie('accessToken', { path: '/' })
-      .clearCookie('refreshToken', { path: '/' });
+    this.reply.clearCookie('accessToken', { path: '/' }).clearCookie('refreshToken', { path: '/' });
     return this.reply;
   }
 }

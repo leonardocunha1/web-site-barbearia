@@ -41,9 +41,7 @@ describe('GetBookingUseCase', () => {
 
   it('deve lançar erro quando o ID do agendamento é vazio', async () => {
     // Executar e verificar
-    await expect(useCase.execute({ bookingId: '' })).rejects.toThrow(
-      BookingNotFoundError,
-    );
+    await expect(useCase.execute({ bookingId: '' })).rejects.toThrow(BookingNotFoundError);
     expect(mockBookingsRepository.findById).not.toHaveBeenCalled();
   });
 

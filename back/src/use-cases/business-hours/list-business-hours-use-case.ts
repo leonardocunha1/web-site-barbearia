@@ -10,14 +10,12 @@ export class ListBusinessHoursUseCase {
   ) {}
 
   async execute({ professionalId }: ListBusinessHoursUseCaseRequest) {
-    const professional =
-      await this.professionalsRepository.findById(professionalId);
+    const professional = await this.professionalsRepository.findById(professionalId);
     if (!professional) {
       throw new ProfessionalNotFoundError();
     }
 
-    const horarios =
-      await this.businessHoursRepository.listByProfessional(professionalId);
+    const horarios = await this.businessHoursRepository.listByProfessional(professionalId);
 
     if (horarios.length === 0) {
       return [];
@@ -26,6 +24,3 @@ export class ListBusinessHoursUseCase {
     return horarios;
   }
 }
-
-
-

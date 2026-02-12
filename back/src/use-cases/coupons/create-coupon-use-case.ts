@@ -22,11 +22,7 @@ export class CreateCouponUseCase {
     this.validateCouponValue(request.type, request.value);
     this.validateMinBookingValue(request.minBookingValue);
     this.validateMaxUses(request.maxUses);
-    this.validateCouponScope(
-      request.scope,
-      request.serviceId,
-      request.professionalId,
-    );
+    this.validateCouponScope(request.scope, request.serviceId, request.professionalId);
     this.validateCouponDates(request.startDate, request.endDate);
     await this.validateScopeEntitiesExist(request);
 
@@ -54,13 +50,9 @@ export class CreateCouponUseCase {
    * Validates minimum booking value
    * @throws {InvalidCouponValueError} If value is invalid
    */
-  private validateMinBookingValue(
-    minBookingValue?: number | null
-  ): void {
+  private validateMinBookingValue(minBookingValue?: number | null): void {
     if (minBookingValue && minBookingValue <= 0) {
-      throw new InvalidCouponValueError(
-        'O valor mínimo de agendamento deve ser maior que zero',
-      );
+      throw new InvalidCouponValueError('O valor mínimo de agendamento deve ser maior que zero');
     }
   }
 
@@ -70,9 +62,7 @@ export class CreateCouponUseCase {
    */
   private validateMaxUses(maxUses?: number): void {
     if (maxUses && maxUses <= 0) {
-      throw new InvalidCouponValueError(
-        'O número máximo de usos deve ser maior que zero',
-      );
+      throw new InvalidCouponValueError('O número máximo de usos deve ser maior que zero');
     }
   }
 
@@ -81,9 +71,7 @@ export class CreateCouponUseCase {
    * @throws {ServiceNotFoundError} If service not found
    * @throws {ProfessionalNotFoundError} If professional not found
    */
-  private async validateScopeEntitiesExist(
-    request: CreateCouponRequest
-  ): Promise<void> {
+  private async validateScopeEntitiesExist(request: CreateCouponRequest): Promise<void> {
     if (request.scope === 'SERVICE' && request.serviceId) {
       const service = await this.servicesRepository.findById(request.serviceId);
       if (!service) {
@@ -92,9 +80,7 @@ export class CreateCouponUseCase {
     }
 
     if (request.scope === 'PROFESSIONAL' && request.professionalId) {
-      const professional = await this.professionalsRepository.findById(
-        request.professionalId,
-      );
+      const professional = await this.professionalsRepository.findById(request.professionalId);
       if (!professional) {
         throw new ProfessionalNotFoundError();
       }
@@ -103,21 +89,15 @@ export class CreateCouponUseCase {
 
   private validateCouponValue(type: string, value: number): void {
     if (type !== 'FREE' && value <= 0) {
-      throw new InvalidCouponValueError(
-        'O valor do cupom deve ser maior que zero',
-      );
+      throw new InvalidCouponValueError('O valor do cupom deve ser maior que zero');
     }
 
     if (type === 'PERCENTAGE' && value > 100) {
-      throw new InvalidCouponValueError(
-        'O valor percentual não pode ser maior que 100',
-      );
+      throw new InvalidCouponValueError('O valor percentual não pode ser maior que 100');
     }
 
     if (type === 'FREE' && value !== 0) {
-      throw new InvalidCouponValueError(
-        'Cupons do tipo "FREE" devem ter valor 0',
-      );
+      throw new InvalidCouponValueError('Cupons do tipo "FREE" devem ter valor 0');
     }
   }
 
@@ -129,9 +109,7 @@ export class CreateCouponUseCase {
   ): void {
     if (scope === 'GLOBAL') {
       if (serviceId || professionalId || userId) {
-        throw new InvalidCouponScopeError(
-          'Cupons globais não devem ter IDs de escopo',
-        );
+        throw new InvalidCouponScopeError('Cupons globais não devem ter IDs de escopo');
       }
       return;
     }
@@ -155,9 +133,7 @@ export class CreateCouponUseCase {
     }[scope];
 
     if (hasExtraIds) {
-      throw new InvalidCouponScopeError(
-        `${scope} não deve ter IDs de escopo adicionais`,
-      );
+      throw new InvalidCouponScopeError(`${scope} não deve ter IDs de escopo adicionais`);
     }
   }
 
@@ -165,22 +141,15 @@ export class CreateCouponUseCase {
     const now = new Date();
 
     if (startDate && startDate < now) {
-      throw new InvalidCouponDatesError(
-        'A data de início não pode ser no passado',
-      );
+      throw new InvalidCouponDatesError('A data de início não pode ser no passado');
     }
 
     if (endDate && endDate < now) {
-      throw new InvalidCouponDatesError(
-        'A data de término não pode ser no passado',
-      );
+      throw new InvalidCouponDatesError('A data de término não pode ser no passado');
     }
 
     if (startDate && endDate && endDate < startDate) {
-      throw new InvalidCouponDatesError(
-        'A data de término não pode ser anterior à data de início',
-      );
+      throw new InvalidCouponDatesError('A data de término não pode ser anterior à data de início');
     }
   }
 }
-

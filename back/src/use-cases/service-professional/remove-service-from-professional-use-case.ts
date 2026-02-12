@@ -18,21 +18,19 @@ export class RemoveServiceFromProfessionalUseCase {
     serviceId,
     professionalId,
   }: RemoveServiceFromProfessionalRequest): Promise<void> {
-    const relationExists =
-      await this.serviceProfessionalRepository.findByServiceAndProfessional(
-        serviceId,
-        professionalId,
-      );
+    const relationExists = await this.serviceProfessionalRepository.findByServiceAndProfessional(
+      serviceId,
+      professionalId,
+    );
 
     if (!relationExists) {
       throw new ServiceProfessionalNotFoundError();
     }
 
-    const hasBookings =
-      await this.bookingsRepository.countActiveByServiceAndProfessional(
-        serviceId,
-        professionalId,
-      );
+    const hasBookings = await this.bookingsRepository.countActiveByServiceAndProfessional(
+      serviceId,
+      professionalId,
+    );
 
     if (hasBookings > 0) {
       throw new ServiceWithBookingsError();
@@ -41,4 +39,3 @@ export class RemoveServiceFromProfessionalUseCase {
     await this.serviceProfessionalRepository.delete(relationExists.id);
   }
 }
-

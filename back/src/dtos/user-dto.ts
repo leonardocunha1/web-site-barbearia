@@ -6,9 +6,10 @@ import { sanitizeUser } from '@/utils/dto-helpers';
  * Excludes sensitive fields like password
  */
 export interface UserDTO {
-  id: string; name: string;
+  id: string;
+  name: string;
   email: string;
-  telefone?: string | null;
+  phone?: string | null;
   role: Role;
   emailVerified: boolean;
   active: boolean;
@@ -18,10 +19,10 @@ export interface UserDTO {
 /**
  * Converts User entity to safe DTO
  * Automatically removes password and other sensitive fields
- * 
+ *
  * @param user - User entity from database
  * @returns Safe user DTO without sensitive data
- * 
+ *
  * @example
  * ```typescript
  * const user = await usersRepository.findById(id);
@@ -30,11 +31,12 @@ export interface UserDTO {
  */
 export function toUserDTO(user: User): UserDTO {
   const sanitized = sanitizeUser(user);
-  
+
   return {
-    id: sanitized.id, name: sanitized.name,
+    id: sanitized.id,
+    name: sanitized.name,
     email: sanitized.email,
-    telefone: sanitized.phone,
+    phone: sanitized.phone,
     role: sanitized.role,
     emailVerified: sanitized.emailVerified,
     active: sanitized.active,

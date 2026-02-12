@@ -8,6 +8,7 @@ import {
   createMockProfessionalsRepository,
   createMockServicesRepository,
 } from '@/mock/mock-repositories';
+import { makeProfessional, makeService } from '@/test/factories';
 
 // Tipos para os mocks dos repositórios
 type MockServicesRepository = IServicesRepository & {
@@ -32,20 +33,20 @@ describe('ListServicesUseCase', () => {
 
   it('deve listar serviços com paginação', async () => {
     const mockServices: Service[] = [
-      {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-        categoria: 'Cabelo',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 'service-2', name: 'Manicure', description: 'Manicure completa',
-        categoria: 'Unhas',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Corte básico',
+        category: 'Cabelo',
+        active: true,
+      }),
+      makeService({
+        id: 'service-2',
+        name: 'Manicure',
+        description: 'Manicure completa',
+        category: 'Unhas',
+        active: true,
+      }),
     ];
 
     servicesRepository.list.mockResolvedValue({
@@ -60,9 +61,10 @@ describe('ListServicesUseCase', () => {
     expect(result.totalPages).toBe(1);
     expect(servicesRepository.list).toHaveBeenCalledWith({
       page: 1,
-      limit: 10, name: undefined,
-      categoria: undefined,
-      ativo: undefined,
+      limit: 10,
+      name: undefined,
+      category: undefined,
+      active: undefined,
       professionalId: undefined,
     });
   });
@@ -81,13 +83,15 @@ describe('ListServicesUseCase', () => {
   });
 
   it('deve calcular corretamente o total de páginas', async () => {
-    const mockServices = Array(15).fill({
-      id: 'service', name: 'Serviço', description: 'Descrição',
-      categoria: 'Categoria',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    const mockServices = Array(15).fill(
+      makeService({
+        id: 'service',
+        name: 'Serviço',
+        description: 'Descrição',
+        category: 'Categoria',
+        active: true,
+      }),
+    );
 
     servicesRepository.list.mockResolvedValue({
       services: mockServices.slice(0, 10),
@@ -102,13 +106,13 @@ describe('ListServicesUseCase', () => {
 
   it('deve filtrar serviços por nome', async () => {
     const mockServices: Service[] = [
-      {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-        categoria: 'Cabelo',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Corte básico',
+        category: 'Cabelo',
+        active: true,
+      }),
     ];
 
     servicesRepository.list.mockResolvedValue({
@@ -118,28 +122,30 @@ describe('ListServicesUseCase', () => {
 
     const result = await sut.execute({
       page: 1,
-      limit: 10, name: 'Corte',
+      limit: 10,
+      name: 'Corte',
     });
 
     expect(result.services[0].name).toBe('Corte de Cabelo');
     expect(servicesRepository.list).toHaveBeenCalledWith({
       page: 1,
-      limit: 10, name: 'Corte',
-      categoria: undefined,
-      ativo: undefined,
+      limit: 10,
+      name: 'Corte',
+      category: undefined,
+      active: undefined,
       professionalId: undefined,
     });
   });
 
   it('deve filtrar serviços por categoria', async () => {
     const mockServices: Service[] = [
-      {
-        id: 'service-1', name: 'Manicure', description: 'Manicure completa',
-        categoria: 'Unhas',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      makeService({
+        id: 'service-1',
+        name: 'Manicure',
+        description: 'Manicure completa',
+        category: 'Unhas',
+        active: true,
+      }),
     ];
 
     servicesRepository.list.mockResolvedValue({
@@ -150,28 +156,29 @@ describe('ListServicesUseCase', () => {
     const result = await sut.execute({
       page: 1,
       limit: 10,
-      categoria: 'Unhas',
+      category: 'Unhas',
     });
 
     expect(result.services[0].category).toBe('Unhas');
     expect(servicesRepository.list).toHaveBeenCalledWith({
       page: 1,
-      limit: 10, name: undefined,
-      categoria: 'Unhas',
-      ativo: undefined,
+      limit: 10,
+      name: undefined,
+      category: 'Unhas',
+      active: undefined,
       professionalId: undefined,
     });
   });
 
   it('deve filtrar serviços por status ativo', async () => {
     const mockServices: Service[] = [
-      {
-        id: 'service-1', name: 'Depilação', description: 'Depilação completa',
-        categoria: 'Estética',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      makeService({
+        id: 'service-1',
+        name: 'Depilação',
+        description: 'Depilação completa',
+        category: 'Estética',
+        active: true,
+      }),
     ];
 
     servicesRepository.list.mockResolvedValue({
@@ -182,38 +189,39 @@ describe('ListServicesUseCase', () => {
     const result = await sut.execute({
       page: 1,
       limit: 10,
-      ativo: true,
+      active: true,
     });
 
     expect(result.services[0].active).toBe(true);
     expect(servicesRepository.list).toHaveBeenCalledWith({
       page: 1,
-      limit: 10, name: undefined,
-      categoria: undefined,
-      ativo: true,
+      limit: 10,
+      name: undefined,
+      category: undefined,
+      active: true,
       professionalId: undefined,
     });
   });
 
   it('deve verificar se o profissional existe quando professionalId é fornecido', async () => {
     const professionalId = 'professional-1';
-    professionalsRepository.findById.mockResolvedValue({
-      id: professionalId,
-      userId: 'user-1',
-      especialidade: 'Cabelereiro',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({
+        id: professionalId,
+        userId: 'user-1',
+        specialty: 'Cabelereiro',
+        active: true,
+      }),
+    );
 
     const mockServices: Service[] = [
-      {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-        categoria: 'Cabelo',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Corte básico',
+        category: 'Cabelo',
+        active: true,
+      }),
     ];
 
     servicesRepository.list.mockResolvedValue({
@@ -227,9 +235,7 @@ describe('ListServicesUseCase', () => {
       professionalId,
     });
 
-    expect(professionalsRepository.findById).toHaveBeenCalledWith(
-      professionalId,
-    );
+    expect(professionalsRepository.findById).toHaveBeenCalledWith(professionalId);
     expect(result.services).toEqual(mockServices);
   });
 
@@ -253,17 +259,19 @@ describe('ListServicesUseCase', () => {
     professionalsRepository.findById.mockResolvedValue({
       id: professionalId,
       userId: 'user-1',
-      especialidade: 'Cabelereiro',
-      ativo: true,
+      specialty: 'Cabelereiro',
+      active: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
     const mockServices: Service[] = [
       {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-        categoria: 'Cabelo',
-        ativo: true,
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Corte básico',
+        category: 'Cabelo',
+        active: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -282,12 +290,12 @@ describe('ListServicesUseCase', () => {
 
     expect(servicesRepository.list).toHaveBeenCalledWith({
       page: 1,
-      limit: 10, name: undefined,
-      categoria: undefined,
-      ativo: undefined,
+      limit: 10,
+      name: undefined,
+      category: undefined,
+      active: undefined,
       professionalId,
     });
     expect(result.services).toEqual(mockServices);
   });
 });
-

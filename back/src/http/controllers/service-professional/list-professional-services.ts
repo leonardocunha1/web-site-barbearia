@@ -5,19 +5,11 @@ import {
   listProfessionalServicesQuerySchema,
 } from '@/schemas/services';
 
-export async function listProfessionalServices(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const { professionalId } = listProfessionalServicesParamsSchema.parse(
-    request.params,
-  );
-  const { page, limit, activeOnly } = listProfessionalServicesQuerySchema.parse(
-    request.query,
-  );
+export async function listProfessionalServices(request: FastifyRequest, reply: FastifyReply) {
+  const { professionalId } = listProfessionalServicesParamsSchema.parse(request.params);
+  const { page, limit, activeOnly } = listProfessionalServicesQuerySchema.parse(request.query);
 
-  const listProfessionalServicesUseCase =
-    makeListProfessionalServicesUseCase();
+  const listProfessionalServicesUseCase = makeListProfessionalServicesUseCase();
 
   const { services, total } = await listProfessionalServicesUseCase.execute({
     professionalId,

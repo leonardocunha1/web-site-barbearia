@@ -19,11 +19,6 @@ export interface IBusinessHoursRepository {
     dayOfWeek: number,
   ): Promise<BusinessHours | null>;
   create(data: Prisma.BusinessHoursCreateInput): Promise<BusinessHours>;
-  update(
-    id: string, date: Prisma.BusinessHoursUpdateInput,
-  ): Promise<BusinessHours>;
+  update(id: string, date: Prisma.BusinessHoursUpdateInput): Promise<BusinessHours>;
   listByProfessional(professionalId: string): Promise<BusinessHours[]>;
 }
-
-
-

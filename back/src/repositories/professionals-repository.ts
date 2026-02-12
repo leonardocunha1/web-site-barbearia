@@ -3,22 +3,18 @@ import { Prisma, Professional, Service, User } from '@prisma/client';
 export interface IProfessionalsRepository {
   findById(id: string): Promise<Professional | null>;
   findByUserId(userId: string): Promise<Professional | null>;
-  findByProfessionalId(
-    professionalId: string,
-  ): Promise<(Professional & { user: User }) | null>;
+  findByProfessionalId(professionalId: string): Promise<(Professional & { user: User }) | null>;
   create(data: Prisma.ProfessionalCreateInput): Promise<Professional>;
-  update(
-    id: string, date: Prisma.ProfessionalUncheckedUpdateInput,
-  ): Promise<Professional>; 
+  update(id: string, date: Prisma.ProfessionalUncheckedUpdateInput): Promise<Professional>;
   delete(id: string): Promise<void>;
 
   list(params: {
     page: number;
     limit: number;
-    especialidade?: string;
-    ativo?: boolean;
+    specialty?: string;
+    active?: boolean;
     sortBy?: string;
-    sortDirection?: "asc" | "desc";
+    sortDirection?: 'asc' | 'desc';
   }): Promise<
     (Professional & {
       user: User;
@@ -26,15 +22,15 @@ export interface IProfessionalsRepository {
     })[]
   >;
 
-  count(params: { especialidade?: string; ativo?: boolean }): Promise<number>;
+  count(params: { specialty?: string; active?: boolean }): Promise<number>;
 
   search(params: {
     query: string;
     page: number;
     limit: number;
-    ativo?: boolean;
+    active?: boolean;
     sortBy?: string;
-    sortDirection?: "asc" | "desc";
+    sortDirection?: 'asc' | 'desc';
   }): Promise<
     (Professional & {
       user: User;
@@ -42,6 +38,5 @@ export interface IProfessionalsRepository {
     })[]
   >;
 
-  countSearch(params: { query: string; ativo?: boolean }): Promise<number>;
+  countSearch(params: { query: string; active?: boolean }): Promise<number>;
 }
-

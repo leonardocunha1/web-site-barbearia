@@ -3,7 +3,8 @@ import { Prisma, Service } from '@prisma/client';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 
 interface UpdateServiceRequest {
-  id: string; date: Prisma.ServiceUpdateInput;
+  id: string;
+  data: Prisma.ServiceUpdateInput;
 }
 
 interface UpdateServiceResponse {
@@ -13,10 +14,7 @@ interface UpdateServiceResponse {
 export class UpdateServiceUseCase {
   constructor(private servicesRepository: IServicesRepository) {}
 
-  async execute({
-    id,
-    data,
-  }: UpdateServiceRequest): Promise<UpdateServiceResponse> {
+  async execute({ id, data }: UpdateServiceRequest): Promise<UpdateServiceResponse> {
     const serviceExists = await this.servicesRepository.findById(id);
     if (!serviceExists) {
       throw new ServiceNotFoundError();
@@ -26,4 +24,3 @@ export class UpdateServiceUseCase {
     return { service };
   }
 }
-

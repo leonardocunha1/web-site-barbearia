@@ -31,11 +31,14 @@ describe('UpdateBookingStatusUseCase', () => {
     endDateTime: new Date('2023-01-01T11:00:00'),
     notes: 'Observação original',
     user: {
-      id: 'user-123', name: 'John Doe',
-    }, professional: {
+      id: 'user-123',
+      name: 'John Doe',
+    },
+    professional: {
       id: 'pro-123',
       user: {
-        id: 'pro-user-123', name: 'Professional User',
+        id: 'pro-user-123',
+        name: 'Professional User',
       },
     },
     items: [
@@ -44,9 +47,12 @@ describe('UpdateBookingStatusUseCase', () => {
         serviceProfessional: {
           id: 'sp-123',
           service: {
-            id: 'service-123', name: 'Service Name',
+            id: 'service-123',
+            name: 'Service Name',
           },
-        }, price: 100, duration: 60,
+        },
+        price: 100,
+        duration: 60,
       },
     ],
   };
@@ -187,4 +193,3 @@ describe('UpdateBookingStatusUseCase', () => {
     expect(result.booking.notes).toBe('Observação original');
   });
 });
-

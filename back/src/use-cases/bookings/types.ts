@@ -57,8 +57,7 @@ export interface ListBookingsUseCaseResponse {
 }
 
 // Reuse schema type and extend with use-case specific fields
-export interface UpdateBookingStatusUseCaseRequest
-  extends UpdateBookingStatusBody {
+export interface UpdateBookingStatusUseCaseRequest extends UpdateBookingStatusBody {
   bookingId: string;
   professionalId: string;
 }

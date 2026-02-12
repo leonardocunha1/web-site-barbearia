@@ -18,8 +18,7 @@ export type CreateProfessionalUseCaseRequest = CreateProfessionalBody;
 /**
  * Update professional extends schema validation with ID param
  */
-export interface UpdateProfessionalUseCaseRequest
-  extends UpdateProfessionalBody {
+export interface UpdateProfessionalUseCaseRequest extends UpdateProfessionalBody {
   id: string;
 }
 

@@ -7,6 +7,7 @@ import {
   createMockBusinessHoursRepository,
   createMockProfessionalsRepository,
 } from '@/mock/mock-repositories';
+import { makeBusinessHours, makeProfessional } from '@/test/factories';
 
 // Tipos para os mocks
 type MockBusinessHoursRepository = IBusinessHoursRepository & {
@@ -46,15 +47,15 @@ describe('List Business Hours Use Case', () => {
     );
   });
 
-  const mockProfessional = {
+  const mockProfessional = makeProfessional({
     id: 'prof-123',
     userId: 'user-123',
-    especialidade: 'Especialidade Teste',
-    ativo: true,
-  };
+    specialty: 'Especialidade Teste',
+    active: true,
+  });
 
   const mockBusinessHours = [
-    {
+    makeBusinessHours({
       id: 'hours-1',
       professionalId: 'prof-123',
       dayOfWeek: 1,
@@ -62,9 +63,9 @@ describe('List Business Hours Use Case', () => {
       closesAt: '18:00',
       breakStart: '12:00',
       breakEnd: '13:00',
-      ativo: true,
-    },
-    {
+      active: true,
+    }),
+    makeBusinessHours({
       id: 'hours-2',
       professionalId: 'prof-123',
       dayOfWeek: 2,
@@ -72,16 +73,14 @@ describe('List Business Hours Use Case', () => {
       closesAt: '17:00',
       breakStart: null,
       breakEnd: null,
-      ativo: true,
-    },
+      active: true,
+    }),
   ];
 
   it('deve listar horários de funcionamento com sucesso', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.listByProfessional.mockResolvedValue(
-      mockBusinessHours,
-    );
+    mockBusinessHoursRepository.listByProfessional.mockResolvedValue(mockBusinessHours);
 
     // Executar
     const result = await useCase.execute({
@@ -90,12 +89,8 @@ describe('List Business Hours Use Case', () => {
 
     // Verificar
     expect(result).toEqual(mockBusinessHours);
-    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith(
-      'prof-123',
-    );
-    expect(mockBusinessHoursRepository.listByProfessional).toHaveBeenCalledWith(
-      'prof-123',
-    );
+    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith('prof-123');
+    expect(mockBusinessHoursRepository.listByProfessional).toHaveBeenCalledWith('prof-123');
   });
 
   it('deve lançar erro quando profissional não existe', async () => {
@@ -139,8 +134,3 @@ describe('List Business Hours Use Case', () => {
     expect(mockBusinessHoursRepository.listByProfessional).not.toHaveBeenCalled();
   });
 });
-
-
-
-
-

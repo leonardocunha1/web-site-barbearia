@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 import { PASSWORD_HASH_ROUNDS } from '@/consts/const';
 
 export class PrismaUsersRepository implements IUsersRepository {
-  async update(id: string, date: Prisma.UserUpdateInput): Promise<User> {
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     return await prisma.user.update({
       where: { id },
       data,
@@ -19,10 +19,10 @@ export class PrismaUsersRepository implements IUsersRepository {
     });
   }
 
-    async findByPhone(telefone: string): Promise<User | null> {
+  async findByPhone(phone: string): Promise<User | null> {
     const user = await prisma.user.findUnique({
       where: {
-        telefone,
+        phone,
       },
     });
 
@@ -41,7 +41,8 @@ export class PrismaUsersRepository implements IUsersRepository {
 
   async updatePassword(id: string, password: string): Promise<User> {
     return prisma.user.update({
-      where: { id }, date: { senha: password },
+      where: { id },
+      data: { password },
     });
   }
 
@@ -75,13 +76,7 @@ export class PrismaUsersRepository implements IUsersRepository {
     });
   }
 
-  async countUsers({
-    role,
-    name,
-  }: {
-    role?: Role;
-    name?: string;
-  }): Promise<number> {
+  async countUsers({ role, name }: { role?: Role; name?: string }): Promise<number> {
     const where: Prisma.UserWhereInput = {};
     if (role) where.role = role;
     if (name) {
@@ -99,13 +94,13 @@ export class PrismaUsersRepository implements IUsersRepository {
     const anonymizedPhone = `deleted-${randomUUID().slice(0, 10)}`;
 
     await prisma.user.update({
-      where: { id: userId }, date: {
+      where: { id: userId },
+      data: {
         email: anonymizedEmail,
-        telefone: anonymizedPhone,
+        phone: anonymizedPhone,
         active: false,
-        senha: await bcrypt.hash('deleted-account', PASSWORD_HASH_ROUNDS),
+        password: await bcrypt.hash('deleted-account', PASSWORD_HASH_ROUNDS),
       },
     });
   }
 }
-

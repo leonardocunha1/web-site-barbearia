@@ -1,9 +1,9 @@
 /**
  * Generic type for paginated API responses
  * Eliminates duplication across different DTOs
- * 
+ *
  * @template T - The type of items in the response
- * 
+ *
  * @example
  * ```typescript
  * export type ListUsersResponse = PaginatedResponse<UserDTO>;
@@ -44,14 +44,14 @@ export type PaginatedResponse<T> = {
 
 /**
  * Helper to create a paginated response
- * 
+ *
  * @template T - The type of items in the response
  * @param items - Array of items for current page
  * @param total - Total number of items
  * @param page - Current page number
  * @param limit - Items per page
  * @returns Formatted paginated response
- * 
+ *
  * @example
  * ```typescript
  * return createPaginatedResponse(users, total, page, limit);
@@ -90,7 +90,7 @@ export type FlatPaginatedResponse<T, K extends string> = {
 /**
  * Helper to create paginated response in flat format
  * Used for backward compatibility with existing controllers
- * 
+ *
  * @template T - The type of items in the response
  * @template K - The key name for the items array (e.g., 'users', 'bookings')
  * @param key - Property name for items array
@@ -99,7 +99,7 @@ export type FlatPaginatedResponse<T, K extends string> = {
  * @param page - Current page number
  * @param limit - Items per page
  * @returns Formatted paginated response in flat format
- * 
+ *
  * @example
  * ```typescript
  * return createFlatPaginatedResponse('holidays', holidays, total, page, limit);
@@ -126,7 +126,8 @@ export function createFlatPaginatedResponse<T, K extends string>(
  * Legacy format for backward compatibility
  * @deprecated Use PaginatedResponse instead
  */
-export type LegacyPaginatedResponse<T> = { date: T[];
+export type LegacyPaginatedResponse<T> = {
+  date: T[];
   total: number;
   page: number;
   limit: number;
@@ -137,10 +138,9 @@ export type LegacyPaginatedResponse<T> = { date: T[];
  * Converts legacy format to new format
  * @deprecated Temporary helper during migration
  */
-export function toLegacyFormat<T>(
-  response: PaginatedResponse<T>,
-): LegacyPaginatedResponse<T> {
-  return { date: response.items,
+export function toLegacyFormat<T>(response: PaginatedResponse<T>): LegacyPaginatedResponse<T> {
+  return {
+    date: response.items,
     total: response.pagination.total,
     page: response.pagination.page,
     limit: response.pagination.limit,

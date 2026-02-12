@@ -6,10 +6,7 @@ export function makeCreateProfessionalUseCase() {
   const professionalsRepository = new PrismaProfessionalsRepository();
   const usersRepository = new PrismaUsersRepository();
 
-  const useCase = new CreateProfessionalUseCase(
-    professionalsRepository,
-    usersRepository,
-  );
+  const useCase = new CreateProfessionalUseCase(professionalsRepository, usersRepository);
 
   return useCase;
 }

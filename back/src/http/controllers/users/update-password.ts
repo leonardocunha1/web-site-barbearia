@@ -2,13 +2,8 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeUpdatePasswordUseCase } from '@/use-cases/factories/make-update-password-factory-use-case';
 import { updatePasswordBodySchema } from '@/schemas/user';
 
-export async function updatePassword(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const { currentPassword, newPassword } = updatePasswordBodySchema.parse(
-    request.body,
-  );
+export async function updatePassword(request: FastifyRequest, reply: FastifyReply) {
+  const { currentPassword, newPassword } = updatePasswordBodySchema.parse(request.body);
 
   const updatePasswordUseCase = makeUpdatePasswordUseCase();
 

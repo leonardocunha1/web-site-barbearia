@@ -1,8 +1,4 @@
-import {
-  DashboardRequestDTO,
-  DashboardResponseDTO,
-  TimeRange,
-} from '@/dtos/dashboard-dto';
+import { DashboardRequestDTO, DashboardResponseDTO, TimeRange } from '@/dtos/dashboard-dto';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
@@ -47,9 +43,7 @@ export class GetProfessionalDashboardUseCase {
           throw new InvalidDataError('Data inicial ou final inválida');
         }
         if (isAfter(startDate, endDate)) {
-          throw new InvalidDataError(
-            'A data inicial não pode ser maior que a data final',
-          );
+          throw new InvalidDataError('A data inicial não pode ser maior que a data final');
         }
         return {
           start: startOfDay(startDate),
@@ -65,42 +59,40 @@ export class GetProfessionalDashboardUseCase {
     professionalId: string,
     { range, startDate, endDate }: DashboardRequestDTO,
   ): Promise<DashboardResponseDTO> {
-    const professional =
-      await this.professionalsRepository.findByProfessionalId(professionalId);
+    const professional = await this.professionalsRepository.findByProfessionalId(professionalId);
     if (!professional) throw new ProfessionalNotFoundError();
 
     const dateRange = this.getDateRange(range, startDate, endDate);
 
-    const [appointments, earnings, canceled, completed, nextAppointments] =
-      await Promise.all([
-        this.bookingsRepository.countByProfessionalAndDate(
-          professionalId,
-          dateRange.start,
-          dateRange.end,
-        ),
-        this.bookingsRepository.getEarningsByProfessionalAndDate(
-          professionalId,
-          dateRange.start,
-          dateRange.end,
-          'COMPLETED',
-        ),
-        this.bookingsRepository.countByProfessionalAndStatus(
-          professionalId,
-          'CANCELED',
-          dateRange.start,
-          dateRange.end,
-        ),
-        this.bookingsRepository.countByProfessionalAndStatus(
-          professionalId,
-          'COMPLETED',
-          dateRange.start,
-          dateRange.end,
-        ),
-        this.bookingsRepository.findNextAppointments(professionalId, 3, {
-          startDate: dateRange.start,
-          endDate: dateRange.end,
-        }),
-      ]);
+    const [appointments, earnings, canceled, completed, nextAppointments] = await Promise.all([
+      this.bookingsRepository.countByProfessionalAndDate(
+        professionalId,
+        dateRange.start,
+        dateRange.end,
+      ),
+      this.bookingsRepository.getEarningsByProfessionalAndDate(
+        professionalId,
+        dateRange.start,
+        dateRange.end,
+        'COMPLETED',
+      ),
+      this.bookingsRepository.countByProfessionalAndStatus(
+        professionalId,
+        'CANCELED',
+        dateRange.start,
+        dateRange.end,
+      ),
+      this.bookingsRepository.countByProfessionalAndStatus(
+        professionalId,
+        'COMPLETED',
+        dateRange.start,
+        dateRange.end,
+      ),
+      this.bookingsRepository.findNextAppointments(professionalId, 3, {
+        startDate: dateRange.start,
+        endDate: dateRange.end,
+      }),
+    ]);
 
     return {
       professional: {
@@ -116,16 +108,14 @@ export class GetProfessionalDashboardUseCase {
       },
       nextAppointments: nextAppointments.map((appointment) => ({
         id: appointment.id,
-        date: appointment.dateHoraInicio,
+        date: appointment.startDateTime,
         clientName: appointment.user.name,
         service:
           appointment.items.length > 1
             ? 'Vários serviços'
-            : appointment.items[0]?.serviceProfessional.service.name ||
-              'Serviço não especificado',
+            : appointment.items[0]?.serviceProfessional.service.name || 'Serviço não especificado',
         status: appointment.status as 'PENDING' | 'CONFIRMED',
       })),
     };
   }
 }
-

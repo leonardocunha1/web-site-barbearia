@@ -13,9 +13,7 @@ interface GetUserProfileUseCaseResponse {
 export class GetUserProfileUseCase {
   constructor(private usersRepository: IUsersRepository) {}
 
-  async execute({
-    userId,
-  }: GetUserProfileUseCaseRequest): Promise<GetUserProfileUseCaseResponse> {
+  async execute({ userId }: GetUserProfileUseCaseRequest): Promise<GetUserProfileUseCaseResponse> {
     const user = await this.usersRepository.findById(userId);
 
     if (!user) {
@@ -25,4 +23,3 @@ export class GetUserProfileUseCase {
     return { user };
   }
 }
-

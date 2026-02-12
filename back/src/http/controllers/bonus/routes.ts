@@ -19,9 +19,7 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
         response: {
           201: z.null().describe('Bônus atribuído com sucesso.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Recurso não encontrado'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
         },
       },
     },
@@ -35,8 +33,7 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
       schema: {
         operationId: 'getBonusBalance',
         tags: ['bonus'],
-        description:
-          'Obter o saldo de bônus (pontos e valor em R$) do usuário autenticado.',
+        description: 'Obter o saldo de bônus (pontos e valor em R$) do usuário autenticado.',
         response: {
           200: z.object({
             points: z.object({
@@ -52,13 +49,10 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
           }),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
           401: z.object({ message: z.string() }).describe('Não autorizado'),
-          404: z
-            .object({ message: z.string() })
-            .describe('Usuário não encontrado'),
+          404: z.object({ message: z.string() }).describe('Usuário não encontrado'),
         },
       },
     },
     getBalance,
   );
 }
-

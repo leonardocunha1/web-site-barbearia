@@ -3,10 +3,7 @@ import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '../errors/invalid-booking-status-error';
 import { BookingUpdateError } from '../errors/booking-update-error';
 import { MAX_BOOKING_CANCEL_REASON_LENGTH } from '@/consts/const';
-import {
-  UpdateBookingStatusUseCaseRequest,
-  UpdateBookingStatusUseCaseResponse,
-} from './types';
+import { UpdateBookingStatusUseCaseRequest, UpdateBookingStatusUseCaseResponse } from './types';
 
 export class UpdateBookingStatusUseCase {
   constructor(private bookingsRepository: IBookingsRepository) {}
@@ -29,9 +26,7 @@ export class UpdateBookingStatusUseCase {
 
     // Verificar se o profissional é o dono do agendamento
     if (booking.professionalId !== professionalId) {
-      throw new BookingUpdateError(
-        'Você não tem permissão para alterar este agendamento',
-      );
+      throw new BookingUpdateError('Você não tem permissão para alterar este agendamento');
     }
 
     if (status === 'CANCELED') {
@@ -62,10 +57,7 @@ export class UpdateBookingStatusUseCase {
     };
 
     // Atualizar o agendamento
-    const updatedBooking = await this.bookingsRepository.update(
-      bookingId,
-      updateData,
-    );
+    const updatedBooking = await this.bookingsRepository.update(bookingId, updateData);
 
     if (!updatedBooking) {
       throw new BookingUpdateError('Erro ao atualizar o agendamento');
@@ -82,4 +74,3 @@ export class UpdateBookingStatusUseCase {
     };
   }
 }
-

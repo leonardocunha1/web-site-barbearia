@@ -4,18 +4,13 @@ import {
 } from '@/repositories/password-reset-tokens-repository';
 import { prisma } from '@/lib/prisma';
 
-export class PrismaPasswordResetTokensRepository
-  implements IPasswordResetTokensRepository
-{
-  async create(
-    token: string,
-    userId: string,
-    expiresAt: Date,
-  ): Promise<PasswordResetToken> {
+export class PrismaPasswordResetTokensRepository implements IPasswordResetTokensRepository {
+  async create(token: string, userId: string, expiresAt: Date): Promise<PasswordResetToken> {
     // Primeiro remove tokens existentes para o usuário
     await this.deleteByUserId(userId);
 
-    const passwordResetToken = await prisma.passwordResetToken.create({ date: {
+    const passwordResetToken = await prisma.passwordResetToken.create({
+      date: {
         token,
         userId,
         expiresAt,
@@ -45,4 +40,3 @@ export class PrismaPasswordResetTokensRepository
     });
   }
 }
-

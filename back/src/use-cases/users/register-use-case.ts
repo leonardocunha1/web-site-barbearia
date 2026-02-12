@@ -5,10 +5,11 @@ import { PASSWORD_HASH_ROUNDS } from '@/consts/const';
 import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
 
-interface RegisterUserRequest { name: string;
+interface RegisterUserRequest {
+  name: string;
   email: string;
-  senha: string;
-  telefone: string;
+  password: string;
+  phone: string;
   role?: Role;
   requestRole?: Role;
 }
@@ -21,34 +22,31 @@ export class RegisterUserUseCase {
   private usersRepository: IUsersRepository;
   private sendVerificationEmail: (email: string) => Promise<void>;
 
-  constructor({
-    usersRepository,
-    sendVerificationEmail,
-  }: RegisterUserUseCaseProps) {
+  constructor({ usersRepository, sendVerificationEmail }: RegisterUserUseCaseProps) {
     this.usersRepository = usersRepository;
     this.sendVerificationEmail = sendVerificationEmail;
   }
 
   async execute({
-    nome,
+    name,
     email,
-    senha,
-    telefone,
+    password,
+    phone,
     role = 'CLIENT',
     requestRole,
   }: RegisterUserRequest): Promise<void> {
     // Fail-fast: validate all business rules before any operation
     this.validatePermissions(role, requestRole);
     await this.validateEmailNotInUse(email);
-    await this.validatePhoneNotInUse(telefone);
+    await this.validatePhoneNotInUse(phone);
 
-    const hashedPassword = await this.hashPassword(senha);
+    const hashedPassword = await this.hashPassword(password);
 
     const user = await this.usersRepository.create({
-      nome,
+      name,
       email,
-      senha: hashedPassword,
-      telefone,
+      password: hashedPassword,
+      phone,
       role,
     });
 
@@ -60,10 +58,7 @@ export class RegisterUserUseCase {
    * @throws {InsufficientPermissionsError} If insufficient permissions
    */
   private validatePermissions(role: Role, requestRole?: Role): void {
-    if (
-      (role === 'ADMIN' || role === 'PROFESSIONAL') &&
-      requestRole !== 'ADMIN'
-    ) {
+    if ((role === 'ADMIN' || role === 'PROFESSIONAL') && requestRole !== 'ADMIN') {
       throw new InsufficientPermissionsError();
     }
   }
@@ -83,8 +78,8 @@ export class RegisterUserUseCase {
    * Validates that phone is not already in use
    * @throws {UserAlreadyExistsError} If phone already exists
    */
-  private async validatePhoneNotInUse(telefone: string): Promise<void> {
-    const userWithSamePhone = await this.usersRepository.findByPhone(telefone);
+  private async validatePhoneNotInUse(phone: string): Promise<void> {
+    const userWithSamePhone = await this.usersRepository.findByPhone(phone);
     if (userWithSamePhone) {
       throw new UserAlreadyExistsError();
     }

@@ -1,29 +1,30 @@
 import { Professional, Service, User } from '@prisma/client';
-import { PaginatedResponse } from './pagination';
 import { omit } from '@/utils/dto-helpers';
 
 export type ProfessionalDTO = {
   id: string;
-  especialidade: string;
+  specialty: string;
   bio?: string;
   avatarUrl?: string;
-  ativo: boolean;
+  active: boolean;
   user: {
-    id: string; name: string;
+    id: string;
+    name: string;
     email: string;
-    telefone?: string;
+    phone?: string;
   };
   services: {
-    id: string; name: string;
-    descricao?: string;
+    id: string;
+    name: string;
+    description?: string;
     linked: boolean;
   }[];
 };
 
 /**
  * Converts Professional entity with relations to safe DTO
- * Automatically removes sensitive user fields (senha, etc.)
- * 
+ * Automatically removes sensitive user fields (password, etc.)
+ *
  * @param professional - Professional entity from database with user relation
  * @returns Safe professional DTO without sensitive data
  */
@@ -34,22 +35,32 @@ export function toProfessionalDTO(
   },
 ): ProfessionalDTO {
   // Remove sensitive user fields
-  const safeUser = omit(professional.user, ['senha', 'emailVerified', 'active', 'role', 'createdAt', 'updatedAt']);
-  
+  const safeUser = omit(professional.user, [
+    'password',
+    'emailVerified',
+    'active',
+    'role',
+    'createdAt',
+    'updatedAt',
+  ]);
+
   return {
     id: professional.id,
-    especialidade: professional.specialty,
+    specialty: professional.specialty,
     bio: professional.bio ?? undefined,
     avatarUrl: professional.avatarUrl ?? undefined,
-    ativo: professional.active,
+    active: professional.active,
     user: {
-      id: safeUser.id, name: safeUser.name,
+      id: safeUser.id,
+      name: safeUser.name,
       email: safeUser.email,
-      telefone: safeUser.phone ?? undefined,
+      phone: safeUser.phone ?? undefined,
     },
     services: professional.services.map((service) => ({
-      id: service.id, name: service.name, description: service.description ?? undefined,
-      linked: service.linked, 
+      id: service.id,
+      name: service.name,
+      description: service.description ?? undefined,
+      linked: service.linked,
     })),
   };
 }

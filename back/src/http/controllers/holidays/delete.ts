@@ -1,10 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeDeleteHolidayUseCase } from '@/use-cases/factories/make-delete-holiday-use-case';
 
-export async function deleteHoliday(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function deleteHoliday(request: FastifyRequest, reply: FastifyReply) {
   const deleteHolidayParamsSchema = z.object({
     holidayId: z.string(),
   });

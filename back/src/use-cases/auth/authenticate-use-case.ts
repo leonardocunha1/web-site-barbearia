@@ -1,14 +1,14 @@
-import { IUsersRepository } from "@/repositories/users-repository";
-import { InvalidCredentialsError } from "../errors/invalid-credentials-error";
-import { InactiveUserError } from "../errors/inactive-user-error";
-import bcrypt from "bcryptjs";
-import { EmailNotVerifiedError } from "../errors/user-email-not-verified-error";
-import { User } from "@prisma/client";
-import { IProfessionalsRepository } from "@/repositories/professionals-repository";
+import { IUsersRepository } from '@/repositories/users-repository';
+import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
+import { InactiveUserError } from '../errors/inactive-user-error';
+import bcrypt from 'bcryptjs';
+import { EmailNotVerifiedError } from '../errors/user-email-not-verified-error';
+import { User } from '@prisma/client';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 
 interface AuthenticateRequest {
   email: string;
-  senha: string;
+  password: string;
 }
 
 interface AuthenticateResponse {
@@ -18,17 +18,14 @@ interface AuthenticateResponse {
 export class AuthenticateUseCase {
   constructor(
     private usersRepository: IUsersRepository,
-    private professionalsRepository: IProfessionalsRepository
+    private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute({
-    email,
-    senha,
-  }: AuthenticateRequest): Promise<AuthenticateResponse> {
+  async execute({ email, password }: AuthenticateRequest): Promise<AuthenticateResponse> {
     const user = await this.usersRepository.findByEmail(email);
 
     this.validateUserExists(user);
-    await this.validatePassword(senha, user.password);
+    await this.validatePassword(password, user.password);
     this.validateEmailVerified(user);
     this.validateUserActive(user);
     await this.validateProfessionalActive(user);
@@ -50,14 +47,8 @@ export class AuthenticateUseCase {
    * Validates user password
    * @throws {InvalidCredentialsError} If password doesn't match
    */
-  private async validatePassword(
-    providedPassword: string,
-    hashedPassword: string
-  ): Promise<void> {
-    const passwordMatches = await bcrypt.compare(
-      providedPassword,
-      hashedPassword
-    );
+  private async validatePassword(providedPassword: string, hashedPassword: string): Promise<void> {
+    const passwordMatches = await bcrypt.compare(providedPassword, hashedPassword);
     if (!passwordMatches) {
       throw new InvalidCredentialsError();
     }
@@ -88,10 +79,8 @@ export class AuthenticateUseCase {
    * @throws {InactiveUserError} If professional is inactive
    */
   private async validateProfessionalActive(user: User): Promise<void> {
-    if (user.role === "PROFESSIONAL") {
-      const professional = await this.professionalsRepository.findByUserId(
-        user.id
-      );
+    if (user.role === 'PROFESSIONAL') {
+      const professional = await this.professionalsRepository.findByUserId(user.id);
 
       if (!professional?.active) {
         throw new InactiveUserError();
@@ -99,4 +88,3 @@ export class AuthenticateUseCase {
     }
   }
 }
-

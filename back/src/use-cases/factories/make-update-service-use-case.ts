@@ -5,4 +5,3 @@ export function makeUpdateServiceUseCase() {
   const servicesRepository = new PrismaServicesRepository();
   return new UpdateServiceUseCase(servicesRepository);
 }
-

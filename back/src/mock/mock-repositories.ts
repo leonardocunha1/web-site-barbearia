@@ -47,9 +47,12 @@ export const createMockProfessionalsRepository = () => ({
 export const createMockServiceProfessionalRepository = () => ({
   create: vi.fn(),
   delete: vi.fn(),
+  deleteByServiceAndProfessional: vi.fn(),
   findByServiceAndProfessional: vi.fn(),
   findByProfessional: vi.fn(),
   updateByServiceAndProfessional: vi.fn(),
+  findAllActiveWithProfessionalData: vi.fn(),
+  findAllWithProfessionalData: vi.fn(),
 });
 
 export const createMockHolidaysRepository = () => ({
@@ -108,5 +111,3 @@ export const createMockCouponsRepository = () => ({
   findMany: vi.fn(),
   count: vi.fn(),
 });
-
-

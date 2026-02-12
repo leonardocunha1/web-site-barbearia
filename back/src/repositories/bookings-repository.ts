@@ -38,19 +38,13 @@ export interface IBookingsRepository {
     params: FindManyByProfessionalIdParams,
   ): Promise<BookingDTO[]>;
 
-  findManyByUserId(
-    userId: string,
-    params: FindManyByUserIdParams,
-  ): Promise<BookingDTO[]>;
+  findManyByUserId(userId: string, params: FindManyByUserIdParams): Promise<BookingDTO[]>;
 
   update(id: string, date: Prisma.BookingUpdateInput): Promise<BookingDTO>;
 
   delete(id: string): Promise<void>;
 
-  countActiveByServiceAndProfessional(
-    serviceId: string,
-    professionalId: string,
-  ): Promise<number>;
+  countActiveByServiceAndProfessional(serviceId: string, professionalId: string): Promise<number>;
 
   countByUserId(
     userId: string,
@@ -91,10 +85,7 @@ export interface IBookingsRepository {
     },
   ): Promise<BookingDTO[]>;
 
-  findByProfessionalAndDate(
-    professionalId: string,
-    date: Date,
-  ): Promise<BookingDTO[]>;
+  findByProfessionalAndDate(professionalId: string, date: Date): Promise<BookingDTO[]>;
 
   countByProfessionalId(
     professionalId: string,
@@ -107,4 +98,3 @@ export interface IBookingsRepository {
 
   countByUserIdAndStatus(userId: string, status: Status): Promise<number>;
 }
-

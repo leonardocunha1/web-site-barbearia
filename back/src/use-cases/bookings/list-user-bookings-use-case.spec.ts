@@ -36,15 +36,12 @@ describe('ListBookingsUseCase', () => {
       limit: 10,
       totalPages: 1,
     });
-    expect(mockBookingsRepository.findManyByUserId).toHaveBeenCalledWith(
-      'user-123',
-      {
-        page: 1,
-        limit: 10,
-        sort: [{ field: 'startDateTime', order: 'asc' }],
-        filters: {},
-      },
-    );
+    expect(mockBookingsRepository.findManyByUserId).toHaveBeenCalledWith('user-123', {
+      page: 1,
+      limit: 10,
+      sort: [{ field: 'startDateTime', order: 'asc' }],
+      filters: {},
+    });
   });
 
   it('deve aplicar filtros corretamente', async () => {
@@ -64,19 +61,16 @@ describe('ListBookingsUseCase', () => {
     });
 
     expect(result.bookings).toHaveLength(1);
-    expect(mockBookingsRepository.findManyByUserId).toHaveBeenCalledWith(
-      'user-123',
-      {
-        page: 1,
-        limit: 10,
-        sort: [{ field: 'startDateTime', order: 'asc' }],
-        filters: {
-          status: 'CONFIRMED',
-          startDate,
-          endDate,
-        },
+    expect(mockBookingsRepository.findManyByUserId).toHaveBeenCalledWith('user-123', {
+      page: 1,
+      limit: 10,
+      sort: [{ field: 'startDateTime', order: 'asc' }],
+      filters: {
+        status: 'CONFIRMED',
+        startDate,
+        endDate,
       },
-    );
+    });
   });
 
   it('deve lançar erro quando página é maior que total de páginas', async () => {
@@ -125,9 +119,7 @@ describe('ListBookingsUseCase', () => {
       userId: 'user-456', // ID diferente do solicitado
     };
 
-    mockBookingsRepository.findManyByUserId.mockResolvedValue([
-      wrongUserBooking,
-    ]);
+    mockBookingsRepository.findManyByUserId.mockResolvedValue([wrongUserBooking]);
     mockBookingsRepository.countByUserId.mockResolvedValue(1);
 
     await expect(

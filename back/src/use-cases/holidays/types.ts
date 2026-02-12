@@ -9,7 +9,8 @@ import type { DeleteHolidayParams } from '@/schemas/holidays';
 
 export interface CreateHolidayUseCaseRequest {
   professionalId: string;
-  date: Date; reason: string;
+  date: Date;
+  reason: string;
 }
 
 /**

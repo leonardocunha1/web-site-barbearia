@@ -16,8 +16,7 @@ import {
 /**
  * Create request transforms schema's string dates to Date objects
  */
-export interface CreateCouponRequest
-  extends Omit<CreateCouponBody, 'startDate' | 'endDate'> {
+export interface CreateCouponRequest extends Omit<CreateCouponBody, 'startDate' | 'endDate'> {
   startDate?: Date;
   endDate?: Date | null;
 }
@@ -30,7 +29,8 @@ export interface CreateCouponResponse {
  * Update request transforms schema's string dates to Date objects
  */
 export interface UpdateCouponRequest {
-  couponId: string; date: Omit<UpdateCouponBody, 'startDate' | 'endDate'> & {
+  couponId: string;
+  date: Omit<UpdateCouponBody, 'startDate' | 'endDate'> & {
     startDate?: Date;
     endDate?: Date | null;
   };

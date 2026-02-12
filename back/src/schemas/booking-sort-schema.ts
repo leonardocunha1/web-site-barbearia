@@ -2,12 +2,7 @@ import { z } from 'zod';
 
 export const orderValues = ['asc', 'desc'] as const;
 
-export const sortFields = [
-  'startDateTime',
-  'PROFESSIONAL',
-  'status',
-  'totalAmount',
-] as const;
+export const sortFields = ['startDateTime', 'PROFESSIONAL', 'status', 'totalAmount'] as const;
 
 /**
  * Tipo literal para os campos de ordenação permitidos.

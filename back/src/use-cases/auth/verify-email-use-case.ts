@@ -22,9 +22,7 @@ export class VerifyEmailUseCase {
       throw new InvalidTokenError();
     }
 
-    const user = await this.usersRepository.findById(
-      verificationTokenEntity.userId,
-    );
+    const user = await this.usersRepository.findById(verificationTokenEntity.userId);
 
     if (!user) {
       throw new UserNotFoundError();
@@ -38,9 +36,7 @@ export class VerifyEmailUseCase {
     const tokenExpired = new Date() > verificationTokenEntity.expiresAt;
 
     if (tokenExpired) {
-      await this.verificationTokensRepository.delete(
-        verificationTokenEntity.id,
-      );
+      await this.verificationTokensRepository.delete(verificationTokenEntity.id);
       throw new InvalidTokenError();
     }
 
@@ -53,4 +49,3 @@ export class VerifyEmailUseCase {
     await this.verificationTokensRepository.delete(verificationTokenEntity.id);
   }
 }
-

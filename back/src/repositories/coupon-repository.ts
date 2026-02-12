@@ -56,4 +56,3 @@ export interface ICouponRepository {
 
   count(filters?: CouponFilters): Promise<number>;
 }
-

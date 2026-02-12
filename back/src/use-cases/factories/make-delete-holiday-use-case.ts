@@ -5,12 +5,7 @@ import { DeleteHolidayUseCase } from '../holidays/delete-holiday-use-case';
 export function makeDeleteHolidayUseCase() {
   const holidaysRepository = new PrismaHolidaysRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
-  const useCase = new DeleteHolidayUseCase(
-    holidaysRepository,
-    professionalsRepository,
-  );
+  const useCase = new DeleteHolidayUseCase(holidaysRepository, professionalsRepository);
 
   return useCase;
 }
-
-

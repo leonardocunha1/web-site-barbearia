@@ -1,7 +1,7 @@
 /**
  * Base class for application errors with HTTP status codes.
  * All domain errors should extend this class.
- * 
+ *
  * @example
  * ```typescript
  * export class UserNotFoundError extends AppError {

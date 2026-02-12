@@ -1,12 +1,12 @@
-import { Prisma, Professional, Service, User } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
-import { IProfessionalsRepository } from "../professionals-repository";
+import { Prisma, Professional, Service, User } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { IProfessionalsRepository } from '../professionals-repository';
 
 export class PrismaProfessionalsRepository implements IProfessionalsRepository {
   async listAllServices(): Promise<Service[]> {
     return prisma.service.findMany({
       where: { ativo: true },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
     });
   }
 
@@ -18,9 +18,7 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     return prisma.professional.findUnique({ where: { userId } });
   }
 
-  async findByProfessionalId(
-    id: string
-  ): Promise<(Professional & { user: User }) | null> {
+  async findByProfessionalId(id: string): Promise<(Professional & { user: User }) | null> {
     return prisma.professional.findUnique({
       where: { id },
       include: { user: true },
@@ -31,9 +29,7 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     return prisma.professional.create({ data });
   }
 
-  async update(
-    id: string, date: Prisma.ProfessionalUncheckedUpdateInput
-  ): Promise<Professional> {
+  async update(id: string, data: Prisma.ProfessionalUncheckedUpdateInput): Promise<Professional> {
     return prisma.professional.update({ where: { id }, data });
   }
 
@@ -44,10 +40,10 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
   async list(params: {
     page: number;
     limit: number;
-    especialidade?: string;
-    ativo?: boolean;
+    specialty?: string;
+    active?: boolean;
     sortBy?: string;
-    sortDirection?: "asc" | "desc";
+    sortDirection?: 'asc' | 'desc';
   }): Promise<
     (Professional & {
       user: User;
@@ -58,41 +54,41 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
 
     const where: Prisma.ProfessionalWhereInput = {
       ...(params.specialty && {
-        especialidade: {
+        specialty: {
           contains: params.specialty,
           mode: Prisma.QueryMode.insensitive,
         },
       }),
-      ...(params.active !== undefined && { ativo: params.active }),
+      ...(params.active !== undefined && { active: params.active }),
     };
 
     // Mapear campos de ordenação incluindo campos da relação User
     let orderBy: Prisma.ProfessionalOrderByWithRelationInput = {};
 
     if (params.sortBy) {
-      const direction = params.sortDirection ?? "asc";
+      const direction = params.sortDirection ?? 'asc';
 
       // Campos da tabela Professional
-      if (params.sortBy === "especialidade") {
-        orderBy = { especialidade: direction };
-      } else if (params.sortBy === "ativo") {
-        orderBy = { ativo: direction };
-      } else if (params.sortBy === "createdAt") {
+      if (params.sortBy === 'specialty') {
+        orderBy = { specialty: direction };
+      } else if (params.sortBy === 'active') {
+        orderBy = { active: direction };
+      } else if (params.sortBy === 'createdAt') {
         orderBy = { createdAt: direction };
-      } else if (params.sortBy === "updatedAt") {
+      } else if (params.sortBy === 'updatedAt') {
         orderBy = { updatedAt: direction };
       }
       // Campos da relação User
-      else if (params.sortBy === "nome") {
+      else if (params.sortBy === 'name') {
         orderBy = { user: { name: direction } };
-      } else if (params.sortBy === "email") {
+      } else if (params.sortBy === 'email') {
         orderBy = { user: { email: direction } };
       } else {
         // Campo não permitido, usar padrão
-        orderBy = { createdAt: "desc" };
+        orderBy = { createdAt: 'desc' };
       }
     } else {
-      orderBy = { createdAt: "desc" };
+      orderBy = { createdAt: 'desc' };
     }
 
     const professionals = await prisma.professional.findMany({
@@ -111,9 +107,7 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     const allServices = await this.listAllServices();
 
     return professionals.map((professional) => {
-      const linkedIds = professional.ServiceProfessional.map(
-        (sp) => sp.service.id
-      );
+      const linkedIds = professional.ServiceProfessional.map((sp) => sp.service.id);
       const servicesWithLinked = allServices.map((service) => ({
         ...service,
         linked: linkedIds.includes(service.id),
@@ -126,18 +120,15 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     });
   }
 
-  async count(params: {
-    especialidade?: string;
-    ativo?: boolean;
-  }): Promise<number> {
+  async count(params: { specialty?: string; active?: boolean }): Promise<number> {
     const where: Prisma.ProfessionalWhereInput = {
       ...(params.specialty && {
-        especialidade: {
+        specialty: {
           contains: params.specialty,
           mode: Prisma.QueryMode.insensitive,
         },
       }),
-      ...(params.active !== undefined && { ativo: params.active }),
+      ...(params.active !== undefined && { active: params.active }),
     };
 
     return prisma.professional.count({ where });
@@ -147,9 +138,9 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     query: string;
     page: number;
     limit: number;
-    ativo?: boolean;
+    active?: boolean;
     sortBy?: string;
-    sortDirection?: "asc" | "desc";
+    sortDirection?: 'asc' | 'desc';
   }): Promise<
     (Professional & {
       user: User;
@@ -162,16 +153,17 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
       AND: [
         {
           OR: [
-            { especialidade: { contains: params.query, mode: "insensitive" } },
+            { specialty: { contains: params.query, mode: 'insensitive' } },
             {
               ServiceProfessional: {
                 some: {
                   service: {
                     OR: [
-                      { name: { contains: params.query, mode: "insensitive" } },
-                      { description: {
+                      { name: { contains: params.query, mode: 'insensitive' } },
+                      {
+                        description: {
                           contains: params.query,
-                          mode: "insensitive",
+                          mode: 'insensitive',
                         },
                       },
                     ],
@@ -182,39 +174,39 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
             {
               user: {
                 OR: [
-                  { name: { contains: params.query, mode: "insensitive" } },
-                  { email: { contains: params.query, mode: "insensitive" } },
+                  { name: { contains: params.query, mode: 'insensitive' } },
+                  { email: { contains: params.query, mode: 'insensitive' } },
                 ],
               },
             },
           ],
         },
-        ...(params.active !== undefined ? [{ ativo: params.active }] : []),
+        ...(params.active !== undefined ? [{ active: params.active }] : []),
       ],
     };
 
     let orderBy: Prisma.ProfessionalOrderByWithRelationInput = {};
 
     if (params.sortBy) {
-      const direction = params.sortDirection ?? "asc";
+      const direction = params.sortDirection ?? 'asc';
 
-      if (params.sortBy === "especialidade") {
-        orderBy = { especialidade: direction };
-      } else if (params.sortBy === "ativo") {
-        orderBy = { ativo: direction };
-      } else if (params.sortBy === "createdAt") {
+      if (params.sortBy === 'specialty') {
+        orderBy = { specialty: direction };
+      } else if (params.sortBy === 'active') {
+        orderBy = { active: direction };
+      } else if (params.sortBy === 'createdAt') {
         orderBy = { createdAt: direction };
-      } else if (params.sortBy === "updatedAt") {
+      } else if (params.sortBy === 'updatedAt') {
         orderBy = { updatedAt: direction };
-      } else if (params.sortBy === "nome") {
+      } else if (params.sortBy === 'name') {
         orderBy = { user: { name: direction } };
-      } else if (params.sortBy === "email") {
+      } else if (params.sortBy === 'email') {
         orderBy = { user: { email: direction } };
       } else {
-        orderBy = { createdAt: "desc" };
+        orderBy = { createdAt: 'desc' };
       }
     } else {
-      orderBy = { createdAt: "desc" };
+      orderBy = { createdAt: 'desc' };
     }
 
     const results = await prisma.professional.findMany({
@@ -233,9 +225,7 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     const allServices = await this.listAllServices();
 
     return results.map((professional) => {
-      const linkedIds = professional.ServiceProfessional.map(
-        (sp) => sp.service.id
-      );
+      const linkedIds = professional.ServiceProfessional.map((sp) => sp.service.id);
       const servicesWithLinked = allServices.map((service) => ({
         ...service,
         linked: linkedIds.includes(service.id),
@@ -248,43 +238,43 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     });
   }
 
- async countSearch(params: {
-  query: string;
-  ativo?: boolean;
-}): Promise<number> {
-  const where: Prisma.ProfessionalWhereInput = {
-    AND: [
-      {
-        OR: [
-          { especialidade: { contains: params.query, mode: "insensitive" } },
-          {
-            ServiceProfessional: {
-              some: {
-                service: {
-                  OR: [
-                    { name: { contains: params.query, mode: "insensitive" } },
-                    { description: { contains: params.query, mode: "insensitive" } },
-                  ],
+  async countSearch(params: { query: string; active?: boolean }): Promise<number> {
+    const where: Prisma.ProfessionalWhereInput = {
+      AND: [
+        {
+          OR: [
+            { specialty: { contains: params.query, mode: 'insensitive' } },
+            {
+              ServiceProfessional: {
+                some: {
+                  service: {
+                    OR: [
+                      { name: { contains: params.query, mode: 'insensitive' } },
+                      {
+                        description: {
+                          contains: params.query,
+                          mode: 'insensitive',
+                        },
+                      },
+                    ],
+                  },
                 },
               },
             },
-          },
-          {
-            user: {
-              OR: [
-                { name: { contains: params.query, mode: "insensitive" } },
-                { email: { contains: params.query, mode: "insensitive" } },
-              ],
+            {
+              user: {
+                OR: [
+                  { name: { contains: params.query, mode: 'insensitive' } },
+                  { email: { contains: params.query, mode: 'insensitive' } },
+                ],
+              },
             },
-          },
-        ],
-      },
-      ...(params.active !== undefined ? [{ ativo: params.active }] : []),
-    ],
-  };
+          ],
+        },
+        ...(params.active !== undefined ? [{ active: params.active }] : []),
+      ],
+    };
 
-  return prisma.professional.count({ where });
+    return prisma.professional.count({ where });
+  }
 }
-
-}
-

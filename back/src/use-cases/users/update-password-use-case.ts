@@ -64,10 +64,7 @@ export class UpdatePasswordUseCase {
     currentPassword: string,
     hashedPassword: string,
   ): Promise<void> {
-    const doesPasswordMatch = await bcrypt.compare(
-      currentPassword,
-      hashedPassword,
-    );
+    const doesPasswordMatch = await bcrypt.compare(currentPassword, hashedPassword);
     if (!doesPasswordMatch) {
       throw new InvalidCredentialsError();
     }
@@ -81,10 +78,7 @@ export class UpdatePasswordUseCase {
     newPassword: string,
     currentHashedPassword: string,
   ): Promise<void> {
-    const isSamePassword = await bcrypt.compare(
-      newPassword,
-      currentHashedPassword,
-    );
+    const isSamePassword = await bcrypt.compare(newPassword, currentHashedPassword);
     if (isSamePassword) {
       throw new SamePasswordError();
     }
@@ -97,4 +91,3 @@ export class UpdatePasswordUseCase {
     return bcrypt.hash(password, PASSWORD_HASH_ROUNDS);
   }
 }
-

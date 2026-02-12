@@ -5,6 +5,7 @@ import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 import { User, Role } from '@prisma/client';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
+import { makeUser } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockUsersRepository = IUsersRepository & {
@@ -23,17 +24,13 @@ describe('AnonymizeUserUseCase', () => {
   });
 
   it('deve anonimizar um usuário com sucesso (ADMIN)', async () => {
-    const mockUser: User = {
-      id: 'user-1', name: 'John Doe',
+    const mockUser: User = makeUser({
+      id: 'user-1',
+      name: 'John Doe',
       email: 'john@example.com',
-      senha: 'hashed-password',
-      telefone: '123456789',
+      phone: '123456789',
       role: Role.CLIENTE,
-      emailVerified: true,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
     usersRepository.findById.mockResolvedValue(mockUser);
     usersRepository.anonymize.mockResolvedValue(undefined);
@@ -49,17 +46,13 @@ describe('AnonymizeUserUseCase', () => {
   });
 
   it('deve anonimizar o próprio usuário (CLIENTE)', async () => {
-    const mockUser: User = {
-      id: 'user-1', name: 'John Doe',
+    const mockUser: User = makeUser({
+      id: 'user-1',
+      name: 'John Doe',
       email: 'john@example.com',
-      senha: 'hashed-password',
-      telefone: '123456789',
+      phone: '123456789',
       role: Role.CLIENTE,
-      emailVerified: true,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
     usersRepository.findById.mockResolvedValue(mockUser);
     usersRepository.anonymize.mockResolvedValue(undefined);
@@ -89,25 +82,22 @@ describe('AnonymizeUserUseCase', () => {
   });
 
   it('deve lançar erro quando CLIENTE tenta anonimizar outro usuário', async () => {
-    const mockUser: User = {
-      id: 'user-1', name: 'John Doe',
+    const mockUser: User = makeUser({
+      id: 'user-1',
+      name: 'John Doe',
       email: 'john@example.com',
-      senha: 'hashed-password',
-      telefone: '123456789',
+      phone: '123456789',
       role: Role.CLIENTE,
-      emailVerified: true,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
     usersRepository.findById.mockResolvedValue(mockUser);
+    usersRepository.anonymize.mockResolvedValue(undefined);
 
     await expect(
       sut.execute({
         userIdToAnonymize: 'user-1',
         userId: 'another-user',
-        role: Role.CLIENTE,
+        role: 'CLIENTE',
       }),
     ).rejects.toThrow(UsuarioTentandoPegarInformacoesDeOutro);
 
@@ -115,17 +105,13 @@ describe('AnonymizeUserUseCase', () => {
   });
 
   it('deve permitir PROFISSIONAL anonimizar outro usuário', async () => {
-    const mockUser: User = {
-      id: 'user-1', name: 'John Doe',
+    const mockUser: User = makeUser({
+      id: 'user-1',
+      name: 'John Doe',
       email: 'john@example.com',
-      senha: 'hashed-password',
-      telefone: '123456789',
+      phone: '123456789',
       role: Role.CLIENTE,
-      emailVerified: true,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
     usersRepository.findById.mockResolvedValue(mockUser);
     usersRepository.anonymize.mockResolvedValue(undefined);
@@ -150,4 +136,3 @@ describe('AnonymizeUserUseCase', () => {
     ).rejects.toThrow(UserNotFoundError);
   });
 });
-

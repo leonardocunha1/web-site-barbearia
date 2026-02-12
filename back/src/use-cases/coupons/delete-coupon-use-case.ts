@@ -13,9 +13,7 @@ interface DeleteCouponResponse {
 export class DeleteCouponUseCase {
   constructor(private couponRepository: ICouponRepository) {}
 
-  async execute({
-    couponId,
-  }: DeleteCouponRequest): Promise<DeleteCouponResponse> {
+  async execute({ couponId }: DeleteCouponRequest): Promise<DeleteCouponResponse> {
     // Verifica se o cupom existe
     const coupon = await this.couponRepository.findById(couponId);
 
@@ -24,9 +22,7 @@ export class DeleteCouponUseCase {
     }
 
     // Verifica se o cupom já foi usado (tem redemptions)
-    const couponWithRedemptions = await this.couponRepository.findByCode(
-      coupon.code,
-    );
+    const couponWithRedemptions = await this.couponRepository.findByCode(coupon.code);
 
     if (couponWithRedemptions && couponWithRedemptions.redemptions.length > 0) {
       throw new CouponInUseError();
@@ -40,4 +36,3 @@ export class DeleteCouponUseCase {
     };
   }
 }
-

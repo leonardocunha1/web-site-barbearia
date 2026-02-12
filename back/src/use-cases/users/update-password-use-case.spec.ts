@@ -5,6 +5,7 @@ import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
 import { SamePasswordError } from '../errors/same-password-error';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
+import { makeUser } from '@/test/factories';
 
 import bcrypt from 'bcryptjs';
 
@@ -40,14 +41,15 @@ describe('Update Password Use Case', () => {
     useCase = new UpdatePasswordUseCase(mockUsersRepository);
   });
 
-  const mockUser = {
+  const mockUser = makeUser({
     id: 'user-123',
     email: 'john@example.com',
-    senha: 'hashed-current-password', name: 'John Doe',
-    telefone: '123456789',
-    role: 'CLIENT',
+    password: 'hashed-current-password',
+    name: 'John Doe',
+    phone: '123456789',
+    role: 'CLIENT' as any,
     active: true,
-  };
+  });
 
   it('deve atualizar a senha com sucesso', async () => {
     mockUsersRepository.findById.mockResolvedValue(mockUser);
@@ -57,7 +59,7 @@ describe('Update Password Use Case', () => {
     bcryptHash.mockResolvedValue('hashed-new-password');
     mockUsersRepository.updatePassword.mockResolvedValue({
       ...mockUser,
-      senha: 'hashed-new-password',
+      password: 'hashed-new-password',
     });
 
     const result = await useCase.execute({
@@ -68,14 +70,8 @@ describe('Update Password Use Case', () => {
 
     expect(result.user.id).toBe('user-123');
     expect(result.user.email).toBe('john@example.com');
-    expect(bcryptCompare).toHaveBeenCalledWith(
-      'current-password',
-      'hashed-current-password',
-    );
-    expect(bcryptCompare).toHaveBeenCalledWith(
-      'new-password',
-      'hashed-current-password',
-    );
+    expect(bcryptCompare).toHaveBeenCalledWith('current-password', 'hashed-current-password');
+    expect(bcryptCompare).toHaveBeenCalledWith('new-password', 'hashed-current-password');
     expect(bcryptHash).toHaveBeenCalledWith('new-password', 6);
     expect(mockUsersRepository.updatePassword).toHaveBeenCalledWith(
       'user-123',
@@ -160,4 +156,3 @@ describe('Update Password Use Case', () => {
     expect(Object.keys(result.user)).toEqual(['id', 'email']);
   });
 });
-

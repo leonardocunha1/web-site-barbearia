@@ -31,4 +31,3 @@ export class ForgotPasswordUseCase {
     await this.emailService.sendPasswordResetEmail(user.email, token);
   }
 }
-

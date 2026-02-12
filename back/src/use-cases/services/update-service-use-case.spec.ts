@@ -4,6 +4,7 @@ import { IServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { Service, Prisma } from '@prisma/client';
 import { createMockServicesRepository } from '@/mock/mock-repositories';
+import { makeService } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = IServicesRepository & {
@@ -16,17 +17,19 @@ describe('UpdateServiceUseCase', () => {
   let sut: UpdateServiceUseCase;
 
   // Dados mockados para os testes
-  const mockService: Service = {
-    id: 'service-1', name: 'Corte de Cabelo', description: 'Corte básico',
-    categoria: 'Cabelo',
-    ativo: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const mockService: Service = makeService({
+    id: 'service-1',
+    name: 'Corte de Cabelo',
+    description: 'Corte básico',
+    category: 'Cabelo',
+    active: true,
+  });
 
   const updatedMockService: Service = {
-    ...mockService, name: 'Corte Premium', description: 'Corte completo com lavagem',
-    categoria: 'Cabelo Premium',
+    ...mockService,
+    name: 'Corte Premium',
+    description: 'Corte completo com lavagem',
+    category: 'Cabelo Premium',
   };
 
   beforeEach(() => {
@@ -40,33 +43,33 @@ describe('UpdateServiceUseCase', () => {
     servicesRepository.findById.mockResolvedValue(mockService);
     servicesRepository.update.mockResolvedValue(updatedMockService);
 
-    const updateData: Prisma.ServiceUpdateInput = { name: 'Corte Premium', description: 'Corte completo com lavagem',
-      categoria: 'Cabelo Premium',
+    const updateData: Prisma.ServiceUpdateInput = {
+      name: 'Corte Premium',
+      description: 'Corte completo com lavagem',
+      category: 'Cabelo Premium',
     };
 
     const result = await sut.execute({
-      id: 'service-1', date: updateData,
+      id: 'service-1',
+      data: updateData,
     });
 
     // Verificações
     expect(result.service).toEqual(updatedMockService);
     expect(servicesRepository.findById).toHaveBeenCalledWith('service-1');
-    expect(servicesRepository.update).toHaveBeenCalledWith(
-      'service-1',
-      updateData,
-    );
+    expect(servicesRepository.update).toHaveBeenCalledWith('service-1', updateData);
   });
 
   it('deve lançar erro quando o serviço não existe', async () => {
     // Configura o mock para retornar null (serviço não encontrado)
     servicesRepository.findById.mockResolvedValue(null);
 
-    const updateData: Prisma.ServiceUpdateInput = { name: 'Corte Premium',
-    };
+    const updateData: Prisma.ServiceUpdateInput = { name: 'Corte Premium' };
 
     await expect(
       sut.execute({
-        id: 'non-existent-id', date: updateData,
+        id: 'non-existent-id',
+        data: updateData,
       }),
     ).rejects.toThrow(ServiceNotFoundError);
 
@@ -78,38 +81,43 @@ describe('UpdateServiceUseCase', () => {
 
   it('deve permitir atualizar apenas o nome do serviço', async () => {
     const partialUpdateMock = {
-      ...mockService, name: 'Corte Premium',
+      ...mockService,
+      name: 'Corte Premium',
     };
 
     servicesRepository.findById.mockResolvedValue(mockService);
     servicesRepository.update.mockResolvedValue(partialUpdateMock);
 
-    const updateData: Prisma.ServiceUpdateInput = { name: 'Corte Premium',
-    };
+    const updateData: Prisma.ServiceUpdateInput = { name: 'Corte Premium' };
 
     const result = await sut.execute({
-      id: 'service-1', date: updateData,
+      id: 'service-1',
+      data: updateData,
     });
 
     expect(result.service.name).toBe('Corte Premium');
     expect(result.service.description).toBe(mockService.description); // Mantém o valor original
-    expect(servicesRepository.update).toHaveBeenCalledWith('service-1', { name: 'Corte Premium',
+    expect(servicesRepository.update).toHaveBeenCalledWith('service-1', {
+      name: 'Corte Premium',
     });
   });
 
   it('deve permitir atualizar apenas a descrição do serviço', async () => {
     const partialUpdateMock = {
-      ...mockService, description: 'Novo descrição detalhada',
+      ...mockService,
+      description: 'Novo descrição detalhada',
     };
 
     servicesRepository.findById.mockResolvedValue(mockService);
     servicesRepository.update.mockResolvedValue(partialUpdateMock);
 
-    const updateData: Prisma.ServiceUpdateInput = { description: 'Novo descrição detalhada',
+    const updateData: Prisma.ServiceUpdateInput = {
+      description: 'Novo descrição detalhada',
     };
 
     const result = await sut.execute({
-      id: 'service-1', date: updateData,
+      id: 'service-1',
+      data: updateData,
     });
 
     expect(result.service.description).toBe('Novo descrição detalhada');
@@ -119,18 +127,19 @@ describe('UpdateServiceUseCase', () => {
   it('deve permitir atualizar apenas a categoria do serviço', async () => {
     const partialUpdateMock = {
       ...mockService,
-      categoria: 'Nova categoria',
+      category: 'Nova categoria',
     };
 
     servicesRepository.findById.mockResolvedValue(mockService);
     servicesRepository.update.mockResolvedValue(partialUpdateMock);
 
     const updateData: Prisma.ServiceUpdateInput = {
-      categoria: 'Nova categoria',
+      category: 'Nova categoria',
     };
 
     const result = await sut.execute({
-      id: 'service-1', date: updateData,
+      id: 'service-1',
+      data: updateData,
     });
 
     expect(result.service.category).toBe('Nova categoria');
@@ -140,18 +149,19 @@ describe('UpdateServiceUseCase', () => {
   it('deve permitir atualizar o status ativo do serviço', async () => {
     const statusUpdateMock = {
       ...mockService,
-      ativo: false,
+      active: false,
     };
 
     servicesRepository.findById.mockResolvedValue(mockService);
     servicesRepository.update.mockResolvedValue(statusUpdateMock);
 
     const updateData: Prisma.ServiceUpdateInput = {
-      ativo: false,
+      active: false,
     };
 
     const result = await sut.execute({
-      id: 'service-1', date: updateData,
+      id: 'service-1',
+      data: updateData,
     });
 
     expect(result.service.active).toBe(false);
@@ -165,11 +175,11 @@ describe('UpdateServiceUseCase', () => {
     const updateData: Prisma.ServiceUpdateInput = {};
 
     const result = await sut.execute({
-      id: 'service-1', date: updateData,
+      id: 'service-1',
+      data: updateData,
     });
 
     expect(result.service).toEqual(mockService);
     expect(servicesRepository.update).toHaveBeenCalledWith('service-1', {});
   });
 });
-

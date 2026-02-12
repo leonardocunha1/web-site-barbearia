@@ -7,6 +7,7 @@ import {
   createMockProfessionalsRepository,
   createMockServiceProfessionalRepository,
 } from '@/mock/mock-repositories';
+import { makeProfessional, makeService } from '@/test/factories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = IProfessionalsRepository & {
@@ -14,7 +15,8 @@ type MockProfessionalsRepository = IProfessionalsRepository & {
 };
 
 type MockServiceProfessionalRepository = IServiceProfessionalRepository & {
-  findByProfessional: ReturnType<typeof vi.fn>;
+  findAllActiveWithProfessionalData: ReturnType<typeof vi.fn>;
+  findAllWithProfessionalData: ReturnType<typeof vi.fn>;
 };
 
 describe('ListProfessionalServicesUseCase', () => {
@@ -32,37 +34,47 @@ describe('ListProfessionalServicesUseCase', () => {
     );
   });
 
-  it('deve listar serviços de um profissional com paginação', async () => {
-    const mockProfessional = {
+  it('deve listar serviÃ§os de um profissional com paginaÃ§Ã£o', async () => {
+    const mockProfessional = makeProfessional({
       id: 'prof-1',
       userId: 'user-1',
-      ativo: true,
-    };
+      active: true,
+    });
 
     const mockServices = {
       services: [
         {
           service: {
-            id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do corte',
-            categoria: 'Cabelo',
-            ativo: true,
-          }, price: 50, duration: 30,
+            ...makeService({
+              id: 'service-1',
+              name: 'Corte de Cabelo',
+              description: 'DescriÃ§Ã£o do corte',
+              category: 'Cabelo',
+              active: true,
+            }),
+          },
+          price: 50,
+          duration: 30,
         },
         {
           service: {
-            id: 'service-2', name: 'Manicure', description: 'Descrição da manicure',
-            categoria: 'Unhas',
-            ativo: true,
-          }, price: 30, duration: 45,
+            ...makeService({
+              id: 'service-2',
+              name: 'Manicure',
+              description: 'DescriÃ§Ã£o da manicure',
+              category: 'Unhas',
+              active: true,
+            }),
+          },
+          price: 30,
+          duration: 45,
         },
       ],
       total: 2,
     };
 
     professionalsRepository.findById.mockResolvedValue(mockProfessional);
-    serviceProfessionalRepository.findByProfessional.mockResolvedValue(
-      mockServices,
-    );
+    serviceProfessionalRepository.findAllActiveWithProfessionalData.mockResolvedValue(mockServices);
 
     const result = await sut.execute({
       professionalId: 'prof-1',
@@ -73,44 +85,56 @@ describe('ListProfessionalServicesUseCase', () => {
     expect(result).toEqual({
       services: [
         {
-          id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do corte',
-          categoria: 'Cabelo',
-          ativo: true, price: 50, duration: 30,
+          id: 'service-1',
+          name: 'Corte de Cabelo',
+          description: 'DescriÃ§Ã£o do corte',
+          category: 'Cabelo',
+          active: true,
+          price: 50,
+          duration: 30,
         },
         {
-          id: 'service-2', name: 'Manicure', description: 'Descrição da manicure',
-          categoria: 'Unhas',
-          ativo: true, price: 30, duration: 45,
+          id: 'service-2',
+          name: 'Manicure',
+          description: 'DescriÃ§Ã£o da manicure',
+          category: 'Unhas',
+          active: true,
+          price: 30,
+          duration: 45,
         },
       ],
       total: 2,
     });
 
     expect(professionalsRepository.findById).toHaveBeenCalledWith('prof-1');
-    expect(
-      serviceProfessionalRepository.findByProfessional,
-    ).toHaveBeenCalledWith('prof-1', {
-      page: 1,
-      limit: 10,
-      activeOnly: true,
-    });
+    expect(serviceProfessionalRepository.findAllActiveWithProfessionalData).toHaveBeenCalledWith(
+      'prof-1',
+      {
+        page: 1,
+        limit: 10,
+      },
+    );
   });
 
-  it('deve listar apenas serviços ativos quando activeOnly=true', async () => {
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+  it('deve listar apenas serviÃ§os ativos quando activeOnly=true', async () => {
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
-    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+    serviceProfessionalRepository.findAllActiveWithProfessionalData.mockResolvedValue({
       services: [
         {
           service: {
-            id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do corte',
-            categoria: 'Cabelo',
-            ativo: true,
-          }, price: 50, duration: 30,
+            ...makeService({
+              id: 'service-1',
+              name: 'Corte de Cabelo',
+              description: 'DescriÃ§Ã£o do corte',
+              category: 'Cabelo',
+              active: true,
+            }),
+          },
+          price: 50,
+          duration: 30,
         },
       ],
       total: 1,
@@ -124,30 +148,34 @@ describe('ListProfessionalServicesUseCase', () => {
     });
 
     expect(result.services.every((s) => s.active)).toBe(true);
-    expect(
-      serviceProfessionalRepository.findByProfessional,
-    ).toHaveBeenCalledWith('prof-1', {
-      page: 1,
-      limit: 10,
-      activeOnly: true,
-    });
+    expect(serviceProfessionalRepository.findAllActiveWithProfessionalData).toHaveBeenCalledWith(
+      'prof-1',
+      {
+        page: 1,
+        limit: 10,
+      },
+    );
   });
 
-  it('deve listar todos os serviços quando activeOnly=false', async () => {
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+  it('deve listar todos os serviÃ§os quando activeOnly=false', async () => {
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
-    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+    serviceProfessionalRepository.findAllWithProfessionalData.mockResolvedValue({
       services: [
         {
           service: {
-            id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do corte',
-            categoria: 'Cabelo',
-            ativo: false,
-          }, price: 50, duration: 30,
+            ...makeService({
+              id: 'service-1',
+              name: 'Corte de Cabelo',
+              description: 'DescriÃ§Ã£o do corte',
+              category: 'Cabelo',
+              active: false,
+            }),
+          },
+          price: 50,
+          duration: 30,
         },
       ],
       total: 1,
@@ -161,16 +189,16 @@ describe('ListProfessionalServicesUseCase', () => {
     });
 
     expect(result.services.some((s) => !s.active)).toBe(true);
-    expect(
-      serviceProfessionalRepository.findByProfessional,
-    ).toHaveBeenCalledWith('prof-1', {
-      page: 1,
-      limit: 10,
-      activeOnly: false,
-    });
+    expect(serviceProfessionalRepository.findAllWithProfessionalData).toHaveBeenCalledWith(
+      'prof-1',
+      {
+        page: 1,
+        limit: 10,
+      },
+    );
   });
 
-  it('deve lançar erro quando o profissional não existe', async () => {
+  it('deve lanÃ§ar erro quando o profissional nÃ£o existe', async () => {
     professionalsRepository.findById.mockResolvedValue(null);
 
     await expect(
@@ -181,19 +209,16 @@ describe('ListProfessionalServicesUseCase', () => {
       }),
     ).rejects.toThrow(ProfessionalNotFoundError);
 
-    expect(
-      serviceProfessionalRepository.findByProfessional,
-    ).not.toHaveBeenCalled();
+    expect(serviceProfessionalRepository.findAllActiveWithProfessionalData).not.toHaveBeenCalled();
+    expect(serviceProfessionalRepository.findAllWithProfessionalData).not.toHaveBeenCalled();
   });
 
-  it('deve retornar lista vazia quando não há serviços', async () => {
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+  it('deve retornar lista vazia quando nÃ£o hÃ¡ serviÃ§os', async () => {
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
-    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+    serviceProfessionalRepository.findAllActiveWithProfessionalData.mockResolvedValue({
       services: [],
       total: 0,
     });
@@ -208,21 +233,25 @@ describe('ListProfessionalServicesUseCase', () => {
     expect(result.total).toBe(0);
   });
 
-  it('deve aplicar paginação corretamente', async () => {
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+  it('deve aplicar paginaÃ§Ã£o corretamente', async () => {
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
-    serviceProfessionalRepository.findByProfessional.mockResolvedValue({
+    serviceProfessionalRepository.findAllActiveWithProfessionalData.mockResolvedValue({
       services: [
         {
           service: {
-            id: 'service-3', name: 'Massagem', description: 'Descrição da massagem',
-            categoria: 'Bem-estar',
-            ativo: true,
-          }, price: 80, duration: 60,
+            ...makeService({
+              id: 'service-3',
+              name: 'Massagem',
+              description: 'DescriÃ§Ã£o da massagem',
+              category: 'Bem-estar',
+              active: true,
+            }),
+          },
+          price: 80,
+          duration: 60,
         },
       ],
       total: 3,
@@ -236,19 +265,22 @@ describe('ListProfessionalServicesUseCase', () => {
 
     expect(result.services).toEqual([
       {
-        id: 'service-3', name: 'Massagem', description: 'Descrição da massagem',
-        categoria: 'Bem-estar',
-        ativo: true, price: 80, duration: 60,
+        id: 'service-3',
+        name: 'Massagem',
+        description: 'DescriÃ§Ã£o da massagem',
+        category: 'Bem-estar',
+        active: true,
+        price: 80,
+        duration: 60,
       },
     ]);
     expect(result.total).toBe(3);
-    expect(
-      serviceProfessionalRepository.findByProfessional,
-    ).toHaveBeenCalledWith('prof-1', {
-      page: 2,
-      limit: 1,
-      activeOnly: true,
-    });
+    expect(serviceProfessionalRepository.findAllActiveWithProfessionalData).toHaveBeenCalledWith(
+      'prof-1',
+      {
+        page: 2,
+        limit: 1,
+      },
+    );
   });
 });
-

@@ -5,10 +5,7 @@ import { GetBalanceUseCase } from '../bonus/get-balance-use-case';
 export function makeGetBalanceUseCase() {
   const userBonusRepository = new PrismaUserBonusRepository();
   const usersRepository = new PrismaUsersRepository();
-  const getBalanceUseCase = new GetBalanceUseCase(
-    userBonusRepository,
-    usersRepository,
-  );
+  const getBalanceUseCase = new GetBalanceUseCase(userBonusRepository, usersRepository);
 
   return getBalanceUseCase;
 }

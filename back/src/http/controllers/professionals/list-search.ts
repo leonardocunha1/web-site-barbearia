@@ -7,11 +7,10 @@ export async function listOrSearchProfessionals(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<ListProfessionalsResponse> {
-  const { page, limit, search, especialidade, status, sortBy, sortDirection } =
+  const { page, limit, search, specialty, status, sortBy, sortDirection } =
     searchProfessionalsQuerySchema.parse(request.query);
 
-  const ativo =
-    status === 'ativo' ? true : status === 'inativo' ? false : undefined;
+  const active = status === 'active' ? true : status === 'inactive' ? false : undefined;
 
   const useCase = makeListProfessionalsUseCase();
 
@@ -22,7 +21,7 @@ export async function listOrSearchProfessionals(
       query: search,
       page,
       limit,
-      ativo,
+      active,
       sortBy,
       sortDirection,
     });
@@ -30,8 +29,8 @@ export async function listOrSearchProfessionals(
     response = await useCase.execute({
       page,
       limit,
-      especialidade,
-      ativo,
+      specialty,
+      active,
       sortBy,
       sortDirection,
     });

@@ -4,34 +4,34 @@ import { ServiceAlreadyExistsError } from '../errors/service-already-exists-erro
 interface CreateServiceResponse {
   service: Service;
 }
-interface CreateServiceRequest { name: string;
-  descricao?: string;
-  categoria?: string;
-  ativo: boolean; 
+interface CreateServiceRequest {
+  name: string;
+  description?: string;
+  category?: string;
+  active: boolean;
 }
 
 export class CreateServiceUseCase {
   constructor(private servicesRepository: IServicesRepository) {}
 
   async execute({
-    nome,
-    descricao,
-    categoria,
-    ativo,
+    name,
+    description,
+    category,
+    active,
   }: CreateServiceRequest): Promise<CreateServiceResponse> {
-    const existingService = await this.servicesRepository.findByName(nome);
+    const existingService = await this.servicesRepository.findByName(name);
     if (existingService) {
       throw new ServiceAlreadyExistsError();
     }
 
     const service = await this.servicesRepository.create({
-      nome,
-      descricao,
-      categoria,
-      ativo,
+      name,
+      description,
+      category,
+      active,
     });
 
     return { service };
   }
 }
-

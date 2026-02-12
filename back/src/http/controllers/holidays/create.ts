@@ -2,10 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeCreateHolidayUseCase } from '@/use-cases/factories/make-create-holiday-use-case';
 import { createHolidayBodySchema } from '@/schemas/holidays';
 
-export async function createHoliday(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function createHoliday(request: FastifyRequest, reply: FastifyReply) {
   const { date, motivo } = createHolidayBodySchema.parse(request.body);
 
   const createHolidayUseCase = makeCreateHolidayUseCase();

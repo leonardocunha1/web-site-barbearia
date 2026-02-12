@@ -2,9 +2,10 @@ import { z } from 'zod';
 
 export const BonusTypeSchema = z
   .enum(['BOOKING_POINTS', 'LOYALTY'], {
-    errorMap: () => ({ 
-      message: 'Tipo de bônus inválido. Valores válidos: BOOKING_POINTS (pontos por agendamento) ou LOYALTY (fidelidade)' 
-    })
+    errorMap: () => ({
+      message:
+        'Tipo de bônus inválido. Valores válidos: BOOKING_POINTS (pontos por agendamento) ou LOYALTY (fidelidade)',
+    }),
   })
   .describe('Tipo de bônus que pode ser atribuído');
 
@@ -13,13 +14,11 @@ export const BonusTypeSchema = z
  */
 export const assignBonusBodySchema = z
   .object({
-    userId: z.string()
-      .uuid({ message: 'ID do usuário deve ser um UUID válido' }),
-    bookingId: z.string()
-      .uuid({ message: 'ID do agendamento deve ser um UUID válido' })
-      .optional(),
+    userId: z.string().uuid({ message: 'ID do usuário deve ser um UUID válido' }),
+    bookingId: z.string().uuid({ message: 'ID do agendamento deve ser um UUID válido' }).optional(),
     type: BonusTypeSchema,
-    description: z.string()
+    description: z
+      .string()
       .max(255, { message: 'Descrição não pode exceder 255 caracteres' })
       .optional(),
   })
@@ -30,8 +29,7 @@ export const assignBonusBodySchema = z
  */
 export const getBalanceParamsSchema = z
   .object({
-    userId: z.string()
-      .uuid({ message: 'ID do usuário deve ser um UUID válido' }),
+    userId: z.string().uuid({ message: 'ID do usuário deve ser um UUID válido' }),
   })
   .describe('Parâmetros para consulta do saldo de bônus de um usuário');
 

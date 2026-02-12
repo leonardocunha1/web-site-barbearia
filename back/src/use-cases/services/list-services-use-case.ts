@@ -7,9 +7,9 @@ import { validatePagination } from '@/utils/validate-pagination';
 interface ListServicesRequest {
   page: number;
   limit: number;
-  nome?: string;
-  categoria?: string;
-  ativo?: boolean;
+  name?: string;
+  category?: string;
+  active?: boolean;
   professionalId?: string;
 }
 
@@ -28,16 +28,15 @@ export class ListServicesUseCase {
   async execute({
     page,
     limit,
-    nome,
-    categoria,
-    ativo,
+    name,
+    category,
+    active,
     professionalId,
   }: ListServicesRequest): Promise<ListServicesResponse> {
     validatePagination(page, limit);
 
     if (professionalId) {
-      const professionalExists =
-        await this.professionalRepository.findById(professionalId);
+      const professionalExists = await this.professionalRepository.findById(professionalId);
 
       if (!professionalExists) {
         throw new ProfessionalNotFoundError();
@@ -47,9 +46,9 @@ export class ListServicesUseCase {
     const { services, total } = await this.servicesRepository.list({
       page,
       limit,
-      nome,
-      categoria,
-      ativo,
+      name,
+      category,
+      active,
       professionalId,
     });
 
@@ -70,4 +69,3 @@ export class ListServicesUseCase {
     };
   }
 }
-

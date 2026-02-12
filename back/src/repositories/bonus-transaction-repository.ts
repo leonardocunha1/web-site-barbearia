@@ -7,4 +7,3 @@ export interface IBonusTransactionRepository {
   sumPointsByUserAndType(userId: string, type: BonusType): Promise<number>;
   countByUserAndBooking(userId: string, bookingId: string): Promise<number>;
 }
-

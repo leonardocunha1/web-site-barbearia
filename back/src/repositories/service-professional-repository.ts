@@ -1,15 +1,11 @@
 import { Prisma, ServiceProfessional } from '@prisma/client';
 
 export interface IServiceProfessionalRepository {
-  create( date: Prisma.ServiceProfessionalCreateInput,
-  ): Promise<ServiceProfessional>;
+  create(date: Prisma.ServiceProfessionalCreateInput): Promise<ServiceProfessional>;
 
   delete(id: string): Promise<void>;
 
-  deleteByServiceAndProfessional(
-    serviceId: string,
-    professionalId: string,
-  ): Promise<void>;
+  deleteByServiceAndProfessional(serviceId: string, professionalId: string): Promise<void>;
 
   findByServiceAndProfessional(
     serviceId: string,
@@ -18,10 +14,14 @@ export interface IServiceProfessionalRepository {
     id: string;
     professionalId: string;
     service: {
-      id: string; name: string; description: string | null;
+      id: string;
+      name: string;
+      description: string | null;
       categoria: string | null;
       ativo: boolean;
-    }; price: number; duration: number;
+    };
+    price: number;
+    duration: number;
   } | null>;
 
   findByProfessional(
@@ -34,17 +34,23 @@ export interface IServiceProfessionalRepository {
   ): Promise<{
     services: Array<{
       service: {
-        id: string; name: string; description: string | null;
+        id: string;
+        name: string;
+        description: string | null;
         categoria: string | null;
         ativo: boolean;
-      }; price: number; duration: number;
+      };
+      price: number;
+      duration: number;
     }>;
     total: number;
   }>;
 
   updateByServiceAndProfessional(data: {
     serviceId: string;
-    professionalId: string; price: number; duration: number;
+    professionalId: string;
+    price: number;
+    duration: number;
   }): Promise<void>;
 
   /**
@@ -59,10 +65,14 @@ export interface IServiceProfessionalRepository {
   ): Promise<{
     services: Array<{
       service: {
-        id: string; name: string; description: string | null;
+        id: string;
+        name: string;
+        description: string | null;
         categoria: string | null;
         ativo: boolean;
-      }; price: number | null; duration: number | null;
+      };
+      price: number | null;
+      duration: number | null;
     }>;
     total: number;
   }>;
@@ -80,12 +90,15 @@ export interface IServiceProfessionalRepository {
   ): Promise<{
     services: Array<{
       service: {
-        id: string; name: string; description: string | null;
+        id: string;
+        name: string;
+        description: string | null;
         categoria: string | null;
         ativo: boolean;
-      }; price: number | null; duration: number | null;
+      };
+      price: number | null;
+      duration: number | null;
     }>;
     total: number;
   }>;
 }
-

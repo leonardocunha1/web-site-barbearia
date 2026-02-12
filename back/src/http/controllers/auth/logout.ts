@@ -8,7 +8,8 @@ export async function logout(request: FastifyRequest, reply: FastifyReply) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     })
-    .clearCookie('accessToken', {   // <-- limpa o accessToken também
+    .clearCookie('accessToken', {
+      // <-- limpa o accessToken também
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

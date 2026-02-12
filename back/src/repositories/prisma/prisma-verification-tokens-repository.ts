@@ -4,15 +4,10 @@ import {
 } from '@/repositories/verification-tokens-repository';
 import { prisma } from '@/lib/prisma';
 
-export class PrismaVerificationTokensRepository
-  implements IVerificationTokensRepository
-{
-  async create(
-    token: string,
-    userId: string,
-    expiresAt: Date,
-  ): Promise<VerificationToken> {
-    const verificationToken = await prisma.verificationToken.create({ date: {
+export class PrismaVerificationTokensRepository implements IVerificationTokensRepository {
+  async create(token: string, userId: string, expiresAt: Date): Promise<VerificationToken> {
+    const verificationToken = await prisma.verificationToken.create({
+      date: {
         token,
         userId,
         expiresAt,
@@ -42,4 +37,3 @@ export class PrismaVerificationTokensRepository
     });
   }
 }
-

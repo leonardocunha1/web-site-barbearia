@@ -8,6 +8,7 @@ import {
   createMockBookingsRepository,
   createMockServiceProfessionalRepository,
 } from '@/mock/mock-repositories';
+import { makeService, makeServiceProfessional } from '@/test/factories';
 
 // Tipos para os mocks
 type MockServiceProfessionalRepository = IServiceProfessionalRepository & {
@@ -36,19 +37,21 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
 
   it('deve remover um serviço de um profissional com sucesso', async () => {
     // Mock da relação existente
-    const mockRelation = {
+    const mockRelation = makeServiceProfessional({
       id: 'relation-1',
       professionalId: 'prof-1',
-      service: {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do serviço',
-        categoria: 'Cabelo',
-        ativo: true,
-      }, price: 50, duration: 30,
-    };
+      service: makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Descrição do serviço',
+        category: 'Cabelo',
+        active: true,
+      }),
+      price: 50,
+      duration: 30,
+    });
 
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      mockRelation,
-    );
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(mockRelation);
     bookingsRepository.countActiveByServiceAndProfessional.mockResolvedValue(0);
     serviceProfessionalRepository.delete.mockResolvedValue(undefined);
 
@@ -59,21 +62,19 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
     });
 
     // Verificar
-    expect(
-      serviceProfessionalRepository.findByServiceAndProfessional,
-    ).toHaveBeenCalledWith('service-1', 'prof-1');
-    expect(
-      bookingsRepository.countActiveByServiceAndProfessional,
-    ).toHaveBeenCalledWith('service-1', 'prof-1');
-    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith(
-      'relation-1',
+    expect(serviceProfessionalRepository.findByServiceAndProfessional).toHaveBeenCalledWith(
+      'service-1',
+      'prof-1',
     );
+    expect(bookingsRepository.countActiveByServiceAndProfessional).toHaveBeenCalledWith(
+      'service-1',
+      'prof-1',
+    );
+    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith('relation-1');
   });
 
   it('deve lançar erro quando a relação serviço-profissional não existe', async () => {
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      null,
-    );
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(null);
 
     await expect(
       sut.execute({
@@ -82,26 +83,26 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
       }),
     ).rejects.toThrow(ServiceProfessionalNotFoundError);
 
-    expect(
-      bookingsRepository.countActiveByServiceAndProfessional,
-    ).not.toHaveBeenCalled();
+    expect(bookingsRepository.countActiveByServiceAndProfessional).not.toHaveBeenCalled();
     expect(serviceProfessionalRepository.delete).not.toHaveBeenCalled();
   });
 
   it('deve lançar erro quando existem agendamentos ativos para o serviço', async () => {
-    const mockRelation = {
+    const mockRelation = makeServiceProfessional({
       id: 'relation-1',
       professionalId: 'prof-1',
-      service: {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do serviço',
-        categoria: 'Cabelo',
-        ativo: true,
-      }, price: 50, duration: 30,
-    };
+      service: makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Descrição do serviço',
+        category: 'Cabelo',
+        active: true,
+      }),
+      price: 50,
+      duration: 30,
+    });
 
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      mockRelation,
-    );
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(mockRelation);
     bookingsRepository.countActiveByServiceAndProfessional.mockResolvedValue(2); // 2 agendamentos ativos
 
     await expect(
@@ -115,19 +116,21 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
   });
 
   it('deve permitir remoção quando não há agendamentos ativos', async () => {
-    const mockRelation = {
+    const mockRelation = makeServiceProfessional({
       id: 'relation-1',
       professionalId: 'prof-1',
-      service: {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do serviço',
-        categoria: 'Cabelo',
-        ativo: true,
-      }, price: 50, duration: 30,
-    };
+      service: makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Descrição do serviço',
+        category: 'Cabelo',
+        active: true,
+      }),
+      price: 50,
+      duration: 30,
+    });
 
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      mockRelation,
-    );
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(mockRelation);
     bookingsRepository.countActiveByServiceAndProfessional.mockResolvedValue(0); // Nenhum agendamento ativo
 
     await expect(
@@ -137,25 +140,25 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
       }),
     ).resolves.not.toThrow();
 
-    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith(
-      'relation-1',
-    );
+    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith('relation-1');
   });
 
   it('deve chamar o repositório com o ID correto da relação', async () => {
-    const mockRelation = {
+    const mockRelation = makeServiceProfessional({
       id: 'relation-123',
       professionalId: 'prof-1',
-      service: {
-        id: 'service-1', name: 'Corte de Cabelo', description: 'Descrição do serviço',
-        categoria: 'Cabelo',
-        ativo: true,
-      }, price: 50, duration: 30,
-    };
+      service: makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        description: 'Descrição do serviço',
+        category: 'Cabelo',
+        active: true,
+      }),
+      price: 50,
+      duration: 30,
+    });
 
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      mockRelation,
-    );
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(mockRelation);
     bookingsRepository.countActiveByServiceAndProfessional.mockResolvedValue(0);
 
     await sut.execute({
@@ -163,9 +166,6 @@ describe('RemoveServiceFromProfessionalUseCase', () => {
       professionalId: 'prof-1',
     });
 
-    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith(
-      'relation-123',
-    );
+    expect(serviceProfessionalRepository.delete).toHaveBeenCalledWith('relation-123');
   });
 });
-

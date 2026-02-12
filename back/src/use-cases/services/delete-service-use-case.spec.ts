@@ -3,6 +3,7 @@ import { DeleteServiceUseCase } from './delete-service-use-case';
 import { IServicesRepository } from '@/repositories/services-repository';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { createMockServicesRepository } from '@/mock/mock-repositories';
+import { makeService } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockServicesRepository = IServicesRepository & {
@@ -23,10 +24,11 @@ describe('DeleteServiceUseCase', () => {
 
   describe('executeSoft (soft delete)', () => {
     it('deve desativar um serviço existente', async () => {
-      const mockService = {
-        id: 'service-1', name: 'Corte de Cabelo',
-        ativo: true,
-      };
+      const mockService = makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        active: true,
+      });
 
       servicesRepository.findById.mockResolvedValue(mockService);
       servicesRepository.softDelete.mockResolvedValue(undefined);
@@ -41,18 +43,17 @@ describe('DeleteServiceUseCase', () => {
     it('deve lançar erro quando o serviço não existe', async () => {
       servicesRepository.findById.mockResolvedValue(null);
 
-      await expect(sut.executeSoft('service-inexistente')).rejects.toThrow(
-        ServiceNotFoundError,
-      );
+      await expect(sut.executeSoft('service-inexistente')).rejects.toThrow(ServiceNotFoundError);
 
       expect(servicesRepository.softDelete).not.toHaveBeenCalled();
     });
 
     it('deve garantir que apenas serviços ativos podem ser desativados', async () => {
-      const mockService = {
-        id: 'service-1', name: 'Corte de Cabelo',
-        ativo: false, // Já está desativado
-      };
+      const mockService = makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        active: false, // Já está desativado
+      });
 
       servicesRepository.findById.mockResolvedValue(mockService);
 
@@ -65,10 +66,11 @@ describe('DeleteServiceUseCase', () => {
 
   describe('executePermanent (hard delete)', () => {
     it('deve excluir permanentemente um serviço existente', async () => {
-      const mockService = {
-        id: 'service-1', name: 'Corte de Cabelo',
-        ativo: true,
-      };
+      const mockService = makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        active: true,
+      });
 
       servicesRepository.findById.mockResolvedValue(mockService);
       servicesRepository.delete.mockResolvedValue(undefined);
@@ -91,10 +93,11 @@ describe('DeleteServiceUseCase', () => {
     });
 
     it('deve permitir exclusão mesmo para serviços inativos', async () => {
-      const mockService = {
-        id: 'service-1', name: 'Corte de Cabelo',
-        ativo: false,
-      };
+      const mockService = makeService({
+        id: 'service-1',
+        name: 'Corte de Cabelo',
+        active: false,
+      });
 
       servicesRepository.findById.mockResolvedValue(mockService);
       servicesRepository.delete.mockResolvedValue(undefined);
@@ -106,10 +109,11 @@ describe('DeleteServiceUseCase', () => {
   });
 
   it('deve diferenciar corretamente entre soft delete e hard delete', async () => {
-    const mockService = {
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
-    };
+    const mockService = makeService({
+      id: 'service-1',
+      name: 'Corte de Cabelo',
+      active: true,
+    });
 
     servicesRepository.findById.mockResolvedValue(mockService);
     servicesRepository.softDelete.mockResolvedValue(undefined);
@@ -124,4 +128,3 @@ describe('DeleteServiceUseCase', () => {
     expect(servicesRepository.delete).toHaveBeenCalledTimes(1);
   });
 });
-

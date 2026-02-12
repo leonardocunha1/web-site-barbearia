@@ -3,10 +3,11 @@ import { Prisma, Role, User } from '@prisma/client';
 
 export const createMockUsersRepository = () => {
   const createMockUser = (overrides?: Partial<User>): User => ({
-    id: 'user-1', name: 'John Doe',
+    id: 'user-1',
+    name: 'John Doe',
     email: 'john@example.com',
-    senha: 'hashed-password',
-    telefone: null,
+    password: 'hashed-password',
+    phone: null,
     role: 'CLIENT' as Role,
     emailVerified: true,
     active: true,
@@ -16,103 +17,82 @@ export const createMockUsersRepository = () => {
   });
 
   const mockRepository = {
-    findById: vi
-      .fn()
-      .mockImplementation((id: string) =>
-        Promise.resolve(createMockUser({ id })),
-      ),
+    findById: vi.fn().mockImplementation((id: string) => Promise.resolve(createMockUser({ id }))),
     findByEmail: vi
       .fn()
-      .mockImplementation((email: string) =>
-        Promise.resolve(createMockUser({ email })),
-      ),
+      .mockImplementation((email: string) => Promise.resolve(createMockUser({ email }))),
     create: vi.fn().mockImplementation((data: Prisma.UserCreateInput) =>
       Promise.resolve(
         createMockUser({
-          ...date,
+          ...data,
           createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
           updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
         }),
       ),
     ),
-    update: vi
-      .fn()
-      .mockImplementation((id: string, date: Prisma.UserUpdateInput) =>
-        Promise.resolve(
-          createMockUser({
-            id,
-            ...(data.name
-              ? { name:
-                    typeof data.name === 'string' ? data.name : data.name.set,
-                }
-              : {}),
-            ...(data.email
-              ? {
-                  email:
-                    typeof data.email === 'string'
-                      ? data.email
-                      : data.email.set,
-                }
-              : {}),
-            ...(data.role ? { role: data.role as Role } : {}),
-          }),
-        ),
+    update: vi.fn().mockImplementation((id: string, data: Prisma.UserUpdateInput) =>
+      Promise.resolve(
+        createMockUser({
+          id,
+          ...(data.name
+            ? {
+                name: typeof data.name === 'string' ? data.name : data.name.set,
+              }
+            : {}),
+          ...(data.email
+            ? {
+                email: typeof data.email === 'string' ? data.email : data.email.set,
+              }
+            : {}),
+          ...(data.role ? { role: data.role as Role } : {}),
+        }),
       ),
+    ),
     updatePassword: vi
       .fn()
       .mockImplementation((id: string, password: string) =>
-        Promise.resolve(createMockUser({ id, senha: password })),
+        Promise.resolve(createMockUser({ id, password })),
       ),
     listUsers: vi
       .fn()
-      .mockImplementation(
-        (params: {
-          page: number;
-          limit: number;
-          role?: Role;
-          name?: string;
-        }) => {
-          const users = [
-            createMockUser({ id: 'user-1', name: 'John Doe', role: 'CLIENT' }),
-            createMockUser({
-              id: 'user-2', name: 'Jane Barber',
-              role: 'PROFESSIONAL',
-            }),
-          ];
-
-          return Promise.resolve(
-            users
-              .filter(
-                (user) =>
-                  (!params.role || user.role === params.role) &&
-                  (!params.name || user.name.includes(params.name)),
-              )
-              .slice(
-                (params.page - 1) * params.limit,
-                params.page * params.limit,
-              ),
-          );
-        },
-      ),
-    countUsers: vi
-      .fn()
-      .mockImplementation((params: { role?: Role; name?: string }) => {
+      .mockImplementation((params: { page: number; limit: number; role?: Role; name?: string }) => {
         const users = [
           createMockUser({ id: 'user-1', name: 'John Doe', role: 'CLIENT' }),
           createMockUser({
-            id: 'user-2', name: 'Jane Barber',
+            id: 'user-2',
+            name: 'Jane Barber',
             role: 'PROFESSIONAL',
           }),
         ];
 
         return Promise.resolve(
-          users.filter(
-            (user) =>
-              (!params.role || user.role === params.role) &&
-              (!params.name || user.name.includes(params.name)),
-          ).length,
+          users
+            .filter(
+              (user) =>
+                (!params.role || user.role === params.role) &&
+                (!params.name || user.name.includes(params.name)),
+            )
+            .slice((params.page - 1) * params.limit, params.page * params.limit),
         );
       }),
+    countUsers: vi.fn().mockImplementation((params: { role?: Role; name?: string }) => {
+      const users = [
+        createMockUser({ id: 'user-1', name: 'John Doe', role: 'CLIENT' }),
+        createMockUser({
+          id: 'user-2',
+          name: 'Jane Barber',
+          role: 'PROFESSIONAL',
+        }),
+      ];
+
+      return Promise.resolve(
+        users.filter(
+          (user) =>
+            (!params.role || user.role === params.role) &&
+            (!params.name || user.name.includes(params.name)),
+        ).length,
+      );
+    }),
     anonymize: vi.fn().mockResolvedValue(undefined),
   };
 

@@ -5,4 +5,3 @@ export function makeDeleteServiceUseCase() {
   const servicesRepository = new PrismaServicesRepository();
   return new DeleteServiceUseCase(servicesRepository);
 }
-

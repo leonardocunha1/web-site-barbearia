@@ -3,6 +3,7 @@ import { ToggleProfessionalStatusUseCase } from './toggle-professional-status-us
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import { makeProfessional } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockProfessionalsRepository = IProfessionalsRepository & {
@@ -22,19 +23,17 @@ describe('ToggleProfessionalStatusUseCase', () => {
 
   it('deve alternar o status de ativo para falso quando profissional está ativo', async () => {
     // Mock do profissional ativo
-    const mockProfessional = {
+    const mockProfessional = makeProfessional({
       id: 'prof-123',
       userId: 'user-123',
-      especialidade: 'Dentista',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      specialty: 'Dentista',
+      active: true,
+    });
 
     professionalsRepository.findById.mockResolvedValue(mockProfessional);
     professionalsRepository.update.mockResolvedValue({
       ...mockProfessional,
-      ativo: false,
+      active: false,
     });
 
     // Executar
@@ -43,29 +42,27 @@ describe('ToggleProfessionalStatusUseCase', () => {
     // Verificar
     expect(result).toEqual({
       ...mockProfessional,
-      ativo: false,
+      active: false,
     });
     expect(professionalsRepository.findById).toHaveBeenCalledWith('prof-123');
     expect(professionalsRepository.update).toHaveBeenCalledWith('prof-123', {
-      ativo: false,
+      active: false,
     });
   });
 
   it('deve alternar o status de ativo para verdadeiro quando profissional está inativo', async () => {
     // Mock do profissional inativo
-    const mockProfessional = {
+    const mockProfessional = makeProfessional({
       id: 'prof-123',
       userId: 'user-123',
-      especialidade: 'Dentista',
-      ativo: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      specialty: 'Dentista',
+      active: false,
+    });
 
     professionalsRepository.findById.mockResolvedValue(mockProfessional);
     professionalsRepository.update.mockResolvedValue({
       ...mockProfessional,
-      ativo: true,
+      active: true,
     });
 
     // Executar
@@ -74,10 +71,10 @@ describe('ToggleProfessionalStatusUseCase', () => {
     // Verificar
     expect(result).toEqual({
       ...mockProfessional,
-      ativo: true,
+      active: true,
     });
     expect(professionalsRepository.update).toHaveBeenCalledWith('prof-123', {
-      ativo: true,
+      active: true,
     });
   });
 
@@ -85,26 +82,22 @@ describe('ToggleProfessionalStatusUseCase', () => {
     professionalsRepository.findById.mockResolvedValue(null);
 
     // Executar e verificar
-    await expect(sut.execute('prof-inexistente')).rejects.toThrow(
-      ProfessionalNotFoundError,
-    );
+    await expect(sut.execute('prof-inexistente')).rejects.toThrow(ProfessionalNotFoundError);
     expect(professionalsRepository.update).not.toHaveBeenCalled();
   });
 
   it('deve chamar o repositório com os parâmetros corretos', async () => {
-    const mockProfessional = {
+    const mockProfessional = makeProfessional({
       id: 'prof-123',
       userId: 'user-123',
-      especialidade: 'Dentista',
-      ativo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      specialty: 'Dentista',
+      active: true,
+    });
 
     professionalsRepository.findById.mockResolvedValue(mockProfessional);
     professionalsRepository.update.mockResolvedValue({
       ...mockProfessional,
-      ativo: false,
+      active: false,
     });
 
     await sut.execute('prof-123');
@@ -112,9 +105,8 @@ describe('ToggleProfessionalStatusUseCase', () => {
     expect(professionalsRepository.update).toHaveBeenCalledWith(
       'prof-123',
       expect.objectContaining({
-        ativo: false,
+        active: false,
       }),
     );
   });
 });
-

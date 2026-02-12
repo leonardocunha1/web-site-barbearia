@@ -50,21 +50,12 @@ export class CreateBookingUseCase {
 
     await this.loadEntities(request.userId, request.professionalId);
 
-    const services = await this.loadAndValidateServices(
-      request.services,
-      request.professionalId,
-    );
+    const services = await this.loadAndValidateServices(request.services, request.professionalId);
 
     const totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
-    const endDateTime = new Date(
-      request.startDateTime.getTime() + totalDuration * 60000,
-    );
+    const endDateTime = new Date(request.startDateTime.getTime() + totalDuration * 60000);
 
-    await this.ensureNoConflict(
-      request.professionalId,
-      request.startDateTime,
-      endDateTime,
-    );
+    await this.ensureNoConflict(request.professionalId, request.startDateTime, endDateTime);
 
     const totalValue = services.reduce((sum, s) => sum + s.price, 0);
 
@@ -105,9 +96,10 @@ export class CreateBookingUseCase {
 
     const booking = await this.bookingsRepository.create({
       startDateTime: request.startDateTime,
-      endDateTime: endDateTime,
+      endDateTime,
       notes: request.notes,
-      user: { connect: { id: request.userId } }, professional: { connect: { id: request.professionalId } },
+      user: { connect: { id: request.userId } },
+      professional: { connect: { id: request.professionalId } },
       status: 'PENDING',
       totalAmount: parseFloat(bonusResult.finalValue.toFixed(2)),
       pointsUsed: bonusResult.pointsUsed,
@@ -115,7 +107,10 @@ export class CreateBookingUseCase {
       couponDiscount,
       items: {
         create: services.map((s) => ({
-          serviceProfessionalId: s.id, price: s.price, name: s.service.name, duration: s.duration,
+          serviceProfessionalId: s.id,
+          price: s.price,
+          name: s.service.name,
+          duration: s.duration,
           serviceId: s.service.id,
         })),
       },
@@ -230,11 +225,10 @@ export class CreateBookingUseCase {
   ) {
     const result = await Promise.all(
       services.map(async ({ serviceId }) => {
-        const sp =
-          await this.serviceProfessionalRepository.findByServiceAndProfessional(
-            serviceId,
-            professionalId,
-          );
+        const sp = await this.serviceProfessionalRepository.findByServiceAndProfessional(
+          serviceId,
+          professionalId,
+        );
         if (!sp) throw new ServiceProfessionalNotFoundError();
         if (sp.duration <= 0) throw new InvalidDurationError();
         return sp;
@@ -244,11 +238,7 @@ export class CreateBookingUseCase {
     return result;
   }
 
-  private async ensureNoConflict(
-    professionalId: string,
-    start: Date,
-    end: Date,
-  ) {
+  private async ensureNoConflict(professionalId: string, start: Date, end: Date) {
     const conflicting = await this.bookingsRepository.findOverlappingBooking(
       professionalId,
       start,
@@ -261,16 +251,8 @@ export class CreateBookingUseCase {
     if (totalValue <= 0) throw new InvalidBonusRedemptionError();
 
     const [bookingBonus, loyaltyBonus] = await Promise.all([
-      this.userBonusRepository.getValidPointsWithExpiration(
-        userId,
-        'BOOKING_POINTS',
-        new Date(),
-      ),
-      this.userBonusRepository.getValidPointsWithExpiration(
-        userId,
-        'LOYALTY',
-        new Date(),
-      ),
+      this.userBonusRepository.getValidPointsWithExpiration(userId, 'BOOKING_POINTS', new Date()),
+      this.userBonusRepository.getValidPointsWithExpiration(userId, 'LOYALTY', new Date()),
     ]);
 
     const allBonuses = [
@@ -280,17 +262,13 @@ export class CreateBookingUseCase {
 
     const totalPoints = allBonuses.reduce((sum, b) => sum + b.points, 0);
 
-    if (totalPoints < MIN_POINTS_TO_REDEEM)
-      throw new InsufficientBonusPointsError();
+    if (totalPoints < MIN_POINTS_TO_REDEEM) throw new InsufficientBonusPointsError();
 
     const maxDiscount = totalValue - MIN_BOOKING_VALUE_AFTER_DISCOUNT;
     const maxPoints = Math.ceil(maxDiscount / VALUE_PER_POINT);
     const pointsToUse = Math.min(totalPoints, maxPoints);
     const discount = pointsToUse * VALUE_PER_POINT;
-    const finalValue = Math.max(
-      totalValue - discount,
-      MIN_BOOKING_VALUE_AFTER_DISCOUNT,
-    );
+    const finalValue = Math.max(totalValue - discount, MIN_BOOKING_VALUE_AFTER_DISCOUNT);
 
     let remaining = pointsToUse;
     const bonusesSorted = [...allBonuses].sort((a, b) => {
@@ -328,4 +306,3 @@ export class CreateBookingUseCase {
     });
   }
 }
-

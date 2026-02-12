@@ -12,11 +12,10 @@ export interface IServicesRepository {
   list(params: {
     page: number;
     limit: number;
-    nome?: string;
-    categoria?: string;
-    ativo?: boolean;
+    name?: string;
+    category?: string;
+    active?: boolean;
     professionalId?: string;
   }): Promise<{ services: ServiceDTO[]; total: number }>;
   existsProfessional(professionalId: string): Promise<boolean>;
 }
-

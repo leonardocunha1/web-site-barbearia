@@ -17,10 +17,7 @@ export class UpdateCouponUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute({
-    couponId,
-    data,
-  }: UpdateCouponRequest): Promise<UpdateCouponResponse> {
+  async execute({ couponId, data }: UpdateCouponRequest): Promise<UpdateCouponResponse> {
     // Verifica se o cupom existe
     const existingCoupon = await this.couponRepository.findById(couponId);
     if (!existingCoupon) {
@@ -29,9 +26,7 @@ export class UpdateCouponUseCase {
 
     // Verifica se o novo código já existe (se estiver sendo alterado)
     if (data.code && data.code !== existingCoupon.code) {
-      const couponWithSameCode = await this.couponRepository.findByCode(
-        data.code,
-      );
+      const couponWithSameCode = await this.couponRepository.findByCode(data.code);
       if (couponWithSameCode) {
         throw new DuplicateCouponError();
       }
@@ -48,23 +43,15 @@ export class UpdateCouponUseCase {
     if (data.scope || data.serviceId || data.professionalId) {
       this.validateCouponScope(
         data.scope || existingCoupon.scope,
-        data.serviceId !== undefined
-          ? data.serviceId
-          : existingCoupon.serviceId,
-        data.professionalId !== undefined
-          ? data.professionalId
-          : existingCoupon.professionalId,
+        data.serviceId !== undefined ? data.serviceId : existingCoupon.serviceId,
+        data.professionalId !== undefined ? data.professionalId : existingCoupon.professionalId,
       );
     }
 
     if (data.startDate || data.endDate) {
       this.validateCouponDates(
         data.startDate ? new Date(data.startDate) : existingCoupon.startDate,
-        data.endDate
-          ? data.endDate
-            ? new Date(data.endDate)
-            : null
-          : existingCoupon.endDate,
+        data.endDate ? (data.endDate ? new Date(data.endDate) : null) : existingCoupon.endDate,
       );
     }
 
@@ -74,25 +61,18 @@ export class UpdateCouponUseCase {
       data.minBookingValue !== null &&
       data.minBookingValue <= 0
     ) {
-      throw new InvalidCouponValueError(
-        'O valor mínimo de agendamento deve ser maior que zero',
-      );
+      throw new InvalidCouponValueError('O valor mínimo de agendamento deve ser maior que zero');
     }
 
     if (data.maxUses !== undefined && data.maxUses <= 0) {
-      throw new InvalidCouponValueError(
-        'O número máximo de usos deve ser maior que zero',
-      );
+      throw new InvalidCouponValueError('O número máximo de usos deve ser maior que zero');
     }
 
     // Verificação de existência de serviço ou profissional
     const scope = data.scope || existingCoupon.scope;
-    const serviceId =
-      data.serviceId !== undefined ? data.serviceId : existingCoupon.serviceId;
+    const serviceId = data.serviceId !== undefined ? data.serviceId : existingCoupon.serviceId;
     const professionalId =
-      data.professionalId !== undefined
-        ? data.professionalId
-        : existingCoupon.professionalId;
+      data.professionalId !== undefined ? data.professionalId : existingCoupon.professionalId;
 
     if (scope === 'SERVICE' && serviceId) {
       const service = await this.servicesRepository.findById(serviceId);
@@ -102,8 +82,7 @@ export class UpdateCouponUseCase {
     }
 
     if (scope === 'PROFESSIONAL' && professionalId) {
-      const professional =
-        await this.professionalsRepository.findById(professionalId);
+      const professional = await this.professionalsRepository.findById(professionalId);
       if (!professional) {
         throw new ProfessionalNotFoundError();
       }
@@ -114,11 +93,7 @@ export class UpdateCouponUseCase {
       ...date,
       startDate: data.startDate ? new Date(data.startDate) : undefined,
       endDate:
-        data.endDate !== undefined
-          ? data.endDate
-            ? new Date(data.endDate)
-            : null
-          : undefined,
+        data.endDate !== undefined ? (data.endDate ? new Date(data.endDate) : null) : undefined,
     });
 
     return { coupon };
@@ -127,21 +102,15 @@ export class UpdateCouponUseCase {
   // Métodos de validação (iguais aos do CreateCouponUseCase)
   private validateCouponValue(type: string, value: number): void {
     if (type !== 'FREE' && value <= 0) {
-      throw new InvalidCouponValueError(
-        'O valor do cupom deve ser maior que zero',
-      );
+      throw new InvalidCouponValueError('O valor do cupom deve ser maior que zero');
     }
 
     if (type === 'PERCENTAGE' && value > 100) {
-      throw new InvalidCouponValueError(
-        'O valor percentual não pode ser maior que 100',
-      );
+      throw new InvalidCouponValueError('O valor percentual não pode ser maior que 100');
     }
 
     if (type === 'FREE' && value !== 0) {
-      throw new InvalidCouponValueError(
-        'Cupons do tipo "FREE" devem ter valor 0',
-      );
+      throw new InvalidCouponValueError('Cupons do tipo "FREE" devem ter valor 0');
     }
   }
 
@@ -152,9 +121,7 @@ export class UpdateCouponUseCase {
   ): void {
     if (scope === 'GLOBAL') {
       if (serviceId || professionalId) {
-        throw new InvalidCouponScopeError(
-          'Cupons globais não devem ter IDs de escopo',
-        );
+        throw new InvalidCouponScopeError('Cupons globais não devem ter IDs de escopo');
       }
       return;
     }
@@ -176,9 +143,7 @@ export class UpdateCouponUseCase {
     }[scope];
 
     if (hasExtraIds) {
-      throw new InvalidCouponScopeError(
-        `${scope} não deve ter IDs de escopo adicionais`,
-      );
+      throw new InvalidCouponScopeError(`${scope} não deve ter IDs de escopo adicionais`);
     }
   }
 
@@ -186,22 +151,15 @@ export class UpdateCouponUseCase {
     const now = new Date();
 
     if (startDate && startDate < now) {
-      throw new InvalidCouponDatesError(
-        'A data de início não pode ser no passado',
-      );
+      throw new InvalidCouponDatesError('A data de início não pode ser no passado');
     }
 
     if (endDate && endDate < now) {
-      throw new InvalidCouponDatesError(
-        'A data de término não pode ser no passado',
-      );
+      throw new InvalidCouponDatesError('A data de término não pode ser no passado');
     }
 
     if (startDate && endDate && endDate < startDate) {
-      throw new InvalidCouponDatesError(
-        'A data de término não pode ser anterior à data de início',
-      );
+      throw new InvalidCouponDatesError('A data de término não pode ser anterior à data de início');
     }
   }
 }
-

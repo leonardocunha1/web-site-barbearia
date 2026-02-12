@@ -65,7 +65,9 @@ export async function businessHoursRoutes(app: FastifyTypedInstance) {
         description: 'Listar horários de funcionamento.',
         params: listBusinessHoursParamsSchema,
         response: {
-          200: z.object({ businessHours: z.array(businessHoursSchema) }).describe('Horários de funcionamento encontrados.'),
+          200: z
+            .object({ businessHours: z.array(businessHoursSchema) })
+            .describe('Horários de funcionamento encontrados.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
           404: z.object({ message: z.string() }).describe('Horário não encontrado'),
         },
@@ -94,4 +96,3 @@ export async function businessHoursRoutes(app: FastifyTypedInstance) {
     deleteBusinessHours,
   );
 }
-

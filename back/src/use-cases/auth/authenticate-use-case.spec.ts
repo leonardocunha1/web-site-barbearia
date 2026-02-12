@@ -14,14 +14,14 @@ describe('AuthenticateUseCase', () => {
   it('should authenticate a valid user with correct credentials', async () => {
     const user = createMockUser({
       email: 'john@example.com',
-      senha: await bcrypt.hash('password', 6),
+      password: await bcrypt.hash('password', 6),
     });
 
     mockRepository.findByEmail.mockResolvedValue(user);
 
     const result = await useCase.execute({
       email: 'john@example.com',
-      senha: 'password',
+      password: 'password',
     });
 
     expect(result.user.id).toBe(user.id);
@@ -34,34 +34,36 @@ describe('AuthenticateUseCase', () => {
     mockRepository.findByEmail.mockResolvedValue(null);
 
     await expect(
-      useCase.execute({ email: 'invalid@example.com', senha: 'password' }),
+      useCase.execute({ email: 'invalid@example.com', password: 'password' }),
     ).rejects.toThrowError(InvalidCredentialsError);
   });
 
   it('should throw EmailNotVerifiedError when email is not verified', async () => {
-    const user = createMockUser({ emailVerified: false });
+    const hashedPassword = await bcrypt.hash('password', 6);
+    const user = createMockUser({ emailVerified: false, password: hashedPassword });
     mockRepository.findByEmail.mockResolvedValue(user);
 
     await expect(
-      useCase.execute({ email: 'john@example.com', senha: 'password' }),
+      useCase.execute({ email: 'john@example.com', password: 'password' }),
     ).rejects.toThrowError(EmailNotVerifiedError);
   });
 
   it('should throw InactiveUserError when user is inactive', async () => {
-    const user = createMockUser({ active: false });
+    const hashedPassword = await bcrypt.hash('password', 6);
+    const user = createMockUser({ active: false, password: hashedPassword });
     mockRepository.findByEmail.mockResolvedValue(user);
 
     await expect(
-      useCase.execute({ email: 'john@example.com', senha: 'password' }),
+      useCase.execute({ email: 'john@example.com', password: 'password' }),
     ).rejects.toThrowError(InactiveUserError);
   });
 
   it('should throw InvalidCredentialsError when password is incorrect', async () => {
-    const user = createMockUser({ senha: 'hashed-password' });
+    const user = createMockUser({ password: 'hashed-password' });
     mockRepository.findByEmail.mockResolvedValue(user);
 
     await expect(
-      useCase.execute({ email: 'john@example.com', senha: 'wrong-password' }),
+      useCase.execute({ email: 'john@example.com', password: 'wrong-password' }),
     ).rejects.toThrowError(InvalidCredentialsError);
   });
 });

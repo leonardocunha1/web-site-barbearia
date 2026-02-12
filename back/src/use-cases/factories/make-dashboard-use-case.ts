@@ -6,8 +6,5 @@ export function makeProfessionalDashboardUseCase() {
   const professionalsRepository = new PrismaProfessionalsRepository();
   const bookingsRepository = new PrismaBookingsRepository();
 
-  return new GetProfessionalDashboardUseCase(
-    professionalsRepository,
-    bookingsRepository,
-  );
+  return new GetProfessionalDashboardUseCase(professionalsRepository, bookingsRepository);
 }

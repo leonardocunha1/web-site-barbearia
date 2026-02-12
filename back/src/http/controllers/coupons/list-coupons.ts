@@ -1,15 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import {
-  CouponSortField,
-  CouponSortOrder,
-  listCouponsQuerySchema,
-} from '@/schemas/coupon';
+import { CouponSortField, CouponSortOrder, listCouponsQuerySchema } from '@/schemas/coupon';
 import { makeListCouponsUseCase } from '@/use-cases/factories/make-list-coupons-use-case';
 
-export async function listCoupons(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function listCoupons(request: FastifyRequest, reply: FastifyReply) {
   const {
     page,
     limit,
@@ -24,8 +17,9 @@ export async function listCoupons(
     serviceId,
   } = listCouponsQuerySchema.parse(request.query);
 
-  const sortCriteria: { field: CouponSortField; order: CouponSortOrder }[] =
-    sort?.length ? sort : [{ field: 'createdAt', order: 'desc' }];
+  const sortCriteria: { field: CouponSortField; order: CouponSortOrder }[] = sort?.length
+    ? sort
+    : [{ field: 'createdAt', order: 'desc' }];
 
   const filters = {
     ...(code && { code }),

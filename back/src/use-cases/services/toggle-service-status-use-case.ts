@@ -13,21 +13,15 @@ interface ToggleServiceStatusResponse {
 export class ToggleServiceStatusUseCase {
   constructor(private servicesRepository: IServicesRepository) {}
 
-  async execute({
-    id,
-  }: ToggleServiceStatusRequest): Promise<ToggleServiceStatusResponse> {
+  async execute({ id }: ToggleServiceStatusRequest): Promise<ToggleServiceStatusResponse> {
     const serviceExists = await this.servicesRepository.findById(id);
 
     if (!serviceExists) {
       throw new ServiceNotFoundError();
     }
 
-    const service = await this.servicesRepository.toggleStatus(
-      id,
-      !serviceExists.active,
-    );
+    const service = await this.servicesRepository.toggleStatus(id, !serviceExists.active);
 
     return { service };
   }
 }
-

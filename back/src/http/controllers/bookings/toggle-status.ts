@@ -5,13 +5,8 @@ import {
   updateBookingStatusBodySchema,
 } from '@/schemas/bookings';
 
-export async function updateBookingStatus(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const { bookingId } = getOrUpdateBookingStatusParamsSchema.parse(
-    request.params,
-  );
+export async function updateBookingStatus(request: FastifyRequest, reply: FastifyReply) {
+  const { bookingId } = getOrUpdateBookingStatusParamsSchema.parse(request.params);
   const { status, reason } = updateBookingStatusBodySchema.parse(request.body);
 
   const updateBookingStatusUseCase = makeUpdateBookingStatusUseCase();

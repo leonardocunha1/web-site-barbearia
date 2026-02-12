@@ -4,6 +4,7 @@ import { BusinessHoursNotFoundError } from '../errors/business-hours-not-found-e
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { DeleteBusinessHoursUseCase } from './delete-business-hours-use-case';
 import { createMockBusinessHoursRepository } from '@/mock/mock-repositories';
+import { makeBusinessHours } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockBusinessHoursRepository = IBusinessHoursRepository & {
@@ -25,7 +26,7 @@ describe('Delete Business Hours Use Case', () => {
     useCase = new DeleteBusinessHoursUseCase(mockBusinessHoursRepository);
   });
 
-  const mockBusinessHours = {
+  const mockBusinessHours = makeBusinessHours({
     id: 'hours-123',
     professionalId: 'prof-123',
     dayOfWeek: 1,
@@ -33,8 +34,8 @@ describe('Delete Business Hours Use Case', () => {
     closesAt: '18:00',
     breakStart: '12:00',
     breakEnd: '13:00',
-    ativo: true,
-  };
+    active: true,
+  });
 
   it('deve deletar horários de funcionamento com sucesso', async () => {
     // Configurar mocks
@@ -109,9 +110,3 @@ describe('Delete Business Hours Use Case', () => {
     expect(mockBusinessHoursRepository.delete).not.toHaveBeenCalled();
   });
 });
-
-
-
-
-
-

@@ -5,11 +5,12 @@ import { deleteHoliday } from './delete';
 import { listHolidays } from './list';
 import { FastifyTypedInstance } from '@/types';
 import { z } from 'zod';
-import { createHolidayBodySchema } from '@/schemas/holidays';
 import {
+  createHolidayBodySchema,
   deleteHolidayParamsSchema,
   listHolidaysResponseSchema,
 } from '@/schemas/holidays';
+
 import { paginationSchema } from '@/schemas/pagination';
 
 export async function holidayRoutes(app: FastifyTypedInstance) {

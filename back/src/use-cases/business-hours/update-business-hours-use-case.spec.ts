@@ -9,6 +9,7 @@ import {
   createMockBusinessHoursRepository,
   createMockProfessionalsRepository,
 } from '@/mock/mock-repositories';
+import { makeBusinessHours, makeProfessional } from '@/test/factories';
 
 // Tipos para os mocks
 type MockBusinessHoursRepository = IBusinessHoursRepository & {
@@ -39,14 +40,14 @@ describe('Update Business Hours Use Case', () => {
     );
   });
 
-  const mockProfessional = {
+  const mockProfessional = makeProfessional({
     id: 'prof-123',
     userId: 'user-123',
-    especialidade: 'Especialidade Teste',
-    ativo: true,
-  };
+    specialty: 'Especialidade Teste',
+    active: true,
+  });
 
-  const mockExistingHours = {
+  const mockExistingHours = makeBusinessHours({
     id: 'hours-123',
     professionalId: 'prof-123',
     dayOfWeek: 1,
@@ -54,15 +55,13 @@ describe('Update Business Hours Use Case', () => {
     closesAt: '18:00',
     breakStart: '12:00',
     breakEnd: '13:00',
-    ativo: true,
-  };
+    active: true,
+  });
 
   it('deve atualizar horários de funcionamento com sucesso', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
     mockBusinessHoursRepository.update.mockResolvedValue({
       ...mockExistingHours,
       opensAt: '09:00',
@@ -83,12 +82,11 @@ describe('Update Business Hours Use Case', () => {
       opensAt: '09:00',
       closesAt: '19:00',
     });
-    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith(
+    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith('prof-123');
+    expect(mockBusinessHoursRepository.findByProfessionalAndDay).toHaveBeenCalledWith(
       'prof-123',
+      1,
     );
-    expect(
-      mockBusinessHoursRepository.findByProfessionalAndDay,
-    ).toHaveBeenCalledWith('prof-123', 1);
     expect(mockBusinessHoursRepository.update).toHaveBeenCalledWith('hours-123', {
       opensAt: '09:00',
       closesAt: '19:00',
@@ -100,9 +98,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve atualizar apenas a pausa mantendo outros horários', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
     mockBusinessHoursRepository.update.mockResolvedValue({
       ...mockExistingHours,
       breakStart: '12:30',
@@ -134,9 +130,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve remover a pausa quando informado null', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
     mockBusinessHoursRepository.update.mockResolvedValue({
       ...mockExistingHours,
       breakStart: null,
@@ -202,9 +196,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve lançar erro quando apenas um horário de pausa é informado', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
 
     // Executar e verificar - apenas breakStart
     await expect(
@@ -228,9 +220,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve lançar erro para formato de horário inválido', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
 
     // Executar e verificar - opensAt inválido
     await expect(
@@ -254,9 +244,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve lançar erro quando horário de abertura é após fechamento', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
 
     // Executar e verificar
     await expect(
@@ -272,9 +260,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve lançar erro quando pausa está fora do horário de funcionamento', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
 
     // Executar e verificar - pausa antes da abertura
     await expect(
@@ -300,9 +286,7 @@ describe('Update Business Hours Use Case', () => {
   it('deve lançar erro quando início da pausa é após o fim', async () => {
     // Configurar mocks
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockExistingHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockExistingHours);
 
     // Executar e verificar
     await expect(
@@ -315,8 +299,3 @@ describe('Update Business Hours Use Case', () => {
     ).rejects.toThrow(InvalidBusinessHoursError);
   });
 });
-
-
-
-
-

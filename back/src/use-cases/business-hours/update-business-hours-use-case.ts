@@ -1,7 +1,4 @@
-import {
-  IBusinessHoursRepository,
-  BusinessHours,
-} from '@/repositories/business-hours-repository';
+import { IBusinessHoursRepository, BusinessHours } from '@/repositories/business-hours-repository';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { InvalidTimeFormatError } from '../errors/invalid-time-format-error';
@@ -15,8 +12,7 @@ export class UpdateBusinessHoursUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute( date: UpdateBusinessHoursUseCaseRequest,
-  ): Promise<BusinessHours> {
+  async execute(data: UpdateBusinessHoursUseCaseRequest): Promise<BusinessHours> {
     // Fail-fast: validate all business rules
     await this.validateProfessionalExists(data.professionalId);
     this.validateDayOfWeek(data.dayOfWeek);
@@ -42,11 +38,8 @@ export class UpdateBusinessHoursUseCase {
    * Validates that professional exists
    * @throws {ProfessionalNotFoundError} If professional not found
    */
-  private async validateProfessionalExists(
-    professionalId: string,
-  ): Promise<void> {
-    const professional =
-      await this.professionalsRepository.findById(professionalId);
+  private async validateProfessionalExists(professionalId: string): Promise<void> {
+    const professional = await this.professionalsRepository.findById(professionalId);
     if (!professional) {
       throw new ProfessionalNotFoundError();
     }
@@ -70,11 +63,10 @@ export class UpdateBusinessHoursUseCase {
     professionalId: string,
     dayOfWeek: number,
   ): Promise<BusinessHours> {
-    const existingHours =
-      await this.businessHoursRepository.findByProfessionalAndDay(
-        professionalId,
-        dayOfWeek,
-      );
+    const existingHours = await this.businessHoursRepository.findByProfessionalAndDay(
+      professionalId,
+      dayOfWeek,
+    );
 
     if (!existingHours) {
       throw new InvalidBusinessHoursError(
@@ -89,35 +81,27 @@ export class UpdateBusinessHoursUseCase {
    * Validates that break times are both provided or both omitted
    * @throws {InvalidBusinessHoursError} If only one break time is provided
    */
-  private validateBreakTimesProvided(
-    breakStart?: string | null,
-    breakEnd?: string | null,
-  ): void {
+  private validateBreakTimesProvided(breakStart?: string | null, breakEnd?: string | null): void {
     if (
       (breakStart !== undefined && breakEnd === undefined) ||
       (breakStart === undefined && breakEnd !== undefined)
     ) {
-      throw new InvalidBusinessHoursError(
-        'Informar breakStart e breakEnd juntos.',
-      );
+      throw new InvalidBusinessHoursError('Informar breakStart e breakEnd juntos.');
     }
   }
 
   /**
    * Merges update data with existing data
    */
-  private mergeWithExistingData( date: UpdateBusinessHoursUseCaseRequest,
+  private mergeWithExistingData(
+    data: UpdateBusinessHoursUseCaseRequest,
     existingHours: BusinessHours,
   ) {
     return {
       opensAt: data.opensAt ?? existingHours.opensAt,
       closesAt: data.closesAt ?? existingHours.closesAt,
-      breakStart:
-        data.breakStart !== undefined
-          ? data.breakStart
-          : existingHours.breakStart,
-      breakEnd:
-        data.breakEnd !== undefined ? data.breakEnd : existingHours.breakEnd,
+      breakStart: data.breakStart !== undefined ? data.breakStart : existingHours.breakStart,
+      breakEnd: data.breakEnd !== undefined ? data.breakEnd : existingHours.breakEnd,
     };
   }
 
@@ -133,8 +117,7 @@ export class UpdateBusinessHoursUseCase {
   }): void {
     this.validateTimeFormat(updatedData.opensAt);
     this.validateTimeFormat(updatedData.closesAt);
-    if (updatedData.breakStart)
-      this.validateTimeFormat(updatedData.breakStart);
+    if (updatedData.breakStart) this.validateTimeFormat(updatedData.breakStart);
     if (updatedData.breakEnd) this.validateTimeFormat(updatedData.breakEnd);
   }
 
@@ -154,36 +137,25 @@ export class UpdateBusinessHoursUseCase {
     const closes = parse(closesAt, 'HH:mm', new Date());
 
     if (!isBefore(opens, closes)) {
-      throw new InvalidBusinessHoursError(
-        'Horário de abertura deve ser antes do fechamento',
-      );
+      throw new InvalidBusinessHoursError('Horário de abertura deve ser antes do fechamento');
     }
 
     // Validação de pausa
     if (breakStart || breakEnd) {
       if (!breakStart || !breakEnd) {
-        throw new InvalidBusinessHoursError(
-          'Pausa deve ter início e fim definidos',
-        );
+        throw new InvalidBusinessHoursError('Pausa deve ter início e fim definidos');
       }
 
       const start = parse(breakStart, 'HH:mm', new Date());
       const end = parse(breakEnd, 'HH:mm', new Date());
 
       if (!isBefore(start, end)) {
-        throw new InvalidBusinessHoursError(
-          'Início da pausa deve ser antes do fim',
-        );
+        throw new InvalidBusinessHoursError('Início da pausa deve ser antes do fim');
       }
 
       if (isBefore(start, opens) || isAfter(end, closes)) {
-        throw new InvalidBusinessHoursError(
-          'Pausa deve estar dentro do horário de funcionamento',
-        );
+        throw new InvalidBusinessHoursError('Pausa deve estar dentro do horário de funcionamento');
       }
     }
   }
 }
-
-
-

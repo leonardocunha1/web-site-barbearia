@@ -58,4 +58,3 @@ export * from './business-hours-not-found-error';
 export * from './booking-update-error';
 export * from './booking-not-found-error';
 export * from './bonus-already-assigned-error';
-

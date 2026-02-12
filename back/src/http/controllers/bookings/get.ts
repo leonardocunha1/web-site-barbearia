@@ -3,9 +3,7 @@ import { makeGetBookingUseCase } from '@/use-cases/factories/make-get-booking-us
 import { getOrUpdateBookingStatusParamsSchema } from '@/schemas/bookings';
 
 export async function getBooking(request: FastifyRequest, reply: FastifyReply) {
-  const { bookingId } = getOrUpdateBookingStatusParamsSchema.parse(
-    request.params,
-  );
+  const { bookingId } = getOrUpdateBookingStatusParamsSchema.parse(request.params);
 
   const getBookingUseCase = makeGetBookingUseCase();
   const { booking } = await getBookingUseCase.execute({ bookingId });

@@ -1,59 +1,43 @@
 import { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { InvalidServicePriceDurationError } from '../errors/invalid-service-price-duration';
 
-interface ServiceUpdate {
-  serviceId: string; price: number; duration: number;
-  linked: boolean;
-}
-
-interface UpdateProfessionalServicesRequest {
+interface UpdateServiceProfessionalRequest {
+  serviceId: string;
   professionalId: string;
-  services: ServiceUpdate[];
+  price: number;
+  duration: number;
 }
 
-export class UpdateProfessionalServicesUseCase {
-  constructor(
-    private serviceProfessionalRepository: IServiceProfessionalRepository,
-  ) {}
+export class UpdateServiceProfessionalUseCase {
+  constructor(private serviceProfessionalRepository: IServiceProfessionalRepository) {}
 
-  async execute({ professionalId, services }: UpdateProfessionalServicesRequest): Promise<void> {
-    for (const { serviceId, preco, duracao, linked } of services) {
-      const existing =
-        await this.serviceProfessionalRepository.findByServiceAndProfessional(
-          serviceId,
-          professionalId,
-        );
-
-      if (linked) {
-        if (preco <= 0 || duracao <= 0) {
-          throw new InvalidServicePriceDurationError();
-        }
-
-        if (existing) {
-          await this.serviceProfessionalRepository.updateByServiceAndProfessional({
-            serviceId,
-            professionalId,
-            preco,
-            duracao,
-          });
-        } else {
-          await this.serviceProfessionalRepository.create({
-            service: { connect: { id: serviceId } },
-            professional: { connect: { id: professionalId } },
-            preco,
-            duracao,
-          });
-        }
-      } else {
-        if (existing) {
-          await this.serviceProfessionalRepository.deleteByServiceAndProfessional(
-            serviceId,
-            professionalId,
-          );
-        }
-      }
+  async execute({
+    serviceId,
+    professionalId,
+    price,
+    duration,
+  }: UpdateServiceProfessionalRequest): Promise<void> {
+    // Validate price and duration
+    if (price <= 0 || duration <= 0) {
+      throw new InvalidServicePriceDurationError();
     }
+
+    // Check if service exists for professional
+    const existing = await this.serviceProfessionalRepository.findByServiceAndProfessional(
+      serviceId,
+      professionalId,
+    );
+
+    if (!existing) {
+      throw new Error('Serviço não encontrado para esse profissional.');
+    }
+
+    // Update the service-professional relationship
+    await this.serviceProfessionalRepository.updateByServiceAndProfessional({
+      serviceId,
+      professionalId,
+      price,
+      duration,
+    });
   }
 }
-
-

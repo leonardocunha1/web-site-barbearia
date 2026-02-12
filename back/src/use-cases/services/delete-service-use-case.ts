@@ -39,4 +39,3 @@ export class DeleteServiceUseCase {
     return serviceExists;
   }
 }
-

@@ -17,8 +17,11 @@ import {
 } from '@/mock/mock-repositories';
 import { InsufficientBonusPointsError } from '../errors/insufficient-bonus-points-error';
 import { InvalidBonusRedemptionError } from '../errors/invalid-bonus-redemption-error';
+import { CouponBonusConflictError } from '../errors/coupon-bonus-conflict-error';
+import { InvalidCouponError } from './invalid-coupon-error';
+import { makeProfessional, makeService, makeServiceProfessional, makeUser } from '@/test/factories';
 
-// Função para criar todos os mocks
+// FunÃ§Ã£o para criar todos os mocks
 const createMockRepositories = () => ({
   bookingsRepository: createMockBookingsRepository(),
   usersRepository: createMockUsersRepository(),
@@ -28,6 +31,47 @@ const createMockRepositories = () => ({
   bonusRedemptionRepository: createMockBonusRedemptionRepository(),
   couponRepository: createMockCouponsRepository(),
 });
+
+const makeValidUser = (overrides: Parameters<typeof makeUser>[0] = {}) =>
+  makeUser({
+    id: 'user-1',
+    name: 'UsuÃ¡rio Teste',
+    email: 'user@example.com',
+    password: 'hash',
+    role: 'USER' as any,
+    ...overrides,
+  });
+
+const makeValidProfessional = (overrides: Parameters<typeof makeProfessional>[0] = {}) =>
+  makeProfessional({
+    id: 'pro-1',
+    userId: 'user-1',
+    specialty: 'Especialidade',
+    active: true,
+    ...overrides,
+  });
+
+const makeValidService = (overrides: Parameters<typeof makeService>[0] = {}) =>
+  makeService({
+    id: 'srv-1',
+    name: 'ServiÃ§o X',
+    description: 'DescriÃ§Ã£o do ServiÃ§o X',
+    category: 'CATEGORIA_TESTE',
+    active: true,
+    ...overrides,
+  });
+
+const makeValidServiceProfessional = (
+  overrides: Parameters<typeof makeServiceProfessional>[0] = {},
+) =>
+  makeServiceProfessional({
+    id: 'sp-1',
+    professionalId: 'pro-1',
+    service: makeValidService(),
+    price: 100,
+    duration: 60,
+    ...overrides,
+  });
 
 describe('CreateBookingUseCase', () => {
   let useCase: CreateBookingUseCase;
@@ -55,44 +99,26 @@ describe('CreateBookingUseCase', () => {
     const mockServiceId = 'srv-1';
     const mockServiceProfessionalId = 'sp-1';
 
-    mockRepos.usersRepository.findById.mockResolvedValue({
-      id: mockUserId, name: 'Usuário Teste',
-      email: 'user@example.com',
-      senha: 'hash',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      role: 'USER',
-    });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: mockProfessionalId, name: 'Profissional Teste',
-      email: 'pro@example.com',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ativo: true,
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(
+      makeValidUser({ id: mockUserId, role: 'USER' as any }),
+    );
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: mockProfessionalId, active: true }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: mockServiceProfessionalId,
-        professionalId: mockProfessionalId, price: 100, duration: 60,
-        service: {
-          id: mockServiceId, name: 'Serviço X', description: 'Descrição do Serviço X',
-          categoria: 'CATEGORIA_TESTE',
-          ativo: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        professionalId: mockProfessionalId,
+        service: makeValidService({ id: mockServiceId }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
       id: mockBookingId,
-      startDateTime: startDateTime,
+      startDateTime,
       endDateTime: new Date(startDateTime.getTime() + 60 * 60000),
-      notes: 'observações',
+      notes: 'observaÃ§Ãµes',
       userId: mockUserId,
       professionalId: mockProfessionalId,
       status: 'PENDING',
@@ -109,23 +135,27 @@ describe('CreateBookingUseCase', () => {
       professionalId: mockProfessionalId,
       services: [{ serviceId: mockServiceId }],
       startDateTime,
-      notes: 'observações',
+      notes: 'observaÃ§Ãµes',
     });
 
     expect(mockRepos.bookingsRepository.create).toHaveBeenCalledWith({
-      startDateTime: startDateTime,
+      startDateTime,
       coupon: undefined,
       couponDiscount: 0,
       endDateTime: new Date(startDateTime.getTime() + 60 * 60000),
-      notes: 'observações',
-      user: { connect: { id: mockUserId } }, professional: { connect: { id: mockProfessionalId } },
+      notes: 'observaÃ§Ãµes',
+      user: { connect: { id: mockUserId } },
+      professional: { connect: { id: mockProfessionalId } },
       status: 'PENDING',
       totalAmount: 100,
       pointsUsed: 0,
       items: {
         create: [
           {
-            serviceProfessionalId: mockServiceProfessionalId, price: 100, name: 'Serviço X', duration: 60,
+            serviceProfessionalId: mockServiceProfessionalId,
+            price: 100,
+            name: 'ServiÃ§o X',
+            duration: 60,
             serviceId: mockServiceId,
           },
         ],
@@ -135,7 +165,7 @@ describe('CreateBookingUseCase', () => {
     expect(result.id).toBe(mockBookingId);
   });
 
-  it('deve lançar erro se data for no passado', async () => {
+  it('deve lanÃ§ar erro se data for no passado', async () => {
     const pastDate = new Date(Date.now() - 1000);
 
     await expect(() =>
@@ -148,12 +178,12 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(InvalidDateTimeError);
   });
 
-  it('deve lançar erro se usuário não existir', async () => {
+  it('deve lanÃ§ar erro se usuÃ¡rio nÃ£o existir', async () => {
     const futureDate = new Date(Date.now() + 3600000);
     mockRepos.usersRepository.findById.mockResolvedValue(null);
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
 
     await expect(() =>
       useCase.execute({
@@ -165,9 +195,9 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(UserNotFoundError);
   });
 
-  it('deve lançar erro se profissional não existir', async () => {
+  it('deve lanÃ§ar erro se profissional nÃ£o existir', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
     mockRepos.professionalsRepository.findById.mockResolvedValue(null);
 
     await expect(() =>
@@ -180,15 +210,13 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(ProfessionalNotFoundError);
   });
 
-  it('deve lançar erro se serviço não estiver vinculado ao profissional', async () => {
+  it('deve lanÃ§ar erro se serviÃ§o nÃ£o estiver vinculado ao profissional', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
-    mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      null,
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
     );
+    mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(null);
 
     await expect(() =>
       useCase.execute({
@@ -200,22 +228,25 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(ServiceProfessionalNotFoundError);
   });
 
-  it('deve lançar erro se duração do serviço for inválida', async () => {
+  it('deve lanÃ§ar erro se duraÃ§Ã£o do serviÃ§o for invÃ¡lida', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 0, // duração inválida
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        duration: 0, // duraÃ§Ã£o invÃ¡lida
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
 
     await expect(() =>
@@ -228,22 +259,25 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(InvalidDurationError);
   });
 
-  it('deve lançar erro se houver agendamento no mesmo horário', async () => {
+  it('deve lanÃ§ar erro se houver agendamento no mesmo horÃ¡rio', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue({
       id: 'existing',
@@ -259,32 +293,44 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(TimeSlotAlreadyBookedError);
   });
 
-  it('deve calcular corretamente para múltiplos serviços', async () => {
+  it('deve calcular corretamente para mÃºltiplos serviÃ§os', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional
       .mockResolvedValueOnce({
-        // Primeiro serviço
-        id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 30,
-        service: {
-          id: 'srv-1', name: 'Serviço A', description: null,
-          categoria: null,
-          ativo: true,
-        },
+        // Primeiro serviÃ§o
+        ...makeValidServiceProfessional({
+          id: 'sp-1',
+          professionalId: 'pro-1',
+          price: 100,
+          duration: 30,
+          service: makeValidService({
+            id: 'srv-1',
+            name: 'ServiÃ§o A',
+            description: null,
+            category: null,
+            active: true,
+          }),
+        }),
       })
       .mockResolvedValueOnce({
-        // Segundo serviço
-        id: 'sp-2',
-        professionalId: 'pro-1', price: 150, duration: 45,
-        service: {
-          id: 'srv-2', name: 'Serviço B', description: null,
-          categoria: null,
-          ativo: true,
-        },
+        // Segundo serviÃ§o
+        ...makeValidServiceProfessional({
+          id: 'sp-2',
+          professionalId: 'pro-1',
+          price: 150,
+          duration: 45,
+          service: makeValidService({
+            id: 'srv-2',
+            name: 'ServiÃ§o B',
+            description: null,
+            category: null,
+            active: true,
+          }),
+        }),
       });
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
@@ -296,39 +342,40 @@ describe('CreateBookingUseCase', () => {
     });
 
     const createCall = mockRepos.bookingsRepository.create.mock.calls[0][0];
-    expect(createCall.endDateTime).toEqual(
-      new Date(futureDate.getTime() + 75 * 60000),
-    ); // 30 + 45 minutos
+    expect(createCall.endDateTime).toEqual(new Date(futureDate.getTime() + 75 * 60000)); // 30 + 45 minutos
     expect(createCall.totalAmount).toBe(250); // 100 + 150
     expect(createCall.items.create).toHaveLength(2);
   });
 
-  it('deve aplicar desconto de bônus corretamente', async () => {
+  it('deve aplicar desconto de bÃ´nus corretamente', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        price: 100,
+        duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
-    mockRepos.userBonusRepository.getValidPointsWithExpiration.mockResolvedValue(
-      [
-        {
-          points: 200,
-          type: 'BOOKING_POINTS',
-          expiresAt: new Date(Date.now() + 86400000),
-        },
-      ],
+    mockRepos.userBonusRepository.getValidPointsWithExpiration.mockImplementation(
+      async (_userId, type) => {
+        if (type === 'BOOKING_POINTS') {
+          return { points: 200, expiresAt: new Date(Date.now() + 86400000) };
+        }
+        return { points: 0 };
+      },
     );
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
@@ -358,14 +405,18 @@ describe('CreateBookingUseCase', () => {
       expect.objectContaining({
         startDateTime: futureDate,
         endDateTime: new Date(futureDate.getTime() + 60 * 60000),
-        user: { connect: { id: 'user-1' } }, professional: { connect: { id: 'pro-1' } },
+        user: { connect: { id: 'user-1' } },
+        professional: { connect: { id: 'pro-1' } },
         status: 'PENDING',
         totalAmount: 0,
         pointsUsed: 200,
         items: {
           create: [
             expect.objectContaining({
-              serviceProfessionalId: 'sp-1', price: 100, name: 'Serviço X', duration: 60,
+              serviceProfessionalId: 'sp-1',
+              price: 100,
+              name: 'ServiÃ§o X',
+              duration: 60,
               serviceId: 'srv-1',
             }),
           ],
@@ -381,32 +432,35 @@ describe('CreateBookingUseCase', () => {
     });
   });
 
-  it('deve lançar erro se não houver pontos suficientes para resgate', async () => {
+  it('deve lanÃ§ar erro se nÃ£o houver pontos suficientes para resgate', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        price: 100,
+        duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
-    mockRepos.userBonusRepository.getValidPointsWithExpiration.mockResolvedValue(
-      [
-        {
-          points: 5,
-          type: 'BOOKING_POINTS',
-          expiresAt: new Date(Date.now() + 86400000),
-        },
-      ],
+    mockRepos.userBonusRepository.getValidPointsWithExpiration.mockImplementation(
+      async (_userId, type) => {
+        if (type === 'BOOKING_POINTS') {
+          return { points: 5, expiresAt: new Date(Date.now() + 86400000) };
+        }
+        return { points: 0 };
+      },
     );
 
     await expect(
@@ -420,57 +474,42 @@ describe('CreateBookingUseCase', () => {
     ).rejects.toThrow(InsufficientBonusPointsError);
   });
 
-  it('deve usar apenas pontos necessários quando desconto excede valor total', async () => {
+  it('deve usar apenas pontos necessÃ¡rios quando desconto excede valor total', async () => {
     const futureDate = new Date(Date.now() + 3600000);
     const mockBookingId = 'booking-excess-bonus-456'; // Novo ID para este teste
 
-    mockRepos.usersRepository.findById.mockResolvedValue({
-      id: 'user-1', name: 'Usuário Teste',
-      email: 'user@example.com',
-      passwordHash: 'hash',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      role: 'USER',
-    });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1', name: 'Profissional Teste',
-      email: 'pro@example.com',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      fotoPerfil: null,
-      telefone: null, description: null,
-      enderecoId: null,
-      ativo: true,
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(
+      makeValidUser({ id: 'user-1', role: 'USER' as any }),
+    );
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1', active: true }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 50, // Valor menor do serviço duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: 'desc',
-          categoria: 'CAT',
-          ativo: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        professionalId: 'pro-1',
+        price: 50, // Valor menor do serviÃ§o duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: 'desc',
+          category: 'CAT',
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
-    mockRepos.userBonusRepository.getValidPointsWithExpiration.mockResolvedValue(
-      [
-        {
-          points: 200,
-          type: 'BOOKING_POINTS',
-          expiresAt: new Date(Date.now() + 86400000),
-        },
-      ],
+    mockRepos.userBonusRepository.getValidPointsWithExpiration.mockImplementation(
+      async (_userId, type) => {
+        if (type === 'BOOKING_POINTS') {
+          return { points: 200, expiresAt: new Date(Date.now() + 86400000) };
+        }
+        return { points: 0 };
+      },
     );
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
-      id: mockBookingId, // Essencial para que booking.id não seja undefined
+      id: mockBookingId, // Essencial para que booking.id nÃ£o seja undefined
       startDateTime: futureDate,
       endDateTime: new Date(futureDate.getTime() + 60 * 60000),
       notes: undefined,
@@ -478,7 +517,7 @@ describe('CreateBookingUseCase', () => {
       professionalId: 'pro-1',
       status: 'PENDING',
       valorTotal: 50,
-      totalAmount: 0, // Valor mínimo após desconto
+      totalAmount: 0, // Valor mÃ­nimo apÃ³s desconto
       desconto: 50,
       pointsUsed: 100, // Pontos para cobrir R$49.99 (49.99 / 0.5 = 99.98, Math.ceil -> 100)
       createdAt: new Date(),
@@ -493,39 +532,42 @@ describe('CreateBookingUseCase', () => {
       useBonusPoints: true,
     });
 
-    // Verifica que só foram usados 100 pontos (R$50 de serviço - R$0.01 valor mínimo = R$49.99 de desconto. R$49.99 / R$0.50 por ponto = 99.98 pontos, arredondado para cima para 100 pontos)
+    // Verifica que sÃ³ foram usados 100 pontos (R$50 de serviÃ§o - R$0.01 valor mÃ­nimo = R$49.99 de desconto. R$49.99 / R$0.50 por ponto = 99.98 pontos, arredondado para cima para 100 pontos)
     expect(mockRepos.bookingsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         totalAmount: 0,
-        pointsUsed: 100, // A lógica do use case deve calcular isso
+        pointsUsed: 100, // A lÃ³gica do use case deve calcular isso
       }),
     );
 
     // Verifica se o resgate foi registrado corretamente
     expect(mockRepos.bonusRedemptionRepository.create).toHaveBeenCalledWith({
       user: { connect: { id: 'user-1' } },
-      booking: { connect: { id: result.id } }, // result.id não deve ser undefined agora
+      booking: { connect: { id: result.id } }, // result.id nÃ£o deve ser undefined agora
       pointsUsed: 100,
       discount: 50, // O desconto efetivamente aplicado
     });
   });
 
-  it('não deve tentar usar pontos se valor total for zero', async () => {
+  it('nÃ£o deve tentar usar pontos se valor total for zero', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 0, // Serviço gratuito duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        price: 0, // ServiÃ§o gratuito duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
@@ -542,20 +584,24 @@ describe('CreateBookingUseCase', () => {
 
   it('deve aplicar desconto de cupom corretamente', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        price: 100,
+        duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
@@ -602,22 +648,26 @@ describe('CreateBookingUseCase', () => {
     expect(mockRepos.couponRepository.registerRedemption).toHaveBeenCalled();
   });
 
-  it('deve lançar erro ao usar cupom e pontos simultaneamente', async () => {
+  it('deve lanÃ§ar erro ao usar cupom e pontos simultaneamente', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        price: 100,
+        duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
@@ -647,27 +697,29 @@ describe('CreateBookingUseCase', () => {
         couponCode: 'DESC20',
         useBonusPoints: true,
       }),
-    ).rejects.toThrow(
-      'Não é possível usar cupom de desconto e pontos de bônus no mesmo agendamento',
-    );
+    ).rejects.toThrow(CouponBonusConflictError);
   });
 
-  it('deve lançar erro para cupom inválido', async () => {
+  it('deve lanÃ§ar erro para cupom invÃ¡lido', async () => {
     const futureDate = new Date(Date.now() + 3600000);
-    mockRepos.usersRepository.findById.mockResolvedValue({ id: 'user-1' });
-    mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-    });
+    mockRepos.usersRepository.findById.mockResolvedValue(makeValidUser({ id: 'user-1' }));
+    mockRepos.professionalsRepository.findById.mockResolvedValue(
+      makeValidProfessional({ id: 'pro-1' }),
+    );
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+      makeValidServiceProfessional({
         id: 'sp-1',
-        professionalId: 'pro-1', price: 100, duration: 60,
-        service: {
-          id: 'srv-1', name: 'Serviço X', description: null,
-          categoria: null,
-          ativo: true,
-        },
-      },
+        professionalId: 'pro-1',
+        price: 100,
+        duration: 60,
+        service: makeValidService({
+          id: 'srv-1',
+          name: 'ServiÃ§o X',
+          description: null,
+          category: null,
+          active: true,
+        }),
+      }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue(null);
 
@@ -681,6 +733,6 @@ describe('CreateBookingUseCase', () => {
         startDateTime: futureDate,
         couponCode: 'CUPOMINVALIDO',
       }),
-    ).rejects.toThrow('Cupom inválido');
+    ).rejects.toThrow(InvalidCouponError);
   });
 });

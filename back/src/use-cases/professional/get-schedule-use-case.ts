@@ -34,11 +34,10 @@ export class GetProfessionalScheduleUseCase {
     }
 
     // Obter horário de funcionamento para o dia
-    const businessHours =
-      await this.businessHoursRepository.findByProfessionalAndDay(
-        professionalId,
-        startOfParsedDate.getDay(), // Pega o dia da semana (0-6)
-      );
+    const businessHours = await this.businessHoursRepository.findByProfessionalAndDay(
+      professionalId,
+      startOfParsedDate.getDay(), // Pega o dia da semana (0-6)
+    );
 
     if (!businessHours || !businessHours.active) {
       return {
@@ -90,9 +89,7 @@ export class GetProfessionalScheduleUseCase {
     const [openHour, openMinute] = businessHours.opensAt.split(':').map(Number);
     currentTime.setHours(openHour, openMinute, 0, 0);
 
-    const [closeHour, closeMinute] = businessHours.closesAt
-      .split(':')
-      .map(Number);
+    const [closeHour, closeMinute] = businessHours.closesAt.split(':').map(Number);
     const closeTime = new Date(date);
     closeTime.setHours(closeHour, closeMinute, 0, 0);
 
@@ -102,15 +99,11 @@ export class GetProfessionalScheduleUseCase {
     let breakEnd: Date | null = null;
 
     if (hasBreak) {
-      const [breakStartHour, breakStartMinute] = businessHours
-        .breakStart!.split(':')
-        .map(Number);
+      const [breakStartHour, breakStartMinute] = businessHours.breakStart!.split(':').map(Number);
       breakStart = new Date(date);
       breakStart.setHours(breakStartHour, breakStartMinute, 0, 0);
 
-      const [breakEndHour, breakEndMinute] = businessHours
-        .breakEnd!.split(':')
-        .map(Number);
+      const [breakEndHour, breakEndMinute] = businessHours.breakEnd!.split(':').map(Number);
       breakEnd = new Date(date);
       breakEnd.setHours(breakEndHour, breakEndMinute, 0, 0);
     }
@@ -121,28 +114,20 @@ export class GetProfessionalScheduleUseCase {
 
       // Verificar se está no horário de pausa
       const isDuringBreak =
-        hasBreak &&
-        breakStart &&
-        breakEnd &&
-        currentTime >= breakStart &&
-        currentTime < breakEnd;
+        hasBreak && breakStart && breakEnd && currentTime >= breakStart && currentTime < breakEnd;
 
       if (!isDuringBreak) {
         // Verificar se há um agendamento que se sobrepõe a este slot
         const isBooked = bookings.some((booking) => {
-          const bookingStart = booking.dateHoraInicio;
+          const bookingStart = booking.startDateTime;
           const bookingEnd = booking.endDateTime;
           return (
-            isSameDay(bookingStart, date) &&
-            currentTime < bookingEnd &&
-            slotEnd > bookingStart
+            isSameDay(bookingStart, date) && currentTime < bookingEnd && slotEnd > bookingStart
           );
         });
 
         const booking = bookings.find(
-          (b) =>
-            isSameDay(b.dateHoraInicio, date) &&
-            format(b.dateHoraInicio, 'HH:mm') === timeStr,
+          (b) => isSameDay(b.startDateTime, date) && format(b.startDateTime, 'HH:mm') === timeStr,
         );
 
         slots.push({
@@ -152,9 +137,7 @@ export class GetProfessionalScheduleUseCase {
             ? {
                 id: booking.id,
                 clientName: booking.user.name,
-                services: booking.items.map(
-                  (item) => item.serviceProfessional.service.name,
-                ),
+                services: booking.items.map((item) => item.serviceProfessional.service.name),
               }
             : undefined,
         });
@@ -166,5 +149,3 @@ export class GetProfessionalScheduleUseCase {
     return slots;
   }
 }
-
-

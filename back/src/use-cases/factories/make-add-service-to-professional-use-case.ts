@@ -6,8 +6,7 @@ import { AddServiceToProfessionalUseCase } from '../service-professional/add-ser
 export function makeAddServiceToProfessionalUseCase() {
   const servicesRepository = new PrismaServicesRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
-  const serviceProfessionalRepository =
-    new PrismaServiceProfessionalRepository();
+  const serviceProfessionalRepository = new PrismaServiceProfessionalRepository();
 
   return new AddServiceToProfessionalUseCase(
     servicesRepository,
@@ -15,4 +14,3 @@ export function makeAddServiceToProfessionalUseCase() {
     serviceProfessionalRepository,
   );
 }
-

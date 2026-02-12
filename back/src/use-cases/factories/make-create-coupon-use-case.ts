@@ -8,9 +8,5 @@ export function makeCreateCouponUseCase() {
   const servicesRepository = new PrismaServicesRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
 
-  return new CreateCouponUseCase(
-    couponRepository,
-    servicesRepository,
-    professionalsRepository,
-  );
+  return new CreateCouponUseCase(couponRepository, servicesRepository, professionalsRepository);
 }

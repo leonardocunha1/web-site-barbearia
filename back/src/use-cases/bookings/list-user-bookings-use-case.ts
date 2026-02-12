@@ -1,6 +1,8 @@
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { validatePagination } from '@/utils/validate-pagination';
+import { BookingNotFoundError } from '../errors/booking-not-found-error';
+import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 import { ListBookingsUseCaseRequest, ListBookingsUseCaseResponse } from './types';
 
 export class ListBookingsUseCase {
@@ -25,6 +27,16 @@ export class ListBookingsUseCase {
       this.bookingsRepository.countByUserId(userId, filters),
     ]);
 
+    // Verificar se não há agendamentos
+    if (bookings.length === 0 && total === 0) {
+      throw new BookingNotFoundError();
+    }
+
+    // Verificar se algum agendamento pertence a outro usuário
+    if (bookings.some((booking) => booking.userId !== userId)) {
+      throw new UsuarioTentandoPegarInformacoesDeOutro();
+    }
+
     const totalPages = Math.ceil(total / limit);
     if (totalPages > 0 && page > totalPages) {
       throw new InvalidPageRangeError();
@@ -39,4 +51,3 @@ export class ListBookingsUseCase {
     };
   }
 }
-

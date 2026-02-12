@@ -2,12 +2,10 @@ import { prisma } from '@/lib/prisma';
 import { IBonusTransactionRepository } from '../bonus-transaction-repository';
 import { BonusTransaction, BonusType, Prisma } from '@prisma/client';
 
-export class PrismaBonusTransactionRepository
-  implements IBonusTransactionRepository
-{
-  async create( date: Prisma.BonusTransactionCreateInput,
-  ): Promise<BonusTransaction> {
-    return prisma.bonusTransaction.create({ date: {
+export class PrismaBonusTransactionRepository implements IBonusTransactionRepository {
+  async create(data: Prisma.BonusTransactionCreateInput): Promise<BonusTransaction> {
+    return prisma.bonusTransaction.create({
+      data: {
         userId: data.user.connect?.id ?? '',
         bookingId: data.booking?.connect?.id ?? null,
         type: data.type,
@@ -17,7 +15,8 @@ export class PrismaBonusTransactionRepository
       include: {
         user: {
           select: {
-            id: true, name: true,
+            id: true,
+            name: true,
           },
         },
         booking: {
@@ -36,7 +35,8 @@ export class PrismaBonusTransactionRepository
       include: {
         user: {
           select: {
-            id: true, name: true,
+            id: true,
+            name: true,
           },
         },
       },
@@ -58,10 +58,7 @@ export class PrismaBonusTransactionRepository
     });
   }
 
-  async sumPointsByUserAndType(
-    userId: string,
-    type: BonusType,
-  ): Promise<number> {
+  async sumPointsByUserAndType(userId: string, type: BonusType): Promise<number> {
     const result = await prisma.bonusTransaction.aggregate({
       where: {
         userId,
@@ -75,10 +72,7 @@ export class PrismaBonusTransactionRepository
     return result._sum.points || 0;
   }
 
-  async countByUserAndBooking(
-    userId: string,
-    bookingId: string,
-  ): Promise<number> {
+  async countByUserAndBooking(userId: string, bookingId: string): Promise<number> {
     return prisma.bonusTransaction.count({
       where: {
         userId,
@@ -87,4 +81,3 @@ export class PrismaBonusTransactionRepository
     });
   }
 }
-

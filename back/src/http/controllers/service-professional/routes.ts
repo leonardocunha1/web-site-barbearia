@@ -9,7 +9,6 @@ import {
   listProfessionalServicesQuerySchema,
   removeServiceFromProfessionalParamsSchema,
   servicesProfessionalSchema,
-  servicesSchema,
   updateProfessionalServicesBodySchema,
   updateProfessionalServicesParamsSchema,
 } from '@/schemas/services';

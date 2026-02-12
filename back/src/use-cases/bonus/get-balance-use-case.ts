@@ -39,18 +39,10 @@ export class GetBalanceUseCase {
 
     // Obtém os pontos válidos (não expirados)
     const { points: bookingPoints, expiresAt: bookingExpiresAt } =
-      await this.userBonusRepository.getValidPointsWithExpiration(
-        userId,
-        'BOOKING_POINTS',
-        now,
-      );
+      await this.userBonusRepository.getValidPointsWithExpiration(userId, 'BOOKING_POINTS', now);
 
     const { points: loyaltyPoints, expiresAt: loyaltyExpiresAt } =
-      await this.userBonusRepository.getValidPointsWithExpiration(
-        userId,
-        'LOYALTY',
-        now,
-      );
+      await this.userBonusRepository.getValidPointsWithExpiration(userId, 'LOYALTY', now);
 
     const totalPoints = bookingPoints + loyaltyPoints;
 
@@ -60,10 +52,7 @@ export class GetBalanceUseCase {
     const totalValue = bookingValue + loyaltyValue;
 
     // Determina a próxima data de expiração (a mais recente)
-    const nextExpiration = this.getNearestExpirationDate([
-      bookingExpiresAt,
-      loyaltyExpiresAt,
-    ]);
+    const nextExpiration = this.getNearestExpirationDate([bookingExpiresAt, loyaltyExpiresAt]);
 
     return {
       points: {
@@ -84,13 +73,10 @@ export class GetBalanceUseCase {
     return points * VALUE_PER_POINT;
   }
 
-  private getNearestExpirationDate(
-    dates: (Date | undefined)[],
-  ): Date | undefined {
+  private getNearestExpirationDate(dates: (Date | undefined)[]): Date | undefined {
     const validDates = dates.filter((d): d is Date => d instanceof Date);
     if (validDates.length === 0) return undefined;
 
     return new Date(Math.min(...validDates.map((date) => date.getTime())));
   }
 }
-

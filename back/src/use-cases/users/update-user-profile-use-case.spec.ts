@@ -5,6 +5,7 @@ import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { EmailAlreadyExistsError } from '../errors/user-email-already-exists-error';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
+import { makeUser } from '@/test/factories';
 
 type MockUsersRepository = IUsersRepository & {
   findById: ReturnType<typeof vi.fn>;
@@ -21,30 +22,34 @@ describe('Update User Profile Use Case', () => {
     useCase = new UpdateUserProfileUseCase(mockUsersRepository);
   });
 
-  const mockUser = {
-    id: 'user-123', name: 'John Doe',
+  const mockUser = makeUser({
+    id: 'user-123',
+    name: 'John Doe',
     email: 'john@example.com',
-    telefone: '123456789',
-    role: 'CLIENT',
+    phone: '123456789',
+    role: 'CLIENT' as any,
     active: true,
-  };
+  });
 
   it('deve atualizar o perfil do usuário com sucesso', async () => {
     // Configurar mocks
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     mockUsersRepository.update.mockResolvedValue({
-      ...mockUser, name: 'John Updated',
+      ...mockUser,
+      name: 'John Updated',
     });
 
     // Executar
     const result = await useCase.execute({
-      userId: 'user-123', name: 'John Updated',
+      userId: 'user-123',
+      name: 'John Updated',
     });
 
     // Verificar
     expect(result.user.name).toBe('John Updated');
     expect(mockUsersRepository.findById).toHaveBeenCalledWith('user-123');
-    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', { name: 'John Updated',
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      name: 'John Updated',
     });
   });
 
@@ -55,7 +60,8 @@ describe('Update User Profile Use Case', () => {
     // Executar e verificar
     await expect(
       useCase.execute({
-        userId: 'non-existent-user', name: 'John Updated',
+        userId: 'non-existent-user',
+        name: 'John Updated',
       }),
     ).rejects.toThrow(UserNotFoundError);
   });
@@ -90,24 +96,24 @@ describe('Update User Profile Use Case', () => {
     ).rejects.toThrow(InvalidDataError);
   });
 
-  it('deve atualizar apenas o telefone quando fornecido', async () => {
+  it('deve atualizar apenas o phone quando fornecido', async () => {
     // Configurar mocks
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
-      telefone: '987654321',
+      phone: '987654321',
     });
 
     // Executar
     const result = await useCase.execute({
       userId: 'user-123',
-      telefone: '987654321',
+      phone: '987654321',
     });
 
     // Verificar
     expect(result.user.phone).toBe('987654321');
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
-      telefone: '987654321',
+      phone: '987654321',
     });
   });
 
@@ -116,25 +122,28 @@ describe('Update User Profile Use Case', () => {
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     mockUsersRepository.findByEmail.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
-      ...mockUser, name: 'John Updated',
+      ...mockUser,
+      name: 'John Updated',
       email: 'updated@example.com',
-      telefone: '987654321',
+      phone: '987654321',
     });
 
     // Executar
     const result = await useCase.execute({
-      userId: 'user-123', name: 'John Updated',
+      userId: 'user-123',
+      name: 'John Updated',
       email: 'updated@example.com',
-      telefone: '987654321',
+      phone: '987654321',
     });
 
     // Verificar
     expect(result.user.name).toBe('John Updated');
     expect(result.user.email).toBe('updated@example.com');
     expect(result.user.phone).toBe('987654321');
-    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', { name: 'John Updated',
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
+      name: 'John Updated',
       email: 'updated@example.com',
-      telefone: '987654321',
+      phone: '987654321',
     });
   });
 
@@ -152,25 +161,24 @@ describe('Update User Profile Use Case', () => {
     expect(mockUsersRepository.update).not.toHaveBeenCalled();
   });
 
-  it('deve permitir atualizar para telefone null', async () => {
+  it('deve permitir atualizar para phone null', async () => {
     // Configurar mocks
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
-      telefone: null,
+      phone: null,
     });
 
     // Executar
     const result = await useCase.execute({
       userId: 'user-123',
-      telefone: null,
+      phone: null,
     });
 
     // Verificar
     expect(result.user.phone).toBeNull();
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
-      telefone: null,
+      phone: null,
     });
   });
 });
-

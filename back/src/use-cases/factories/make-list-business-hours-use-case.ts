@@ -6,12 +6,7 @@ export function makeListBusinessHoursUseCase() {
   const businessHoursRepository = new PrismaBusinessHoursRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
 
-  const useCase = new ListBusinessHoursUseCase(
-    businessHoursRepository,
-    professionalsRepository,
-  );
+  const useCase = new ListBusinessHoursUseCase(businessHoursRepository, professionalsRepository);
 
   return useCase;
 }
-
-

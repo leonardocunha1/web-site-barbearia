@@ -12,6 +12,7 @@ import {
   createMockServiceProfessionalRepository,
   createMockServicesRepository,
 } from '@/mock/mock-repositories';
+import { makeProfessional, makeService, makeServiceProfessional } from '@/test/factories';
 
 // Tipos para os mocks
 type MockServicesRepository = IServicesRepository & {
@@ -47,124 +48,131 @@ describe('AddServiceToProfessionalUseCase', () => {
 
   it('deve adicionar um serviço a um profissional com sucesso', async () => {
     // Configurar mocks
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
-    });
-
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
-
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      null,
+    servicesRepository.findById.mockResolvedValue(
+      makeService({ id: 'service-1', name: 'Corte de Cabelo', active: true }),
     );
-    serviceProfessionalRepository.create.mockResolvedValue({
-      id: 'sp-1',
-      serviceId: 'service-1',
-      professionalId: 'prof-1', price: 50, duration: 30,
-    });
+
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
+
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(null);
+    serviceProfessionalRepository.create.mockResolvedValue(
+      makeServiceProfessional({
+        id: 'sp-1',
+        serviceId: 'service-1',
+        professionalId: 'prof-1',
+        price: 50,
+        duration: 30,
+      }),
+    );
 
     // Executar
     await sut.execute({
       serviceId: 'service-1',
-      professionalId: 'prof-1', price: 50, duration: 30,
+      professionalId: 'prof-1',
+      price: 50,
+      duration: 30,
     });
 
     // Verificar
     expect(servicesRepository.findById).toHaveBeenCalledWith('service-1');
     expect(professionalsRepository.findById).toHaveBeenCalledWith('prof-1');
-    expect(
-      serviceProfessionalRepository.findByServiceAndProfessional,
-    ).toHaveBeenCalledWith('service-1', 'prof-1');
+    expect(serviceProfessionalRepository.findByServiceAndProfessional).toHaveBeenCalledWith(
+      'service-1',
+      'prof-1',
+    );
     expect(serviceProfessionalRepository.create).toHaveBeenCalledWith({
       service: { connect: { id: 'service-1' } },
-      professional: { connect: { id: 'prof-1' } }, price: 50, duration: 30,
+      professional: { connect: { id: 'prof-1' } },
+      price: 50,
+      duration: 30,
     });
   });
 
   it('deve lançar erro quando o serviço não existe', async () => {
     servicesRepository.findById.mockResolvedValue(null);
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
     await expect(
       sut.execute({
         serviceId: 'service-inexistente',
-        professionalId: 'prof-1', price: 50, duration: 30,
+        professionalId: 'prof-1',
+        price: 50,
+        duration: 30,
       }),
     ).rejects.toThrow(ServiceNotFoundError);
   });
 
   it('deve lançar erro quando o profissional não existe', async () => {
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
-    });
+    servicesRepository.findById.mockResolvedValue(
+      makeService({ id: 'service-1', name: 'Corte de Cabelo', active: true }),
+    );
     professionalsRepository.findById.mockResolvedValue(null);
 
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-inexistente', price: 50, duration: 30,
+        professionalId: 'prof-inexistente',
+        price: 50,
+        duration: 30,
       }),
     ).rejects.toThrow(ProfessionalNotFoundError);
   });
 
   it('deve lançar erro quando o serviço já foi adicionado ao profissional', async () => {
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
-    });
+    servicesRepository.findById.mockResolvedValue(
+      makeService({ id: 'service-1', name: 'Corte de Cabelo', active: true }),
+    );
 
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      {
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue({
+      ...makeServiceProfessional({
         id: 'sp-1',
         professionalId: 'prof-1',
-        service: {
-          id: 'service-1', name: 'Corte de Cabelo', description: null,
-          categoria: null,
-          ativo: true,
-        }, price: 50, duration: 30,
-      },
-    );
+        service: makeService({
+          id: 'service-1',
+          name: 'Corte de Cabelo',
+          description: null,
+          category: null,
+          active: true,
+        }),
+        price: 50,
+        duration: 30,
+      }),
+    });
 
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-1', price: 50, duration: 30,
+        professionalId: 'prof-1',
+        price: 50,
+        duration: 30,
       }),
     ).rejects.toThrow(ServiceAlreadyAddedError);
   });
 
   it('deve lançar erro quando o preço é inválido', async () => {
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
-    });
+    servicesRepository.findById.mockResolvedValue(
+      makeService({ id: 'service-1', name: 'Corte de Cabelo', active: true }),
+    );
 
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
     // Teste para preço zero
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-1', price: 0, duration: 30,
+        professionalId: 'prof-1',
+        price: 0,
+        duration: 30,
       }),
     ).rejects.toThrow(InvalidServicePriceDurationError);
 
@@ -172,7 +180,9 @@ describe('AddServiceToProfessionalUseCase', () => {
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-1', price: -10, duration: 30,
+        professionalId: 'prof-1',
+        price: -10,
+        duration: 30,
       }),
     ).rejects.toThrow(InvalidServicePriceDurationError);
 
@@ -181,22 +191,21 @@ describe('AddServiceToProfessionalUseCase', () => {
   });
 
   it('deve lançar erro quando a duração é inválida', async () => {
-    servicesRepository.findById.mockResolvedValue({
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
-    });
+    servicesRepository.findById.mockResolvedValue(
+      makeService({ id: 'service-1', name: 'Corte de Cabelo', active: true }),
+    );
 
-    professionalsRepository.findById.mockResolvedValue({
-      id: 'prof-1',
-      userId: 'user-1',
-      ativo: true,
-    });
+    professionalsRepository.findById.mockResolvedValue(
+      makeProfessional({ id: 'prof-1', userId: 'user-1', active: true }),
+    );
 
     // Teste para duração zero
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-1', price: 50, duration: 0,
+        professionalId: 'prof-1',
+        price: 50,
+        duration: 0,
       }),
     ).rejects.toThrow(InvalidServicePriceDurationError);
 
@@ -204,7 +213,9 @@ describe('AddServiceToProfessionalUseCase', () => {
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-1', price: 50, duration: -30,
+        professionalId: 'prof-1',
+        price: 50,
+        duration: -30,
       }),
     ).rejects.toThrow(InvalidServicePriceDurationError);
 
@@ -214,31 +225,33 @@ describe('AddServiceToProfessionalUseCase', () => {
 
   it('deve permitir preço e duração decimais válidos', async () => {
     servicesRepository.findById.mockResolvedValue({
-      id: 'service-1', name: 'Corte de Cabelo',
-      ativo: true,
+      id: 'service-1',
+      name: 'Corte de Cabelo',
+      active: true,
     });
 
     professionalsRepository.findById.mockResolvedValue({
       id: 'prof-1',
       userId: 'user-1',
-      ativo: true,
+      active: true,
     });
 
-    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
-      null,
-    );
+    serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(null);
     serviceProfessionalRepository.create.mockResolvedValue({
       id: 'sp-1',
       serviceId: 'service-1',
-      professionalId: 'prof-1', price: 49.99, duration: 45.5,
+      professionalId: 'prof-1',
+      price: 49.99,
+      duration: 45.5,
     });
 
     await expect(
       sut.execute({
         serviceId: 'service-1',
-        professionalId: 'prof-1', price: 49.99, duration: 45.5,
+        professionalId: 'prof-1',
+        price: 49.99,
+        duration: 45.5,
       }),
     ).resolves.not.toThrow();
   });
 });
-

@@ -9,6 +9,7 @@ import {
   createMockBookingsRepository,
   createMockProfessionalsRepository,
 } from '@/mock/mock-repositories';
+import { makeProfessional, makeUser } from '@/test/factories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = IProfessionalsRepository & {
@@ -38,14 +39,17 @@ describe('Get Professional Dashboard Use Case', () => {
   });
 
   const mockProfessional = {
-    id: 'prof-123',
-    userId: 'user-123',
-    especialidade: 'Dentista',
-    avatarUrl: 'avatar.jpg',
-    user: {
-      id: 'user-123', name: 'Dr. Smith',
+    ...makeProfessional({
+      id: 'prof-123',
+      userId: 'user-123',
+      specialty: 'Dentista',
+      avatarUrl: 'avatar.jpg',
+    }),
+    user: makeUser({
+      id: 'user-123',
+      name: 'Dr. Smith',
       email: 'dr.smith@example.com',
-    },
+    }),
   };
 
   const mockNextAppointments = [
@@ -53,13 +57,13 @@ describe('Get Professional Dashboard Use Case', () => {
       id: 'booking-1',
       startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1', name: 'Client 1',
+        id: 'user-1',
+        name: 'Client 1',
       },
       items: [
         {
           serviceProfessional: {
-            service: { name: 'Limpeza',
-            },
+            service: { name: 'Limpeza' },
           },
         },
       ],
@@ -92,22 +96,12 @@ describe('Get Professional Dashboard Use Case', () => {
 
   it('deve retornar dashboard para intervalo "today"', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
     mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(10);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
-      2500,
-    );
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      2,
-    ); // canceled
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      8,
-    ); // completed
-    mockBookingsRepository.findNextAppointments.mockResolvedValue(
-      mockNextAppointments,
-    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(2500);
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(2); // canceled
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(8); // completed
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(mockNextAppointments);
 
     // Executar
     const result = await useCase.execute('prof-123', { range: 'today' });
@@ -118,29 +112,21 @@ describe('Get Professional Dashboard Use Case', () => {
     // Verificar datas (hoje)
     const todayStart = startOfDay(new Date());
     const todayEnd = endOfDay(new Date());
-    expect(
-      mockBookingsRepository.countByProfessionalAndDate,
-    ).toHaveBeenCalledWith('prof-123', todayStart, todayEnd);
+    expect(mockBookingsRepository.countByProfessionalAndDate).toHaveBeenCalledWith(
+      'prof-123',
+      todayStart,
+      todayEnd,
+    );
   });
 
   it('deve retornar dashboard para intervalo "week"', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
     mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(15);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
-      3500,
-    );
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      3,
-    ); // canceled
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      12,
-    ); // completed
-    mockBookingsRepository.findNextAppointments.mockResolvedValue(
-      mockNextAppointments,
-    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(3500);
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(3); // canceled
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(12); // completed
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(mockNextAppointments);
 
     // Executar
     await useCase.execute('prof-123', { range: 'week' });
@@ -149,29 +135,21 @@ describe('Get Professional Dashboard Use Case', () => {
     const now = new Date();
     const weekStart = startOfDay(subDays(now, 6));
     const weekEnd = endOfDay(now);
-    expect(
-      mockBookingsRepository.countByProfessionalAndDate,
-    ).toHaveBeenCalledWith('prof-123', weekStart, weekEnd);
+    expect(mockBookingsRepository.countByProfessionalAndDate).toHaveBeenCalledWith(
+      'prof-123',
+      weekStart,
+      weekEnd,
+    );
   });
 
   it('deve retornar dashboard para intervalo "month"', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
     mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(50);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
-      12000,
-    );
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      5,
-    ); // canceled
-    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(
-      45,
-    ); // completed
-    mockBookingsRepository.findNextAppointments.mockResolvedValue(
-      mockNextAppointments,
-    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(12000);
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(5); // canceled
+    mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValueOnce(45); // completed
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(mockNextAppointments);
 
     // Executar
     await useCase.execute('prof-123', { range: 'month' });
@@ -180,9 +158,11 @@ describe('Get Professional Dashboard Use Case', () => {
     const now = new Date();
     const monthStart = startOfDay(subDays(now, 30));
     const monthEnd = endOfDay(now);
-    expect(
-      mockBookingsRepository.countByProfessionalAndDate,
-    ).toHaveBeenCalledWith('prof-123', monthStart, monthEnd);
+    expect(mockBookingsRepository.countByProfessionalAndDate).toHaveBeenCalledWith(
+      'prof-123',
+      monthStart,
+      monthEnd,
+    );
   });
 
   it('deve retornar dashboard para intervalo "custom" com datas válidas', async () => {
@@ -194,21 +174,15 @@ describe('Get Professional Dashboard Use Case', () => {
       completed: 4,
     };
 
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
-    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(
-      customMetrics.appointments,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
+    mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(customMetrics.appointments);
     mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
       customMetrics.earnings,
     );
     mockBookingsRepository.countByProfessionalAndStatus
       .mockResolvedValueOnce(customMetrics.canceled)
       .mockResolvedValueOnce(customMetrics.completed);
-    mockBookingsRepository.findNextAppointments.mockResolvedValue(
-      mockNextAppointments,
-    );
+    mockBookingsRepository.findNextAppointments.mockResolvedValue(mockNextAppointments);
 
     const startDate = new Date('2023-01-01');
     const endDate = new Date('2023-01-31');
@@ -230,20 +204,16 @@ describe('Get Professional Dashboard Use Case', () => {
       metrics: customMetrics,
       nextAppointments: mockNextAppointments.map((appointment) => ({
         id: appointment.id,
-        date: appointment.dateHoraInicio,
+        date: appointment.startDateTime,
         clientName: appointment.user.name,
-        service:
-          appointment.items[0]?.serviceProfessional.service.name ||
-          'Vários serviços',
+        service: appointment.items[0]?.serviceProfessional.service.name || 'Vários serviços',
         status: appointment.status as 'PENDING' | 'CONFIRMED',
       })),
     };
 
     // Verificar
     expect(result).toEqual(expectedResponse);
-    expect(
-      mockBookingsRepository.countByProfessionalAndDate,
-    ).toHaveBeenCalledWith(
+    expect(mockBookingsRepository.countByProfessionalAndDate).toHaveBeenCalledWith(
       'prof-123',
       startOfDay(startDate),
       endOfDay(endDate),
@@ -255,28 +225,24 @@ describe('Get Professional Dashboard Use Case', () => {
     mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(null);
 
     // Executar e verificar
-    await expect(
-      useCase.execute('non-existent-prof', { range: 'today' }),
-    ).rejects.toThrow(ProfessionalNotFoundError);
+    await expect(useCase.execute('non-existent-prof', { range: 'today' })).rejects.toThrow(
+      ProfessionalNotFoundError,
+    );
   });
 
   it('deve lançar erro para intervalo "custom" sem datas', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
 
     // Executar e verificar
-    await expect(
-      useCase.execute('prof-123', { range: 'custom' }),
-    ).rejects.toThrow(InvalidDataError);
+    await expect(useCase.execute('prof-123', { range: 'custom' })).rejects.toThrow(
+      InvalidDataError,
+    );
   });
 
   it('deve lançar erro para intervalo "custom" com datas inválidas', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
 
     // Executar e verificar - datas inválidas
     await expect(
@@ -299,9 +265,7 @@ describe('Get Professional Dashboard Use Case', () => {
 
   it('deve lançar erro para intervalo inválido', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
 
     // Executar e verificar
     await expect(
@@ -313,13 +277,9 @@ describe('Get Professional Dashboard Use Case', () => {
 
   it('deve retornar "Vários serviços" quando há múltiplos itens', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
     mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(1);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
-      100,
-    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(100);
     mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValue(0);
 
     // Criar mock com múltiplos itens (2 serviços)
@@ -327,28 +287,25 @@ describe('Get Professional Dashboard Use Case', () => {
       id: 'booking-multi',
       startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1', name: 'Client 1',
+        id: 'user-1',
+        name: 'Client 1',
       },
       items: [
         {
           serviceProfessional: {
-            service: { name: 'Limpeza',
-            },
+            service: { name: 'Limpeza' },
           },
         },
         {
           serviceProfessional: {
-            service: { name: 'Clareamento',
-            },
+            service: { name: 'Clareamento' },
           },
         },
       ],
       status: 'CONFIRMED',
     };
 
-    mockBookingsRepository.findNextAppointments.mockResolvedValue([
-      multiServiceAppointment,
-    ]);
+    mockBookingsRepository.findNextAppointments.mockResolvedValue([multiServiceAppointment]);
 
     // Executar
     const result = await useCase.execute('prof-123', { range: 'today' });
@@ -360,13 +317,9 @@ describe('Get Professional Dashboard Use Case', () => {
 
   it('deve retornar nome do serviço quando há apenas um item', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
     mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(1);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
-      100,
-    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(100);
     mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValue(0);
 
     // Criar mock com um único item
@@ -374,22 +327,20 @@ describe('Get Professional Dashboard Use Case', () => {
       id: 'booking-single',
       startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1', name: 'Client 1',
+        id: 'user-1',
+        name: 'Client 1',
       },
       items: [
         {
           serviceProfessional: {
-            service: { name: 'Limpeza',
-            },
+            service: { name: 'Limpeza' },
           },
         },
       ],
       status: 'CONFIRMED',
     };
 
-    mockBookingsRepository.findNextAppointments.mockResolvedValue([
-      singleServiceAppointment,
-    ]);
+    mockBookingsRepository.findNextAppointments.mockResolvedValue([singleServiceAppointment]);
 
     // Executar
     const result = await useCase.execute('prof-123', { range: 'today' });
@@ -401,13 +352,9 @@ describe('Get Professional Dashboard Use Case', () => {
 
   it('deve retornar "Serviço não especificado" quando não há itens', async () => {
     // Configurar mocks
-    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(
-      mockProfessional,
-    );
+    mockProfessionalsRepository.findByProfessionalId.mockResolvedValue(mockProfessional);
     mockBookingsRepository.countByProfessionalAndDate.mockResolvedValue(1);
-    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(
-      100,
-    );
+    mockBookingsRepository.getEarningsByProfessionalAndDate.mockResolvedValue(100);
     mockBookingsRepository.countByProfessionalAndStatus.mockResolvedValue(0);
 
     // Criar mock sem itens
@@ -415,15 +362,14 @@ describe('Get Professional Dashboard Use Case', () => {
       id: 'booking-no-service',
       startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1', name: 'Client 1',
+        id: 'user-1',
+        name: 'Client 1',
       },
       items: [],
       status: 'CONFIRMED',
     };
 
-    mockBookingsRepository.findNextAppointments.mockResolvedValue([
-      noServiceAppointment,
-    ]);
+    mockBookingsRepository.findNextAppointments.mockResolvedValue([noServiceAppointment]);
 
     // Executar
     const result = await useCase.execute('prof-123', { range: 'today' });
@@ -433,4 +379,3 @@ describe('Get Professional Dashboard Use Case', () => {
     expect(result.nextAppointments[0].service).toBe('Serviço não especificado');
   });
 });
-

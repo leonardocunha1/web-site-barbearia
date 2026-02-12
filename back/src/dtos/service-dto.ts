@@ -6,12 +6,13 @@ import { Service } from '@prisma/client';
  * Automatically excludes sensitive information
  */
 export type ServiceDTO = Service & {
-  profissionais: {
+  professionals: {
     id: string;
     professional: {
       id: string;
       user: {
-        id: string; name: string;
+        id: string;
+        name: string;
       };
     };
   }[];

@@ -9,20 +9,22 @@ export class PrismaHolidaysRepository implements IHolidaysRepository {
 
     return prisma.holiday.findFirst({
       where: {
-        professionalId: professionalId, date: {
+        professionalId,
+        date: {
           gte: startOfDayDate,
           lte: endOfDayDate,
         },
       },
-      select: { reason: true,
-      },
+      select: { reason: true },
     });
   }
 
   async addHoliday(professionalId: string, date: Date, reason: string) {
-    await prisma.holiday.create({ date: {
-        professionalId: professionalId, date: date,
-        motivo,
+    await prisma.holiday.create({
+      data: {
+        professionalId,
+        date,
+        reason,
       },
     });
   }
@@ -33,13 +35,15 @@ export class PrismaHolidaysRepository implements IHolidaysRepository {
 
     return prisma.holiday.findFirst({
       where: {
-        professionalId: professionalId, date: {
+        professionalId,
+        date: {
           gte: startOfDayDate,
           lte: endOfDayDate,
         },
       },
       select: {
-        id: true, reason: true,
+        id: true,
+        reason: true,
       },
     });
   }
@@ -49,7 +53,9 @@ export class PrismaHolidaysRepository implements IHolidaysRepository {
       where: { id },
       select: {
         id: true,
-        professionalId: true, date: true, reason: true,
+        professionalId: true,
+        date: true,
+        reason: true,
       },
     });
   }
@@ -66,13 +72,15 @@ export class PrismaHolidaysRepository implements IHolidaysRepository {
   ) {
     return prisma.holiday.findMany({
       where: {
-        professionalId: professionalId,
+        professionalId,
       },
       skip: (page - 1) * limit,
       take: limit,
       select: {
         id: true,
-        professionalId: true, date: true, reason: true,
+        professionalId: true,
+        date: true,
+        reason: true,
       },
     });
   }
@@ -80,11 +88,8 @@ export class PrismaHolidaysRepository implements IHolidaysRepository {
   async countByProfessionalId(professionalId: string) {
     return prisma.holiday.count({
       where: {
-        professionalId: professionalId,
+        professionalId,
       },
     });
   }
 }
-
-
-

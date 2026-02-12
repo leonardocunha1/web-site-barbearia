@@ -8,6 +8,7 @@ import {
   createMockProfessionalsRepository,
   createMockUsersRepository,
 } from '@/mock/mock-repositories';
+import { makeProfessional, makeUser } from '@/test/factories';
 
 type MockProfessionalsRepository = IProfessionalsRepository & {
   findByUserId: ReturnType<typeof vi.fn>;
@@ -28,27 +29,25 @@ describe('Create Professional Use Case', () => {
     mockProfessionalsRepository = createMockProfessionalsRepository();
     mockUsersRepository = createMockUsersRepository();
 
-    useCase = new CreateProfessionalUseCase(
-      mockProfessionalsRepository,
-      mockUsersRepository,
-    );
+    useCase = new CreateProfessionalUseCase(mockProfessionalsRepository, mockUsersRepository);
   });
 
-  const mockUser = {
-    id: 'user-123', name: 'John Doe',
+  const mockUser = makeUser({
+    id: 'user-123',
+    name: 'John Doe',
     email: 'john@example.com',
-    role: 'CLIENT',
+    role: 'CLIENT' as any,
     active: true,
-  };
+  });
 
-  const mockProfessional = {
+  const mockProfessional = makeProfessional({
     id: 'prof-123',
     userId: 'user-123',
-    especialidade: 'Dentista',
+    specialty: 'Dentista',
     bio: 'Especialista em odontologia',
-    documento: '123456',
-    ativo: true,
-  };
+    document: '123456',
+    active: true,
+  });
 
   it('deve criar um profissional com sucesso', async () => {
     mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
@@ -61,9 +60,9 @@ describe('Create Professional Use Case', () => {
 
     const result = await useCase.execute({
       email: 'john@example.com',
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
       bio: 'Especialista em odontologia',
-      documento: '123456',
+      document: '123456',
     });
 
     expect(result).toEqual(mockProfessional);
@@ -73,11 +72,11 @@ describe('Create Professional Use Case', () => {
       role: 'PROFESSIONAL',
     });
     expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
       bio: 'Especialista em odontologia',
-      ativo: true,
+      active: true,
       avatarUrl: undefined,
-      documento: '123456',
+      document: '123456',
       user: { connect: { id: 'user-123' } },
     });
   });
@@ -88,7 +87,7 @@ describe('Create Professional Use Case', () => {
     await expect(
       useCase.execute({
         email: 'nonexistent@example.com',
-        especialidade: 'Dentista',
+        specialty: 'Dentista',
       }),
     ).rejects.toThrow(UserNotFoundError);
   });
@@ -100,7 +99,7 @@ describe('Create Professional Use Case', () => {
     await expect(
       useCase.execute({
         email: 'john@example.com',
-        especialidade: 'Dentista',
+        specialty: 'Dentista',
       }),
     ).rejects.toThrow(UserAlreadyProfessionalError);
   });
@@ -115,24 +114,24 @@ describe('Create Professional Use Case', () => {
     mockProfessionalsRepository.create.mockResolvedValue({
       ...mockProfessional,
       bio: null,
-      documento: null,
+      document: null,
     });
 
     const result = await useCase.execute({
       email: 'john@example.com',
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
     });
 
     expect(result).toEqual({
       ...mockProfessional,
       bio: null,
-      documento: null,
+      document: null,
     });
     expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
       bio: undefined,
-      documento: undefined,
-      ativo: true,
+      document: undefined,
+      active: true,
       avatarUrl: undefined,
       user: { connect: { id: 'user-123' } },
     });
@@ -149,7 +148,7 @@ describe('Create Professional Use Case', () => {
 
     await useCase.execute({
       email: 'john@example.com',
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
     });
 
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
@@ -163,11 +162,10 @@ describe('Create Professional Use Case', () => {
     await expect(
       useCase.execute({
         email: 'john@example.com',
-        especialidade: 'Dentista',
+        specialty: 'Dentista',
       }),
     ).rejects.toThrow();
 
     expect(mockProfessionalsRepository.create).not.toHaveBeenCalled();
   });
 });
-

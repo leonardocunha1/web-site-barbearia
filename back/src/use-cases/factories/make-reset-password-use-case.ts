@@ -4,13 +4,9 @@ import { ResetPasswordUseCase } from '../auth/reset-password-use-case';
 
 export function makeResetPasswordUseCase() {
   const usersRepository = new PrismaUsersRepository();
-  const passwordResetTokensRepository =
-    new PrismaPasswordResetTokensRepository();
+  const passwordResetTokensRepository = new PrismaPasswordResetTokensRepository();
 
-  const useCase = new ResetPasswordUseCase(
-    usersRepository,
-    passwordResetTokensRepository,
-  );
+  const useCase = new ResetPasswordUseCase(usersRepository, passwordResetTokensRepository);
 
   return useCase;
 }

@@ -9,11 +9,7 @@ export class EmailService {
   private readonly appUrl: string;
 
   constructor() {
-    if (
-      !process.env.SENDGRID_API_KEY ||
-      !process.env.EMAIL_FROM ||
-      !process.env.APP_URL
-    ) {
+    if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_FROM || !process.env.APP_URL) {
       throw new Error(
         'Variáveis de ambiente SENDGRID_API_KEY, EMAIL_FROM ou APP_URL não definidas.',
       );

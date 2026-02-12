@@ -5,17 +5,17 @@
 /**
  * Fields that should be omitted from user responses for security
  */
-const SENSITIVE_USER_FIELDS = ['senha', 'password'] as const;
+const SENSITIVE_USER_FIELDS = ['password'] as const;
 
 /**
  * Omits sensitive fields from an object
- * 
+ *
  * @template T - The object type
  * @template K - Keys to omit
  * @param obj - Source object
  * @param keys - Array of keys to omit
  * @returns New object without specified keys
- * 
+ *
  * @example
  * ```typescript
  * const user = { id: '1', email: 'test@test.com', senha: 'hash' };
@@ -33,13 +33,13 @@ export function omit<T extends Record<string, any>, K extends keyof T>(
 
 /**
  * Picks only specified fields from an object
- * 
+ *
  * @template T - The object type
  * @template K - Keys to pick
  * @param obj - Source object
  * @param keys - Array of keys to pick
  * @returns New object with only specified keys
- * 
+ *
  * @example
  * ```typescript
  * const user = { id: '1', email: 'test@test.com', senha: 'hash' };
@@ -61,11 +61,11 @@ export function pick<T extends Record<string, any>, K extends keyof T>(
 
 /**
  * Removes password/sensitive fields from user object
- * 
+ *
  * @template T - User object type
  * @param user - User object (potentially with password)
  * @returns User object without sensitive fields
- * 
+ *
  * @example
  * ```typescript
  * const safeUser = sanitizeUser(userFromDB);
@@ -80,7 +80,7 @@ export function sanitizeUser<T extends Record<string, any>>(
 /**
  * Converts null to undefined for optional fields
  * Useful for JSON responses where undefined is preferred
- * 
+ *
  * @param value - Value to convert
  * @returns undefined if null, otherwise the value
  */
@@ -90,7 +90,7 @@ export function nullToUndefined<T>(value: T | null): T | undefined {
 
 /**
  * Deep sanitizes an object by removing sensitive fields recursively
- * 
+ *
  * @param obj - Object to sanitize
  * @returns Sanitized object
  */
@@ -123,7 +123,7 @@ export function deepSanitize<T extends Record<string, any>>(obj: T): T {
 
 /**
  * Transforms object by applying mapper function to all values
- * 
+ *
  * @template T - Object type
  * @param obj - Source object
  * @param mapper - Function to transform each value

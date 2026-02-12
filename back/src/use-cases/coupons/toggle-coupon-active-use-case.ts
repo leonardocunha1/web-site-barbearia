@@ -15,9 +15,7 @@ interface ToggleCouponActiveResponse {
 export class ToggleCouponActiveUseCase {
   constructor(private couponRepository: ICouponRepository) {}
 
-  async execute({
-    couponId,
-  }: ToggleCouponActiveRequest): Promise<ToggleCouponActiveResponse> {
+  async execute({ couponId }: ToggleCouponActiveRequest): Promise<ToggleCouponActiveResponse> {
     const coupon = await this.couponRepository.findById(couponId);
 
     if (!coupon) {
@@ -36,4 +34,3 @@ export class ToggleCouponActiveUseCase {
     };
   }
 }
-

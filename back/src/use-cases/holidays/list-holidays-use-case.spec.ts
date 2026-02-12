@@ -5,6 +5,7 @@ import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { createMockHolidaysRepository } from '@/mock/mock-repositories';
+import { makeHoliday } from '@/test/factories';
 
 // Tipo para o mock do repositório
 type MockHolidaysRepository = IHolidaysRepository & {
@@ -23,16 +24,16 @@ describe('ListHolidaysUseCase', () => {
     useCase = new ListHolidaysUseCase(mockHolidaysRepository);
   });
 
-  const mockHoliday = {
+  const mockHoliday = makeHoliday({
     id: 'feriado-123',
-    professionalId: 'pro-123', date: new Date('2023-01-01'), reason: 'Feriado teste',
-  };
+    professionalId: 'pro-123',
+    date: new Date('2023-01-01'),
+    reason: 'Feriado teste',
+  });
 
   it('deve listar feriados com paginação', async () => {
     // Configurar mocks
-    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([
-      mockHoliday,
-    ]);
+    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([mockHoliday]);
     mockHolidaysRepository.countByProfessionalId.mockResolvedValue(1);
 
     // Executar
@@ -50,15 +51,14 @@ describe('ListHolidaysUseCase', () => {
       limit: 10,
       totalPages: 1,
     });
-    expect(
-      mockHolidaysRepository.findManyByProfessionalId,
-    ).toHaveBeenCalledWith('pro-123', { page: 1, limit: 10 });
+    expect(mockHolidaysRepository.findManyByProfessionalId).toHaveBeenCalledWith('pro-123', {
+      page: 1,
+      limit: 10,
+    });
   });
 
   it('deve usar valores padrão quando não fornecidos', async () => {
-    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([
-      mockHoliday,
-    ]);
+    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([mockHoliday]);
     mockHolidaysRepository.countByProfessionalId.mockResolvedValue(1);
 
     const result = await useCase.execute({
@@ -98,9 +98,7 @@ describe('ListHolidaysUseCase', () => {
       professionalId: 'pro-456', // ID diferente
     };
 
-    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([
-      wrongHoliday,
-    ]);
+    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([wrongHoliday]);
     mockHolidaysRepository.countByProfessionalId.mockResolvedValue(1);
 
     await expect(
@@ -111,9 +109,7 @@ describe('ListHolidaysUseCase', () => {
   });
 
   it('deve calcular corretamente o total de páginas', async () => {
-    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([
-      mockHoliday,
-    ]);
+    mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([mockHoliday]);
     mockHolidaysRepository.countByProfessionalId.mockResolvedValue(25); // 25 registros
 
     const result = await useCase.execute({
@@ -142,6 +138,3 @@ describe('ListHolidaysUseCase', () => {
     expect(totalPages).toBe(1);
   });
 });
-
-
-

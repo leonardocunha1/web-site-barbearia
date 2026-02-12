@@ -10,6 +10,7 @@ import {
   createMockBusinessHoursRepository,
   createMockProfessionalsRepository,
 } from '@/mock/mock-repositories';
+import { makeBusinessHours, makeProfessional } from '@/test/factories';
 
 // Tipos para os mocks
 type MockBusinessHoursRepository = IBusinessHoursRepository & {
@@ -40,14 +41,14 @@ describe('Create Business Hours Use Case', () => {
     );
   });
 
-  const mockProfessional = {
+  const mockProfessional = makeProfessional({
     id: 'prof-123',
     userId: 'user-123',
-    especialidade: 'Especialidade Teste',
-    ativo: true,
-  };
+    specialty: 'Especialidade Teste',
+    active: true,
+  });
 
-  const mockBusinessHours = {
+  const mockBusinessHours = makeBusinessHours({
     id: 'hours-123',
     professionalId: 'prof-123',
     dayOfWeek: 1,
@@ -55,8 +56,8 @@ describe('Create Business Hours Use Case', () => {
     closesAt: '18:00',
     breakStart: '12:00',
     breakEnd: '13:00',
-    ativo: true,
-  };
+    active: true,
+  });
 
   it('deve criar horários de funcionamento com sucesso', async () => {
     // Configurar mocks
@@ -76,19 +77,19 @@ describe('Create Business Hours Use Case', () => {
 
     // Verificar
     expect(result).toEqual(mockBusinessHours);
-    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith(
+    expect(mockProfessionalsRepository.findById).toHaveBeenCalledWith('prof-123');
+    expect(mockBusinessHoursRepository.findByProfessionalAndDay).toHaveBeenCalledWith(
       'prof-123',
+      1,
     );
-    expect(
-      mockBusinessHoursRepository.findByProfessionalAndDay,
-    ).toHaveBeenCalledWith('prof-123', 1);
-    expect(mockBusinessHoursRepository.create).toHaveBeenCalledWith({ professional: { connect: { id: 'prof-123' } },
+    expect(mockBusinessHoursRepository.create).toHaveBeenCalledWith({
+      professional: { connect: { id: 'prof-123' } },
       dayOfWeek: 1,
       opensAt: '08:00',
       closesAt: '18:00',
       breakStart: '12:00',
       breakEnd: '13:00',
-      ativo: true,
+      active: true,
     });
   });
 
@@ -133,9 +134,7 @@ describe('Create Business Hours Use Case', () => {
 
   it('deve lançar erro quando já existe horário para o mesmo dia', async () => {
     mockProfessionalsRepository.findById.mockResolvedValue(mockProfessional);
-    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(
-      mockBusinessHours,
-    );
+    mockBusinessHoursRepository.findByProfessionalAndDay.mockResolvedValue(mockBusinessHours);
 
     await expect(
       useCase.execute({
@@ -189,8 +188,3 @@ describe('Create Business Hours Use Case', () => {
     ).rejects.toThrow(InvalidBusinessHoursError);
   });
 });
-
-
-
-
-

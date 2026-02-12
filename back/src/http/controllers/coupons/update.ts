@@ -2,10 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { updateCouponBodySchema } from '@/schemas/coupon';
 import { makeUpdateCouponUseCase } from '@/use-cases/factories/make-update-coupon-use-case';
 
-export async function updateCoupon(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function updateCoupon(request: FastifyRequest, reply: FastifyReply) {
   const updateCouponParamsSchema = z.object({
     couponId: z.string().uuid(),
   });
@@ -15,7 +12,8 @@ export async function updateCoupon(
   const updateCouponUseCase = makeUpdateCouponUseCase();
 
   const { coupon } = await updateCouponUseCase.execute({
-    couponId, date: {
+    couponId,
+    date: {
       ...body,
       startDate: body.startDate ? new Date(body.startDate) : undefined,
       endDate: body.endDate ? new Date(body.endDate) : null,

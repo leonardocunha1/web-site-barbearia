@@ -9,7 +9,9 @@ import { Professional, Service } from '@prisma/client';
 
 interface AddServiceToProfessionalRequest {
   serviceId: string;
-  professionalId: string; price: number; duration: number;
+  professionalId: string;
+  price: number;
+  duration: number;
 }
 
 export class AddServiceToProfessionalUseCase {
@@ -22,22 +24,22 @@ export class AddServiceToProfessionalUseCase {
   async execute({
     serviceId,
     professionalId,
-    preco,
-    duracao,
+    price,
+    duration,
   }: AddServiceToProfessionalRequest): Promise<void> {
     // Fail-fast: validate all conditions before operations
     await this.validateServiceExists(serviceId);
     await this.validateProfessionalExists(professionalId);
     await this.validateServiceNotAlreadyAdded(serviceId, professionalId);
-    this.validatePricePositive(preco);
-    this.validateDurationPositive(duracao);
+    this.validatePricePositive(price);
+    this.validateDurationPositive(duration);
 
     // All validations passed - proceed with operation
     await this.serviceProfessionalRepository.create({
       service: { connect: { id: serviceId } },
       professional: { connect: { id: professionalId } },
-      preco,
-      duracao,
+      price,
+      duration,
     });
   }
 
@@ -57,11 +59,8 @@ export class AddServiceToProfessionalUseCase {
    * Validates that professional exists
    * @throws {ProfessionalNotFoundError} If professional is not found
    */
-  private async validateProfessionalExists(
-    professionalId: string,
-  ): Promise<Professional> {
-    const professionalExists =
-      await this.professionalsRepository.findById(professionalId);
+  private async validateProfessionalExists(professionalId: string): Promise<Professional> {
+    const professionalExists = await this.professionalsRepository.findById(professionalId);
     if (!professionalExists) {
       throw new ProfessionalNotFoundError();
     }
@@ -76,11 +75,10 @@ export class AddServiceToProfessionalUseCase {
     serviceId: string,
     professionalId: string,
   ): Promise<void> {
-    const alreadyAdded =
-      await this.serviceProfessionalRepository.findByServiceAndProfessional(
-        serviceId,
-        professionalId,
-      );
+    const alreadyAdded = await this.serviceProfessionalRepository.findByServiceAndProfessional(
+      serviceId,
+      professionalId,
+    );
     if (alreadyAdded) {
       throw new ServiceAlreadyAddedError();
     }
@@ -90,8 +88,8 @@ export class AddServiceToProfessionalUseCase {
    * Validates that price is positive
    * @throws {InvalidServicePriceDurationError} If price <= 0
    */
-  private validatePricePositive(preco: number): void {
-    if (preco <= 0) {
+  private validatePricePositive(price: number): void {
+    if (price <= 0) {
       throw new InvalidServicePriceDurationError();
     }
   }
@@ -100,10 +98,9 @@ export class AddServiceToProfessionalUseCase {
    * Validates that duration is positive
    * @throws {InvalidServicePriceDurationError} If duration <= 0
    */
-  private validateDurationPositive(duracao: number): void {
-    if (duracao <= 0) {
+  private validateDurationPositive(duration: number): void {
+    if (duration <= 0) {
       throw new InvalidServicePriceDurationError();
     }
   }
 }
-

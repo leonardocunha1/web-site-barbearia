@@ -1,10 +1,7 @@
 import { ICouponRepository } from '@/repositories/coupon-repository';
 import { validatePagination } from '@/utils/validate-pagination';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
-import {
-  ListCouponsUseCaseRequest,
-  ListCouponsUseCaseResponse,
-} from './types';
+import { ListCouponsUseCaseRequest, ListCouponsUseCaseResponse } from './types';
 
 export class ListCouponsUseCase {
   constructor(private couponRepository: ICouponRepository) {}
@@ -42,4 +39,3 @@ export class ListCouponsUseCase {
     };
   }
 }
-

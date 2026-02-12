@@ -3,8 +3,7 @@ import { PrismaBookingsRepository } from '@/repositories/prisma/prisma-bookings-
 import { RemoveServiceFromProfessionalUseCase } from '../service-professional/remove-service-from-professional-use-case';
 
 export function makeRemoveServiceFromProfessionalUseCase() {
-  const serviceProfessionalRepository =
-    new PrismaServiceProfessionalRepository();
+  const serviceProfessionalRepository = new PrismaServiceProfessionalRepository();
   const bookingsRepository = new PrismaBookingsRepository();
 
   return new RemoveServiceFromProfessionalUseCase(
@@ -12,4 +11,3 @@ export function makeRemoveServiceFromProfessionalUseCase() {
     bookingsRepository,
   );
 }
-

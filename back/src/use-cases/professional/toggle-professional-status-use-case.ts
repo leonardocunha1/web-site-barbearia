@@ -11,7 +11,7 @@ export class ToggleProfessionalStatusUseCase {
 
     // All validations passed - proceed with operation
     return this.professionalsRepository.update(professionalId, {
-      ativo: !professional.active,
+      active: !professional.active,
     });
   }
 
@@ -19,15 +19,11 @@ export class ToggleProfessionalStatusUseCase {
    * Validates that professional exists
    * @throws {ProfessionalNotFoundError} If professional is not found
    */
-  private async validateProfessionalExists(
-    professionalId: string,
-  ): Promise<Professional> {
-    const professional =
-      await this.professionalsRepository.findById(professionalId);
+  private async validateProfessionalExists(professionalId: string): Promise<Professional> {
+    const professional = await this.professionalsRepository.findById(professionalId);
     if (!professional) {
       throw new ProfessionalNotFoundError();
     }
     return professional;
   }
 }
-

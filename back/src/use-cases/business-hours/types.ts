@@ -9,16 +9,14 @@ import type {
 /**
  * Create request extends schema validation type with professional ID
  */
-export interface CreateBusinessHoursUseCaseRequest
-  extends CreateBusinessHoursBody {
+export interface CreateBusinessHoursUseCaseRequest extends CreateBusinessHoursBody {
   professionalId: string;
 }
 
 /**
  * Update request extends schema validation type with professional ID
  */
-export interface UpdateBusinessHoursUseCaseRequest
-  extends UpdateBusinessHoursBody {
+export interface UpdateBusinessHoursUseCaseRequest extends UpdateBusinessHoursBody {
   professionalId: string;
   dayOfWeek: number;
 }
@@ -26,8 +24,7 @@ export interface UpdateBusinessHoursUseCaseRequest
 /**
  * Delete request extends schema params with professional ID for authorization
  */
-export interface DeleteBusinessHoursUseCaseRequest
-  extends DeleteBusinessHoursParams {
+export interface DeleteBusinessHoursUseCaseRequest extends DeleteBusinessHoursParams {
   professionalId: string;
 }
 

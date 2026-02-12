@@ -4,6 +4,7 @@ import { InvalidPageError } from '../errors/invalid-page-error';
 import { InvalidLimitError } from '../errors/invalid-limit-error';
 import { ListOrSearchProfessionalsUseCase } from './list-professionals-use-case';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
+import { makeProfessional, makeService, makeUser } from '@/test/factories';
 
 // Tipos para os mocks
 type MockProfessionalsRepository = IProfessionalsRepository & {
@@ -23,36 +24,35 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     useCase = new ListOrSearchProfessionalsUseCase(mockProfessionalsRepository);
   });
 
-  const mockProfessional = (id: string) => ({
-    id: `prof-${id}`,
-    userId: `user-${id}`,
-    especialidade: 'Dentista',
-    bio: `Bio do profissional ${id}`,
-    documento: `doc-${id}`,
-    ativo: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    user: {
-      id: `user-${id}`, name: `Professional ${id}`,
+  const mockProfessional = (id: string) => {
+    const user = makeUser({
+      id: `user-${id}`,
+      name: `Professional ${id}`,
       email: `professional${id}@example.com`,
-      telefone: null,
-      role: 'PROFESSIONAL',
-      emailVerified: true,
+      phone: null,
+      role: 'PROFESSIONAL' as any,
+    });
+    const service = makeService({
+      id: `service-${id}`,
+      name: 'Consulta Odontológica',
+      description: 'Descrição do serviço',
+      category: 'Odontologia',
       active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      senha: 'hashed-password',
-    },
-    services: [
-      {
-        id: `service-${id}`, name: 'Consulta Odontológica', description: 'Descrição do serviço',
-        categoria: 'Odontologia',
-        ativo: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
-  });
+    });
+
+    return {
+      ...makeProfessional({
+        id: `prof-${id}`,
+        userId: user.id,
+        specialty: 'Dentista',
+        bio: `Bio do profissional ${id}`,
+        document: `doc-${id}`,
+        active: true,
+      }),
+      user,
+      services: [service],
+    };
+  };
 
   it('deve listar profissionais com paginação padrão', async () => {
     // Configurar mocks
@@ -76,17 +76,20 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     expect(result.professionals).toHaveLength(2);
     expect(result.professionals[0]).toEqual({
       id: 'prof-1',
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
       bio: 'Bio do profissional 1',
-      ativo: true,
+      active: true,
       user: {
-        id: 'user-1', name: 'Professional 1',
+        id: 'user-1',
+        name: 'Professional 1',
         email: 'professional1@example.com',
-        telefone: undefined,
+        phone: undefined,
       },
       services: [
         {
-          id: 'service-1', name: 'Consulta Odontológica', description: 'Descrição do serviço',
+          id: 'service-1',
+          name: 'Consulta Odontológica',
+          description: 'Descrição do serviço',
         },
       ],
       avatarUrl: undefined,
@@ -95,10 +98,10 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
       page: 1,
       limit: 10,
-      ativo: true,
+      active: true,
     });
     expect(mockProfessionalsRepository.count).toHaveBeenCalledWith({
-      ativo: true,
+      active: true,
     });
   });
 
@@ -129,7 +132,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
       page: 2,
       limit: 5,
-      ativo: true,
+      active: true,
     });
   });
 
@@ -169,7 +172,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
 
     // Executar
     const result = await useCase.execute({
-      especialidade: 'Dentista',
+      specialty: 'Dentista',
     });
 
     // Verificar
@@ -177,8 +180,8 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
       page: 1,
       limit: 10,
-      especialidade: 'Dentista',
-      ativo: true,
+      specialty: 'Dentista',
+      active: true,
     });
   });
 
@@ -190,7 +193,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
 
     // Executar
     const result = await useCase.execute({
-      ativo: false,
+      active: false,
     });
 
     // Verificar
@@ -198,7 +201,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     expect(mockProfessionalsRepository.list).toHaveBeenCalledWith({
       page: 1,
       limit: 10,
-      ativo: false,
+      active: false,
     });
   });
 
@@ -237,11 +240,11 @@ describe('ListOrSearchProfessionalsUseCase', () => {
       query: 'Dentista',
       page: 1,
       limit: 10,
-      ativo: true,
+      active: true,
     });
     expect(mockProfessionalsRepository.countSearch).toHaveBeenCalledWith({
       query: 'Dentista',
-      ativo: true,
+      active: true,
     });
   });
 
@@ -254,8 +257,8 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     // Executar
     const result = await useCase.execute({
       query: 'Dentista',
-      especialidade: 'Ortodontia',
-      ativo: false,
+      specialty: 'Ortodontia',
+      active: false,
       page: 3,
       limit: 20,
     });
@@ -266,7 +269,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
       query: 'Dentista',
       page: 3,
       limit: 20,
-      ativo: false,
+      active: false,
     });
     // Nota: A especialidade não é usada na busca, apenas na listagem normal
   });
@@ -293,4 +296,3 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     }
   });
 });
-

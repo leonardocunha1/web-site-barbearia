@@ -2,13 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { IServiceProfessionalRepository } from '../service-professional-repository';
 import { Prisma } from '@prisma/client';
 
-export class PrismaServiceProfessionalRepository
-  implements IServiceProfessionalRepository
-{
+export class PrismaServiceProfessionalRepository implements IServiceProfessionalRepository {
   async create(data: Prisma.ServiceProfessionalCreateInput): Promise<{
     id: string;
     serviceId: string;
-    professionalId: string; price: number; duration: number;
+    professionalId: string;
+    price: number;
+    duration: number;
   }> {
     const created = await prisma.serviceProfessional.create({
       data,
@@ -17,7 +17,9 @@ export class PrismaServiceProfessionalRepository
     return {
       id: created.id,
       serviceId: created.serviceId,
-      professionalId: created.professionalId, price: created.price, duration: created.duration,
+      professionalId: created.professionalId,
+      price: created.price,
+      duration: created.duration,
     };
   }
 
@@ -27,20 +29,13 @@ export class PrismaServiceProfessionalRepository
     });
   }
 
-  async deleteByServiceAndProfessional(
-  serviceId: string,
-  professionalId: string,
-): Promise<void> {
-  await prisma.serviceProfessional.deleteMany({
-    where: { serviceId, professionalId },
-  });
-}
+  async deleteByServiceAndProfessional(serviceId: string, professionalId: string): Promise<void> {
+    await prisma.serviceProfessional.deleteMany({
+      where: { serviceId, professionalId },
+    });
+  }
 
-
-  async findByServiceAndProfessional(
-    serviceId: string,
-    professionalId: string,
-  ) {
+  async findByServiceAndProfessional(serviceId: string, professionalId: string) {
     const result = await prisma.serviceProfessional.findFirst({
       where: {
         serviceId,
@@ -48,10 +43,14 @@ export class PrismaServiceProfessionalRepository
       },
       select: {
         id: true,
-        professionalId: true, price: true, duration: true,
+        professionalId: true,
+        price: true,
+        duration: true,
         service: {
           select: {
-            id: true, name: true, description: true,
+            id: true,
+            name: true,
+            description: true,
             categoria: true,
             ativo: true,
           },
@@ -66,7 +65,9 @@ export class PrismaServiceProfessionalRepository
     return {
       id: result.id,
       professionalId: result.professionalId,
-      service: result.service, price: result.price, duration: result.duration,
+      service: result.service,
+      price: result.price,
+      duration: result.duration,
     };
   }
 
@@ -80,10 +81,14 @@ export class PrismaServiceProfessionalRepository
   ): Promise<{
     services: Array<{
       service: {
-        id: string; name: string; description: string | null;
+        id: string;
+        name: string;
+        description: string | null;
         categoria: string | null;
         ativo: boolean;
-      }; price: number; duration: number;
+      };
+      price: number;
+      duration: number;
     }>;
     total: number;
   }> {
@@ -99,18 +104,21 @@ export class PrismaServiceProfessionalRepository
         where,
         skip: (page - 1) * limit,
         take: limit,
-        select: { price: true, duration: true,
+        select: {
+          price: true,
+          duration: true,
           service: {
             select: {
-              id: true, name: true, description: true,
+              id: true,
+              name: true,
+              description: true,
               categoria: true,
               ativo: true,
             },
           },
         },
         orderBy: {
-          service: { name: 'asc',
-          },
+          service: { name: 'asc' },
         },
       }),
       prisma.serviceProfessional.count({ where }),
@@ -118,7 +126,9 @@ export class PrismaServiceProfessionalRepository
 
     return {
       services: serviceProfessionals.map((sp) => ({
-        service: sp.service, price: sp.price, duration: sp.duration,
+        service: sp.service,
+        price: sp.price,
+        duration: sp.duration,
       })),
       total,
     };
@@ -131,13 +141,16 @@ export class PrismaServiceProfessionalRepository
     duracao,
   }: {
     serviceId: string;
-    professionalId: string; price: number; duration: number;
+    professionalId: string;
+    price: number;
+    duration: number;
   }): Promise<void> {
     await prisma.serviceProfessional.updateMany({
       where: {
         serviceId,
         professionalId,
-      }, date: {
+      },
+      date: {
         preco,
         duracao,
       },
@@ -145,81 +158,90 @@ export class PrismaServiceProfessionalRepository
   }
 
   async findAllActiveWithProfessionalData(
-  professionalId: string,
-  options: { page?: number; limit?: number } = {}
-) {
-  const { page = 1, limit = 10 } = options;
+    professionalId: string,
+    options: { page?: number; limit?: number } = {},
+  ) {
+    const { page = 1, limit = 10 } = options;
 
-  const [services, total] = await Promise.all([
-    prisma.service.findMany({
-      where: { ativo: true },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { name: 'asc' },
-      include: {
-        profissionais: {
-          where: { professionalId },
-          select: { price: true, duration: true },
+    const [services, total] = await Promise.all([
+      prisma.service.findMany({
+        where: { ativo: true },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { name: 'asc' },
+        include: {
+          profissionais: {
+            where: { professionalId },
+            select: { price: true, duration: true },
+          },
         },
-      },
-    }),
-    prisma.service.count({ where: { ativo: true } }),
-  ]);
+      }),
+      prisma.service.count({ where: { ativo: true } }),
+    ]);
 
-  return {
-    services: services.map((s) => ({
-      service: {
-        id: s.id, name: s.name, description: s.description,
-        categoria: s.category,
-        ativo: s.active,
-      }, price: s.professionals[0]?.price ?? 0, duration: s.professionals[0]?.duration ?? 0,
-    })),
-    total,
-  };
-}
-
-async findAllWithProfessionalData(
-  professionalId: string,
-  options: { page?: number; limit?: number } = {},
-): Promise<{
-  services: Array<{
-    service: {
-      id: string; name: string; description: string | null;
-      categoria: string | null;
-      ativo: boolean;
-    }; price: number | null; duration: number | null;
-  }>;
-  total: number;
-}> {
-  const { page = 1, limit = 10 } = options;
-
-  const [services, total] = await Promise.all([
-    prisma.service.findMany({
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { name: 'asc' },
-      include: {
-        profissionais: {
-          where: { professionalId },
-          select: { price: true, duration: true },
+    return {
+      services: services.map((s) => ({
+        service: {
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          categoria: s.category,
+          ativo: s.active,
         },
-      },
-    }),
-    prisma.service.count(),
-  ]);
+        price: s.professionals[0]?.price ?? 0,
+        duration: s.professionals[0]?.duration ?? 0,
+      })),
+      total,
+    };
+  }
 
-  return {
-    services: services.map((s) => ({
+  async findAllWithProfessionalData(
+    professionalId: string,
+    options: { page?: number; limit?: number } = {},
+  ): Promise<{
+    services: Array<{
       service: {
-        id: s.id, name: s.name, description: s.description,
-        categoria: s.category,
-        ativo: s.active,
-      }, price: s.professionals[0]?.price ?? null, duration: s.professionals[0]?.duration ?? null,
-    })),
-    total,
-  };
+        id: string;
+        name: string;
+        description: string | null;
+        categoria: string | null;
+        ativo: boolean;
+      };
+      price: number | null;
+      duration: number | null;
+    }>;
+    total: number;
+  }> {
+    const { page = 1, limit = 10 } = options;
+
+    const [services, total] = await Promise.all([
+      prisma.service.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { name: 'asc' },
+        include: {
+          profissionais: {
+            where: { professionalId },
+            select: { price: true, duration: true },
+          },
+        },
+      }),
+      prisma.service.count(),
+    ]);
+
+    return {
+      services: services.map((s) => ({
+        service: {
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          categoria: s.category,
+          ativo: s.active,
+        },
+        price: s.professionals[0]?.price ?? null,
+        duration: s.professionals[0]?.duration ?? null,
+      })),
+      total,
+    };
+  }
 }
-
-
-}
-

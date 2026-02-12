@@ -16,12 +16,8 @@ export class ResetPasswordUseCase {
     private passwordResetTokensRepository: IPasswordResetTokensRepository,
   ) {}
 
-  async execute({
-    token,
-    newPassword,
-  }: ResetPasswordUseCaseRequest): Promise<void> {
-    const resetToken =
-      await this.passwordResetTokensRepository.findByToken(token);
+  async execute({ token, newPassword }: ResetPasswordUseCaseRequest): Promise<void> {
+    const resetToken = await this.passwordResetTokensRepository.findByToken(token);
 
     if (!resetToken) {
       throw new InvalidTokenError();
@@ -39,4 +35,3 @@ export class ResetPasswordUseCase {
     ]);
   }
 }
-

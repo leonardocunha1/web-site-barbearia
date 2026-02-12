@@ -5,8 +5,7 @@ import { ForgotPasswordUseCase } from '../auth/forgot-password-use-case';
 
 export function makeForgotPasswordUseCase() {
   const usersRepository = new PrismaUsersRepository();
-  const passwordResetTokensRepository =
-    new PrismaPasswordResetTokensRepository();
+  const passwordResetTokensRepository = new PrismaPasswordResetTokensRepository();
   const emailService = new EmailService();
 
   const useCase = new ForgotPasswordUseCase(
