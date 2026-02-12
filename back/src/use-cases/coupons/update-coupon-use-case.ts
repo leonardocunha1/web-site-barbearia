@@ -1,7 +1,6 @@
-import { CouponRepository } from '@/repositories/coupon-repository';
-import { ServicesRepository } from '@/repositories/services-repository';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { Coupon } from '@prisma/client';
+import { ICouponRepository } from '@/repositories/coupon-repository';
+import { IServicesRepository } from '@/repositories/services-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { CouponNotFoundError } from '../errors/coupon-not-found-error';
 import { DuplicateCouponError } from '../errors/duplicate-coupon-error';
 import { InvalidCouponValueError } from '../errors/invalid-coupon-value-error';
@@ -9,34 +8,13 @@ import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { InvalidCouponScopeError } from '../errors/invalid-coupon-scope-error';
 import { InvalidCouponDatesError } from '../errors/invalid-coupon-dates-error';
-
-interface UpdateCouponRequest {
-  couponId: string;
-  data: {
-    code?: string;
-    type?: 'PERCENTAGE' | 'FIXED' | 'FREE';
-    value?: number;
-    scope?: 'GLOBAL' | 'SERVICE' | 'PROFESSIONAL';
-    description?: string;
-    maxUses?: number;
-    startDate?: Date;
-    endDate?: Date | null;
-    minBookingValue?: number | null;
-    serviceId?: string | null;
-    professionalId?: string | null;
-    active?: boolean;
-  };
-}
-
-interface UpdateCouponResponse {
-  coupon: Coupon;
-}
+import { UpdateCouponRequest, UpdateCouponResponse } from './types';
 
 export class UpdateCouponUseCase {
   constructor(
-    private couponRepository: CouponRepository,
-    private servicesRepository: ServicesRepository,
-    private professionalsRepository: ProfessionalsRepository,
+    private couponRepository: ICouponRepository,
+    private servicesRepository: IServicesRepository,
+    private professionalsRepository: IProfessionalsRepository,
   ) {}
 
   async execute({
@@ -133,7 +111,7 @@ export class UpdateCouponUseCase {
 
     // Atualiza o cupom
     const coupon = await this.couponRepository.update(couponId, {
-      ...data,
+      ...date,
       startDate: data.startDate ? new Date(data.startDate) : undefined,
       endDate:
         data.endDate !== undefined
@@ -148,7 +126,7 @@ export class UpdateCouponUseCase {
 
   // Métodos de validação (iguais aos do CreateCouponUseCase)
   private validateCouponValue(type: string, value: number): void {
-    if (value <= 0) {
+    if (type !== 'FREE' && value <= 0) {
       throw new InvalidCouponValueError(
         'O valor do cupom deve ser maior que zero',
       );
@@ -226,3 +204,4 @@ export class UpdateCouponUseCase {
     }
   }
 }
+

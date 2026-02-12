@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error';
 import { InsufficientPermissionsError } from '../errors/insufficient-permissions-error';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
 
 import bcrypt from 'bcryptjs';
@@ -17,7 +17,7 @@ vi.mock('bcryptjs', () => {
 }); // Import após vi.mock
 const bcryptHash = bcrypt.hash as ReturnType<typeof vi.fn>;
 
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   findByEmail: ReturnType<typeof vi.fn>;
   create: ReturnType<typeof vi.fn>;
 };
@@ -44,8 +44,7 @@ describe('Register User Use Case', () => {
     });
   });
 
-  const userInput = {
-    nome: 'Alice',
+  const userInput = { name: 'Alice',
     email: 'alice@example.com',
     senha: 'secure-password',
   };
@@ -57,7 +56,7 @@ describe('Register User Use Case', () => {
       ...userInput,
       id: 'user-1',
       senha: 'hashed-password',
-      role: 'CLIENTE',
+      role: 'CLIENT',
     });
 
     await useCase.execute(userInput);
@@ -66,11 +65,10 @@ describe('Register User Use Case', () => {
       'alice@example.com',
     );
     expect(bcryptHash).toHaveBeenCalledWith('secure-password', 6);
-    expect(mockUsersRepository.create).toHaveBeenCalledWith({
-      nome: 'Alice',
+    expect(mockUsersRepository.create).toHaveBeenCalledWith({ name: 'Alice',
       email: 'alice@example.com',
       senha: 'hashed-password',
-      role: 'CLIENTE',
+      role: 'CLIENT',
     });
     expect(sendVerificationEmail).toHaveBeenCalledWith('alice@example.com');
   });
@@ -90,7 +88,7 @@ describe('Register User Use Case', () => {
       useCase.execute({
         ...userInput,
         role: 'ADMIN',
-        requestRole: 'CLIENTE', // ou undefined
+        requestRole: 'CLIENT', // ou undefined
       }),
     ).rejects.toThrow(InsufficientPermissionsError);
 
@@ -120,3 +118,4 @@ describe('Register User Use Case', () => {
     expect(sendVerificationEmail).toHaveBeenCalledWith('alice@example.com');
   });
 });
+

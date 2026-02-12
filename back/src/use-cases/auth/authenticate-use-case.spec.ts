@@ -25,7 +25,7 @@ describe('AuthenticateUseCase', () => {
     });
 
     expect(result.user.id).toBe(user.id);
-    expect(result.user.nome).toBe(user.nome);
+    expect(result.user.name).toBe(user.name);
     expect(result.user.email).toBe(user.email);
     expect(result.user.role).toBe(user.role);
   });

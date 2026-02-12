@@ -1,15 +1,16 @@
 import { BookingDTO } from '@/dtos/booking-dto';
 import { TimeSlot } from '@/dtos/schedule-dto';
-import { BookingsRepository } from '@/repositories/bookings-repository';
-import { FeriadosRepository } from '@/repositories/feriados-repository';
-import { HorariosFuncionamentoRepository } from '@/repositories/horarios-funcionamento-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
+import { IHolidaysRepository } from '@/repositories/holidays-repository';
+import { IBusinessHoursRepository } from '@/repositories/business-hours-repository';
 import { parseISO, isSameDay, startOfDay, addMinutes, format } from 'date-fns';
+import { SCHEDULE_SLOT_MINUTES } from '@/consts/const';
 
 export class GetProfessionalScheduleUseCase {
   constructor(
-    private bookingsRepository: BookingsRepository,
-    private horariosFuncionamentoRepository: HorariosFuncionamentoRepository,
-    private feriadosRepository: FeriadosRepository,
+    private bookingsRepository: IBookingsRepository,
+    private businessHoursRepository: IBusinessHoursRepository,
+    private holidaysRepository: IHolidaysRepository,
   ) {}
 
   async execute(params: { professionalId: string; date: string }) {
@@ -18,7 +19,7 @@ export class GetProfessionalScheduleUseCase {
     const startOfParsedDate = startOfDay(parsedDate); // Zera hora/minuto/segundo para comparação precisa
 
     // Verificar se é feriado
-    const isHoliday = await this.feriadosRepository.isProfessionalHoliday(
+    const isHoliday = await this.holidaysRepository.isProfessionalHoliday(
       professionalId,
       startOfParsedDate, // Passar a data zerada
     );
@@ -28,18 +29,18 @@ export class GetProfessionalScheduleUseCase {
         date,
         timeSlots: [],
         isHoliday: true,
-        holidayReason: isHoliday.motivo,
+        holidayReason: isHoliday.reason,
       };
     }
 
     // Obter horário de funcionamento para o dia
     const businessHours =
-      await this.horariosFuncionamentoRepository.findByProfessionalAndDay(
+      await this.businessHoursRepository.findByProfessionalAndDay(
         professionalId,
         startOfParsedDate.getDay(), // Pega o dia da semana (0-6)
       );
 
-    if (!businessHours || !businessHours.ativo) {
+    if (!businessHours || !businessHours.active) {
       return {
         date,
         timeSlots: [],
@@ -64,51 +65,51 @@ export class GetProfessionalScheduleUseCase {
       date,
       timeSlots,
       businessHours: {
-        opensAt: businessHours.abreAs,
-        closesAt: businessHours.fechaAs,
-        breakStart: businessHours.pausaInicio,
-        breakEnd: businessHours.pausaFim,
+        opensAt: businessHours.opensAt,
+        closesAt: businessHours.closesAt,
+        breakStart: businessHours.breakStart,
+        breakEnd: businessHours.breakEnd,
       },
     };
   }
 
   private generateTimeSlots(
     businessHours: {
-      abreAs: string;
-      fechaAs: string;
-      pausaInicio: string | null;
-      pausaFim: string | null;
+      opensAt: string;
+      closesAt: string;
+      breakStart: string | null;
+      breakEnd: string | null;
     },
     date: Date,
     bookings: BookingDTO[],
   ): TimeSlot[] {
     const slots: TimeSlot[] = [];
-    const slotDuration = 10; // 15 minutos por slot
+    const slotDuration = SCHEDULE_SLOT_MINUTES;
 
     let currentTime = startOfDay(date);
-    const [openHour, openMinute] = businessHours.abreAs.split(':').map(Number);
+    const [openHour, openMinute] = businessHours.opensAt.split(':').map(Number);
     currentTime.setHours(openHour, openMinute, 0, 0);
 
-    const [closeHour, closeMinute] = businessHours.fechaAs
+    const [closeHour, closeMinute] = businessHours.closesAt
       .split(':')
       .map(Number);
     const closeTime = new Date(date);
     closeTime.setHours(closeHour, closeMinute, 0, 0);
 
     // Verificar se há pausa
-    const hasBreak = !!(businessHours.pausaInicio && businessHours.pausaFim);
+    const hasBreak = !!(businessHours.breakStart && businessHours.breakEnd);
     let breakStart: Date | null = null;
     let breakEnd: Date | null = null;
 
     if (hasBreak) {
       const [breakStartHour, breakStartMinute] = businessHours
-        .pausaInicio!.split(':')
+        .breakStart!.split(':')
         .map(Number);
       breakStart = new Date(date);
       breakStart.setHours(breakStartHour, breakStartMinute, 0, 0);
 
       const [breakEndHour, breakEndMinute] = businessHours
-        .pausaFim!.split(':')
+        .breakEnd!.split(':')
         .map(Number);
       breakEnd = new Date(date);
       breakEnd.setHours(breakEndHour, breakEndMinute, 0, 0);
@@ -129,8 +130,8 @@ export class GetProfessionalScheduleUseCase {
       if (!isDuringBreak) {
         // Verificar se há um agendamento que se sobrepõe a este slot
         const isBooked = bookings.some((booking) => {
-          const bookingStart = booking.dataHoraInicio;
-          const bookingEnd = booking.dataHoraFim;
+          const bookingStart = booking.dateHoraInicio;
+          const bookingEnd = booking.endDateTime;
           return (
             isSameDay(bookingStart, date) &&
             currentTime < bookingEnd &&
@@ -140,8 +141,8 @@ export class GetProfessionalScheduleUseCase {
 
         const booking = bookings.find(
           (b) =>
-            isSameDay(b.dataHoraInicio, date) &&
-            format(b.dataHoraInicio, 'HH:mm') === timeStr,
+            isSameDay(b.dateHoraInicio, date) &&
+            format(b.dateHoraInicio, 'HH:mm') === timeStr,
         );
 
         slots.push({
@@ -150,9 +151,9 @@ export class GetProfessionalScheduleUseCase {
           booking: booking
             ? {
                 id: booking.id,
-                clientName: booking.user.nome,
+                clientName: booking.user.name,
                 services: booking.items.map(
-                  (item) => item.serviceProfessional.service.nome,
+                  (item) => item.serviceProfessional.service.name,
                 ),
               }
             : undefined,
@@ -165,3 +166,5 @@ export class GetProfessionalScheduleUseCase {
     return slots;
   }
 }
+
+

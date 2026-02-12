@@ -82,7 +82,7 @@ export async function serviceProfessionalRoutes(app: FastifyTypedInstance) {
   );
 
   app.put(
-    '/professionals/:professionalId/services/:serviceId',
+    '/professionals/:professionalId/services',
     {
       onRequest: [verifyJwt, verifyUserRole('ADMIN')],
       schema: {

@@ -1,8 +1,7 @@
 import { Prisma, ServiceProfessional } from '@prisma/client';
 
-export interface ServiceProfessionalRepository {
-  create(
-    data: Prisma.ServiceProfessionalCreateInput,
+export interface IServiceProfessionalRepository {
+  create( date: Prisma.ServiceProfessionalCreateInput,
   ): Promise<ServiceProfessional>;
 
   delete(id: string): Promise<void>;
@@ -19,14 +18,10 @@ export interface ServiceProfessionalRepository {
     id: string;
     professionalId: string;
     service: {
-      id: string;
-      nome: string;
-      descricao: string | null;
+      id: string; name: string; description: string | null;
       categoria: string | null;
       ativo: boolean;
-    };
-    preco: number;
-    duracao: number;
+    }; price: number; duration: number;
   } | null>;
 
   findByProfessional(
@@ -39,23 +34,17 @@ export interface ServiceProfessionalRepository {
   ): Promise<{
     services: Array<{
       service: {
-        id: string;
-        nome: string;
-        descricao: string | null;
+        id: string; name: string; description: string | null;
         categoria: string | null;
         ativo: boolean;
-      };
-      preco: number;
-      duracao: number;
+      }; price: number; duration: number;
     }>;
     total: number;
   }>;
 
   updateByServiceAndProfessional(data: {
     serviceId: string;
-    professionalId: string;
-    preco: number;
-    duracao: number;
+    professionalId: string; price: number; duration: number;
   }): Promise<void>;
 
   /**
@@ -70,14 +59,10 @@ export interface ServiceProfessionalRepository {
   ): Promise<{
     services: Array<{
       service: {
-        id: string;
-        nome: string;
-        descricao: string | null;
+        id: string; name: string; description: string | null;
         categoria: string | null;
         ativo: boolean;
-      };
-      preco: number | null;
-      duracao: number | null;
+      }; price: number | null; duration: number | null;
     }>;
     total: number;
   }>;
@@ -95,15 +80,12 @@ export interface ServiceProfessionalRepository {
   ): Promise<{
     services: Array<{
       service: {
-        id: string;
-        nome: string;
-        descricao: string | null;
+        id: string; name: string; description: string | null;
         categoria: string | null;
         ativo: boolean;
-      };
-      preco: number | null;
-      duracao: number | null;
+      }; price: number | null; duration: number | null;
     }>;
     total: number;
   }>;
 }
+

@@ -10,8 +10,7 @@ export const createHolidayBodySchema = z.object({
     .describe('Data do feriado no formato ISO 8601 com timezone')
     .refine(val => new Date(val) > new Date(), {
       message: 'A data do feriado deve ser futura'
-    }),
-  motivo: z
+    }), reason: z
     .string()
     .trim()
     .min(3, { message: 'O motivo deve ter pelo menos 3 caracteres' })
@@ -30,13 +29,11 @@ export const listHolidaysResponseSchema = z.object({
     z.object({
       id: z.string()
         .uuid({ message: 'ID do feriado inválido' })
-        .describe('ID do feriado'),
-      data: z.string()
+        .describe('ID do feriado'), date: z.string()
         .datetime({ message: 'Formato de data inválido' })
-        .describe('Data no formato ISO 8601'),
-      motivo: z.string()
+        .describe('Data no formato ISO 8601'), reason: z.string()
         .describe('Motivo do feriado'),
-      profissionalId: z.string()
+      professionalId: z.string()
         .uuid({ message: 'ID do profissional inválido' })
         .describe('ID do profissional')
     })

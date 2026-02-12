@@ -1,15 +1,13 @@
 import { prisma } from '@/lib/prisma';
-import { BonusTransactionRepository } from '../bonus-transaction-repository';
+import { IBonusTransactionRepository } from '../bonus-transaction-repository';
 import { BonusTransaction, BonusType, Prisma } from '@prisma/client';
 
 export class PrismaBonusTransactionRepository
-  implements BonusTransactionRepository
+  implements IBonusTransactionRepository
 {
-  async create(
-    data: Prisma.BonusTransactionCreateInput,
+  async create( date: Prisma.BonusTransactionCreateInput,
   ): Promise<BonusTransaction> {
-    return prisma.bonusTransaction.create({
-      data: {
+    return prisma.bonusTransaction.create({ date: {
         userId: data.user.connect?.id ?? '',
         bookingId: data.booking?.connect?.id ?? null,
         type: data.type,
@@ -19,8 +17,7 @@ export class PrismaBonusTransactionRepository
       include: {
         user: {
           select: {
-            id: true,
-            nome: true,
+            id: true, name: true,
           },
         },
         booking: {
@@ -39,8 +36,7 @@ export class PrismaBonusTransactionRepository
       include: {
         user: {
           select: {
-            id: true,
-            nome: true,
+            id: true, name: true,
           },
         },
       },
@@ -55,7 +51,7 @@ export class PrismaBonusTransactionRepository
         booking: {
           select: {
             id: true,
-            dataHoraInicio: true,
+            startDateTime: true,
           },
         },
       },
@@ -91,3 +87,4 @@ export class PrismaBonusTransactionRepository
     });
   }
 }
+

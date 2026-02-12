@@ -51,7 +51,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.patch(
     '/professionals/:id',
     {
-      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFESSIONAL'])],
       schema: {
         operationId: 'updateProfessional',
         tags: ['professionals'],
@@ -125,7 +125,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.get(
     '/me/professional/dashboard',
     {
-      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      onRequest: [verifyJwt, verifyUserRole('PROFESSIONAL')],
       schema: {
         operationId: 'getProfessionalDashboard',
         tags: ['professionals'],
@@ -148,7 +148,7 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.get(
     '/me/professional/schedule',
     {
-      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      onRequest: [verifyJwt, verifyUserRole('PROFESSIONAL')],
       schema: {
         operationId: 'getProfessionalSchedule',
         tags: ['professionals'],

@@ -1,5 +1,6 @@
 import { BonusRedemption, Prisma } from '@prisma/client';
 
-export interface BonusRedemptionRepository {
+export interface IBonusRedemptionRepository {
   create(data: Prisma.BonusRedemptionCreateInput): Promise<BonusRedemption>;
 }
+

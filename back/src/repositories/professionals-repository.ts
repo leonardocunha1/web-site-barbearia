@@ -1,6 +1,6 @@
 import { Prisma, Professional, Service, User } from '@prisma/client';
 
-export interface ProfessionalsRepository {
+export interface IProfessionalsRepository {
   findById(id: string): Promise<Professional | null>;
   findByUserId(userId: string): Promise<Professional | null>;
   findByProfessionalId(
@@ -8,8 +8,7 @@ export interface ProfessionalsRepository {
   ): Promise<(Professional & { user: User }) | null>;
   create(data: Prisma.ProfessionalCreateInput): Promise<Professional>;
   update(
-    id: string,
-    data: Prisma.ProfessionalUncheckedUpdateInput,
+    id: string, date: Prisma.ProfessionalUncheckedUpdateInput,
   ): Promise<Professional>; 
   delete(id: string): Promise<void>;
 
@@ -45,3 +44,4 @@ export interface ProfessionalsRepository {
 
   countSearch(params: { query: string; ativo?: boolean }): Promise<number>;
 }
+

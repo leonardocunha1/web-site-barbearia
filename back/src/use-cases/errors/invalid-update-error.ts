@@ -1,6 +1,7 @@
-export class InvalidUpdateError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidUpdateError extends BadRequestError {
   constructor(message: string) {
-    super(message);
-    this.name = 'InvalidUpdateError';
+    super(message, 'INVALID_UPDATE');
   }
 }

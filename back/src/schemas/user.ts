@@ -2,8 +2,7 @@ import { z } from 'zod';
 import { paginationSchema } from './pagination';
 import { Role } from '@prisma/client';
 
-export const registerUserSchema = z.object({
-  nome: z.string()
+export const registerUserSchema = z.object({ name: z.string()
     .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
     .transform(nome => nome.trim()),
     
@@ -16,9 +15,9 @@ export const registerUserSchema = z.object({
     .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' })
     .max(100, { message: 'Senha muito longa' }),
     
-  role: z.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN'], {
+  role: z.enum(['CLIENT', 'PROFESSIONAL', 'ADMIN'], {
     message: 'O perfil deve ser CLIENTE, PROFISSIONAL ou ADMIN'
-  }).default('CLIENTE'),
+  }).default('CLIENT'),
     
   telefone: z.string()
     .min(1, { message: 'Telefone é obrigatório' })
@@ -54,14 +53,13 @@ export const loginUserSchema = z.object({
 
 export const userSchema = z.object({
   id: z.string()
-    .uuid({ message: 'ID deve ser um UUID válido' }),
-  nome: z.string(),
+    .uuid({ message: 'ID deve ser um UUID válido' }), name: z.string(),
   email: z.string()
     .email({ message: 'E-mail inválido' }),
   telefone: z.string()
     .nullable()
     .optional(),
-  role: z.enum(['CLIENTE', 'PROFISSIONAL', 'ADMIN'], {
+  role: z.enum(['CLIENT', 'PROFESSIONAL', 'ADMIN'], {
     message: 'Perfil inválido'
   }).optional(),
   emailVerified: z.boolean(),
@@ -69,8 +67,7 @@ export const userSchema = z.object({
   createdAt: z.date(),
 });
 
-export const updateProfileBodySchema = z.object({
-  nome: z.string()
+export const updateProfileBodySchema = z.object({ name: z.string()
     .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
     .optional(),
   email: z.string()

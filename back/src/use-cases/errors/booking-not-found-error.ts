@@ -1,6 +1,7 @@
-export class BookingNotFoundError extends Error {
+import { NotFoundError } from './app-error';
+
+export class BookingNotFoundError extends NotFoundError {
   constructor() {
-    super('Reserva não encontrada');
-    this.name = 'BookingNotFoundError';
+    super('Reserva não encontrada', 'BOOKING_NOT_FOUND');
   }
 }

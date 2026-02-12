@@ -1,51 +1,69 @@
-import { ProfessionalsRepository } from "@/repositories/professionals-repository";
-import { UsersRepository } from "@/repositories/users-repository";
+import { IProfessionalsRepository } from "@/repositories/professionals-repository";
+import { IUsersRepository } from "@/repositories/users-repository";
 import { UserNotFoundError } from "../errors/user-not-found-error";
 import { UserAlreadyProfessionalError } from "../errors/user-already-professional-error";
 import { UserCannotBeProfessionalError } from "../errors/user-cannot-be-professional-error";
-
-interface CreateProfessionalUseCaseRequest {
-  email: string;
-  especialidade: string;
-  bio?: string;
-  documento?: string;
-  avatarUrl?: string;
-  ativo?: boolean;
-}
+import { CreateProfessionalUseCaseRequest } from "./types";
 
 export class CreateProfessionalUseCase {
   constructor(
-    private professionalsRepository: ProfessionalsRepository,
-    private usersRepository: UsersRepository
+    private professionalsRepository: IProfessionalsRepository,
+    private usersRepository: IUsersRepository
   ) {}
 
   async execute(data: CreateProfessionalUseCaseRequest) {
-    const user = await this.usersRepository.findByEmail(data.email);
+    // Fail-fast: validate all business rules
+    const user = await this.validateUserExists(data.email);
+    this.validateUserCanBeProfessional(user);
+    await this.validateUserNotAlreadyProfessional(user.id);
 
-    if (!user) {
-      throw new UserNotFoundError();
-    }
-
-    if (user.role === "ADMIN") {
-      throw new UserCannotBeProfessionalError();
-    }
-
-    const existingProfessional =
-      await this.professionalsRepository.findByUserId(user.id);
-
-    if (existingProfessional) {
-      throw new UserAlreadyProfessionalError();
-    }
-
-    await this.usersRepository.update(user.id, { role: "PROFISSIONAL" });
+    await this.usersRepository.update(user.id, { role: "PROFESSIONAL" });
 
     return this.professionalsRepository.create({
-      especialidade: data.especialidade,
+      especialidade: data.specialty,
       bio: data.bio,
-      documento: data.documento,
-      ativo: data.ativo,
+      documento: data.document,
+      ativo: data.active,
       avatarUrl: data.avatarUrl,
       user: { connect: { id: user.id } },
     });
   }
+
+  /**
+   * Validates that user exists and returns it
+   * @throws {UserNotFoundError} If user not found
+   */
+  private async validateUserExists(email: string) {
+    const user = await this.usersRepository.findByEmail(email);
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+    return user;
+  }
+
+  /**
+   * Validates that user can become a professional
+   * @throws {UserCannotBeProfessionalError} If user is admin
+   */
+  private validateUserCanBeProfessional(user: { role: string }): void {
+    if (user.role === "ADMIN") {
+      throw new UserCannotBeProfessionalError();
+    }
+  }
+
+  /**
+   * Validates that user is not already a professional
+   * @throws {UserAlreadyProfessionalError} If user is already professional
+   */
+  private async validateUserNotAlreadyProfessional(
+    userId: string
+  ): Promise<void> {
+    const existingProfessional =
+      await this.professionalsRepository.findByUserId(userId);
+
+    if (existingProfessional) {
+      throw new UserAlreadyProfessionalError();
+    }
+  }
 }
+

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ListUsersUseCase } from './list-users-use-case';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { Role, User } from '@prisma/client';
 import { ListUsersResponse } from '@/dtos/user-dto';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   listUsers: ReturnType<typeof vi.fn>;
   countUsers: ReturnType<typeof vi.fn>;
 };
@@ -24,8 +24,7 @@ describe('ListUsersUseCase', () => {
   it('deve listar usuários com paginação padrão', async () => {
     const mockUsers: User[] = [
       {
-        id: 'user-1',
-        nome: 'John Doe',
+        id: 'user-1', name: 'John Doe',
         email: 'john@example.com',
         senha: 'hashed-password',
         telefone: '123456789',
@@ -36,8 +35,7 @@ describe('ListUsersUseCase', () => {
         updatedAt: new Date(),
       },
       {
-        id: 'user-2',
-        nome: 'Jane Smith',
+        id: 'user-2', name: 'Jane Smith',
         email: 'jane@example.com',
         senha: 'hashed-password',
         telefone: '987654321',
@@ -78,8 +76,7 @@ describe('ListUsersUseCase', () => {
   it('deve listar usuários com paginação personalizada', async () => {
     const mockUsers: User[] = [
       {
-        id: 'user-1',
-        nome: 'John Doe',
+        id: 'user-1', name: 'John Doe',
         email: 'john@example.com',
         senha: 'hashed-password',
         telefone: '123456789',
@@ -116,8 +113,7 @@ describe('ListUsersUseCase', () => {
   it('deve filtrar usuários por role', async () => {
     const mockUsers: User[] = [
       {
-        id: 'admin-1',
-        nome: 'Admin User',
+        id: 'admin-1', name: 'Admin User',
         email: 'admin@example.com',
         senha: 'hashed-password',
         telefone: '111111111',
@@ -151,8 +147,7 @@ describe('ListUsersUseCase', () => {
   it('deve filtrar usuários por nome', async () => {
     const mockUsers: User[] = [
       {
-        id: 'user-1',
-        nome: 'John Doe',
+        id: 'user-1', name: 'John Doe',
         email: 'john@example.com',
         senha: 'hashed-password',
         telefone: '123456789',
@@ -170,7 +165,7 @@ describe('ListUsersUseCase', () => {
     const result = await sut.execute({ name: 'John' });
 
     expect(result.users.length).toBe(1);
-    expect(result.users[0].nome).toBe('John Doe');
+    expect(result.users[0].name).toBe('John Doe');
     expect(usersRepository.listUsers).toHaveBeenCalledWith({
       page: 1,
       limit: 10,
@@ -199,3 +194,4 @@ describe('ListUsersUseCase', () => {
     await expect(sut.execute({ page: 1, limit: -5 })).rejects.toThrow();
   });
 });
+

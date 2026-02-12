@@ -1,4 +1,4 @@
-import { CouponRepository } from '@/repositories/coupon-repository';
+import { ICouponRepository } from '@/repositories/coupon-repository';
 import { CouponNotFoundError } from '../errors/coupon-not-found-error';
 
 interface ToggleCouponActiveRequest {
@@ -13,7 +13,7 @@ interface ToggleCouponActiveResponse {
 }
 
 export class ToggleCouponActiveUseCase {
-  constructor(private couponRepository: CouponRepository) {}
+  constructor(private couponRepository: ICouponRepository) {}
 
   async execute({
     couponId,
@@ -36,3 +36,4 @@ export class ToggleCouponActiveUseCase {
     };
   }
 }
+

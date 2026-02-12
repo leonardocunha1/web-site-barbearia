@@ -1,6 +1,7 @@
-export class ExpiredTokenError extends Error {
+import { UnauthorizedError } from './app-error';
+
+export class ExpiredTokenError extends UnauthorizedError {
   constructor() {
-    super('Token de redefinição expirado');
-    this.name = 'ExpiredTokenError';
+    super('Token de redefinição expirado', 'EXPIRED_TOKEN');
   }
 }

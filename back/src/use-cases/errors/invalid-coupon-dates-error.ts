@@ -1,6 +1,7 @@
-export class InvalidCouponDatesError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidCouponDatesError extends BadRequestError {
   constructor(message: string) {
-    super(message);
-    this.name = 'InvalidCouponDatesError';
+    super(message, 'INVALID_COUPON_DATES');
   }
 }

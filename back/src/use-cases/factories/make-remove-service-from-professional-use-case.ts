@@ -1,6 +1,6 @@
 import { PrismaServiceProfessionalRepository } from '@/repositories/prisma/prisma-service-professional-repository';
 import { PrismaBookingsRepository } from '@/repositories/prisma/prisma-bookings-repository';
-import { RemoveServiceFromProfessionalUseCase } from '../service-profissional/remove-service-from-professional-use-case';
+import { RemoveServiceFromProfessionalUseCase } from '../service-professional/remove-service-from-professional-use-case';
 
 export function makeRemoveServiceFromProfessionalUseCase() {
   const serviceProfessionalRepository =
@@ -12,3 +12,4 @@ export function makeRemoveServiceFromProfessionalUseCase() {
     bookingsRepository,
   );
 }
+

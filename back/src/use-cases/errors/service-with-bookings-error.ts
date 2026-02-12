@@ -1,6 +1,7 @@
-export class ServiceWithBookingsError extends Error {
+import { ForbiddenError } from './app-error';
+
+export class ServiceWithBookingsError extends ForbiddenError {
   constructor() {
-    super('O Serviço possui agendamentos ativos.');
-    this.name = 'ServiceWithBookingsError';
+    super('O Serviço possui agendamentos ativos.', 'SERVICE_WITH_BOOKINGS');
   }
 }

@@ -4,12 +4,13 @@ import { InvalidTokenError } from '@/use-cases/errors/invalid-token-error';
 
 export async function refresh(request: FastifyRequest, reply: FastifyReply) {
   try {
-    await verifyRefreshToken(request);
+    const payload = await verifyRefreshToken(request);
 
     const tokenService = new TokenService(reply);
     const { token, refreshToken } = await tokenService.generateTokens({
-      id: request.user.sub,
-      role: request.user.role,
+      id: payload.sub,
+      role: payload.role,
+      professionalId: payload.professionalId,
     });
     
     return tokenService
@@ -18,10 +19,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
       .send({ token, refreshToken });
   } catch (err) {
     if (err instanceof InvalidTokenError) {
-      return reply
-        .status(401)
-        .clearCookie('refreshToken')
-        .send({ message: 'Token inválido ou expirado' });
+      reply.clearCookie('refreshToken');
     }
 
     throw err;
@@ -29,13 +27,24 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
 }
 
 async function verifyRefreshToken(request: FastifyRequest) {
-  console.log(request.cookies.refreshToken)
-  if (!request.cookies.refreshToken) {
+  const refreshToken = request.cookies.refreshToken;
+
+  if (!refreshToken) {
     throw new InvalidTokenError();
   }
 
   try {
-    await request.jwtVerify({ onlyCookie: true });
+    const payload = request.server.jwt.verify(refreshToken) as {
+      sub: string;
+      role: string;
+      professionalId?: string;
+    };
+
+    if (!payload?.sub || !payload?.role) {
+      throw new InvalidTokenError();
+    }
+
+    return payload;
   } catch (err) {
     throw new InvalidTokenError();
   }

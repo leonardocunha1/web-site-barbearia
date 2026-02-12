@@ -1,13 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { AnonymizeUserUseCase } from './anonymize-user-use-case';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 import { User, Role } from '@prisma/client';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   findById: ReturnType<typeof vi.fn>;
   anonymize: ReturnType<typeof vi.fn>;
 };
@@ -24,8 +24,7 @@ describe('AnonymizeUserUseCase', () => {
 
   it('deve anonimizar um usuário com sucesso (ADMIN)', async () => {
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: '123456789',
@@ -51,8 +50,7 @@ describe('AnonymizeUserUseCase', () => {
 
   it('deve anonimizar o próprio usuário (CLIENTE)', async () => {
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: '123456789',
@@ -92,8 +90,7 @@ describe('AnonymizeUserUseCase', () => {
 
   it('deve lançar erro quando CLIENTE tenta anonimizar outro usuário', async () => {
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: '123456789',
@@ -119,8 +116,7 @@ describe('AnonymizeUserUseCase', () => {
 
   it('deve permitir PROFISSIONAL anonimizar outro usuário', async () => {
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: '123456789',
@@ -154,3 +150,4 @@ describe('AnonymizeUserUseCase', () => {
     ).rejects.toThrow(UserNotFoundError);
   });
 });
+

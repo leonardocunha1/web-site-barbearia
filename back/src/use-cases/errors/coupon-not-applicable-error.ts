@@ -1,6 +1,7 @@
-export class CouponNotApplicableError extends Error {
+import { BadRequestError } from './app-error';
+
+export class CouponNotApplicableError extends BadRequestError {
   constructor(message = 'Cupom não aplicável a este agendamento') {
-    super(message);
-    this.name = 'CouponNotApplicableError';
+    super(message, 'COUPON_NOT_APPLICABLE');
   }
 }

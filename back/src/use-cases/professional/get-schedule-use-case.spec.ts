@@ -2,55 +2,54 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { GetProfessionalScheduleUseCase } from './get-schedule-use-case';
 import {
   createMockBookingsRepository,
-  createMockFeriadosRepository,
-  createMockHorariosRepository,
+  createMockHolidaysRepository,
+  createMockBusinessHoursRepository,
 } from '@/mock/mock-repositories';
 
 const defaultBusinessHours = {
   id: '1',
-  profissionalId: 'prof-1',
-  diaSemana: 3, // Quarta-feira (para o teste padrão)
-  abreAs: '08:00',
-  fechaAs: '17:00',
-  pausaInicio: '12:00',
-  pausaFim: '13:00',
+  professionalId: 'prof-1',
+  dayOfWeek: 3, // Quarta-feira (para o teste padrão)
+  opensAt: '08:00',
+  closesAt: '17:00',
+  breakStart: '12:00',
+  breakEnd: '13:00',
   ativo: true,
 };
 
 describe('GetProfessionalScheduleUseCase', () => {
   let bookingsRepository: ReturnType<typeof createMockBookingsRepository>;
-  let horariosFuncionamentoRepository: ReturnType<
-    typeof createMockHorariosRepository
+  let businessHoursRepository: ReturnType<
+    typeof createMockBusinessHoursRepository
   >;
-  let feriadosRepository: ReturnType<typeof createMockFeriadosRepository>;
+  let holidaysRepository: ReturnType<typeof createMockHolidaysRepository>;
   let sut: GetProfessionalScheduleUseCase;
 
   beforeEach(() => {
     bookingsRepository = createMockBookingsRepository();
-    horariosFuncionamentoRepository = createMockHorariosRepository();
-    feriadosRepository = createMockFeriadosRepository();
+    businessHoursRepository = createMockBusinessHoursRepository();
+    holidaysRepository = createMockHolidaysRepository();
 
     // Configuração padrão dos mocks
-    horariosFuncionamentoRepository.findByProfessionalAndDay = vi
+    businessHoursRepository.findByProfessionalAndDay = vi
       .fn()
       .mockResolvedValue(defaultBusinessHours);
 
-    feriadosRepository.isProfessionalHoliday = vi.fn().mockResolvedValue(null);
+    holidaysRepository.isProfessionalHoliday = vi.fn().mockResolvedValue(null);
     bookingsRepository.findByProfessionalAndDate = vi
       .fn()
       .mockResolvedValue([]); // Padrão para não quebrar testes que não mockam explicitamente
 
     sut = new GetProfessionalScheduleUseCase(
       bookingsRepository,
-      horariosFuncionamentoRepository,
-      feriadosRepository,
+      businessHoursRepository,
+      holidaysRepository,
     );
   });
 
   it('deve retornar slots vazios quando for feriado', async () => {
     const holidayDate = '2023-05-01';
-    feriadosRepository.isProfessionalHoliday = vi.fn().mockResolvedValue({
-      motivo: 'Dia do Trabalho',
+    holidaysRepository.isProfessionalHoliday = vi.fn().mockResolvedValue({ reason: 'Dia do Trabalho',
     });
 
     const result = await sut.execute({
@@ -69,7 +68,7 @@ describe('GetProfessionalScheduleUseCase', () => {
   it('deve retornar slots vazios quando o horário de funcionamento estiver inativo', async () => {
     const testDate = '2023-05-02';
     // CORREÇÃO: Usar o objeto base defaultBusinessHours para sobrescrever
-    horariosFuncionamentoRepository.findByProfessionalAndDay = vi
+    businessHoursRepository.findByProfessionalAndDay = vi
       .fn()
       .mockResolvedValue({
         ...defaultBusinessHours, // Usar o objeto base
@@ -107,13 +106,13 @@ describe('GetProfessionalScheduleUseCase', () => {
     const testDate = '2023-05-04';
     const mockBooking = {
       id: 'booking-1',
-      dataHoraInicio: new Date(`${testDate}T10:00:00`),
-      dataHoraFim: new Date(`${testDate}T10:30:00`), // 3 slots de 10 min: 10:00, 10:10, 10:20
-      status: 'CONFIRMADO',
-      user: { id: 'user-1', nome: 'Cliente Teste' },
+      startDateTime: new Date(`${testDate}T10:00:00`),
+      endDateTime: new Date(`${testDate}T10:30:00`), // 3 slots de 10 min: 10:00, 10:10, 10:20
+      status: 'CONFIRMED',
+      user: { id: 'user-1', name: 'Cliente Teste' },
       items: [
         {
-          serviceProfessional: { service: { nome: 'Corte de Cabelo' } },
+          serviceProfessional: { service: { name: 'Corte de Cabelo' } },
         },
       ],
     };
@@ -139,13 +138,13 @@ describe('GetProfessionalScheduleUseCase', () => {
   it('deve lidar corretamente com dias sem pausa', async () => {
     const testDate = '2023-05-05';
     // CORREÇÃO: Usar o objeto base defaultBusinessHours para sobrescrever
-    horariosFuncionamentoRepository.findByProfessionalAndDay = vi
+    businessHoursRepository.findByProfessionalAndDay = vi
       .fn()
       .mockResolvedValue({
         ...defaultBusinessHours, // Usar o objeto base
-        diaSemana: 5, // Sexta-feira
-        pausaInicio: null,
-        pausaFim: null,
+        dayOfWeek: 5, // Sexta-feira
+        breakStart: null,
+        breakEnd: null,
       });
 
     const result = await sut.execute({
@@ -175,3 +174,5 @@ describe('GetProfessionalScheduleUseCase', () => {
     });
   });
 });
+
+

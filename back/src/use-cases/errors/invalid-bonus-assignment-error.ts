@@ -1,6 +1,7 @@
-export class InvalidBonusAssignmentError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidBonusAssignmentError extends BadRequestError {
   constructor(message: string) {
-    super(message);
-    this.name = 'InvalidBonusAssignmentError';
+    super(message, 'INVALID_BONUS_ASSIGNMENT');
   }
 }

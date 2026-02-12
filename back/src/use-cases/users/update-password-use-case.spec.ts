@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UpdatePasswordUseCase } from './update-password-use-case';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
 import { SamePasswordError } from '../errors/same-password-error';
@@ -19,7 +19,7 @@ vi.mock('bcryptjs', () => {
 const bcryptCompare = bcrypt.compare as ReturnType<typeof vi.fn>;
 const bcryptHash = bcrypt.hash as ReturnType<typeof vi.fn>;
 
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   findById: ReturnType<typeof vi.fn>;
   updatePassword: ReturnType<typeof vi.fn>;
 };
@@ -43,10 +43,9 @@ describe('Update Password Use Case', () => {
   const mockUser = {
     id: 'user-123',
     email: 'john@example.com',
-    senha: 'hashed-current-password',
-    nome: 'John Doe',
+    senha: 'hashed-current-password', name: 'John Doe',
     telefone: '123456789',
-    role: 'CLIENTE',
+    role: 'CLIENT',
     active: true,
   };
 
@@ -161,3 +160,4 @@ describe('Update Password Use Case', () => {
     expect(Object.keys(result.user)).toEqual(['id', 'email']);
   });
 });
+

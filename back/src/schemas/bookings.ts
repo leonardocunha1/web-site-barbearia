@@ -8,17 +8,14 @@ import { paginationSchema } from './pagination';
  */
 export const bookingItemSchema = z
   .object({
-    id: z.string().uuid({ message: 'ID do item de agendamento inválido' }),
-    duracao: z.number()
+    id: z.string().uuid({ message: 'ID do item de agendamento inválido' }), duration: z.number()
       .int({ message: 'Duração deve ser um número inteiro' })
-      .nonnegative({ message: 'Duração não pode ser negativa' }),
-    preco: z.number()
+      .nonnegative({ message: 'Duração não pode ser negativa' }), price: z.number()
       .nonnegative({ message: 'Preço não pode ser negativo' }),
     serviceProfessional: z.object({
       id: z.string().uuid({ message: 'ID do profissional de serviço inválido' }),
       service: z.object({
-        id: z.string().uuid({ message: 'ID do serviço inválido' }),
-        nome: z.string().min(2, { message: 'Nome do serviço deve ter pelo menos 2 caracteres' }),
+        id: z.string().uuid({ message: 'ID do serviço inválido' }), name: z.string().min(2, { message: 'Nome do serviço deve ter pelo menos 2 caracteres' }),
       }),
     }),
   })
@@ -30,17 +27,17 @@ export const bookingItemSchema = z
 export const bookingSchema = z
   .object({
     id: z.string().uuid({ message: 'ID do agendamento inválido' }),
-    usuarioId: z.string().uuid({ message: 'ID do usuário inválido' }),
-    dataHoraInicio: z.string().datetime({ message: 'Data/hora de início inválida' }),
-    dataHoraFim: z.string().datetime({ message: 'Data/hora de fim inválida' }),
+    userId: z.string().uuid({ message: 'ID do usuário inválido' }),
+    startDateTime: z.string().datetime({ message: 'Data/hora de início inválida' }),
+    endDateTime: z.string().datetime({ message: 'Data/hora de fim inválida' }),
     status: z.nativeEnum(Status, {
       errorMap: () => ({ message: 'Status do agendamento inválido' })
     }),
-    observacoes: z.string()
+    notes: z.string()
       .max(500, { message: 'Observações não podem exceder 500 caracteres' })
       .nullable()
       .optional(),
-    valorFinal: z.number()
+    totalAmount: z.number()
       .positive({ message: 'Valor final deve ser positivo' })
       .nullable()
       .optional(),
@@ -51,17 +48,14 @@ export const bookingSchema = z
       .nullable()
       .optional(),
     updatedAt: z.string().datetime({ message: 'Data de atualização inválida' }),
-    createdAt: z.string().datetime({ message: 'Data de criação inválida' }),
-    profissional: z.object({
+    createdAt: z.string().datetime({ message: 'Data de criação inválida' }), professional: z.object({
       id: z.string().uuid({ message: 'ID do profissional inválido' }),
       user: z.object({
-        id: z.string().uuid({ message: 'ID do usuário profissional inválido' }),
-        nome: z.string().min(2, { message: 'Nome do profissional deve ter pelo menos 2 caracteres' }),
+        id: z.string().uuid({ message: 'ID do usuário profissional inválido' }), name: z.string().min(2, { message: 'Nome do profissional deve ter pelo menos 2 caracteres' }),
       }),
     }),
     user: z.object({
-      id: z.string().uuid({ message: 'ID do usuário cliente inválido' }),
-      nome: z.string().min(2, { message: 'Nome do cliente deve ter pelo menos 2 caracteres' }),
+      id: z.string().uuid({ message: 'ID do usuário cliente inválido' }), name: z.string().min(2, { message: 'Nome do cliente deve ter pelo menos 2 caracteres' }),
     }),
     items: z.array(bookingItemSchema)
       .min(1, { message: 'Agendamento deve ter pelo menos 1 serviço' }),
@@ -107,7 +101,7 @@ export const getOrUpdateBookingStatusParamsSchema = z
  */
 export const updateBookingStatusBodySchema = z
   .object({
-    status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'], {
+    status: z.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
       errorMap: () => ({ message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO' })
     }),
     reason: z.string()
@@ -137,7 +131,7 @@ export const listBookingsQuerySchema = paginationSchema
     endDate: z.string()
       .datetime({ message: 'Data de fim inválida' })
       .optional(),
-    status: z.enum(['PENDENTE', 'CONFIRMADO', 'CANCELADO', 'CONCLUIDO'], {
+    status: z.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
       errorMap: () => ({ message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO' })
     }).optional(),
     sort: z.array(sortSchema)

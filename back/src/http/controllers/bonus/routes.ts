@@ -10,7 +10,7 @@ export async function bonusRoutes(app: FastifyTypedInstance) {
   app.post(
     '/bonus/assign',
     {
-      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      onRequest: [verifyJwt, verifyUserRole('PROFESSIONAL')],
       schema: {
         operationId: 'assignBonusToUser',
         tags: ['bonus'],

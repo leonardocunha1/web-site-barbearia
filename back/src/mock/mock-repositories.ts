@@ -52,7 +52,7 @@ export const createMockServiceProfessionalRepository = () => ({
   updateByServiceAndProfessional: vi.fn(),
 });
 
-export const createMockFeriadosRepository = () => ({
+export const createMockHolidaysRepository = () => ({
   findByProfessionalAndDate: vi.fn(),
   addHoliday: vi.fn(),
   isProfessionalHoliday: vi.fn(),
@@ -62,7 +62,7 @@ export const createMockFeriadosRepository = () => ({
   countByProfessionalId: vi.fn(),
 });
 
-export const createMockHorariosRepository = () => ({
+export const createMockBusinessHoursRepository = () => ({
   findByProfessionalAndDay: vi.fn(),
   create: vi.fn(),
   findById: vi.fn(),
@@ -108,3 +108,5 @@ export const createMockCouponsRepository = () => ({
   findMany: vi.fn(),
   count: vi.fn(),
 });
+
+

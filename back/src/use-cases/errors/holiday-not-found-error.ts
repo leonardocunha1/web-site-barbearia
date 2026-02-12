@@ -1,6 +1,7 @@
-export class HolidayNotFoundError extends Error {
+import { NotFoundError } from './app-error';
+
+export class HolidayNotFoundError extends NotFoundError {
   constructor() {
-    super('Feriado não encontrado');
-    this.name = 'HolidayNotFoundError';
+    super('Feriado não encontrado', 'HOLIDAY_NOT_FOUND');
   }
 }

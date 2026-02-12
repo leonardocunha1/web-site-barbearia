@@ -1,11 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UpdateProfessionalUseCase } from './update-professional-use-case';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
-type MockProfessionalsRepository = ProfessionalsRepository & {
+type MockProfessionalsRepository = IProfessionalsRepository & {
   findById: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
 };
@@ -99,7 +99,7 @@ describe('UpdateProfessionalUseCase', () => {
       especialidade: 'Ortodontista',
     });
 
-    expect(result?.especialidade).toBe('Ortodontista');
+    expect(result?.specialty).toBe('Ortodontista');
     expect(result?.bio).toBe('Bio antiga'); // Deve manter o valor antigo
     expect(professionalsRepository.update).toHaveBeenCalledWith('prof-123', {
       especialidade: 'Ortodontista',
@@ -135,7 +135,7 @@ describe('UpdateProfessionalUseCase', () => {
     });
 
     expect(result?.bio).toBeNull();
-    expect(result?.documento).toBeNull();
+    expect(result?.document).toBeNull();
   });
 
   it('deve lançar erro quando profissional não for encontrado', async () => {
@@ -164,7 +164,7 @@ describe('UpdateProfessionalUseCase', () => {
     professionalsRepository.findById.mockResolvedValue(mockProfessional);
     professionalsRepository.update.mockImplementation(async (id, data) => ({
       ...mockProfessional,
-      ...data,
+      ...date,
     }));
 
     const oldUpdatedAt = mockProfessional.updatedAt;
@@ -177,3 +177,4 @@ describe('UpdateProfessionalUseCase', () => {
     expect(result?.updatedAt).toEqual(expect.any(Date));
   });
 });
+

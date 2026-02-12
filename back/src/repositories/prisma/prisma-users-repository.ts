@@ -1,10 +1,12 @@
 import { Prisma, Role, User } from '@prisma/client';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
+import { PASSWORD_HASH_ROUNDS } from '@/consts/const';
 
-export class PrismaUsersRepository implements UsersRepository {
-  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+export class PrismaUsersRepository implements IUsersRepository {
+  async update(id: string, date: Prisma.UserUpdateInput): Promise<User> {
     return await prisma.user.update({
       where: { id },
       data,
@@ -39,8 +41,7 @@ export class PrismaUsersRepository implements UsersRepository {
 
   async updatePassword(id: string, password: string): Promise<User> {
     return prisma.user.update({
-      where: { id },
-      data: { senha: password },
+      where: { id }, date: { senha: password },
     });
   }
 
@@ -60,7 +61,7 @@ export class PrismaUsersRepository implements UsersRepository {
     const where: Prisma.UserWhereInput = {};
     if (role) where.role = role;
     if (name) {
-      where.nome = {
+      where.name = {
         contains: name,
         mode: 'insensitive',
       };
@@ -84,7 +85,7 @@ export class PrismaUsersRepository implements UsersRepository {
     const where: Prisma.UserWhereInput = {};
     if (role) where.role = role;
     if (name) {
-      where.nome = {
+      where.name = {
         contains: name,
         mode: 'insensitive',
       };
@@ -94,17 +95,17 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async anonymize(userId: string): Promise<void> {
-    const anonymizedEmail = `anon-${Date.now()}-${bcrypt.hash(userId, 6)}@deleted.com`;
-    const anonymizedPhone = `deleted-${Math.random().toString(36).substring(2, 10)}`;
+    const anonymizedEmail = `anon-${randomUUID()}@deleted.com`;
+    const anonymizedPhone = `deleted-${randomUUID().slice(0, 10)}`;
 
     await prisma.user.update({
-      where: { id: userId },
-      data: {
+      where: { id: userId }, date: {
         email: anonymizedEmail,
         telefone: anonymizedPhone,
         active: false,
-        senha: await bcrypt.hash('deleted-account', 6), // Senha padrão para conta deletada
+        senha: await bcrypt.hash('deleted-account', PASSWORD_HASH_ROUNDS),
       },
     });
   }
 }
+

@@ -1,5 +1,5 @@
 import { PrismaServiceProfessionalRepository } from '@/repositories/prisma/prisma-service-professional-repository';
-import { UpdateProfessionalServicesUseCase } from '../service-profissional/update-service-professional-use-case';
+import { UpdateProfessionalServicesUseCase } from '../service-professional/update-service-professional-use-case';
 
 export function makeUpdateProfessionalServicesUseCase() {
   const serviceProfessionalRepository =
@@ -7,3 +7,4 @@ export function makeUpdateProfessionalServicesUseCase() {
 
   return new UpdateProfessionalServicesUseCase(serviceProfessionalRepository);
 }
+

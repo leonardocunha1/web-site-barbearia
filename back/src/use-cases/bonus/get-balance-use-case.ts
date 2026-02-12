@@ -1,5 +1,5 @@
-import { UserBonusRepository } from '@/repositories/user-bonus-repository';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { VALUE_PER_POINT } from '@/consts/const';
 
@@ -23,8 +23,8 @@ interface GetBalanceResponse {
 
 export class GetBalanceUseCase {
   constructor(
-    private userBonusRepository: UserBonusRepository,
-    private usersRepository: UsersRepository,
+    private userBonusRepository: IUserBonusRepository,
+    private usersRepository: IUsersRepository,
   ) {}
 
   async execute(request: GetBalanceRequest): Promise<GetBalanceResponse> {
@@ -93,3 +93,4 @@ export class GetBalanceUseCase {
     return new Date(Math.min(...validDates.map((date) => date.getTime())));
   }
 }
+

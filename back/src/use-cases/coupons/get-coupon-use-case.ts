@@ -1,17 +1,9 @@
-import { CouponRepository } from '@/repositories/coupon-repository';
+import { ICouponRepository } from '@/repositories/coupon-repository';
 import { CouponNotFoundError } from '../errors/coupon-not-found-error';
-import { Coupon } from '@prisma/client';
-
-interface GetCouponRequest {
-  couponId: string;
-}
-
-interface GetCouponResponse {
-  coupon: Omit<Coupon, 'userId'>;
-}
+import { GetCouponRequest, GetCouponResponse } from './types';
 
 export class GetCouponUseCase {
-  constructor(private couponRepository: CouponRepository) {}
+  constructor(private couponRepository: ICouponRepository) {}
 
   async execute({ couponId }: GetCouponRequest): Promise<GetCouponResponse> {
     const coupon = await this.couponRepository.findById(couponId);
@@ -42,3 +34,4 @@ export class GetCouponUseCase {
     };
   }
 }
+

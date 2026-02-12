@@ -20,7 +20,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.post(
     '/bookings',
     {
-      onRequest: [verifyJwt, verifyUserRole('CLIENTE')],
+      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
       schema: {
         operationId: 'createBooking',
         tags: ['bookings'],
@@ -44,7 +44,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.patch(
     '/bookings/:bookingId/status',
     {
-      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      onRequest: [verifyJwt, verifyUserRole('PROFESSIONAL')],
       schema: {
         operationId: 'updateBookingStatus',
         tags: ['bookings'],
@@ -66,7 +66,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.get(
     '/bookings/me',
     {
-      onRequest: [verifyJwt, verifyUserRole('CLIENTE')],
+      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
       schema: {
         operationId: 'listUserBookings',
         tags: ['bookings'],
@@ -86,7 +86,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.get(
     '/bookings/professional',
     {
-      onRequest: [verifyJwt, verifyUserRole('PROFISSIONAL')],
+      onRequest: [verifyJwt, verifyUserRole('PROFESSIONAL')],
       schema: {
         operationId: 'listProfessionalBookings',
         tags: ['bookings'],

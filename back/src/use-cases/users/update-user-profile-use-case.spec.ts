@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UpdateUserProfileUseCase } from './update-user-profile-use-case';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { EmailAlreadyExistsError } from '../errors/user-email-already-exists-error';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
 
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   findById: ReturnType<typeof vi.fn>;
   findByEmail: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
@@ -22,11 +22,10 @@ describe('Update User Profile Use Case', () => {
   });
 
   const mockUser = {
-    id: 'user-123',
-    nome: 'John Doe',
+    id: 'user-123', name: 'John Doe',
     email: 'john@example.com',
     telefone: '123456789',
-    role: 'CLIENTE',
+    role: 'CLIENT',
     active: true,
   };
 
@@ -34,21 +33,18 @@ describe('Update User Profile Use Case', () => {
     // Configurar mocks
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     mockUsersRepository.update.mockResolvedValue({
-      ...mockUser,
-      nome: 'John Updated',
+      ...mockUser, name: 'John Updated',
     });
 
     // Executar
     const result = await useCase.execute({
-      userId: 'user-123',
-      nome: 'John Updated',
+      userId: 'user-123', name: 'John Updated',
     });
 
     // Verificar
-    expect(result.user.nome).toBe('John Updated');
+    expect(result.user.name).toBe('John Updated');
     expect(mockUsersRepository.findById).toHaveBeenCalledWith('user-123');
-    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
-      nome: 'John Updated',
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', { name: 'John Updated',
     });
   });
 
@@ -59,8 +55,7 @@ describe('Update User Profile Use Case', () => {
     // Executar e verificar
     await expect(
       useCase.execute({
-        userId: 'non-existent-user',
-        nome: 'John Updated',
+        userId: 'non-existent-user', name: 'John Updated',
       }),
     ).rejects.toThrow(UserNotFoundError);
   });
@@ -110,7 +105,7 @@ describe('Update User Profile Use Case', () => {
     });
 
     // Verificar
-    expect(result.user.telefone).toBe('987654321');
+    expect(result.user.phone).toBe('987654321');
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
       telefone: '987654321',
     });
@@ -121,26 +116,23 @@ describe('Update User Profile Use Case', () => {
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     mockUsersRepository.findByEmail.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
-      ...mockUser,
-      nome: 'John Updated',
+      ...mockUser, name: 'John Updated',
       email: 'updated@example.com',
       telefone: '987654321',
     });
 
     // Executar
     const result = await useCase.execute({
-      userId: 'user-123',
-      nome: 'John Updated',
+      userId: 'user-123', name: 'John Updated',
       email: 'updated@example.com',
       telefone: '987654321',
     });
 
     // Verificar
-    expect(result.user.nome).toBe('John Updated');
+    expect(result.user.name).toBe('John Updated');
     expect(result.user.email).toBe('updated@example.com');
-    expect(result.user.telefone).toBe('987654321');
-    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
-      nome: 'John Updated',
+    expect(result.user.phone).toBe('987654321');
+    expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', { name: 'John Updated',
       email: 'updated@example.com',
       telefone: '987654321',
     });
@@ -175,9 +167,10 @@ describe('Update User Profile Use Case', () => {
     });
 
     // Verificar
-    expect(result.user.telefone).toBeNull();
+    expect(result.user.phone).toBeNull();
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
       telefone: null,
     });
   });
 });
+

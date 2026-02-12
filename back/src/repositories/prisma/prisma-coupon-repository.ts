@@ -2,11 +2,11 @@ import { Coupon, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import {
   CouponFilters,
-  CouponRepository,
+  ICouponRepository,
 } from '@/repositories/coupon-repository';
 import { CouponSortField, CouponSortOrder } from '@/schemas/coupon';
 
-export class PrismaCouponRepository implements CouponRepository {
+export class PrismaCouponRepository implements ICouponRepository {
   async findByCode(code: string) {
     return prisma.coupon.findUnique({
       where: { code },
@@ -21,8 +21,7 @@ export class PrismaCouponRepository implements CouponRepository {
     discount: number;
   }) {
     await prisma.$transaction([
-      prisma.couponRedemption.create({
-        data: {
+      prisma.couponRedemption.create({ date: {
           couponId: data.couponId,
           userId: data.userId,
           bookingId: data.bookingId,
@@ -30,16 +29,14 @@ export class PrismaCouponRepository implements CouponRepository {
         },
       }),
       prisma.coupon.update({
-        where: { id: data.couponId },
-        data: { uses: { increment: 1 } },
+        where: { id: data.couponId }, date: { uses: { increment: 1 } },
       }),
     ]);
   }
 
   async incrementUses(couponId: string) {
     await prisma.coupon.update({
-      where: { id: couponId },
-      data: { uses: { increment: 1 } },
+      where: { id: couponId }, date: { uses: { increment: 1 } },
     });
   }
 
@@ -55,7 +52,7 @@ export class PrismaCouponRepository implements CouponRepository {
     });
   }
 
-  async update(id: string, data: Prisma.CouponUpdateInput) {
+  async update(id: string, date: Prisma.CouponUpdateInput) {
     return prisma.coupon.update({
       where: { id },
       data,
@@ -145,3 +142,4 @@ export class PrismaCouponRepository implements CouponRepository {
     });
   }
 }
+

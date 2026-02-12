@@ -1,4 +1,4 @@
-import { BookingsRepository } from '@/repositories/bookings-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { BookingDTO } from '@/dtos/booking-dto';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 
@@ -11,7 +11,7 @@ interface GetBookingResponse {
 }
 
 export class GetBookingUseCase {
-  constructor(private bookingsRepository: BookingsRepository) {}
+  constructor(private bookingsRepository: IBookingsRepository) {}
 
   async execute({ bookingId }: GetBookingRequest): Promise<GetBookingResponse> {
     if (!bookingId) {
@@ -29,3 +29,4 @@ export class GetBookingUseCase {
     };
   }
 }
+

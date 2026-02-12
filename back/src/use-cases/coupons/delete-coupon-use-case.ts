@@ -1,4 +1,4 @@
-import { CouponRepository } from '@/repositories/coupon-repository';
+import { ICouponRepository } from '@/repositories/coupon-repository';
 import { CouponNotFoundError } from '../errors/coupon-not-found-error';
 import { CouponInUseError } from '../errors/coupon-in-use-error';
 
@@ -11,7 +11,7 @@ interface DeleteCouponResponse {
 }
 
 export class DeleteCouponUseCase {
-  constructor(private couponRepository: CouponRepository) {}
+  constructor(private couponRepository: ICouponRepository) {}
 
   async execute({
     couponId,
@@ -40,3 +40,4 @@ export class DeleteCouponUseCase {
     };
   }
 }
+

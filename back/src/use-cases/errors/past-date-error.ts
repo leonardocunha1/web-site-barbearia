@@ -1,6 +1,7 @@
-export class PastDateError extends Error {
+import { BadRequestError } from './app-error';
+
+export class PastDateError extends BadRequestError {
   constructor() {
-    super('Não é possível cadastrar feriados para datas passadas');
-    this.name = 'PastDateError';
+    super('Não é possível cadastrar feriados para datas passadas', 'PAST_DATE');
   }
 }

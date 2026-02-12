@@ -1,15 +1,17 @@
-import { UpdateBusinessHoursUseCase } from '../horario-funcionamento/update-horario-funcionamento-profissional-use-case';
-import { PrismaHorariosFuncionamentoRepository } from '@/repositories/prisma/prisma-horarios-funcionamento-repository';
+import { UpdateBusinessHoursUseCase } from '../business-hours/update-business-hours-use-case';
+import { PrismaBusinessHoursRepository } from '@/repositories/prisma/prisma-business-hours-repository';
 import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
 
 export function makeUpdateBusinessHoursUseCase() {
-  const horariosRepository = new PrismaHorariosFuncionamentoRepository();
+  const businessHoursRepository = new PrismaBusinessHoursRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
 
   const useCase = new UpdateBusinessHoursUseCase(
-    horariosRepository,
+    businessHoursRepository,
     professionalsRepository,
   );
 
   return useCase;
 }
+
+

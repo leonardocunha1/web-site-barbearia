@@ -1,14 +1,16 @@
-import { PrismaFeriadosRepository } from '@/repositories/prisma/prisma-feriados-repository';
+import { PrismaHolidaysRepository } from '@/repositories/prisma/prisma-holidays-repository';
 import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
-import { DeleteHolidayUseCase } from '../feriados/delete-feriado-professional-use-case';
+import { DeleteHolidayUseCase } from '../holidays/delete-holiday-use-case';
 
 export function makeDeleteHolidayUseCase() {
-  const feriadosRepository = new PrismaFeriadosRepository();
+  const holidaysRepository = new PrismaHolidaysRepository();
   const professionalsRepository = new PrismaProfessionalsRepository();
   const useCase = new DeleteHolidayUseCase(
-    feriadosRepository,
+    holidaysRepository,
     professionalsRepository,
   );
 
   return useCase;
 }
+
+

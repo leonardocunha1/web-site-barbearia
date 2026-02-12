@@ -1,8 +1,12 @@
 import { User, Role } from '@prisma/client';
+import { sanitizeUser } from '@/utils/dto-helpers';
 
+/**
+ * User Data Transfer Object
+ * Excludes sensitive fields like password
+ */
 export interface UserDTO {
-  id: string;
-  nome: string;
+  id: string; name: string;
   email: string;
   telefone?: string | null;
   role: Role;
@@ -11,19 +15,36 @@ export interface UserDTO {
   createdAt: Date;
 }
 
+/**
+ * Converts User entity to safe DTO
+ * Automatically removes password and other sensitive fields
+ * 
+ * @param user - User entity from database
+ * @returns Safe user DTO without sensitive data
+ * 
+ * @example
+ * ```typescript
+ * const user = await usersRepository.findById(id);
+ * return reply.send({ user: toUserDTO(user) });
+ * ```
+ */
 export function toUserDTO(user: User): UserDTO {
+  const sanitized = sanitizeUser(user);
+  
   return {
-    id: user.id,
-    nome: user.nome,
-    email: user.email,
-    telefone: user.telefone,
-    role: user.role,
-    emailVerified: user.emailVerified,
-    active: user.active,
-    createdAt: user.createdAt,
+    id: sanitized.id, name: sanitized.name,
+    email: sanitized.email,
+    telefone: sanitized.phone,
+    role: sanitized.role,
+    emailVerified: sanitized.emailVerified,
+    active: sanitized.active,
+    createdAt: sanitized.createdAt,
   };
 }
 
+/**
+ * @deprecated Use PaginatedResponse<UserDTO> from @/dtos/pagination instead
+ */
 export type ListUsersResponse = {
   users: UserDTO[];
   total: number;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UpdateBookingStatusUseCase } from './update-booking-status-use-case';
-import { BookingsRepository } from '@/repositories/bookings-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '../errors/invalid-booking-status-error';
 import { BookingUpdateError } from '../errors/booking-update-error';
@@ -8,7 +8,7 @@ import { Status } from '@prisma/client';
 import { createMockBookingsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
-type MockBookingsRepository = BookingsRepository & {
+type MockBookingsRepository = IBookingsRepository & {
   findById: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
 };
@@ -25,20 +25,17 @@ describe('UpdateBookingStatusUseCase', () => {
 
   const mockBooking = {
     id: 'booking-123',
-    profissionalId: 'pro-123',
-    status: 'PENDENTE' as Status,
-    dataHoraInicio: new Date('2023-01-01T10:00:00'),
-    dataHoraFim: new Date('2023-01-01T11:00:00'),
-    observacoes: 'Observação original',
+    professionalId: 'pro-123',
+    status: 'PENDING' as Status,
+    startDateTime: new Date('2023-01-01T10:00:00'),
+    endDateTime: new Date('2023-01-01T11:00:00'),
+    notes: 'Observação original',
     user: {
-      id: 'user-123',
-      nome: 'John Doe',
-    },
-    profissional: {
+      id: 'user-123', name: 'John Doe',
+    }, professional: {
       id: 'pro-123',
       user: {
-        id: 'pro-user-123',
-        nome: 'Professional User',
+        id: 'pro-user-123', name: 'Professional User',
       },
     },
     items: [
@@ -47,12 +44,9 @@ describe('UpdateBookingStatusUseCase', () => {
         serviceProfessional: {
           id: 'sp-123',
           service: {
-            id: 'service-123',
-            nome: 'Service Name',
+            id: 'service-123', name: 'Service Name',
           },
-        },
-        preco: 100,
-        duracao: 60,
+        }, price: 100, duration: 60,
       },
     ],
   };
@@ -62,23 +56,23 @@ describe('UpdateBookingStatusUseCase', () => {
     mockBookingsRepository.findById.mockResolvedValue(mockBooking);
     mockBookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
       confirmedAt: new Date(),
     });
 
     // Executar
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'CONFIRMADO',
-      profissionalId: 'pro-123',
+      status: 'CONFIRMED',
+      professionalId: 'pro-123',
     });
 
     // Verificar
-    expect(result.booking.status).toBe('CONFIRMADO');
+    expect(result.booking.status).toBe('CONFIRMED');
     expect(mockBookingsRepository.update).toHaveBeenCalledWith('booking-123', {
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
       confirmedAt: expect.any(Date),
-      observacoes: 'Observação original',
+      notes: 'Observação original',
     });
   });
 
@@ -87,25 +81,25 @@ describe('UpdateBookingStatusUseCase', () => {
     mockBookingsRepository.findById.mockResolvedValue(mockBooking);
     mockBookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'CANCELADO',
+      status: 'CANCELED',
       canceledAt: new Date(),
-      observacoes: 'Observação original\nMotivo do cancelamento: Motivo teste',
+      notes: 'Observação original\nMotivo do cancelamento: Motivo teste',
     });
 
     // Executar
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'CANCELADO',
+      status: 'CANCELED',
       reason: 'Motivo teste',
-      profissionalId: 'pro-123',
+      professionalId: 'pro-123',
     });
 
     // Verificar
-    expect(result.booking.status).toBe('CANCELADO');
+    expect(result.booking.status).toBe('CANCELED');
     expect(mockBookingsRepository.update).toHaveBeenCalledWith('booking-123', {
-      status: 'CANCELADO',
+      status: 'CANCELED',
       canceledAt: expect.any(Date),
-      observacoes: 'Observação original\nMotivo do cancelamento: Motivo teste',
+      notes: 'Observação original\nMotivo do cancelamento: Motivo teste',
     });
   });
 
@@ -115,8 +109,8 @@ describe('UpdateBookingStatusUseCase', () => {
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CONFIRMADO',
-        profissionalId: 'pro-123',
+        status: 'CONFIRMED',
+        professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingNotFoundError);
   });
@@ -127,8 +121,8 @@ describe('UpdateBookingStatusUseCase', () => {
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CONFIRMADO',
-        profissionalId: 'pro-456', // ID diferente
+        status: 'CONFIRMED',
+        professionalId: 'pro-456', // ID diferente
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
@@ -136,14 +130,14 @@ describe('UpdateBookingStatusUseCase', () => {
   it('deve lançar erro quando tenta confirmar agendamento não pendente', async () => {
     mockBookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CONFIRMADO',
-        profissionalId: 'pro-123',
+        status: 'CONFIRMED',
+        professionalId: 'pro-123',
       }),
     ).rejects.toThrow(InvalidBookingStatusError);
   });
@@ -151,14 +145,14 @@ describe('UpdateBookingStatusUseCase', () => {
   it('deve lançar erro quando tenta cancelar agendamento já cancelado', async () => {
     mockBookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'CANCELADO',
+      status: 'CANCELED',
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CANCELADO',
-        profissionalId: 'pro-123',
+        status: 'CANCELED',
+        professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
@@ -169,9 +163,9 @@ describe('UpdateBookingStatusUseCase', () => {
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CANCELADO',
+        status: 'CANCELED',
         reason: 'a'.repeat(501), // 501 caracteres
-        profissionalId: 'pro-123',
+        professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
@@ -180,16 +174,17 @@ describe('UpdateBookingStatusUseCase', () => {
     mockBookingsRepository.findById.mockResolvedValue(mockBooking);
     mockBookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'CANCELADO',
+      status: 'CANCELED',
       canceledAt: new Date(),
     });
 
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'CANCELADO',
-      profissionalId: 'pro-123',
+      status: 'CANCELED',
+      professionalId: 'pro-123',
     });
 
-    expect(result.booking.observacoes).toBe('Observação original');
+    expect(result.booking.notes).toBe('Observação original');
   });
 });
+

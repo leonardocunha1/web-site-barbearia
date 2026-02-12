@@ -1,11 +1,11 @@
 import { Prisma, Role, User } from '@prisma/client';
 
-export interface UsersRepository {
+export interface IUsersRepository {
   findById(id: string): Promise<User | null>;
   findByPhone(telefone: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   create(data: Prisma.UserCreateInput): Promise<User>;
-  update(id: string, data: Prisma.UserUpdateInput): Promise<User>;
+  update(id: string, date: Prisma.UserUpdateInput): Promise<User>;
   updatePassword(id: string, password: string): Promise<User>;
   listUsers(params: {
     page: number;
@@ -16,3 +16,4 @@ export interface UsersRepository {
   countUsers(params: { role?: Role; name?: string }): Promise<number>;
   anonymize(userId: string): Promise<void>;
 }
+

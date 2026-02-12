@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CreateProfessionalUseCase } from './create-professional-use-case';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserAlreadyProfessionalError } from '../errors/user-already-professional-error';
 import {
@@ -9,12 +9,12 @@ import {
   createMockUsersRepository,
 } from '@/mock/mock-repositories';
 
-type MockProfessionalsRepository = ProfessionalsRepository & {
+type MockProfessionalsRepository = IProfessionalsRepository & {
   findByUserId: ReturnType<typeof vi.fn>;
   create: ReturnType<typeof vi.fn>;
 };
 
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   findByEmail: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
 };
@@ -35,10 +35,9 @@ describe('Create Professional Use Case', () => {
   });
 
   const mockUser = {
-    id: 'user-123',
-    nome: 'John Doe',
+    id: 'user-123', name: 'John Doe',
     email: 'john@example.com',
-    role: 'CLIENTE',
+    role: 'CLIENT',
     active: true,
   };
 
@@ -56,7 +55,7 @@ describe('Create Professional Use Case', () => {
     mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
-      role: 'PROFISSIONAL',
+      role: 'PROFESSIONAL',
     });
     mockProfessionalsRepository.create.mockResolvedValue(mockProfessional);
 
@@ -71,7 +70,7 @@ describe('Create Professional Use Case', () => {
     expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('john@example.com');
     expect(mockProfessionalsRepository.findByUserId).toHaveBeenCalledWith('user-123');
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
-      role: 'PROFISSIONAL',
+      role: 'PROFESSIONAL',
     });
     expect(mockProfessionalsRepository.create).toHaveBeenCalledWith({
       especialidade: 'Dentista',
@@ -111,7 +110,7 @@ describe('Create Professional Use Case', () => {
     mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
-      role: 'PROFISSIONAL',
+      role: 'PROFESSIONAL',
     });
     mockProfessionalsRepository.create.mockResolvedValue({
       ...mockProfessional,
@@ -144,7 +143,7 @@ describe('Create Professional Use Case', () => {
     mockProfessionalsRepository.findByUserId.mockResolvedValue(null);
     mockUsersRepository.update.mockResolvedValue({
       ...mockUser,
-      role: 'PROFISSIONAL',
+      role: 'PROFESSIONAL',
     });
     mockProfessionalsRepository.create.mockResolvedValue(mockProfessional);
 
@@ -154,7 +153,7 @@ describe('Create Professional Use Case', () => {
     });
 
     expect(mockUsersRepository.update).toHaveBeenCalledWith('user-123', {
-      role: 'PROFISSIONAL',
+      role: 'PROFESSIONAL',
     });
   });
 
@@ -171,3 +170,4 @@ describe('Create Professional Use Case', () => {
     expect(mockProfessionalsRepository.create).not.toHaveBeenCalled();
   });
 });
+

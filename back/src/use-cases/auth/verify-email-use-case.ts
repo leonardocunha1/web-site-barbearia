@@ -1,5 +1,5 @@
-import { VerificationTokensRepository } from '@/repositories/verification-tokens-repository';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IVerificationTokensRepository } from '@/repositories/verification-tokens-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { InvalidTokenError } from '../errors/invalid-token-error';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserAlreadyVerifiedError } from '../errors/user-already-verified-error';
@@ -10,8 +10,8 @@ interface VerifyEmailRequest {
 
 export class VerifyEmailUseCase {
   constructor(
-    private verificationTokensRepository: VerificationTokensRepository,
-    private usersRepository: UsersRepository,
+    private verificationTokensRepository: IVerificationTokensRepository,
+    private usersRepository: IUsersRepository,
   ) {}
 
   async execute({ verificationToken }: VerifyEmailRequest): Promise<void> {
@@ -53,3 +53,4 @@ export class VerifyEmailUseCase {
     await this.verificationTokensRepository.delete(verificationTokenEntity.id);
   }
 }
+

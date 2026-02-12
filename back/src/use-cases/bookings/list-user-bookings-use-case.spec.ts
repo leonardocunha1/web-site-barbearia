@@ -41,7 +41,7 @@ describe('ListBookingsUseCase', () => {
       {
         page: 1,
         limit: 10,
-        sort: [{ field: 'dataHoraInicio', order: 'asc' }],
+        sort: [{ field: 'startDateTime', order: 'asc' }],
         filters: {},
       },
     );
@@ -57,7 +57,7 @@ describe('ListBookingsUseCase', () => {
     const result = await useCase.execute({
       userId: 'user-123',
       filters: {
-        status: 'CONFIRMADO',
+        status: 'CONFIRMED',
         startDate,
         endDate,
       },
@@ -69,9 +69,9 @@ describe('ListBookingsUseCase', () => {
       {
         page: 1,
         limit: 10,
-        sort: [{ field: 'dataHoraInicio', order: 'asc' }],
+        sort: [{ field: 'startDateTime', order: 'asc' }],
         filters: {
-          status: 'CONFIRMADO',
+          status: 'CONFIRMED',
           startDate,
           endDate,
         },
@@ -122,7 +122,7 @@ describe('ListBookingsUseCase', () => {
   it('deve lançar erro quando usuário tenta acessar agendamentos de outro', async () => {
     const wrongUserBooking = {
       ...mockBooking,
-      usuarioId: 'user-456', // ID diferente do solicitado
+      userId: 'user-456', // ID diferente do solicitado
     };
 
     mockBookingsRepository.findManyByUserId.mockResolvedValue([

@@ -3,10 +3,10 @@ import { z } from 'zod';
 export const orderValues = ['asc', 'desc'] as const;
 
 export const sortFields = [
-  'dataHoraInicio',
-  'profissional',
+  'startDateTime',
+  'PROFESSIONAL',
   'status',
-  'valorFinal',
+  'totalAmount',
 ] as const;
 
 /**

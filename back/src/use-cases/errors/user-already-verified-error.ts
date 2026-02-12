@@ -1,6 +1,7 @@
-export class UserAlreadyVerifiedError extends Error {
+import { ConflictError } from './app-error';
+
+export class UserAlreadyVerifiedError extends ConflictError {
   constructor() {
-    super('Usuário já verificado.');
-    this.name = 'UserAlreadyVerifiedError';
+    super('Usuário já verificado.', 'USER_ALREADY_VERIFIED');
   }
 }

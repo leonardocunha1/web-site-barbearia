@@ -23,6 +23,6 @@ export type DashboardResponseDTO = {
     date: Date;
     clientName: string;
     service: string;
-    status: 'PENDENTE' | 'CONFIRMADO';
+    status: 'PENDING' | 'CONFIRMED';
   }[];
 };

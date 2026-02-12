@@ -6,7 +6,7 @@ export interface VerificationToken {
   createdAt: Date;
 }
 
-export interface VerificationTokensRepository {
+export interface IVerificationTokensRepository {
   create(
     token: string,
     userId: string,
@@ -15,3 +15,4 @@ export interface VerificationTokensRepository {
   findByToken(token: string): Promise<VerificationToken | null>;
   delete(id: string): Promise<void>;
 }
+

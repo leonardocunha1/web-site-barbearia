@@ -1,6 +1,7 @@
-export class InvalidQueryError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidQueryError extends BadRequestError {
   constructor(message = 'A pesquisa deve conter uma consulta válida.') {
-    super(message);
-    this.name = 'InvalidQueryError';
+    super(message, 'INVALID_QUERY');
   }
 }

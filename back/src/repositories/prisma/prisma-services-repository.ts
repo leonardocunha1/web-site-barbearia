@@ -1,6 +1,6 @@
 import { Prisma, Service } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { ServicesRepository } from '../services-repository';
+import { IServicesRepository } from '../services-repository';
 
 export interface ListServicesParams {
   page: number;
@@ -18,8 +18,7 @@ const includeProfessional = {
         include: {
           user: {
             select: {
-              id: true,
-              nome: true,
+              id: true, name: true,
             },
           },
         },
@@ -29,7 +28,7 @@ const includeProfessional = {
 };
 
 
-export class PrismaServicesRepository implements ServicesRepository {
+export class PrismaServicesRepository implements IServicesRepository {
   async create(data: Prisma.ServiceCreateInput): Promise<Service> {
     const service = await prisma.service.create({
       data,
@@ -49,8 +48,7 @@ export class PrismaServicesRepository implements ServicesRepository {
 
   async findByName(name: string) {
     const service = await prisma.service.findFirst({
-      where: {
-        nome: name,
+      where: { name: name,
       },
       include: includeProfessional,
     });
@@ -58,7 +56,7 @@ export class PrismaServicesRepository implements ServicesRepository {
     return service;
   }
 
-  async update(id: string, data: Prisma.ServiceUpdateInput): Promise<Service> {
+  async update(id: string, date: Prisma.ServiceUpdateInput): Promise<Service> {
     const service = await prisma.service.update({
       where: { id },
       data,
@@ -75,8 +73,7 @@ export class PrismaServicesRepository implements ServicesRepository {
 
   async softDelete(id: string): Promise<void> {
     await prisma.service.update({
-      where: { id },
-      data: {
+      where: { id }, date: {
         ativo: false,
       },
     });
@@ -84,8 +81,7 @@ export class PrismaServicesRepository implements ServicesRepository {
 
   async toggleStatus(id: string, newStatus: boolean): Promise<Service> {
     return prisma.service.update({
-      where: { id },
-      data: {
+      where: { id }, date: {
         ativo: newStatus,
       },
     });
@@ -102,24 +98,24 @@ export class PrismaServicesRepository implements ServicesRepository {
     const where: Prisma.ServiceWhereInput = {};
 
     if (nome) {
-      where.nome = {
+      where.name = {
         contains: nome,
         mode: 'insensitive',
       };
     }
 
     if (categoria) {
-      where.categoria = categoria;
+      where.category = categoria;
     }
 
     if (ativo !== undefined) {
-      where.ativo = ativo;
+      where.active = ativo;
     }
 
     if (professionalId) {
-      where.profissionais = {
+      where.professionals = {
         some: {
-          id: professionalId,
+          professionalId,
         },
       };
     }
@@ -129,7 +125,7 @@ export class PrismaServicesRepository implements ServicesRepository {
       include: includeProfessional,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { nome: 'asc' },
+      orderBy: { name: 'asc' },
     });
 
     const total = await prisma.service.count({
@@ -149,3 +145,4 @@ export class PrismaServicesRepository implements ServicesRepository {
     return count > 0;
   }
 }
+

@@ -1,33 +1,20 @@
-import { BookingsRepository } from '@/repositories/bookings-repository';
-import { Status } from '@prisma/client';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '../errors/invalid-booking-status-error';
 import { BookingUpdateError } from '../errors/booking-update-error';
-
-interface UpdateBookingStatusUseCaseRequest {
-  bookingId: string;
-  status: Status;
-  reason?: string;
-  profissionalId: string;
-}
-
-interface UpdateBookingStatusUseCaseResponse {
-  booking: {
-    id: string;
-    status: Status;
-    dataHoraInicio: Date;
-    dataHoraFim: Date;
-    observacoes?: string;
-  };
-}
+import { MAX_BOOKING_CANCEL_REASON_LENGTH } from '@/consts/const';
+import {
+  UpdateBookingStatusUseCaseRequest,
+  UpdateBookingStatusUseCaseResponse,
+} from './types';
 
 export class UpdateBookingStatusUseCase {
-  constructor(private bookingsRepository: BookingsRepository) {}
+  constructor(private bookingsRepository: IBookingsRepository) {}
 
   async execute(
     request: UpdateBookingStatusUseCaseRequest,
   ): Promise<UpdateBookingStatusUseCaseResponse> {
-    const { bookingId, status, reason, profissionalId } = request;
+    const { bookingId, status, reason, professionalId } = request;
 
     // Buscar o agendamento
     const booking = await this.bookingsRepository.findById(bookingId);
@@ -36,41 +23,41 @@ export class UpdateBookingStatusUseCase {
     }
 
     // Validações específicas para cada status
-    if (status === 'CONFIRMADO' && booking.status !== 'PENDENTE') {
-      throw new InvalidBookingStatusError(booking.status, 'PENDENTE');
+    if (status === 'CONFIRMED' && booking.status !== 'PENDING') {
+      throw new InvalidBookingStatusError(booking.status, 'PENDING');
     }
 
     // Verificar se o profissional é o dono do agendamento
-    if (booking.profissionalId !== profissionalId) {
+    if (booking.professionalId !== professionalId) {
       throw new BookingUpdateError(
         'Você não tem permissão para alterar este agendamento',
       );
     }
 
-    if (status === 'CANCELADO') {
-      if (booking.status === 'CANCELADO') {
+    if (status === 'CANCELED') {
+      if (booking.status === 'CANCELED') {
         throw new BookingUpdateError('Agendamento já cancelado');
       }
 
       // Validar motivo para cancelamento (opcional)
-      if (reason && reason.length > 500) {
+      if (reason && reason.length > MAX_BOOKING_CANCEL_REASON_LENGTH) {
         throw new BookingUpdateError(
-          'Motivo do cancelamento muito longo (máx. 500 caracteres)',
+          `Motivo do cancelamento muito longo (max. ${MAX_BOOKING_CANCEL_REASON_LENGTH} caracteres)`,
         );
       }
     }
     // Preparar dados para atualização
     const updateData = {
       status,
-      ...(status === 'CONFIRMADO' && {
+      ...(status === 'CONFIRMED' && {
         confirmedAt: new Date(),
-        observacoes: booking.observacoes, // Mantém as observações originais
+        notes: booking.notes, // Mantém as observações originais
       }),
-      ...(status === 'CANCELADO' && {
+      ...(status === 'CANCELED' && {
         canceledAt: new Date(),
-        observacoes: reason
-          ? `${booking.observacoes ? booking.observacoes + '\n' : ''}Motivo do cancelamento: ${reason}`
-          : booking.observacoes,
+        notes: reason
+          ? `${booking.notes ? booking.notes + '\n' : ''}Motivo do cancelamento: ${reason}`
+          : booking.notes,
       }),
     };
 
@@ -88,10 +75,11 @@ export class UpdateBookingStatusUseCase {
       booking: {
         id: updatedBooking.id,
         status: updatedBooking.status,
-        dataHoraInicio: updatedBooking.dataHoraInicio,
-        dataHoraFim: updatedBooking.dataHoraFim,
-        observacoes: updatedBooking.observacoes ?? undefined,
+        startDateTime: updatedBooking.dateHoraInicio,
+        endDateTime: updatedBooking.endDateTime,
+        notes: updatedBooking.notes ?? undefined,
       },
     };
   }
 }
+

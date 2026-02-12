@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { BookingsRepository } from '@/repositories/bookings-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { InvalidDataError } from '../errors/invalid-data-error';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
@@ -11,11 +11,11 @@ import {
 } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
-type MockProfessionalsRepository = ProfessionalsRepository & {
+type MockProfessionalsRepository = IProfessionalsRepository & {
   findByProfessionalId: ReturnType<typeof vi.fn>;
 };
 
-type MockBookingsRepository = BookingsRepository & {
+type MockBookingsRepository = IBookingsRepository & {
   countByProfessionalAndDate: ReturnType<typeof vi.fn>;
   getEarningsByProfessionalAndDate: ReturnType<typeof vi.fn>;
   countByProfessionalAndStatus: ReturnType<typeof vi.fn>;
@@ -43,8 +43,7 @@ describe('Get Professional Dashboard Use Case', () => {
     especialidade: 'Dentista',
     avatarUrl: 'avatar.jpg',
     user: {
-      id: 'user-123',
-      nome: 'Dr. Smith',
+      id: 'user-123', name: 'Dr. Smith',
       email: 'dr.smith@example.com',
     },
   };
@@ -52,28 +51,26 @@ describe('Get Professional Dashboard Use Case', () => {
   const mockNextAppointments = [
     {
       id: 'booking-1',
-      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1',
-        nome: 'Client 1',
+        id: 'user-1', name: 'Client 1',
       },
       items: [
         {
           serviceProfessional: {
-            service: {
-              nome: 'Limpeza',
+            service: { name: 'Limpeza',
             },
           },
         },
       ],
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
     },
   ];
 
   const mockDashboardData = {
     professional: {
-      name: mockProfessional.user.nome,
-      specialty: mockProfessional.especialidade,
+      name: mockProfessional.user.name,
+      specialty: mockProfessional.specialty,
       avatarUrl: mockProfessional.avatarUrl,
     },
     metrics: {
@@ -88,7 +85,7 @@ describe('Get Professional Dashboard Use Case', () => {
         date: new Date('2023-01-01T10:00:00'),
         clientName: 'Client 1',
         service: 'Limpeza',
-        status: 'CONFIRMADO',
+        status: 'CONFIRMED',
       },
     ],
   };
@@ -226,19 +223,19 @@ describe('Get Professional Dashboard Use Case', () => {
     // Criar objeto de expectativa específico para este teste
     const expectedResponse = {
       professional: {
-        name: mockProfessional.user.nome,
-        specialty: mockProfessional.especialidade,
+        name: mockProfessional.user.name,
+        specialty: mockProfessional.specialty,
         avatarUrl: mockProfessional.avatarUrl,
       },
       metrics: customMetrics,
       nextAppointments: mockNextAppointments.map((appointment) => ({
         id: appointment.id,
-        date: appointment.dataHoraInicio,
-        clientName: appointment.user.nome,
+        date: appointment.dateHoraInicio,
+        clientName: appointment.user.name,
         service:
-          appointment.items[0]?.serviceProfessional.service.nome ||
+          appointment.items[0]?.serviceProfessional.service.name ||
           'Vários serviços',
-        status: appointment.status as 'PENDENTE' | 'CONFIRMADO',
+        status: appointment.status as 'PENDING' | 'CONFIRMED',
       })),
     };
 
@@ -328,28 +325,25 @@ describe('Get Professional Dashboard Use Case', () => {
     // Criar mock com múltiplos itens (2 serviços)
     const multiServiceAppointment = {
       id: 'booking-multi',
-      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1',
-        nome: 'Client 1',
+        id: 'user-1', name: 'Client 1',
       },
       items: [
         {
           serviceProfessional: {
-            service: {
-              nome: 'Limpeza',
+            service: { name: 'Limpeza',
             },
           },
         },
         {
           serviceProfessional: {
-            service: {
-              nome: 'Clareamento',
+            service: { name: 'Clareamento',
             },
           },
         },
       ],
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
     };
 
     mockBookingsRepository.findNextAppointments.mockResolvedValue([
@@ -378,21 +372,19 @@ describe('Get Professional Dashboard Use Case', () => {
     // Criar mock com um único item
     const singleServiceAppointment = {
       id: 'booking-single',
-      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1',
-        nome: 'Client 1',
+        id: 'user-1', name: 'Client 1',
       },
       items: [
         {
           serviceProfessional: {
-            service: {
-              nome: 'Limpeza',
+            service: { name: 'Limpeza',
             },
           },
         },
       ],
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
     };
 
     mockBookingsRepository.findNextAppointments.mockResolvedValue([
@@ -421,13 +413,12 @@ describe('Get Professional Dashboard Use Case', () => {
     // Criar mock sem itens
     const noServiceAppointment = {
       id: 'booking-no-service',
-      dataHoraInicio: new Date('2023-01-01T10:00:00'),
+      startDateTime: new Date('2023-01-01T10:00:00'),
       user: {
-        id: 'user-1',
-        nome: 'Client 1',
+        id: 'user-1', name: 'Client 1',
       },
       items: [],
-      status: 'CONFIRMADO',
+      status: 'CONFIRMED',
     };
 
     mockBookingsRepository.findNextAppointments.mockResolvedValue([
@@ -442,3 +433,4 @@ describe('Get Professional Dashboard Use Case', () => {
     expect(result.nextAppointments[0].service).toBe('Serviço não especificado');
   });
 });
+

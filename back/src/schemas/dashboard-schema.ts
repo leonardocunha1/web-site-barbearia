@@ -46,7 +46,7 @@ export const nextAppointmentSchema = z.object({
   service: z.string()
     .min(3, { message: 'Nome do serviço deve ter pelo menos 3 caracteres' })
     .describe('Serviço agendado'),
-  status: z.enum(['PENDENTE', 'CONFIRMADO'], {
+  status: z.enum(['PENDING', 'CONFIRMED'], {
     errorMap: () => ({ message: 'Status deve ser PENDENTE ou CONFIRMADO' })
   })
   .describe('Status do agendamento'),

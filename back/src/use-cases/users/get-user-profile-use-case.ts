@@ -1,4 +1,4 @@
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { User } from '@prisma/client';
 
@@ -11,7 +11,7 @@ interface GetUserProfileUseCaseResponse {
 }
 
 export class GetUserProfileUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private usersRepository: IUsersRepository) {}
 
   async execute({
     userId,
@@ -25,3 +25,4 @@ export class GetUserProfileUseCase {
     return { user };
   }
 }
+

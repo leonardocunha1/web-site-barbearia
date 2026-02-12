@@ -1,13 +1,17 @@
 import { Service } from '@prisma/client';
 
+/**
+ * Service Data Transfer Object with professional relations
+ * Includes only public user fields (id, nome) for professionals
+ * Automatically excludes sensitive information
+ */
 export type ServiceDTO = Service & {
   profissionais: {
     id: string;
     professional: {
       id: string;
       user: {
-        id: string;
-        nome: string;
+        id: string; name: string;
       };
     };
   }[];

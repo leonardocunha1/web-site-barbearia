@@ -1,11 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ToggleProfessionalStatusUseCase } from './toggle-professional-status-use-case';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
-type MockProfessionalsRepository = ProfessionalsRepository & {
+type MockProfessionalsRepository = IProfessionalsRepository & {
   findById: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
 };
@@ -117,3 +117,4 @@ describe('ToggleProfessionalStatusUseCase', () => {
     );
   });
 });
+

@@ -3,9 +3,9 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 export function verifyUserRole(
   rolesToVerify:
     | 'ADMIN'
-    | 'CLIENTE'
-    | 'PROFISSIONAL'
-    | Array<'ADMIN' | 'CLIENTE' | 'PROFISSIONAL'>,
+    | 'CLIENT'
+    | 'PROFESSIONAL'
+    | Array<'ADMIN' | 'CLIENT' | 'PROFESSIONAL'>,
 ) {
   const rolesArray = Array.isArray(rolesToVerify)
     ? rolesToVerify

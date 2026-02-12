@@ -1,17 +1,9 @@
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-
-interface UpdateProfessionalUseCaseRequest {
-  id: string;
-  especialidade?: string;
-  bio?: string | null;
-  documento?: string | null;
-  ativo?: boolean;
-  avatarUrl?: string | null;
-}
+import { UpdateProfessionalUseCaseRequest } from './types';
 
 export class UpdateProfessionalUseCase {
-  constructor(private professionalsRepository: ProfessionalsRepository) {}
+  constructor(private professionalsRepository: IProfessionalsRepository) {}
 
   async execute(data: UpdateProfessionalUseCaseRequest) {
     const professional = await this.professionalsRepository.findById(data.id);
@@ -21,12 +13,13 @@ export class UpdateProfessionalUseCase {
     }
 
     return this.professionalsRepository.update(data.id, {
-      especialidade: data.especialidade,
+      especialidade: data.specialty,
       bio: data.bio,
-      documento: data.documento,
-      ativo: data.ativo,
+      documento: data.document,
+      ativo: data.active,
       updatedAt: new Date(),
       avatarUrl: data.avatarUrl,
     });
   }
 }
+

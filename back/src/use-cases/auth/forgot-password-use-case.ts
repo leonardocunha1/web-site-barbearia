@@ -1,9 +1,10 @@
-import { UsersRepository } from '@/repositories/users-repository';
-import { PasswordResetTokensRepository } from '@/repositories/password-reset-tokens-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
+import { IPasswordResetTokensRepository } from '@/repositories/password-reset-tokens-repository';
 import { EmailService } from '@/services/email-service';
 import { randomBytes } from 'crypto';
 import { addHours } from 'date-fns';
 import { UserNotFoundError } from '../errors/user-not-found-error';
+import { PASSWORD_RESET_TOKEN_EXPIRATION_HOURS } from '@/consts/const';
 
 interface ForgotPasswordUseCaseRequest {
   email: string;
@@ -11,8 +12,8 @@ interface ForgotPasswordUseCaseRequest {
 
 export class ForgotPasswordUseCase {
   constructor(
-    private usersRepository: UsersRepository,
-    private passwordResetTokensRepository: PasswordResetTokensRepository,
+    private usersRepository: IUsersRepository,
+    private passwordResetTokensRepository: IPasswordResetTokensRepository,
     private emailService: EmailService,
   ) {}
 
@@ -24,9 +25,10 @@ export class ForgotPasswordUseCase {
     }
 
     const token = randomBytes(32).toString('hex');
-    const expiresAt = addHours(new Date(), 2); // Token expira em 2 horas
+    const expiresAt = addHours(new Date(), PASSWORD_RESET_TOKEN_EXPIRATION_HOURS);
 
     await this.passwordResetTokensRepository.create(token, user.id, expiresAt);
     await this.emailService.sendPasswordResetEmail(user.email, token);
   }
 }
+

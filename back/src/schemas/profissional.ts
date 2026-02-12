@@ -36,8 +36,7 @@ export const professionalSchema = z
         id: z
           .string()
           .uuid({ message: "ID do usuário deve ser um UUID válido" })
-          .describe("ID do usuário"),
-        nome: z
+          .describe("ID do usuário"), name: z
           .string()
           .min(2, { message: "O nome deve ter pelo menos 2 caracteres" })
           .describe("Nome completo do usuário"),
@@ -62,12 +61,10 @@ export const professionalSchema = z
           id: z
             .string()
             .uuid({ message: "ID do serviço deve ser um UUID válido" })
-            .describe("ID do serviço"),
-          nome: z
+            .describe("ID do serviço"), name: z
             .string()
             .min(2, { message: "O nome do serviço deve ter pelo menos 2 caracteres" })
-            .describe("Nome do serviço"),
-          descricao: z
+            .describe("Nome do serviço"), description: z
             .string()
             .max(200, { message: "A descrição não pode exceder 200 caracteres" })
             .optional()
@@ -93,7 +90,21 @@ export const searchProfessionalsQuerySchema = paginationSchema
       .describe("Termo de busca para profissionais")
       .optional(),
 
-    status: z.enum(['ativo', 'inativo']).optional().describe("Filtrar por status ativo ou inativo")
+    especialidade: z
+      .string()
+      .optional()
+      .describe("Filtrar por especialidade do profissional"),
+
+    status: z
+      .enum(["ativo", "inativo"])
+      .optional()
+      .describe("Filtrar por status ativo ou inativo"),
+
+    sortBy: z.string().optional().describe("Campo para ordenacao"),
+    sortDirection: z
+      .enum(["asc", "desc"])
+      .optional()
+      .describe("Direcao da ordenacao"),
 
   })
   .describe("Busca de profissionais com parâmetros de paginação");

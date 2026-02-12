@@ -1,6 +1,7 @@
-export class DuplicateCouponError extends Error {
+import { ConflictError } from './app-error';
+
+export class DuplicateCouponError extends ConflictError {
   constructor() {
-    super('Codigo do cupom já existe.');
-    this.name = 'DuplicateCouponError';
+    super('Codigo do cupom já existe.', 'DUPLICATE_COUPON');
   }
 }

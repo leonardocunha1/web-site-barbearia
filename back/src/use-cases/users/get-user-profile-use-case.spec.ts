@@ -1,12 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { GetUserProfileUseCase } from './get-user-profile-use-case';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { User, Role } from '@prisma/client';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
 
 // Tipo para o mock do repositório
-type MockUsersRepository = UsersRepository & {
+type MockUsersRepository = IUsersRepository & {
   findById: ReturnType<typeof vi.fn>;
 };
 
@@ -23,8 +23,7 @@ describe('GetUserProfileUseCase', () => {
   it('deve retornar o perfil completo do usuário com sucesso', async () => {
     const mockDate = new Date();
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: '123456789',
@@ -64,8 +63,7 @@ describe('GetUserProfileUseCase', () => {
   it('deve retornar o perfil completo mesmo com campos opcionais nulos', async () => {
     const mockDate = new Date();
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: null,
@@ -85,8 +83,7 @@ describe('GetUserProfileUseCase', () => {
 
   it('deve incluir todos os campos do User, incluindo a senha', async () => {
     const mockUser: User = {
-      id: 'user-1',
-      nome: 'John Doe',
+      id: 'user-1', name: 'John Doe',
       email: 'john@example.com',
       senha: 'hashed-password',
       telefone: '123456789',
@@ -106,3 +103,4 @@ describe('GetUserProfileUseCase', () => {
     expect(user).toHaveProperty('createdAt');
   });
 });
+

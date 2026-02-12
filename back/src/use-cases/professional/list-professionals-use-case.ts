@@ -1,24 +1,15 @@
-import { ProfessionalsRepository } from "@/repositories/professionals-repository";
-import {
-  toProfessionalDTO,
-  ListProfessionalsResponse,
-} from "@/dtos/professional-dto";
+import { IProfessionalsRepository } from "@/repositories/professionals-repository";
+import { toProfessionalDTO } from "@/dtos/professional-dto";
 import { validatePagination } from "@/utils/validate-pagination";
 import { InvalidPageError } from "../errors/invalid-page-error";
 import { InvalidLimitError } from "../errors/invalid-limit-error";
-
-interface ListOrSearchProfessionalsUseCaseRequest {
-  query?: string;
-  page?: number;
-  limit?: number;
-  especialidade?: string;
-  ativo?: boolean;
-  sortBy?: string; 
-  sortDirection?: "asc" | "desc";
-}
+import {
+  ListOrSearchProfessionalsUseCaseRequest,
+  ListOrSearchProfessionalsUseCaseResponse,
+} from "./types";
 
 export class ListOrSearchProfessionalsUseCase {
-  constructor(private professionalsRepository: ProfessionalsRepository) {}
+  constructor(private professionalsRepository: IProfessionalsRepository) {}
 
   async execute({
     query,
@@ -28,7 +19,7 @@ export class ListOrSearchProfessionalsUseCase {
     ativo,
     sortBy,
     sortDirection,
-  }: ListOrSearchProfessionalsUseCaseRequest): Promise<ListProfessionalsResponse> {
+  }: ListOrSearchProfessionalsUseCaseRequest): Promise<ListOrSearchProfessionalsUseCaseResponse> {
     // Validação de página e limite
     if (page < 1) throw new InvalidPageError();
     if (limit < 1 || limit > 100) throw new InvalidLimitError();

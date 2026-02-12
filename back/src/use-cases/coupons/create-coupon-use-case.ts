@@ -1,66 +1,89 @@
-import { CouponRepository } from '@/repositories/coupon-repository';
-import { ServicesRepository } from '@/repositories/services-repository';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { Coupon } from '@prisma/client';
+import { ICouponRepository } from '@/repositories/coupon-repository';
+import { IServicesRepository } from '@/repositories/services-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { DuplicateCouponError } from '../errors/duplicate-coupon-error';
 import { InvalidCouponValueError } from '../errors/invalid-coupon-value-error';
 import { InvalidCouponScopeError } from '../errors/invalid-coupon-scope-error';
 import { InvalidCouponDatesError } from '../errors/invalid-coupon-dates-error';
 import { ServiceNotFoundError } from '../errors/service-not-found-error';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-
-interface CreateCouponRequest {
-  code: string;
-  type: 'PERCENTAGE' | 'FIXED' | 'FREE';
-  value: number;
-  scope: 'GLOBAL' | 'SERVICE' | 'PROFESSIONAL';
-  description?: string;
-  maxUses?: number;
-  startDate?: Date;
-  endDate?: Date | null;
-  minBookingValue?: number | null;
-  serviceId?: string | null;
-  professionalId?: string | null;
-}
-
-interface CreateCouponResponse {
-  coupon: Coupon;
-}
+import { CreateCouponRequest, CreateCouponResponse } from './types';
 
 export class CreateCouponUseCase {
   constructor(
-    private couponRepository: CouponRepository,
-    private servicesRepository: ServicesRepository,
-    private professionalsRepository: ProfessionalsRepository,
+    private couponRepository: ICouponRepository,
+    private servicesRepository: IServicesRepository,
+    private professionalsRepository: IProfessionalsRepository,
   ) {}
 
   async execute(request: CreateCouponRequest): Promise<CreateCouponResponse> {
-    const existingCoupon = await this.couponRepository.findByCode(request.code);
-    if (existingCoupon) {
-      throw new DuplicateCouponError();
-    }
-
+    // Fail-fast: validate all business rules before creation
+    await this.validateCouponCodeUnique(request.code);
     this.validateCouponValue(request.type, request.value);
+    this.validateMinBookingValue(request.minBookingValue);
+    this.validateMaxUses(request.maxUses);
     this.validateCouponScope(
       request.scope,
       request.serviceId,
       request.professionalId,
     );
     this.validateCouponDates(request.startDate, request.endDate);
+    await this.validateScopeEntitiesExist(request);
 
-    if (request.minBookingValue && request.minBookingValue <= 0) {
+    const coupon = await this.couponRepository.create({
+      ...request,
+      active: true,
+      uses: 0,
+    });
+
+    return { coupon };
+  }
+
+  /**
+   * Validates that coupon code is unique
+   * @throws {DuplicateCouponError} If code already exists
+   */
+  private async validateCouponCodeUnique(code: string): Promise<void> {
+    const existingCoupon = await this.couponRepository.findByCode(code);
+    if (existingCoupon) {
+      throw new DuplicateCouponError();
+    }
+  }
+
+  /**
+   * Validates minimum booking value
+   * @throws {InvalidCouponValueError} If value is invalid
+   */
+  private validateMinBookingValue(
+    minBookingValue?: number | null
+  ): void {
+    if (minBookingValue && minBookingValue <= 0) {
       throw new InvalidCouponValueError(
         'O valor mínimo de agendamento deve ser maior que zero',
       );
     }
+  }
 
-    if (request.maxUses && request.maxUses <= 0) {
+  /**
+   * Validates maximum uses
+   * @throws {InvalidCouponValueError} If max uses is invalid
+   */
+  private validateMaxUses(maxUses?: number): void {
+    if (maxUses && maxUses <= 0) {
       throw new InvalidCouponValueError(
         'O número máximo de usos deve ser maior que zero',
       );
     }
+  }
 
-    // Verificação de existência de serviço ou profissional
+  /**
+   * Validates that service/professional entities exist when required
+   * @throws {ServiceNotFoundError} If service not found
+   * @throws {ProfessionalNotFoundError} If professional not found
+   */
+  private async validateScopeEntitiesExist(
+    request: CreateCouponRequest
+  ): Promise<void> {
     if (request.scope === 'SERVICE' && request.serviceId) {
       const service = await this.servicesRepository.findById(request.serviceId);
       if (!service) {
@@ -76,18 +99,10 @@ export class CreateCouponUseCase {
         throw new ProfessionalNotFoundError();
       }
     }
-
-    const coupon = await this.couponRepository.create({
-      ...request,
-      active: true,
-      uses: 0,
-    });
-
-    return { coupon };
   }
 
   private validateCouponValue(type: string, value: number): void {
-    if (value <= 0) {
+    if (type !== 'FREE' && value <= 0) {
       throw new InvalidCouponValueError(
         'O valor do cupom deve ser maior que zero',
       );
@@ -168,3 +183,4 @@ export class CreateCouponUseCase {
     }
   }
 }
+

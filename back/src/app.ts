@@ -1,5 +1,4 @@
 import fastify from 'fastify';
-import { ZodError } from 'zod';
 import { env } from './env';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
@@ -10,8 +9,8 @@ import { servicesRoutes } from './http/controllers/services/routes';
 import { bookingsRoutes } from './http/controllers/bookings/routes';
 import { authRoutes } from './http/controllers/auth/routes';
 import { tokenRoutes } from './http/controllers/tokens/routes';
-import { holidayRoutes } from './http/controllers/feriados/routes';
-import { businessHoursRoutes } from './http/controllers/horarios-funcionamento/routes';
+import { holidayRoutes } from './http/controllers/holidays/routes';
+import { businessHoursRoutes } from './http/controllers/business-hours/routes';
 import { serviceProfessionalRoutes } from './http/controllers/service-professional/routes';
 import {
   validatorCompiler,
@@ -23,6 +22,7 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { bonusRoutes } from './http/controllers/bonus/routes';
 import { couponsRoutes } from './http/controllers/coupons/routes';
+import { resolveHttpError } from './http/error-handler';
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -49,7 +49,7 @@ app.register(fastifyCookie);
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
   cookie: {
-    cookieName: 'refreshToken',
+    cookieName: 'accessToken',
     signed: false,
   },
   sign: {
@@ -76,17 +76,13 @@ app.register(bonusRoutes);
 app.register(couponsRoutes);
 
 app.setErrorHandler((error, _request, reply) => {
-  if (error instanceof ZodError) {
-    reply
-      .status(400)
-      .send({ message: 'Validation error.', issues: error.format() });
-  }
-
   if (env.NODE_ENV !== 'prod') {
     console.error(error);
   } else {
     // TODO. Aqui poderia ser enviado um email para o time de desenvolvimento.
   }
 
-  reply.status(500).send({ message: 'Erro genérico' });
+  const { status, body } = resolveHttpError(error);
+  return reply.status(status).send(body);
 });
+

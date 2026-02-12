@@ -7,6 +7,10 @@ export const getScheduleQuerySchema = z.object({
 
 export type GetScheduleQuery = z.infer<typeof getScheduleQuerySchema>;
 
+/**
+ * Time slot with availability and optional booking info
+ * Includes only public client info (name, not email/phone)
+ */
 export type TimeSlot = {
   time: string; // Formato "HH:MM"
   available: boolean;
@@ -17,6 +21,9 @@ export type TimeSlot = {
   };
 };
 
+/**
+ * Schedule response for a specific date
+ */
 export type ScheduleResponse = {
   date: string;
   timeSlots: TimeSlot[];

@@ -1,9 +1,9 @@
-import { BookingsRepository } from '@/repositories/bookings-repository';
-import { UsersRepository } from '@/repositories/users-repository';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { ServiceProfessionalRepository } from '@/repositories/service-professional-repository';
-import { UserBonusRepository } from '@/repositories/user-bonus-repository';
-import { BonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
+import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
+import { IBonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
 import { Booking } from '@prisma/client';
 
 import {
@@ -22,7 +22,7 @@ import { InsufficientBonusPointsError } from '../errors/insufficient-bonus-point
 import { CouponBonusConflictError } from '../errors/coupon-bonus-conflict-error';
 import { InvalidCouponError } from './invalid-coupon-error';
 import { CouponNotApplicableError } from '../errors/coupon-not-applicable-error';
-import { CouponRepository } from '@/repositories/coupon-repository';
+import { ICouponRepository } from '@/repositories/coupon-repository';
 
 export interface BookingRequest {
   userId: string;
@@ -36,13 +36,13 @@ export interface BookingRequest {
 
 export class CreateBookingUseCase {
   constructor(
-    private bookingsRepository: BookingsRepository,
-    private usersRepository: UsersRepository,
-    private professionalsRepository: ProfessionalsRepository,
-    private serviceProfessionalRepository: ServiceProfessionalRepository,
-    private userBonusRepository: UserBonusRepository,
-    private bonusRedemptionRepository: BonusRedemptionRepository,
-    private couponRepository: CouponRepository,
+    private bookingsRepository: IBookingsRepository,
+    private usersRepository: IUsersRepository,
+    private professionalsRepository: IProfessionalsRepository,
+    private serviceProfessionalRepository: IServiceProfessionalRepository,
+    private userBonusRepository: IUserBonusRepository,
+    private bonusRedemptionRepository: IBonusRedemptionRepository,
+    private couponRepository: ICouponRepository,
   ) {}
 
   async execute(request: BookingRequest): Promise<Booking> {
@@ -55,7 +55,7 @@ export class CreateBookingUseCase {
       request.professionalId,
     );
 
-    const totalDuration = services.reduce((sum, s) => sum + s.duracao, 0);
+    const totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
     const endDateTime = new Date(
       request.startDateTime.getTime() + totalDuration * 60000,
     );
@@ -66,7 +66,7 @@ export class CreateBookingUseCase {
       endDateTime,
     );
 
-    const totalValue = services.reduce((sum, s) => sum + s.preco, 0);
+    const totalValue = services.reduce((sum, s) => sum + s.price, 0);
 
     // Verificar conflito entre cupom e pontos de bônus
     if (request.couponCode && request.useBonusPoints) {
@@ -101,26 +101,21 @@ export class CreateBookingUseCase {
             finalValue: valueAfterCoupon,
             pointsUsed: 0,
             discount: 0,
-            details: [],
           };
 
     const booking = await this.bookingsRepository.create({
-      dataHoraInicio: request.startDateTime,
-      dataHoraFim: endDateTime,
-      observacoes: request.notes,
-      user: { connect: { id: request.userId } },
-      profissional: { connect: { id: request.professionalId } },
-      status: 'PENDENTE',
-      valorFinal: parseFloat(bonusResult.finalValue.toFixed(2)),
-      pontosUtilizados: bonusResult.pointsUsed,
+      startDateTime: request.startDateTime,
+      endDateTime: endDateTime,
+      notes: request.notes,
+      user: { connect: { id: request.userId } }, professional: { connect: { id: request.professionalId } },
+      status: 'PENDING',
+      totalAmount: parseFloat(bonusResult.finalValue.toFixed(2)),
+      pointsUsed: bonusResult.pointsUsed,
       coupon: couponId ? { connect: { id: couponId } } : undefined,
       couponDiscount,
       items: {
         create: services.map((s) => ({
-          serviceProfessionalId: s.id,
-          preco: s.preco,
-          nome: s.service.nome,
-          duracao: s.duracao,
+          serviceProfessionalId: s.id, price: s.price, name: s.service.name, duration: s.duration,
           serviceId: s.service.id,
         })),
       },
@@ -133,7 +128,6 @@ export class CreateBookingUseCase {
         booking.id,
         bonusResult.pointsUsed,
         bonusResult.discount,
-        bonusResult.details,
       );
     }
 
@@ -242,7 +236,7 @@ export class CreateBookingUseCase {
             professionalId,
           );
         if (!sp) throw new ServiceProfessionalNotFoundError();
-        if (sp.duracao <= 0) throw new InvalidDurationError();
+        if (sp.duration <= 0) throw new InvalidDurationError();
         return sp;
       }),
     );
@@ -266,11 +260,24 @@ export class CreateBookingUseCase {
   private async applyBonusPoints(userId: string, totalValue: number) {
     if (totalValue <= 0) throw new InvalidBonusRedemptionError();
 
-    const allBonuses =
-      await this.userBonusRepository.getValidPointsWithExpiration(
+    const [bookingBonus, loyaltyBonus] = await Promise.all([
+      this.userBonusRepository.getValidPointsWithExpiration(
         userId,
+        'BOOKING_POINTS',
         new Date(),
-      );
+      ),
+      this.userBonusRepository.getValidPointsWithExpiration(
+        userId,
+        'LOYALTY',
+        new Date(),
+      ),
+    ]);
+
+    const allBonuses = [
+      { type: 'BOOKING_POINTS', ...bookingBonus },
+      { type: 'LOYALTY', ...loyaltyBonus },
+    ].filter((bonus) => bonus.points > 0);
+
     const totalPoints = allBonuses.reduce((sum, b) => sum + b.points, 0);
 
     if (totalPoints < MIN_POINTS_TO_REDEEM)
@@ -285,8 +292,6 @@ export class CreateBookingUseCase {
       MIN_BOOKING_VALUE_AFTER_DISCOUNT,
     );
 
-    const details: Array<{ type: string; pointsUsed: number }> = [];
-
     let remaining = pointsToUse;
     const bonusesSorted = [...allBonuses].sort((a, b) => {
       if (!a.expiresAt) return 1;
@@ -298,12 +303,7 @@ export class CreateBookingUseCase {
       if (remaining <= 0) break;
 
       const toConsume = Math.min(remaining, bonus.points);
-      await this.userBonusRepository.consumePoints(
-        userId,
-        toConsume,
-        bonus.type,
-      );
-      details.push({ type: bonus.type, pointsUsed: toConsume });
+      await this.userBonusRepository.consumePoints(userId, toConsume, bonus.type);
       remaining -= toConsume;
     }
 
@@ -311,7 +311,6 @@ export class CreateBookingUseCase {
       finalValue,
       pointsUsed: pointsToUse,
       discount,
-      details,
     };
   }
 
@@ -320,7 +319,6 @@ export class CreateBookingUseCase {
     bookingId: string,
     totalPoints: number,
     discount: number,
-    details: Array<{ type: string; pointsUsed: number }>,
   ) {
     await this.bonusRedemptionRepository.create({
       user: { connect: { id: userId } },
@@ -328,14 +326,6 @@ export class CreateBookingUseCase {
       pointsUsed: totalPoints,
       discount: parseFloat(discount.toFixed(2)),
     });
-
-    for (const detail of details) {
-      await this.bonusRedemptionRepository.create({
-        user: { connect: { id: userId } },
-        booking: { connect: { id: bookingId } },
-        pointsUsed: detail.pointsUsed,
-        discount: parseFloat(discount.toFixed(2)),
-      });
-    }
   }
 }
+

@@ -16,15 +16,15 @@ datasource db {
 // Enums
 enum Role {
   ADMIN
-  CLIENTE
-  PROFISSIONAL
+  CLIENT
+  PROFESSIONAL
 }
 
 enum Status {
-  PENDENTE
-  CONFIRMADO
-  CANCELADO
-  CONCLUIDO
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
 }
 
 enum BonusType {
@@ -47,11 +47,11 @@ enum CouponScope {
 // Tabelas principais
 model User {
   id            String   @id @default(uuid())
-  nome          String
+  name          String
   email         String   @unique
-  senha         String
-  telefone      String   @unique
-  role          Role     @default(CLIENTE)
+  password      String
+  phone         String   @unique
+  role          Role     @default(CLIENT)
   emailVerified Boolean  @default(false)
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
@@ -76,14 +76,14 @@ model Professional {
   id                    String                 @id @default(uuid())
   userId                String                 @unique
   user                  User                   @relation(fields: [userId], references: [id])
-  especialidade         String
+  specialty             String
   bio                   String?
   avatarUrl             String?
-  documento             String?
-  ativo                 Boolean                @default(true)
+  document              String?
+  active                Boolean                @default(true)
   bookings              Booking[]
-  horariosFuncionamento HorarioFuncionamento[]
-  feriados              Feriado[]
+  businessHours         BusinessHours[]
+  holidays              Holiday[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   ServiceProfessional   ServiceProfessional[]
@@ -92,40 +92,40 @@ model Professional {
   @@map("professionals")
 }
 
-model HorarioFuncionamento {
+model BusinessHours {
   id             String       @id @default(uuid())
-  profissional   Professional @relation(fields: [profissionalId], references: [id])
-  profissionalId String
-  diaSemana      Int // 0-6 (Domingo-Sábado)
-  abreAs         String // Formato "HH:MM"
-  fechaAs        String // Formato "HH:MM"
-  pausaInicio    String? // Formato "HH:MM"
-  pausaFim       String? // Formato "HH:MM"
-  ativo          Boolean      @default(true)
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  professionalId String
+  dayOfWeek      Int // 0-6 (Sunday-Saturday)
+  opensAt        String // Format "HH:MM"
+  closesAt       String // Format "HH:MM"
+  breakStart     String? // Format "HH:MM"
+  breakEnd       String? // Format "HH:MM"
+  active         Boolean      @default(true)
 
-  @@unique([profissionalId, diaSemana])
+  @@unique([professionalId, dayOfWeek])
   @@map("business_hours")
 }
 
-model Feriado {
+model Holiday {
   id             String       @id @default(uuid())
-  profissional   Professional @relation(fields: [profissionalId], references: [id])
-  profissionalId String
-  data           DateTime
-  motivo         String
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  professionalId String
+  date           DateTime
+  reason         String
   createdAt      DateTime     @default(now())
 
-  @@index([profissionalId, data])
+  @@index([professionalId, date])
   @@map("holidays")
 }
 
 model Service {
   id            String                @id @default(uuid())
-  nome          String
-  descricao     String?
-  categoria     String?
-  ativo         Boolean               @default(true)
-  profissionais ServiceProfessional[]
+  name          String
+  description   String?
+  category      String?
+  active        Boolean               @default(true)
+  professionals ServiceProfessional[]
   BookingItem   BookingItem[]
   updatedAt     DateTime              @updatedAt
   createdAt     DateTime              @default(now())
@@ -140,8 +140,8 @@ model ServiceProfessional {
   serviceId      String
   professional   Professional  @relation(fields: [professionalId], references: [id])
   professionalId String
-  preco          Float
-  duracao        Int
+  price          Float
+  duration       Int
   BookingItem    BookingItem[]
 
   @@map("service_professional")
@@ -149,16 +149,16 @@ model ServiceProfessional {
 
 model Booking {
   id               String             @id @default(uuid())
-  user             User               @relation(fields: [usuarioId], references: [id])
-  usuarioId        String
-  profissional     Professional       @relation(fields: [profissionalId], references: [id])
-  profissionalId   String
-  dataHoraInicio   DateTime
-  dataHoraFim      DateTime
-  status           Status             @default(PENDENTE)
-  observacoes      String?
-  valorFinal       Float
-  pontosUtilizados Int                @default(0)
+  user             User               @relation(fields: [userId], references: [id])
+  userId           String
+  professional     Professional       @relation(fields: [professionalId], references: [id])
+  professionalId   String
+  startDateTime    DateTime
+  endDateTime      DateTime
+  status           Status             @default(PENDING)
+  notes            String?
+  totalAmount      Float
+  pointsUsed       Int                @default(0)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   canceledAt       DateTime?
@@ -181,9 +181,9 @@ model BookingItem {
   serviceProfessional   ServiceProfessional @relation(fields: [serviceProfessionalId], references: [id])
   serviceProfessionalId String
 
-  nome      String
-  preco     Float
-  duracao   Int
+  name      String
+  price     Float
+  duration  Int
   Service   Service? @relation(fields: [serviceId], references: [id])
   serviceId String?
 
@@ -204,16 +204,16 @@ model VerificationToken {
 model Log {
   id         String   @id @default(uuid())
   user       User?    @relation(fields: [userId], references: [id])
-  userId     String? // Quem fez a ação (pode ser nulo para sistema)
-  tipo       String // Tipo do evento: "STATUS_UPDATE", "CANCELAMENTO", etc.
-  descricao  String // Texto explicativo do que aconteceu
-  referencia String? // ID da entidade afetada (ex: bookingId, serviceId etc)
-  entidade   String? // Nome da entidade: "Booking", "Service", "User"
-  userAgent  String? // Navegador ou client info (opcional)
+  userId     String? // Who performed the action (can be null for system)
+  type       String // Event type: "STATUS_UPDATE", "CANCELAMENTO", etc.
+  description String // Descriptive text of what happened
+  reference  String? // ID of affected entity (ex: bookingId, serviceId etc)
+  entity     String? // Entity name: "Booking", "Service", "User"
+  userAgent  String? // Browser or client info (optional)
   createdAt  DateTime @default(now())
 
   @@index([userId])
-  @@index([entidade, referencia])
+  @@index([entity, reference])
   @@map("logs")
 }
 

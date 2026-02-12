@@ -1,12 +1,12 @@
 import { Prisma, Professional, Service, User } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { ProfessionalsRepository } from "../professionals-repository";
+import { IProfessionalsRepository } from "../professionals-repository";
 
-export class PrismaProfessionalsRepository implements ProfessionalsRepository {
+export class PrismaProfessionalsRepository implements IProfessionalsRepository {
   async listAllServices(): Promise<Service[]> {
     return prisma.service.findMany({
       where: { ativo: true },
-      orderBy: { nome: "asc" },
+      orderBy: { name: "asc" },
     });
   }
 
@@ -32,8 +32,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
   }
 
   async update(
-    id: string,
-    data: Prisma.ProfessionalUncheckedUpdateInput
+    id: string, date: Prisma.ProfessionalUncheckedUpdateInput
   ): Promise<Professional> {
     return prisma.professional.update({ where: { id }, data });
   }
@@ -58,13 +57,13 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     const skip = (params.page - 1) * params.limit;
 
     const where: Prisma.ProfessionalWhereInput = {
-      ...(params.especialidade && {
+      ...(params.specialty && {
         especialidade: {
-          contains: params.especialidade,
+          contains: params.specialty,
           mode: Prisma.QueryMode.insensitive,
         },
       }),
-      ...(params.ativo !== undefined && { ativo: params.ativo }),
+      ...(params.active !== undefined && { ativo: params.active }),
     };
 
     // Mapear campos de ordenação incluindo campos da relação User
@@ -85,7 +84,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
       }
       // Campos da relação User
       else if (params.sortBy === "nome") {
-        orderBy = { user: { nome: direction } };
+        orderBy = { user: { name: direction } };
       } else if (params.sortBy === "email") {
         orderBy = { user: { email: direction } };
       } else {
@@ -132,13 +131,13 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
     ativo?: boolean;
   }): Promise<number> {
     const where: Prisma.ProfessionalWhereInput = {
-      ...(params.especialidade && {
+      ...(params.specialty && {
         especialidade: {
-          contains: params.especialidade,
+          contains: params.specialty,
           mode: Prisma.QueryMode.insensitive,
         },
       }),
-      ...(params.ativo !== undefined && { ativo: params.ativo }),
+      ...(params.active !== undefined && { ativo: params.active }),
     };
 
     return prisma.professional.count({ where });
@@ -169,9 +168,8 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
                 some: {
                   service: {
                     OR: [
-                      { nome: { contains: params.query, mode: "insensitive" } },
-                      {
-                        descricao: {
+                      { name: { contains: params.query, mode: "insensitive" } },
+                      { description: {
                           contains: params.query,
                           mode: "insensitive",
                         },
@@ -184,14 +182,14 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
             {
               user: {
                 OR: [
-                  { nome: { contains: params.query, mode: "insensitive" } },
+                  { name: { contains: params.query, mode: "insensitive" } },
                   { email: { contains: params.query, mode: "insensitive" } },
                 ],
               },
             },
           ],
         },
-        ...(params.ativo !== undefined ? [{ ativo: params.ativo }] : []),
+        ...(params.active !== undefined ? [{ ativo: params.active }] : []),
       ],
     };
 
@@ -209,7 +207,7 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
       } else if (params.sortBy === "updatedAt") {
         orderBy = { updatedAt: direction };
       } else if (params.sortBy === "nome") {
-        orderBy = { user: { nome: direction } };
+        orderBy = { user: { name: direction } };
       } else if (params.sortBy === "email") {
         orderBy = { user: { email: direction } };
       } else {
@@ -264,8 +262,8 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
               some: {
                 service: {
                   OR: [
-                    { nome: { contains: params.query, mode: "insensitive" } },
-                    { descricao: { contains: params.query, mode: "insensitive" } },
+                    { name: { contains: params.query, mode: "insensitive" } },
+                    { description: { contains: params.query, mode: "insensitive" } },
                   ],
                 },
               },
@@ -274,14 +272,14 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
           {
             user: {
               OR: [
-                { nome: { contains: params.query, mode: "insensitive" } },
+                { name: { contains: params.query, mode: "insensitive" } },
                 { email: { contains: params.query, mode: "insensitive" } },
               ],
             },
           },
         ],
       },
-      ...(params.ativo !== undefined ? [{ ativo: params.ativo }] : []),
+      ...(params.active !== undefined ? [{ ativo: params.active }] : []),
     ],
   };
 
@@ -289,3 +287,4 @@ export class PrismaProfessionalsRepository implements ProfessionalsRepository {
 }
 
 }
+

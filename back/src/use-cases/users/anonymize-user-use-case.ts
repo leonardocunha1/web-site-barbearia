@@ -1,9 +1,9 @@
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 
 export class AnonymizeUserUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private usersRepository: IUsersRepository) {}
 
   async execute({
     userIdToAnonymize,
@@ -16,7 +16,7 @@ export class AnonymizeUserUseCase {
   }): Promise<void> {
     const userExists = await this.usersRepository.findById(userIdToAnonymize);
 
-    if (role === 'CLIENTE' && userId !== userIdToAnonymize) {
+    if (role === 'CLIENT' && userId !== userIdToAnonymize) {
       throw new UsuarioTentandoPegarInformacoesDeOutro();
     }
 
@@ -27,3 +27,4 @@ export class AnonymizeUserUseCase {
     await this.usersRepository.anonymize(userIdToAnonymize);
   }
 }
+

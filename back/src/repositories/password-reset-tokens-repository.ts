@@ -6,7 +6,7 @@ export interface PasswordResetToken {
   createdAt: Date;
 }
 
-export interface PasswordResetTokensRepository {
+export interface IPasswordResetTokensRepository {
   create(
     token: string,
     userId: string,
@@ -16,3 +16,4 @@ export interface PasswordResetTokensRepository {
   delete(id: string): Promise<void>;
   deleteByUserId(userId: string): Promise<void>;
 }
+

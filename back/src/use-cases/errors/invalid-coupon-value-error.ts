@@ -1,6 +1,7 @@
-export class InvalidCouponValueError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidCouponValueError extends BadRequestError {
   constructor(message: string) {
-    super(message);
-    this.name = 'InvalidCouponValueError';
+    super(message, 'INVALID_COUPON_VALUE');
   }
 }

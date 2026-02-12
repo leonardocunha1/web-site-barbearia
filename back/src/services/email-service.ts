@@ -1,4 +1,8 @@
 import sgMail, { MailDataRequired } from '@sendgrid/mail';
+import {
+  EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS,
+  PASSWORD_RESET_TOKEN_EXPIRATION_HOURS,
+} from '@/consts/const';
 
 export class EmailService {
   private readonly sender: string;
@@ -22,7 +26,10 @@ export class EmailService {
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const subject = 'Verifique seu e-mail';
-    const html = `<p>Clique <a href="${this.appUrl}/users/verify-email?token=${token}">aqui</a> para verificar seu e-mail</p>`;
+    const html = `
+      <p>Clique <a href="${this.appUrl}/users/verify-email?token=${token}">aqui</a> para verificar seu e-mail.</p>
+      <p>Este link expira em ${EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS} horas.</p>
+    `;
     await this.sendEmail(email, subject, html, 'verificação de e-mail');
   }
 
@@ -32,7 +39,7 @@ export class EmailService {
       <p>Você solicitou a redefinição de senha. Clique no link abaixo para continuar:</p>
       <p><a href="${this.appUrl}/users/reset-password?token=${token}">Redefinir senha</a></p>
       <p>Se você não solicitou esta alteração, ignore este e-mail.</p>
-      <p>O link expirará em 2 horas.</p>
+      <p>O link expirará em ${PASSWORD_RESET_TOKEN_EXPIRATION_HOURS} horas.</p>
     `;
     await this.sendEmail(email, subject, html, 'redefinição de senha');
   }

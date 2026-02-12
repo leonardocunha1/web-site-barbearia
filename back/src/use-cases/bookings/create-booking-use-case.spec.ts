@@ -56,8 +56,7 @@ describe('CreateBookingUseCase', () => {
     const mockServiceProfessionalId = 'sp-1';
 
     mockRepos.usersRepository.findById.mockResolvedValue({
-      id: mockUserId,
-      nome: 'Usuário Teste',
+      id: mockUserId, name: 'Usuário Teste',
       email: 'user@example.com',
       senha: 'hash',
       createdAt: new Date(),
@@ -65,8 +64,7 @@ describe('CreateBookingUseCase', () => {
       role: 'USER',
     });
     mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: mockProfessionalId,
-      nome: 'Profissional Teste',
+      id: mockProfessionalId, name: 'Profissional Teste',
       email: 'pro@example.com',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -75,13 +73,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: mockServiceProfessionalId,
-        professionalId: mockProfessionalId,
-        preco: 100,
-        duracao: 60,
+        professionalId: mockProfessionalId, price: 100, duration: 60,
         service: {
-          id: mockServiceId,
-          nome: 'Serviço X',
-          descricao: 'Descrição do Serviço X',
+          id: mockServiceId, name: 'Serviço X', description: 'Descrição do Serviço X',
           categoria: 'CATEGORIA_TESTE',
           ativo: true,
           createdAt: new Date(),
@@ -96,16 +90,16 @@ describe('CreateBookingUseCase', () => {
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
       id: mockBookingId,
-      dataHoraInicio: startDateTime,
-      dataHoraFim: new Date(startDateTime.getTime() + 60 * 60000),
-      observacoes: 'observações',
+      startDateTime: startDateTime,
+      endDateTime: new Date(startDateTime.getTime() + 60 * 60000),
+      notes: 'observações',
       userId: mockUserId,
-      profissionalId: mockProfessionalId,
-      status: 'PENDENTE',
+      professionalId: mockProfessionalId,
+      status: 'PENDING',
       valorTotal: 100,
-      valorFinal: 100,
+      totalAmount: 100,
       desconto: 0,
-      pontosUtilizados: 0,
+      pointsUsed: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -119,23 +113,19 @@ describe('CreateBookingUseCase', () => {
     });
 
     expect(mockRepos.bookingsRepository.create).toHaveBeenCalledWith({
-      dataHoraInicio: startDateTime,
+      startDateTime: startDateTime,
       coupon: undefined,
       couponDiscount: 0,
-      dataHoraFim: new Date(startDateTime.getTime() + 60 * 60000),
-      observacoes: 'observações',
-      user: { connect: { id: mockUserId } },
-      profissional: { connect: { id: mockProfessionalId } },
-      status: 'PENDENTE',
-      valorFinal: 100,
-      pontosUtilizados: 0,
+      endDateTime: new Date(startDateTime.getTime() + 60 * 60000),
+      notes: 'observações',
+      user: { connect: { id: mockUserId } }, professional: { connect: { id: mockProfessionalId } },
+      status: 'PENDING',
+      totalAmount: 100,
+      pointsUsed: 0,
       items: {
         create: [
           {
-            serviceProfessionalId: mockServiceProfessionalId,
-            preco: 100,
-            nome: 'Serviço X',
-            duracao: 60,
+            serviceProfessionalId: mockServiceProfessionalId, price: 100, name: 'Serviço X', duration: 60,
             serviceId: mockServiceId,
           },
         ],
@@ -219,13 +209,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 0, // duração inválida
+        professionalId: 'pro-1', price: 100, duration: 0, // duração inválida
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -251,13 +237,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 60,
+        professionalId: 'pro-1', price: 100, duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -287,13 +269,9 @@ describe('CreateBookingUseCase', () => {
       .mockResolvedValueOnce({
         // Primeiro serviço
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 30,
+        professionalId: 'pro-1', price: 100, duration: 30,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço A',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço A', description: null,
           categoria: null,
           ativo: true,
         },
@@ -301,13 +279,9 @@ describe('CreateBookingUseCase', () => {
       .mockResolvedValueOnce({
         // Segundo serviço
         id: 'sp-2',
-        professionalId: 'pro-1',
-        preco: 150,
-        duracao: 45,
+        professionalId: 'pro-1', price: 150, duration: 45,
         service: {
-          id: 'srv-2',
-          nome: 'Serviço B',
-          descricao: null,
+          id: 'srv-2', name: 'Serviço B', description: null,
           categoria: null,
           ativo: true,
         },
@@ -322,10 +296,10 @@ describe('CreateBookingUseCase', () => {
     });
 
     const createCall = mockRepos.bookingsRepository.create.mock.calls[0][0];
-    expect(createCall.dataHoraFim).toEqual(
+    expect(createCall.endDateTime).toEqual(
       new Date(futureDate.getTime() + 75 * 60000),
     ); // 30 + 45 minutos
-    expect(createCall.valorFinal).toBe(250); // 100 + 150
+    expect(createCall.totalAmount).toBe(250); // 100 + 150
     expect(createCall.items.create).toHaveLength(2);
   });
 
@@ -338,13 +312,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 60,
+        professionalId: 'pro-1', price: 100, duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -363,14 +333,14 @@ describe('CreateBookingUseCase', () => {
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
       id: 'booking-1',
-      dataHoraInicio: futureDate,
-      dataHoraFim: new Date(futureDate.getTime() + 60 * 60000),
-      observacoes: undefined,
+      startDateTime: futureDate,
+      endDateTime: new Date(futureDate.getTime() + 60 * 60000),
+      notes: undefined,
       userId: 'user-1',
-      profissionalId: 'pro-1',
-      status: 'PENDENTE',
-      valorFinal: 0,
-      pontosUtilizados: 200,
+      professionalId: 'pro-1',
+      status: 'PENDING',
+      totalAmount: 0,
+      pointsUsed: 200,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -386,20 +356,16 @@ describe('CreateBookingUseCase', () => {
     // Use objectContaining for more flexible assertions
     expect(mockRepos.bookingsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataHoraInicio: futureDate,
-        dataHoraFim: new Date(futureDate.getTime() + 60 * 60000),
-        user: { connect: { id: 'user-1' } },
-        profissional: { connect: { id: 'pro-1' } },
-        status: 'PENDENTE',
-        valorFinal: 0,
-        pontosUtilizados: 200,
+        startDateTime: futureDate,
+        endDateTime: new Date(futureDate.getTime() + 60 * 60000),
+        user: { connect: { id: 'user-1' } }, professional: { connect: { id: 'pro-1' } },
+        status: 'PENDING',
+        totalAmount: 0,
+        pointsUsed: 200,
         items: {
           create: [
             expect.objectContaining({
-              serviceProfessionalId: 'sp-1',
-              preco: 100,
-              nome: 'Serviço X',
-              duracao: 60,
+              serviceProfessionalId: 'sp-1', price: 100, name: 'Serviço X', duration: 60,
               serviceId: 'srv-1',
             }),
           ],
@@ -424,13 +390,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 60,
+        professionalId: 'pro-1', price: 100, duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -463,8 +425,7 @@ describe('CreateBookingUseCase', () => {
     const mockBookingId = 'booking-excess-bonus-456'; // Novo ID para este teste
 
     mockRepos.usersRepository.findById.mockResolvedValue({
-      id: 'user-1',
-      nome: 'Usuário Teste',
+      id: 'user-1', name: 'Usuário Teste',
       email: 'user@example.com',
       passwordHash: 'hash',
       createdAt: new Date(),
@@ -472,27 +433,21 @@ describe('CreateBookingUseCase', () => {
       role: 'USER',
     });
     mockRepos.professionalsRepository.findById.mockResolvedValue({
-      id: 'pro-1',
-      nome: 'Profissional Teste',
+      id: 'pro-1', name: 'Profissional Teste',
       email: 'pro@example.com',
       createdAt: new Date(),
       updatedAt: new Date(),
       fotoPerfil: null,
-      telefone: null,
-      descricao: null,
+      telefone: null, description: null,
       enderecoId: null,
       ativo: true,
     });
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 50, // Valor menor do serviço
-        duracao: 60,
+        professionalId: 'pro-1', price: 50, // Valor menor do serviço duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: 'desc',
+          id: 'srv-1', name: 'Serviço X', description: 'desc',
           categoria: 'CAT',
           ativo: true,
           createdAt: new Date(),
@@ -516,16 +471,16 @@ describe('CreateBookingUseCase', () => {
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
       id: mockBookingId, // Essencial para que booking.id não seja undefined
-      dataHoraInicio: futureDate,
-      dataHoraFim: new Date(futureDate.getTime() + 60 * 60000),
-      observacoes: undefined,
+      startDateTime: futureDate,
+      endDateTime: new Date(futureDate.getTime() + 60 * 60000),
+      notes: undefined,
       userId: 'user-1',
-      profissionalId: 'pro-1',
-      status: 'PENDENTE',
+      professionalId: 'pro-1',
+      status: 'PENDING',
       valorTotal: 50,
-      valorFinal: 0, // Valor mínimo após desconto
+      totalAmount: 0, // Valor mínimo após desconto
       desconto: 50,
-      pontosUtilizados: 100, // Pontos para cobrir R$49.99 (49.99 / 0.5 = 99.98, Math.ceil -> 100)
+      pointsUsed: 100, // Pontos para cobrir R$49.99 (49.99 / 0.5 = 99.98, Math.ceil -> 100)
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -541,8 +496,8 @@ describe('CreateBookingUseCase', () => {
     // Verifica que só foram usados 100 pontos (R$50 de serviço - R$0.01 valor mínimo = R$49.99 de desconto. R$49.99 / R$0.50 por ponto = 99.98 pontos, arredondado para cima para 100 pontos)
     expect(mockRepos.bookingsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        valorFinal: 0,
-        pontosUtilizados: 100, // A lógica do use case deve calcular isso
+        totalAmount: 0,
+        pointsUsed: 100, // A lógica do use case deve calcular isso
       }),
     );
 
@@ -564,13 +519,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 0, // Serviço gratuito
-        duracao: 60,
+        professionalId: 'pro-1', price: 0, // Serviço gratuito duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -598,13 +549,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 60,
+        professionalId: 'pro-1', price: 100, duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -632,13 +579,13 @@ describe('CreateBookingUseCase', () => {
 
     mockRepos.bookingsRepository.create.mockResolvedValue({
       id: 'booking-1',
-      dataHoraInicio: futureDate,
-      dataHoraFim: new Date(futureDate.getTime() + 60 * 60000),
+      startDateTime: futureDate,
+      endDateTime: new Date(futureDate.getTime() + 60 * 60000),
       userId: 'user-1',
-      profissionalId: 'pro-1',
-      status: 'PENDENTE',
-      valorFinal: 80, // 100 - 20%
-      pontosUtilizados: 0,
+      professionalId: 'pro-1',
+      status: 'PENDING',
+      totalAmount: 80, // 100 - 20%
+      pointsUsed: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -651,7 +598,7 @@ describe('CreateBookingUseCase', () => {
       couponCode: 'DESC20',
     });
 
-    expect(result.valorFinal).toBe(80);
+    expect(result.totalAmount).toBe(80);
     expect(mockRepos.couponRepository.registerRedemption).toHaveBeenCalled();
   });
 
@@ -664,13 +611,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 60,
+        professionalId: 'pro-1', price: 100, duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },
@@ -718,13 +661,9 @@ describe('CreateBookingUseCase', () => {
     mockRepos.serviceProfessionalRepository.findByServiceAndProfessional.mockResolvedValue(
       {
         id: 'sp-1',
-        professionalId: 'pro-1',
-        preco: 100,
-        duracao: 60,
+        professionalId: 'pro-1', price: 100, duration: 60,
         service: {
-          id: 'srv-1',
-          nome: 'Serviço X',
-          descricao: null,
+          id: 'srv-1', name: 'Serviço X', description: null,
           categoria: null,
           ativo: true,
         },

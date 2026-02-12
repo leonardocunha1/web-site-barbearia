@@ -1,15 +1,15 @@
 import { prisma } from '@/lib/prisma';
-import { BonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
+import { IBonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
 import { BonusRedemption, Prisma } from '@prisma/client';
 
 export class PrismaBonusRedemptionRepository
-  implements BonusRedemptionRepository
+  implements IBonusRedemptionRepository
 {
-  async create(
-    data: Prisma.BonusRedemptionCreateInput,
+  async create( date: Prisma.BonusRedemptionCreateInput,
   ): Promise<BonusRedemption> {
     return prisma.bonusRedemption.create({
       data,
     });
   }
 }
+

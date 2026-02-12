@@ -1,6 +1,7 @@
-export class DuplicateHolidayError extends Error {
+import { ConflictError } from './app-error';
+
+export class DuplicateHolidayError extends ConflictError {
   constructor() {
-    super('Já existe um feriado cadastrado para esta data');
-    this.name = 'DuplicateHolidayError';
+    super('Já existe um feriado cadastrado para esta data', 'DUPLICATE_HOLIDAY');
   }
 }

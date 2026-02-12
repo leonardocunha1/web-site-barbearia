@@ -1,6 +1,7 @@
-export class InvalidLimitError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidLimitError extends BadRequestError {
   constructor(message = 'O limite de resultados deve ser entre 1 e 100.') {
-    super(message);
-    this.name = 'InvalidLimitError';
+    super(message, 'INVALID_LIMIT');
   }
 }

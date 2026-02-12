@@ -3,12 +3,11 @@ import { Prisma, Role, User } from '@prisma/client';
 
 export const createMockUsersRepository = () => {
   const createMockUser = (overrides?: Partial<User>): User => ({
-    id: 'user-1',
-    nome: 'John Doe',
+    id: 'user-1', name: 'John Doe',
     email: 'john@example.com',
     senha: 'hashed-password',
     telefone: null,
-    role: 'CLIENTE' as Role,
+    role: 'CLIENT' as Role,
     emailVerified: true,
     active: true,
     createdAt: new Date(),
@@ -30,7 +29,7 @@ export const createMockUsersRepository = () => {
     create: vi.fn().mockImplementation((data: Prisma.UserCreateInput) =>
       Promise.resolve(
         createMockUser({
-          ...data,
+          ...date,
           createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
           updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
         }),
@@ -38,14 +37,13 @@ export const createMockUsersRepository = () => {
     ),
     update: vi
       .fn()
-      .mockImplementation((id: string, data: Prisma.UserUpdateInput) =>
+      .mockImplementation((id: string, date: Prisma.UserUpdateInput) =>
         Promise.resolve(
           createMockUser({
             id,
-            ...(data.nome
-              ? {
-                  nome:
-                    typeof data.nome === 'string' ? data.nome : data.nome.set,
+            ...(data.name
+              ? { name:
+                    typeof data.name === 'string' ? data.name : data.name.set,
                 }
               : {}),
             ...(data.email
@@ -75,11 +73,10 @@ export const createMockUsersRepository = () => {
           name?: string;
         }) => {
           const users = [
-            createMockUser({ id: 'user-1', nome: 'John Doe', role: 'CLIENTE' }),
+            createMockUser({ id: 'user-1', name: 'John Doe', role: 'CLIENT' }),
             createMockUser({
-              id: 'user-2',
-              nome: 'Jane Barber',
-              role: 'PROFISSIONAL',
+              id: 'user-2', name: 'Jane Barber',
+              role: 'PROFESSIONAL',
             }),
           ];
 
@@ -88,7 +85,7 @@ export const createMockUsersRepository = () => {
               .filter(
                 (user) =>
                   (!params.role || user.role === params.role) &&
-                  (!params.name || user.nome.includes(params.name)),
+                  (!params.name || user.name.includes(params.name)),
               )
               .slice(
                 (params.page - 1) * params.limit,
@@ -101,11 +98,10 @@ export const createMockUsersRepository = () => {
       .fn()
       .mockImplementation((params: { role?: Role; name?: string }) => {
         const users = [
-          createMockUser({ id: 'user-1', nome: 'John Doe', role: 'CLIENTE' }),
+          createMockUser({ id: 'user-1', name: 'John Doe', role: 'CLIENT' }),
           createMockUser({
-            id: 'user-2',
-            nome: 'Jane Barber',
-            role: 'PROFISSIONAL',
+            id: 'user-2', name: 'Jane Barber',
+            role: 'PROFESSIONAL',
           }),
         ];
 
@@ -113,7 +109,7 @@ export const createMockUsersRepository = () => {
           users.filter(
             (user) =>
               (!params.role || user.role === params.role) &&
-              (!params.name || user.nome.includes(params.name)),
+              (!params.name || user.name.includes(params.name)),
           ).length,
         );
       }),

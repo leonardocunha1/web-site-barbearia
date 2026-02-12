@@ -1,9 +1,14 @@
 import { prisma } from '@/lib/prisma';
-import { UserBonusRepository } from '../user-bonus-repository';
+import { IUserBonusRepository } from '../user-bonus-repository';
 import { BonusType } from '@prisma/client';
 
-export class PrismaUserBonusRepository implements UserBonusRepository {
-  async upsert(data: { userId: string; type: BonusType; points: number }) {
+export class PrismaUserBonusRepository implements IUserBonusRepository {
+  async upsert(data: {
+    userId: string;
+    type: BonusType;
+    points: number;
+    expiresAt: Date;
+  }) {
     const existingBonus = await prisma.userBonus.findUnique({
       where: {
         userId_type: {
@@ -13,8 +18,7 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
       },
     });
 
-    const newExpiresAt = new Date();
-    newExpiresAt.setMonth(newExpiresAt.getMonth() + 6);
+    const newExpiresAt = data.expiresAt;
 
     if (
       !existingBonus ||
@@ -47,8 +51,7 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
             userId: data.userId,
             type: data.type,
           },
-        },
-        data: {
+        }, date: {
           points: {
             increment: data.points,
           },
@@ -85,7 +88,7 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
 
   async getValidPointsByType(
     userId: string,
-    type: 'BOOKING_POINTS' | 'LOYALTY',
+    type: BonusType,
     currentDate: Date,
   ): Promise<number> {
     const userBonus = await prisma.userBonus.findUnique({
@@ -137,7 +140,7 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
   async consumePoints(
     userId: string,
     quantity: number,
-    type: 'BOOKING_POINTS' | 'LOYALTY',
+    type: BonusType,
   ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const updated = await tx.userBonus.updateMany({
@@ -147,8 +150,7 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
           points: {
             gte: quantity,
           },
-        },
-        data: {
+        }, date: {
           points: {
             decrement: quantity,
           },
@@ -163,3 +165,4 @@ export class PrismaUserBonusRepository implements UserBonusRepository {
     });
   }
 }
+

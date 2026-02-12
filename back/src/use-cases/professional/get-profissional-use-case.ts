@@ -4,15 +4,15 @@ import {
   TimeRange,
 } from '@/dtos/dashboard-dto';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
-import { BookingsRepository } from '@/repositories/bookings-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { startOfDay, endOfDay, subDays, isAfter, isValid } from 'date-fns';
 import { InvalidDataError } from '../errors/invalid-data-error';
 
 export class GetProfessionalDashboardUseCase {
   constructor(
-    private professionalsRepository: ProfessionalsRepository,
-    private bookingsRepository: BookingsRepository,
+    private professionalsRepository: IProfessionalsRepository,
+    private bookingsRepository: IBookingsRepository,
   ) {}
 
   private getDateRange(range: TimeRange, startDate?: Date, endDate?: Date) {
@@ -82,17 +82,17 @@ export class GetProfessionalDashboardUseCase {
           professionalId,
           dateRange.start,
           dateRange.end,
-          'CONCLUIDO',
+          'COMPLETED',
         ),
         this.bookingsRepository.countByProfessionalAndStatus(
           professionalId,
-          'CANCELADO',
+          'CANCELED',
           dateRange.start,
           dateRange.end,
         ),
         this.bookingsRepository.countByProfessionalAndStatus(
           professionalId,
-          'CONCLUIDO',
+          'COMPLETED',
           dateRange.start,
           dateRange.end,
         ),
@@ -104,8 +104,8 @@ export class GetProfessionalDashboardUseCase {
 
     return {
       professional: {
-        name: professional.user.nome,
-        specialty: professional.especialidade,
+        name: professional.user.name,
+        specialty: professional.specialty,
         avatarUrl: professional.avatarUrl,
       },
       metrics: {
@@ -116,15 +116,16 @@ export class GetProfessionalDashboardUseCase {
       },
       nextAppointments: nextAppointments.map((appointment) => ({
         id: appointment.id,
-        date: appointment.dataHoraInicio,
-        clientName: appointment.user.nome,
+        date: appointment.dateHoraInicio,
+        clientName: appointment.user.name,
         service:
           appointment.items.length > 1
             ? 'Vários serviços'
-            : appointment.items[0]?.serviceProfessional.service.nome ||
+            : appointment.items[0]?.serviceProfessional.service.name ||
               'Serviço não especificado',
-        status: appointment.status as 'PENDENTE' | 'CONFIRMADO',
+        status: appointment.status as 'PENDING' | 'CONFIRMED',
       })),
     };
   }
 }
+

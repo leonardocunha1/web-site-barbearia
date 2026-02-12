@@ -1,6 +1,7 @@
-export class UserAlreadyProfessionalError extends Error {
+import { ConflictError } from './app-error';
+
+export class UserAlreadyProfessionalError extends ConflictError {
   constructor() {
-    super('Usuário já é um profissional');
-    this.name = 'UserAlreadyProfessionalError';
+    super('Usuário já é um profissional', 'USER_ALREADY_PROFESSIONAL');
   }
 }

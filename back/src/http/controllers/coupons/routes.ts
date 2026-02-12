@@ -29,7 +29,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
         description: 'Criação de um novo cupom.',
         body: createCouponBodySchema,
         response: {
-          201: z.null().describe('Cupom criado com sucesso.'),
+          201: z.object({ coupon: couponSchema }).describe('Cupom criado com sucesso.'),
           400: z.object({ message: z.string() }).describe('Erro de validação'),
           409: z.object({ message: z.string() }).describe('Código de cupom já existente.'),
         },
@@ -91,7 +91,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
         params: updateCouponParamsSchema,
         body: updateCouponBodySchema,
         response: {
-          200: z.object({ message: z.string() }),
+          200: z.object({ coupon: couponSchema }),
           400: z.object({ message: z.string() }),
           404: z.object({ message: z.string() }),
         },
@@ -110,7 +110,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
         description: 'Deleta um cupom pelo ID.',
         params: updateCouponParamsSchema,
         response: {
-          204: z.null().describe('Cupom deletado com sucesso.'),
+          200: z.object({ success: z.boolean() }).describe('Cupom deletado com sucesso.'),
           404: z.object({ message: z.string() }),
         },
       },
@@ -128,7 +128,7 @@ export async function couponsRoutes(app: FastifyTypedInstance) {
         description: 'Ativa ou desativa o status de um cupom.',
         params: updateCouponParamsSchema,
         response: {
-          200: z.object({ message: z.string() }),
+          200: z.object({ coupon: z.object({ id: z.string(), active: z.boolean() }) }),
           404: z.object({ message: z.string() }),
         },
       },

@@ -26,7 +26,7 @@ export interface FindManyParams {
   filters?: CouponFilters;
 }
 
-export interface CouponRepository {
+export interface ICouponRepository {
   findByCode(code: string): Promise<
     | (Coupon & {
         redemptions: CouponRedemption[];
@@ -44,7 +44,7 @@ export interface CouponRepository {
 
   create(data: Prisma.CouponCreateInput): Promise<Coupon>;
 
-  update(id: string, data: Prisma.CouponUpdateInput): Promise<Coupon>;
+  update(id: string, date: Prisma.CouponUpdateInput): Promise<Coupon>;
 
   listValidCoupons(
     professionalId: string,
@@ -56,3 +56,4 @@ export interface CouponRepository {
 
   count(filters?: CouponFilters): Promise<number>;
 }
+

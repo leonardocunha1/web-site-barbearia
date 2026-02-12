@@ -1,10 +1,11 @@
 import { randomUUID } from 'crypto';
 import dayjs from 'dayjs';
-import { UsersRepository } from '@/repositories/users-repository';
-import { VerificationTokensRepository } from '@/repositories/verification-tokens-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
+import { IVerificationTokensRepository } from '@/repositories/verification-tokens-repository';
 import { EmailService } from '@/services/email-service';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { UserEmailAlreadyVerifiedError } from '../errors/user-email-already-verified-error';
+import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS } from '@/consts/const';
 
 interface SendVerificationEmailRequest {
   email: string;
@@ -12,8 +13,8 @@ interface SendVerificationEmailRequest {
 
 export class SendVerificationEmailUseCase {
   constructor(
-    private usersRepository: UsersRepository,
-    private verificationTokensRepository: VerificationTokensRepository,
+    private usersRepository: IUsersRepository,
+    private verificationTokensRepository: IVerificationTokensRepository,
     private emailService: EmailService,
   ) {}
 
@@ -29,10 +30,13 @@ export class SendVerificationEmailUseCase {
     }
 
     const token = randomUUID();
-    const expiresAt = dayjs().add(24, 'hours').toDate();
+    const expiresAt = dayjs()
+      .add(EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS, 'hours')
+      .toDate();
 
     await this.verificationTokensRepository.create(token, user.id, expiresAt);
 
     await this.emailService.sendVerificationEmail(user.email, token);
   }
 }
+

@@ -1,6 +1,7 @@
-export class InvalidDataError extends Error {
+import { BadRequestError } from './app-error';
+
+export class InvalidDataError extends BadRequestError {
   constructor(message: string) {
-    super(message);
-    this.name = 'InvalidDataError';
+    super(message, 'INVALID_DATA');
   }
 }

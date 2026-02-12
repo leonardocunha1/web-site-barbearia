@@ -1,12 +1,10 @@
 import { z } from 'zod';
 import { paginationSchema } from './pagination';
 
-export const createServiceBodySchema = z.object({
-  nome: z
+export const createServiceBodySchema = z.object({ name: z
     .string()
     .min(3, { message: 'O nome do serviço deve ter pelo menos 3 caracteres' })
-    .max(100, { message: 'O nome do serviço não pode exceder 100 caracteres' }),
-  descricao: z
+    .max(100, { message: 'O nome do serviço não pode exceder 100 caracteres' }), description: z
     .string()
     .max(500, { message: 'A descrição não pode exceder 500 caracteres' })
     .optional(),
@@ -17,8 +15,7 @@ export const createServiceBodySchema = z.object({
   ativo: z.boolean().default(true),
 });
 
-export const listServicesQuerySchema = paginationSchema.extend({
-  nome: z
+export const listServicesQuerySchema = paginationSchema.extend({ name: z
     .string()
     .max(100, { message: 'O termo de busca não pode exceder 100 caracteres' })
     .optional(),
@@ -40,38 +37,29 @@ export const listServicesQuerySchema = paginationSchema.extend({
 });
 
 export const servicesProfessionalSchema = z.object({
-  id: z.string().uuid({ message: 'ID do serviço inválido' }),
-  nome: z.string(),
-  descricao: z.string().nullable(),
+  id: z.string().uuid({ message: 'ID do serviço inválido' }), name: z.string(), description: z.string().nullable(),
   categoria: z.string().nullable(),
-  ativo: z.boolean(),
-  preco: z.number().nullable(),
-  duracao: z.number().nullable(),
+  ativo: z.boolean(), price: z.number().nullable(), duration: z.number().nullable(),
 });
 
 export const servicesSchema = z.object({
-  id: z.string().uuid({ message: 'ID do serviço inválido' }),
-  nome: z.string(),
-  descricao: z.string().nullable(),
+  id: z.string().uuid({ message: 'ID do serviço inválido' }), name: z.string(), description: z.string().nullable(),
   categoria: z.string().nullable(),
   ativo: z.boolean(),
 });
 
-export const updateServiceBodySchema = z.object({
-  nome: z
+export const updateServiceBodySchema = z.object({ name: z
     .string()
     .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
     .max(100, { message: 'O nome não pode exceder 100 caracteres' })
-    .optional(),
-  descricao: z
+    .optional(), description: z
     .string()
     .max(500, { message: 'A descrição não pode exceder 500 caracteres' })
     .optional(),
   precoPadrao: z
     .number()
     .positive({ message: 'O preço deve ser um valor positivo' })
-    .optional(),
-  duracao: z
+    .optional(), duration: z
     .number()
     .int({ message: 'A duração deve ser um número inteiro' })
     .positive({ message: 'A duração deve ser um valor positivo' })
@@ -97,9 +85,7 @@ export const deleteServiceQuerySchema = z.object({
 
 // Schema para service-professional
 export const serviceSchemaWithProfessional = z.object({
-  id: z.string().uuid(),
-  nome: z.string(),
-  descricao: z.string().optional(),
+  id: z.string().uuid(), name: z.string(), description: z.string().optional(),
   categoria: z.string().optional(),
   ativo: z.boolean(),
   createdAt: z.string().datetime(),
@@ -110,8 +96,7 @@ export const serviceSchemaWithProfessional = z.object({
       professional: z.object({
         id: z.string().uuid(),
         user: z.object({
-          id: z.string().uuid(),
-          nome: z.string(),
+          id: z.string().uuid(), name: z.string(),
         }),
       }),
     }),
@@ -119,9 +104,7 @@ export const serviceSchemaWithProfessional = z.object({
 });
 
 export const addServiceToProfessionalBodySchema = z.object({
-  serviceId: z.string().uuid({ message: 'ID do serviço inválido' }),
-  preco: z.number().positive({ message: 'O preço deve ser um valor positivo' }),
-  duracao: z
+  serviceId: z.string().uuid({ message: 'ID do serviço inválido' }), price: z.number().positive({ message: 'O preço deve ser um valor positivo' }), duration: z
     .number()
     .int({ message: 'A duração deve ser um número inteiro' })
     .positive({ message: 'A duração deve ser um valor positivo' }),
@@ -147,15 +130,12 @@ export const listProfessionalServicesQuerySchema = paginationSchema.extend({
 
 export const updateProfessionalServicesParamsSchema = z.object({
   professionalId: z.string().uuid(),
-  serviceId: z.string().uuid(),
 });
 
 export const updateProfessionalServicesBodySchema = z.object({
   services: z.array(
     z.object({
-      serviceId: z.string().uuid(),
-      preco: z.number().positive(),
-      duracao: z.number().positive(),
+      serviceId: z.string().uuid(), price: z.number().positive(), duration: z.number().positive(),
       linked: z.boolean(),
     }),
   ),

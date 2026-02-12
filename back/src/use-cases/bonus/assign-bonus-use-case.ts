@@ -1,7 +1,7 @@
-import { UserBonusRepository } from '@/repositories/user-bonus-repository';
-import { BonusTransactionRepository } from '@/repositories/bonus-transaction-repository';
-import { UsersRepository } from '@/repositories/users-repository';
-import { BookingsRepository } from '@/repositories/bookings-repository';
+import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
+import { IBonusTransactionRepository } from '@/repositories/bonus-transaction-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
+import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidBonusAssignmentError } from '../errors/invalid-bonus-assignment-error';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
@@ -23,10 +23,10 @@ interface AssignBonusRequest {
 
 export class AssignBonusUseCase {
   constructor(
-    private userBonusRepository: UserBonusRepository,
-    private bonusTransactionRepository: BonusTransactionRepository,
-    private usersRepository: UsersRepository,
-    private bookingsRepository: BookingsRepository,
+    private userBonusRepository: IUserBonusRepository,
+    private bonusTransactionRepository: IBonusTransactionRepository,
+    private usersRepository: IUsersRepository,
+    private bookingsRepository: IBookingsRepository,
   ) {}
 
   async execute(request: AssignBonusRequest): Promise<void> {
@@ -54,7 +54,7 @@ export class AssignBonusUseCase {
     const expiresAt = this.calculateExactExpirationDate();
 
     await this.userBonusRepository.upsert({
-      user: { connect: { id: userId } },
+      userId,
       type,
       points: calculatedPoints,
       expiresAt,
@@ -63,7 +63,7 @@ export class AssignBonusUseCase {
     // 5. Registra a transação
     await this.bonusTransactionRepository.create({
       user: { connect: { id: userId } },
-      booking: { connect: { id: bookingId } },
+      booking: bookingId ? { connect: { id: bookingId } } : undefined,
 
       type,
       points: calculatedPoints,
@@ -88,14 +88,14 @@ export class AssignBonusUseCase {
       throw new BookingNotFoundError();
     }
 
-    if (booking.usuarioId !== userId) {
+    if (booking.userId !== userId) {
       throw new InvalidBonusAssignmentError(
         'Agendamento não pertence ao usuário',
       );
     }
 
-    if (booking.status !== 'CONCLUIDO') {
-      throw new InvalidBookingStatusError(booking.status, 'CONCLUIDO');
+    if (booking.status !== 'COMPLETED') {
+      throw new InvalidBookingStatusError(booking.status, 'COMPLETED');
     }
 
     const existingTransaction =
@@ -104,13 +104,13 @@ export class AssignBonusUseCase {
       throw new BonusAlreadyAssignedError();
     }
 
-    if (booking.valorFinal === null || booking.valorFinal === undefined) {
+    if (booking.totalAmount === null || booking.totalAmount === undefined) {
       throw new InvalidBonusAssignmentError(
-        'Agendamento com valorFinal inválido para gerar pontos',
+        'Agendamento com totalAmount inválido para gerar pontos',
       );
     }
 
-    const points = Math.floor((booking.valorFinal / 10) * POINTS_PER_10_REAIS);
+    const points = Math.floor((booking.totalAmount / 10) * POINTS_PER_10_REAIS);
     if (points <= 0) {
       throw new InvalidBonusAssignmentError(
         'Agendamento com valor insuficiente para gerar pontos',
@@ -122,7 +122,7 @@ export class AssignBonusUseCase {
 
   private async handleLoyaltyPoints(userId: string): Promise<number> {
     const totalCompletedBookings =
-      await this.bookingsRepository.countByUserIdAndStatus(userId, 'CONCLUIDO');
+      await this.bookingsRepository.countByUserIdAndStatus(userId, 'COMPLETED');
 
     if (totalCompletedBookings < LOYALTY_BOOKINGS_REQUIRED) {
       throw new InvalidBonusAssignmentError(
@@ -164,3 +164,4 @@ export class AssignBonusUseCase {
     return expirationDate;
   }
 }
+

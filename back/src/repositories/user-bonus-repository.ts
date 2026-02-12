@@ -1,7 +1,12 @@
-import { BonusType, Prisma, UserBonus } from '@prisma/client';
+import { BonusType, UserBonus } from '@prisma/client';
 
-export interface UserBonusRepository {
-  upsert(data: Prisma.UserBonusUpdateInput): Promise<void>;
+export interface IUserBonusRepository {
+  upsert(data: {
+    userId: string;
+    type: BonusType;
+    points: number;
+    expiresAt: Date;
+  }): Promise<void>;
 
   findByUserIdAndType(
     userId: string,
@@ -24,3 +29,4 @@ export interface UserBonusRepository {
 
   consumePoints(userId: string, points: number, type: BonusType): Promise<void>;
 }
+

@@ -1,33 +1,37 @@
 import { FastifyReply } from 'fastify';
+import {
+  ACCESS_TOKEN_EXPIRATION_SECONDS,
+  REFRESH_TOKEN_EXPIRATION_SECONDS,
+} from '@/consts/const';
 
 interface UserForToken {
   id: string;
   role: string;
-  profissionalId?: string;
+  professionalId?: string;
 }
 
 interface TokenPayload {
   id: string;
   role: string;
-  profissionalId?: string;
+  professionalId?: string;
 }
 
 export class TokenService {
   private readonly isProduction: boolean;
-  private readonly refreshTokenExpiration = 60 * 60 * 24 * 7; // 7 dias em segundos
-  private readonly accessTokenExpiration = 60 * 60; // 1 hora em segundos
+  private readonly refreshTokenExpiration = REFRESH_TOKEN_EXPIRATION_SECONDS;
+  private readonly accessTokenExpiration = ACCESS_TOKEN_EXPIRATION_SECONDS;
 
   constructor(private reply: FastifyReply) {
     this.isProduction = process.env.NODE_ENV === 'production';
   }
 
   private createTokenPayload(user: UserForToken | TokenPayload) {
-    const payload: { role: string; profissionalId?: string } = {
+    const payload: { role: string; professionalId?: string } = {
       role: user.role,
     };
 
-    if (user.role === 'PROFISSIONAL' && user.profissionalId) {
-      payload.profissionalId = user.profissionalId;
+    if (user.role === 'PROFESSIONAL' && user.professionalId) {
+      payload.professionalId = user.professionalId;
     }
 
     return payload;

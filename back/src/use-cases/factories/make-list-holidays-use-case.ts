@@ -1,9 +1,11 @@
-import { PrismaFeriadosRepository } from '@/repositories/prisma/prisma-feriados-repository';
-import { ListHolidaysUseCase } from '../feriados/list-feriado-professional-use-case';
+import { PrismaHolidaysRepository } from '@/repositories/prisma/prisma-holidays-repository';
+import { ListHolidaysUseCase } from '../holidays/list-holidays-use-case';
 
 export function makeListHolidaysUseCase() {
-  const feriadosRepository = new PrismaFeriadosRepository();
-  const listHolidaysUseCase = new ListHolidaysUseCase(feriadosRepository);
+  const holidaysRepository = new PrismaHolidaysRepository();
+  const listHolidaysUseCase = new ListHolidaysUseCase(holidaysRepository);
 
   return listHolidaysUseCase;
 }
+
+

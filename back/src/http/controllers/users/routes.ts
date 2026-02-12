@@ -66,7 +66,7 @@ export async function usersRoutes(app: FastifyTypedInstance) {
   app.get(
     '/users',
     {
-      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFISSIONAL'])],
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'PROFESSIONAL'])],
       schema: {
         operationId: 'listUsers',
         tags: ['users'],
@@ -94,7 +94,7 @@ export async function usersRoutes(app: FastifyTypedInstance) {
   app.patch(
     '/users/:userId/anonymize',
     {
-      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'CLIENTE'])],
+      onRequest: [verifyJwt, verifyUserRole(['ADMIN', 'CLIENT'])],
       schema: {
         operationId: 'anonymizeUser',
         tags: ['users'],

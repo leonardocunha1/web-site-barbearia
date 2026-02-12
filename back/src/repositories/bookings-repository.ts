@@ -24,7 +24,7 @@ export interface FindManyByProfessionalIdParams {
   };
 }
 
-export interface BookingsRepository {
+export interface IBookingsRepository {
   create(data: Prisma.BookingCreateInput): Promise<Booking>;
   findById(id: string): Promise<BookingDTO | null>;
   findOverlappingBooking(
@@ -43,7 +43,7 @@ export interface BookingsRepository {
     params: FindManyByUserIdParams,
   ): Promise<BookingDTO[]>;
 
-  update(id: string, data: Prisma.BookingUpdateInput): Promise<BookingDTO>;
+  update(id: string, date: Prisma.BookingUpdateInput): Promise<BookingDTO>;
 
   delete(id: string): Promise<void>;
 
@@ -107,3 +107,4 @@ export interface BookingsRepository {
 
   countByUserIdAndStatus(userId: string, status: Status): Promise<number>;
 }
+

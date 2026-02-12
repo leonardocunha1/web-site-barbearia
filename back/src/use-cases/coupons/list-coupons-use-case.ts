@@ -1,38 +1,13 @@
-import { CouponRepository } from '@/repositories/coupon-repository';
+import { ICouponRepository } from '@/repositories/coupon-repository';
 import { validatePagination } from '@/utils/validate-pagination';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
-import { Coupon } from '@prisma/client';
-import { CouponSortField, CouponSortOrder } from '@/schemas/coupon';
-
-interface ListCouponsUseCaseRequest {
-  page?: number;
-  limit?: number;
-  sort?: {
-    field: CouponSortField;
-    order: CouponSortOrder;
-  }[];
-  filters?: {
-    code?: string;
-    type?: 'PERCENTAGE' | 'FIXED' | 'FREE';
-    scope?: 'GLOBAL' | 'SERVICE' | 'PROFESSIONAL';
-    active?: boolean;
-    startDate?: Date;
-    endDate?: Date;
-    professionalId?: string;
-    serviceId?: string;
-  };
-}
-
-interface ListCouponsUseCaseResponse {
-  coupons: Coupon[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+import {
+  ListCouponsUseCaseRequest,
+  ListCouponsUseCaseResponse,
+} from './types';
 
 export class ListCouponsUseCase {
-  constructor(private couponRepository: CouponRepository) {}
+  constructor(private couponRepository: ICouponRepository) {}
 
   async execute({
     page = 1,
@@ -67,3 +42,4 @@ export class ListCouponsUseCase {
     };
   }
 }
+

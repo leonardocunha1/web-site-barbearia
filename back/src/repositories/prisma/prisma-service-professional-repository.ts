@@ -1,16 +1,14 @@
 import { prisma } from '@/lib/prisma';
-import { ServiceProfessionalRepository } from '../service-professional-repository';
+import { IServiceProfessionalRepository } from '../service-professional-repository';
 import { Prisma } from '@prisma/client';
 
 export class PrismaServiceProfessionalRepository
-  implements ServiceProfessionalRepository
+  implements IServiceProfessionalRepository
 {
   async create(data: Prisma.ServiceProfessionalCreateInput): Promise<{
     id: string;
     serviceId: string;
-    professionalId: string;
-    preco: number;
-    duracao: number;
+    professionalId: string; price: number; duration: number;
   }> {
     const created = await prisma.serviceProfessional.create({
       data,
@@ -19,9 +17,7 @@ export class PrismaServiceProfessionalRepository
     return {
       id: created.id,
       serviceId: created.serviceId,
-      professionalId: created.professionalId,
-      preco: created.preco,
-      duracao: created.duracao,
+      professionalId: created.professionalId, price: created.price, duration: created.duration,
     };
   }
 
@@ -52,14 +48,10 @@ export class PrismaServiceProfessionalRepository
       },
       select: {
         id: true,
-        professionalId: true,
-        preco: true,
-        duracao: true,
+        professionalId: true, price: true, duration: true,
         service: {
           select: {
-            id: true,
-            nome: true,
-            descricao: true,
+            id: true, name: true, description: true,
             categoria: true,
             ativo: true,
           },
@@ -74,9 +66,7 @@ export class PrismaServiceProfessionalRepository
     return {
       id: result.id,
       professionalId: result.professionalId,
-      service: result.service,
-      preco: result.preco,
-      duracao: result.duracao,
+      service: result.service, price: result.price, duration: result.duration,
     };
   }
 
@@ -90,14 +80,10 @@ export class PrismaServiceProfessionalRepository
   ): Promise<{
     services: Array<{
       service: {
-        id: string;
-        nome: string;
-        descricao: string | null;
+        id: string; name: string; description: string | null;
         categoria: string | null;
         ativo: boolean;
-      };
-      preco: number;
-      duracao: number;
+      }; price: number; duration: number;
     }>;
     total: number;
   }> {
@@ -113,22 +99,17 @@ export class PrismaServiceProfessionalRepository
         where,
         skip: (page - 1) * limit,
         take: limit,
-        select: {
-          preco: true,
-          duracao: true,
+        select: { price: true, duration: true,
           service: {
             select: {
-              id: true,
-              nome: true,
-              descricao: true,
+              id: true, name: true, description: true,
               categoria: true,
               ativo: true,
             },
           },
         },
         orderBy: {
-          service: {
-            nome: 'asc',
+          service: { name: 'asc',
           },
         },
       }),
@@ -137,9 +118,7 @@ export class PrismaServiceProfessionalRepository
 
     return {
       services: serviceProfessionals.map((sp) => ({
-        service: sp.service,
-        preco: sp.preco,
-        duracao: sp.duracao,
+        service: sp.service, price: sp.price, duration: sp.duration,
       })),
       total,
     };
@@ -152,16 +131,13 @@ export class PrismaServiceProfessionalRepository
     duracao,
   }: {
     serviceId: string;
-    professionalId: string;
-    preco: number;
-    duracao: number;
+    professionalId: string; price: number; duration: number;
   }): Promise<void> {
     await prisma.serviceProfessional.updateMany({
       where: {
         serviceId,
         professionalId,
-      },
-      data: {
+      }, date: {
         preco,
         duracao,
       },
@@ -179,11 +155,11 @@ export class PrismaServiceProfessionalRepository
       where: { ativo: true },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { nome: 'asc' },
+      orderBy: { name: 'asc' },
       include: {
         profissionais: {
           where: { professionalId },
-          select: { preco: true, duracao: true },
+          select: { price: true, duration: true },
         },
       },
     }),
@@ -193,14 +169,10 @@ export class PrismaServiceProfessionalRepository
   return {
     services: services.map((s) => ({
       service: {
-        id: s.id,
-        nome: s.nome,
-        descricao: s.descricao,
-        categoria: s.categoria,
-        ativo: s.ativo,
-      },
-      preco: s.profissionais[0]?.preco ?? 0,
-      duracao: s.profissionais[0]?.duracao ?? 0,
+        id: s.id, name: s.name, description: s.description,
+        categoria: s.category,
+        ativo: s.active,
+      }, price: s.professionals[0]?.price ?? 0, duration: s.professionals[0]?.duration ?? 0,
     })),
     total,
   };
@@ -212,14 +184,10 @@ async findAllWithProfessionalData(
 ): Promise<{
   services: Array<{
     service: {
-      id: string;
-      nome: string;
-      descricao: string | null;
+      id: string; name: string; description: string | null;
       categoria: string | null;
       ativo: boolean;
-    };
-    preco: number | null;
-    duracao: number | null;
+    }; price: number | null; duration: number | null;
   }>;
   total: number;
 }> {
@@ -229,11 +197,11 @@ async findAllWithProfessionalData(
     prisma.service.findMany({
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { nome: 'asc' },
+      orderBy: { name: 'asc' },
       include: {
         profissionais: {
           where: { professionalId },
-          select: { preco: true, duracao: true },
+          select: { price: true, duration: true },
         },
       },
     }),
@@ -243,14 +211,10 @@ async findAllWithProfessionalData(
   return {
     services: services.map((s) => ({
       service: {
-        id: s.id,
-        nome: s.nome,
-        descricao: s.descricao,
-        categoria: s.categoria,
-        ativo: s.ativo,
-      },
-      preco: s.profissionais[0]?.preco ?? null,
-      duracao: s.profissionais[0]?.duracao ?? null,
+        id: s.id, name: s.name, description: s.description,
+        categoria: s.category,
+        ativo: s.active,
+      }, price: s.professionals[0]?.price ?? null, duration: s.professionals[0]?.duration ?? null,
     })),
     total,
   };
@@ -258,3 +222,4 @@ async findAllWithProfessionalData(
 
 
 }
+

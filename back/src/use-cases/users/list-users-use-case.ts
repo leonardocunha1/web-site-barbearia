@@ -1,5 +1,5 @@
 import { ListUsersResponse } from '@/dtos/user-dto';
-import { UsersRepository } from '@/repositories/users-repository';
+import { IUsersRepository } from '@/repositories/users-repository';
 import { validatePagination } from '@/utils/validate-pagination';
 import { Role } from '@prisma/client';
 
@@ -11,7 +11,7 @@ interface ListUsersUseCaseRequest {
 }
 
 export class ListUsersUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private usersRepository: IUsersRepository) {}
 
   async execute({
     page = 1,
@@ -35,3 +35,4 @@ export class ListUsersUseCase {
     };
   }
 }
+

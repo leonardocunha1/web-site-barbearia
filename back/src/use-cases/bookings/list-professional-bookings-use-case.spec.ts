@@ -42,7 +42,7 @@ describe('ListProfessionalBookingsUseCase', () => {
     ).toHaveBeenCalledWith('pro-123', {
       page: 1,
       limit: 10,
-      sort: [{ field: 'dataHoraInicio', order: 'asc' }],
+      sort: [{ field: 'startDateTime', order: 'asc' }],
       filters: {},
     });
   });
@@ -59,7 +59,7 @@ describe('ListProfessionalBookingsUseCase', () => {
     const result = await useCase.execute({
       professionalId: 'pro-123',
       filters: {
-        status: 'CONFIRMADO',
+        status: 'CONFIRMED',
         startDate,
         endDate,
       },
@@ -71,9 +71,9 @@ describe('ListProfessionalBookingsUseCase', () => {
     ).toHaveBeenCalledWith('pro-123', {
       page: 1,
       limit: 10,
-      sort: [{ field: 'dataHoraInicio', order: 'asc' }],
+      sort: [{ field: 'startDateTime', order: 'asc' }],
       filters: {
-        status: 'CONFIRMADO',
+        status: 'CONFIRMED',
         startDate,
         endDate,
       },
@@ -109,7 +109,7 @@ describe('ListProfessionalBookingsUseCase', () => {
   it('deve lançar erro quando profissional tenta acessar agendamentos de outro', async () => {
     const wrongProfessionalBooking = {
       ...mockBooking,
-      profissionalId: 'pro-456',
+      professionalId: 'pro-456',
     };
 
     mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([

@@ -64,8 +64,7 @@ export const couponSchema = z
     // Relacionamentos
     service: z
       .object({
-        id: z.string().uuid({ message: 'ID do serviço inválido' }),
-        nome: z.string(),
+        id: z.string().uuid({ message: 'ID do serviço inválido' }), name: z.string(),
       })
       .nullable()
       .optional(),
@@ -74,8 +73,7 @@ export const couponSchema = z
       .object({
         id: z.string().uuid({ message: 'ID do profissional inválido' }),
         user: z.object({
-          id: z.string().uuid({ message: 'ID do usuário inválido' }),
-          nome: z.string(),
+          id: z.string().uuid({ message: 'ID do usuário inválido' }), name: z.string(),
         }),
       })
       .nullable()
@@ -83,8 +81,7 @@ export const couponSchema = z
 
     user: z
       .object({
-        id: z.string().uuid({ message: 'ID do usuário inválido' }),
-        nome: z.string(),
+        id: z.string().uuid({ message: 'ID do usuário inválido' }), name: z.string(),
       })
       .nullable()
       .optional(),
@@ -103,7 +100,7 @@ export const createCouponBodySchema = z
       errorMap: () => ({ message: 'Tipo de cupom inválido' })
     }),
     value: z.number()
-      .positive({ message: 'Valor deve ser positivo' }),
+      .min(0, { message: 'Valor não pode ser negativo' }),
     scope: z.nativeEnum(CouponScope, {
       errorMap: () => ({ message: 'Escopo do cupom inválido' })
     }),
@@ -129,6 +126,23 @@ export const createCouponBodySchema = z
     professionalId: z.string()
       .uuid({ message: 'ID do profissional inválido' })
       .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === 'FREE' && data.value !== 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Cupons do tipo FREE devem ter valor 0',
+        path: ['value'],
+      });
+    }
+
+    if (data.type !== 'FREE' && data.value <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Valor deve ser positivo para este tipo de cupom',
+        path: ['value'],
+      });
+    }
   })
   .describe('Dados para criação de cupom');
 
@@ -240,6 +254,25 @@ export const updateCouponBodySchema = z
       .optional(),
     active: z.boolean()
       .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === 'FREE' && data.value !== undefined && data.value !== 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Cupons do tipo FREE devem ter valor 0',
+        path: ['value'],
+      });
+    }
+
+    if (data.type && data.type !== 'FREE' && data.value !== undefined) {
+      if (data.value <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Valor deve ser positivo para este tipo de cupom',
+          path: ['value'],
+        });
+      }
+    }
   })
   .describe('Dados para atualização de cupom');
 

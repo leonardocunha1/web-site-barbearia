@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ProfessionalsRepository } from '@/repositories/professionals-repository';
+import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { InvalidPageError } from '../errors/invalid-page-error';
 import { InvalidLimitError } from '../errors/invalid-limit-error';
 import { ListOrSearchProfessionalsUseCase } from './list-professionals-use-case';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 
 // Tipos para os mocks
-type MockProfessionalsRepository = ProfessionalsRepository & {
+type MockProfessionalsRepository = IProfessionalsRepository & {
   list: ReturnType<typeof vi.fn>;
   count: ReturnType<typeof vi.fn>;
   search: ReturnType<typeof vi.fn>;
@@ -33,11 +33,10 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     user: {
-      id: `user-${id}`,
-      nome: `Professional ${id}`,
+      id: `user-${id}`, name: `Professional ${id}`,
       email: `professional${id}@example.com`,
       telefone: null,
-      role: 'PROFISSIONAL',
+      role: 'PROFESSIONAL',
       emailVerified: true,
       active: true,
       createdAt: new Date(),
@@ -46,9 +45,7 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     },
     services: [
       {
-        id: `service-${id}`,
-        nome: 'Consulta Odontológica',
-        descricao: 'Descrição do serviço',
+        id: `service-${id}`, name: 'Consulta Odontológica', description: 'Descrição do serviço',
         categoria: 'Odontologia',
         ativo: true,
         createdAt: new Date(),
@@ -83,16 +80,13 @@ describe('ListOrSearchProfessionalsUseCase', () => {
       bio: 'Bio do profissional 1',
       ativo: true,
       user: {
-        id: 'user-1',
-        nome: 'Professional 1',
+        id: 'user-1', name: 'Professional 1',
         email: 'professional1@example.com',
         telefone: undefined,
       },
       services: [
         {
-          id: 'service-1',
-          nome: 'Consulta Odontológica',
-          descricao: 'Descrição do serviço',
+          id: 'service-1', name: 'Consulta Odontológica', description: 'Descrição do serviço',
         },
       ],
       avatarUrl: undefined,
@@ -299,3 +293,4 @@ describe('ListOrSearchProfessionalsUseCase', () => {
     }
   });
 });
+
