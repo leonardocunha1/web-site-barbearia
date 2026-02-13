@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FormProvider, useForm } from "react-hook-form";
@@ -26,8 +26,8 @@ import { LoginRequiredDialog } from "./login-required-dialog";
 import { BookingStepProfessional } from "./booking-step-professional";
 import { BookingStepServices } from "./booking-step-services";
 import { BookingStepSchedule } from "./booking-step-schedule";
-import { BookingStepSummary } from "./booking-step-summary";
 import { cn } from "@/shared/utils/utils";
+import { BookingStepSummary } from "./booking-step-summary";
 
 const STEPS: Step[] = [
   {
@@ -68,10 +68,7 @@ type BookingFormWizardProps = {
   className?: string;
 };
 
-export function BookingFormWizard({
-  onSuccess,
-  className,
-}: BookingFormWizardProps) {
+export function BookingFormWizard({ className }: BookingFormWizardProps) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -82,6 +79,7 @@ export function BookingFormWizard({
   const [direction, setDirection] = useState(0);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const methods = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -112,6 +110,26 @@ export function BookingFormWizard({
   const previousProfessionalIdRef = useRef("");
 
   const isDirty = methods.formState.isDirty;
+
+  // Log on form element
+  useEffect(() => {
+    if (currentStep !== 3) return;
+
+    const formElement = document.querySelector("form");
+    if (!formElement) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+      }
+    };
+
+    formElement.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      formElement.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentStep]);
 
   // Auto-save draft
   useEffect(() => {
@@ -156,7 +174,6 @@ export function BookingFormWizard({
         });
         clearDraft();
         setCurrentStep(0);
-        onSuccess?.();
         router.push("/");
       },
       onError: (error: unknown) => {
@@ -200,8 +217,9 @@ export function BookingFormWizard({
       }
 
       if (isValid) {
+        const newStep = Math.min(currentStep + 1, STEPS.length - 1);
         setDirection(1);
-        setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
+        setCurrentStep(newStep);
       }
     } finally {
       setIsNavigating(false);
@@ -213,29 +231,48 @@ export function BookingFormWizard({
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleCreateBooking = async (data: BookingFormValues) => {
-    if (!user) {
-      setShowLoginDialog(true);
-      return;
-    }
+  const handleCreateBooking = useCallback(
+    async (data: BookingFormValues) => {
+      // Evitar submissões duplas
+      if (isSubmittingRef.current) {
+        return;
+      }
 
-    const startDateTime = buildStartDateTime(data.date, data.time);
-    if (!startDateTime) {
-      toast.error("Data ou horário inválido.");
-      return;
-    }
+      if (!user) {
+        setShowLoginDialog(true);
+        return;
+      }
 
-    await createBooking.mutateAsync({
-      data: {
-        professionalId: data.professionalId,
-        services: data.services.map((serviceId) => ({ serviceId })),
-        startDateTime,
-        notes: data.notes || undefined,
-        useBonusPoints: data.useBonusPoints ?? false,
-        couponCode: data.couponCode || undefined,
-      },
-    });
-  };
+      // Proteger contra submissão em step errado
+      if (currentStep !== STEPS.length - 1) {
+        return;
+      }
+
+      isSubmittingRef.current = true;
+
+      try {
+        const startDateTime = buildStartDateTime(data.date, data.time);
+        if (!startDateTime) {
+          toast.error("Data ou horário inválido.");
+          return;
+        }
+
+        await createBooking.mutateAsync({
+          data: {
+            professionalId: data.professionalId,
+            services: data.services.map((serviceId) => ({ serviceId })),
+            startDateTime,
+            notes: data.notes || undefined,
+            useBonusPoints: data.useBonusPoints ?? false,
+            couponCode: data.couponCode || undefined,
+          },
+        });
+      } finally {
+        isSubmittingRef.current = false;
+      }
+    },
+    [user, currentStep, createBooking],
+  );
 
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -270,6 +307,13 @@ export function BookingFormWizard({
   const isStepValid = getStepValidation();
   const isLastStep = currentStep === STEPS.length - 1;
 
+  // Monitorar mudanças de estado que podem disparar submit
+  useEffect(() => {
+    if (isLastStep) {
+      // Vazio
+    }
+  }, [isValid, isSubmitting, isLastStep]);
+
   return (
     <FormProvider {...methods}>
       <div className={cn("mx-auto w-full max-w-4xl", className)}>
@@ -286,7 +330,6 @@ export function BookingFormWizard({
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSubmit(handleCreateBooking)(e);
             }}
           >
             <AnimatePresence mode="wait" custom={direction}>
@@ -344,7 +387,13 @@ export function BookingFormWizard({
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
+                    type="button"
+                    onClick={() => {
+                      console.log(
+                        "[Button.onClick] Confirmando reserva (manual click, não submit)",
+                      );
+                      handleSubmit(handleCreateBooking)();
+                    }}
                     disabled={
                       isSubmitting || createBooking.isPending || !isValid
                     }

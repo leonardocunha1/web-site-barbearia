@@ -7,8 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { PlusIcon } from "lucide-react";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
 import { useListUserBookings } from "@/api";
@@ -21,8 +19,6 @@ import {
 import { useTableParams } from "@/shared/hooks/useTableParams";
 import {
   BookingFilters,
-  useBookingDetailsModal,
-  useBookingFormModal,
 } from "@/features/bookings";
 
 type ReservationRow = {
@@ -36,8 +32,6 @@ type ReservationRow = {
 
 export function ReservationsSection() {
   const { params, updateParams } = useTableParams();
-  const { openBookingForm } = useBookingFormModal();
-  const { openBookingDetails } = useBookingDetailsModal();
 
   const { startDate, endDate } = buildDateRangeFilters(
     params.filters.startDate,
@@ -126,16 +120,9 @@ export function ReservationsSection() {
             emptyMessage="Nenhuma reserva encontrada"
             totalItems={data?.total ?? 0}
             showPagination
-            onRowClick={(row) => openBookingDetails(row.id)}
           />
         )}
 
-        <div className="flex justify-end">
-          <Button onClick={openBookingForm}>
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Nova Reserva
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

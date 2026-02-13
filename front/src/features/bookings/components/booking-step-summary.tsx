@@ -15,7 +15,7 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Sparkles, Calendar, Clock, User, Scissors } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { useUser } from "@/contexts/user";
 
 interface BookingStepSummaryProps {
@@ -23,6 +23,8 @@ interface BookingStepSummaryProps {
 }
 
 export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
+  console.log("[BookingStepSummary] Renderizando");
+
   const {
     watch,
     setValue,
@@ -82,34 +84,71 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
     [selectedServices],
   );
 
-  const previewQuery = usePreviewBookingPrice(
-    {
-      professionalId,
-      services: sortedServices.map((serviceId) => ({ serviceId })),
-      useBonusPoints: Boolean(useBonusPoints),
-      couponCode: couponCode || undefined,
-    },
-    {
-      query: {
-        enabled: Boolean(user && professionalId && sortedServices.length > 0),
-        retry: false,
-        staleTime: 1000 * 60, // Cache por 1 minuto
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-      },
-    },
+  const previewMutation = usePreviewBookingPrice();
+  const lastPreviewParamsRef = useRef<string>("");
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const shouldFetchPreview = Boolean(
+    user && professionalId && sortedServices.length > 0,
   );
 
-  const pricePreview = previewQuery.data;
+  // Chamar preview quando os dados mudarem (com debounce para evitar múltiplas chamadas)
+  useEffect(() => {
+    if (!shouldFetchPreview) return;
+
+    const newParams = JSON.stringify({
+      professionalId,
+      services: sortedServices,
+      useBonusPoints: Boolean(useBonusPoints),
+      couponCode: couponCode || undefined,
+    });
+
+    // Evitar chamadas desnecessárias comparando os params
+    if (newParams === lastPreviewParamsRef.current) return;
+
+    // Limpar debounce anterior
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Definir novo debounce (300ms)
+    debounceTimerRef.current = setTimeout(() => {
+      lastPreviewParamsRef.current = newParams;
+
+      previewMutation.mutate({
+        data: {
+          professionalId,
+          services: sortedServices.map((serviceId) => ({ serviceId })),
+          useBonusPoints: Boolean(useBonusPoints),
+          couponCode: couponCode || undefined,
+        },
+      });
+    }, 300);
+
+    // Cleanup do debounce ao desmontar
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    professionalId,
+    sortedServices,
+    useBonusPoints,
+    couponCode,
+    shouldFetchPreview,
+  ]);
+
+  const pricePreview = previewMutation.data;
   const subtotalValue = pricePreview?.totalValue ?? totalPrice;
   const couponDiscount = pricePreview?.couponDiscount ?? 0;
   const pointsDiscount = pricePreview?.pointsDiscount ?? 0;
   const pointsUsed = pricePreview?.pointsUsed ?? 0;
   const finalValue = pricePreview?.finalValue ?? totalPrice;
   const previewErrorMessage =
-    previewQuery.isError && previewQuery.error
-      ? (previewQuery.error as { message?: string }).message
+    previewMutation.isError && previewMutation.error
+      ? (previewMutation.error as { message?: string }).message
       : null;
 
   const formattedDate = useMemo(() => {
@@ -140,18 +179,8 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
   return (
-    <div
-      className="space-y-6"
-      onSubmit={(e) => e.preventDefault()}
-      onKeyDown={handleKeyDown}
-    >
+    <div className="space-y-6">
       <div>
         <h3 className="text-2xl font-semibold text-stone-900">
           Confirme seu agendamento
@@ -237,7 +266,7 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
             <div className="flex justify-between text-base font-semibold">
               <span>Total final:</span>
               <span className="text-principal-600">
-                {previewQuery.isFetching
+                {previewMutation.isPending
                   ? "Calculando..."
                   : `R$ ${finalValue.toFixed(2)}`}
               </span>

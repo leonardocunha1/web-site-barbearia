@@ -32,7 +32,7 @@ import {
   formatBookingStatus,
 } from "@/features/bookings/utils/booking-formatters";
 import { useTableParams } from "@/shared/hooks/useTableParams";
-import { BookingFilters, useBookingDetailsModal } from "@/features/bookings";
+import { BookingFilters } from "@/features/bookings";
 import { BonusAssignDialog } from "./bonus-assign-dialog";
 
 type ScheduleRow = {
