@@ -6,6 +6,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   const getStatusStyle = () => {
     switch (status) {
       case "Concluído":
+      case "Concluido":
       case "Confirmado":
         return "bg-green-100 text-green-800";
       case "Cancelado":

@@ -32,6 +32,10 @@ import type {
   GetProfessionalSchedule400,
   GetProfessionalSchedule404,
   GetProfessionalScheduleParams,
+  GetPublicProfessionalSchedule200,
+  GetPublicProfessionalSchedule400,
+  GetPublicProfessionalSchedule404,
+  GetPublicProfessionalScheduleParams,
   ListOrSearchProfessionals200,
   ListOrSearchProfessionals400,
   ListOrSearchProfessionalsParams,
@@ -590,6 +594,351 @@ export const useToggleProfessionalStatus = <
 
   return useMutation(mutationOptions, queryClient);
 };
+export const getPublicProfessionalSchedule = (
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<GetPublicProfessionalSchedule200>({
+    url: `/professionals/${professionalId}/schedule`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetPublicProfessionalScheduleQueryKey = (
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+) => {
+  return [
+    `/professionals/${professionalId}/schedule`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetPublicProfessionalScheduleInfiniteQueryOptions = <
+  TData = InfiniteData<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  >,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetPublicProfessionalScheduleQueryKey(professionalId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  > = ({ signal }) =>
+    getPublicProfessionalSchedule(professionalId, params, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!professionalId,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetPublicProfessionalScheduleInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+>;
+export type GetPublicProfessionalScheduleInfiniteQueryError =
+  | GetPublicProfessionalSchedule400
+  | GetPublicProfessionalSchedule404;
+
+export function useGetPublicProfessionalScheduleInfinite<
+  TData = InfiniteData<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  >,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPublicProfessionalScheduleInfinite<
+  TData = InfiniteData<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  >,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPublicProfessionalScheduleInfinite<
+  TData = InfiniteData<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  >,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetPublicProfessionalScheduleInfinite<
+  TData = InfiniteData<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  >,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetPublicProfessionalScheduleInfiniteQueryOptions(
+    professionalId,
+    params,
+    options,
+  );
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getGetPublicProfessionalScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetPublicProfessionalScheduleQueryKey(professionalId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+  > = ({ signal }) =>
+    getPublicProfessionalSchedule(professionalId, params, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!professionalId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetPublicProfessionalScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+>;
+export type GetPublicProfessionalScheduleQueryError =
+  | GetPublicProfessionalSchedule400
+  | GetPublicProfessionalSchedule404;
+
+export function useGetPublicProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPublicProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicProfessionalSchedule>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPublicProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetPublicProfessionalSchedule<
+  TData = Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+  TError = GetPublicProfessionalSchedule400 | GetPublicProfessionalSchedule404,
+>(
+  professionalId: string,
+  params: GetPublicProfessionalScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getPublicProfessionalSchedule>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetPublicProfessionalScheduleQueryOptions(
+    professionalId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 export const getProfessionalDashboard = (
   params: GetProfessionalDashboardParams,
   signal?: AbortSignal,

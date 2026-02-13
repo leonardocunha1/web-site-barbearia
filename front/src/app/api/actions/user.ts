@@ -21,7 +21,6 @@ export default async function userGet() {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
-
     } else {
       response = new Response(null, { status: 401 });
     }
@@ -41,7 +40,7 @@ export default async function userGet() {
         headers: {
           Cookie: `refreshToken=${refreshToken}`,
         },
-        credentials: "include", 
+        credentials: "include",
       });
 
       if (!refreshResponse.ok) {
@@ -57,7 +56,7 @@ export default async function userGet() {
 
       if (token) {
         const newCookieStore = await cookies();
-        newCookieStore.set("accessToken", token, { 
+        newCookieStore.set("accessToken", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
@@ -93,4 +92,3 @@ export default async function userGet() {
     return apiError(error);
   }
 }
-

@@ -173,7 +173,7 @@ export const businessHoursSchema = z
       .uuid({ message: 'ID do registro deve ser um UUID válido' })
       .describe('ID do registro'),
 
-    ativo: z.boolean().describe('Indica se o horário está ativo'),
+    active: z.boolean().describe('Indica se o horário está ativo'),
 
     dayOfWeek: z
       .number()

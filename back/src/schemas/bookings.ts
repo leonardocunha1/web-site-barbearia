@@ -111,6 +111,40 @@ export const createBookingBodySchema = z
   .describe('Dados para criação de agendamento');
 
 /**
+ * Schema do corpo para prévia de preço do agendamento.
+ */
+export const previewBookingBodySchema = z
+  .object({
+    professionalId: z.string().uuid({ message: 'ID do profissional inválido' }),
+    services: z
+      .array(
+        z.object({
+          serviceId: z.string().uuid({ message: 'ID do serviço inválido' }),
+        }),
+      )
+      .min(1, { message: 'Selecione pelo menos 1 serviço' }),
+    useBonusPoints: z.boolean().optional().default(false),
+    couponCode: z
+      .string()
+      .max(50, { message: 'Código do cupom não pode exceder 50 caracteres' })
+      .optional(),
+  })
+  .describe('Dados para prévia de preço do agendamento');
+
+/**
+ * Schema da resposta de prévia de preço do agendamento.
+ */
+export const bookingPricePreviewSchema = z
+  .object({
+    totalValue: z.number().nonnegative({ message: 'Total não pode ser negativo' }),
+    couponDiscount: z.number().nonnegative({ message: 'Desconto não pode ser negativo' }),
+    pointsDiscount: z.number().nonnegative({ message: 'Desconto não pode ser negativo' }),
+    pointsUsed: z.number().int().nonnegative({ message: 'Pontos usados inválidos' }),
+    finalValue: z.number().nonnegative({ message: 'Total final inválido' }),
+  })
+  .describe('Resumo de preço do agendamento');
+
+/**
  * Params de rota para busca ou alteração de status de agendamento.
  */
 export const getOrUpdateBookingStatusParamsSchema = z

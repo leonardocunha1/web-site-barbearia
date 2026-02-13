@@ -12,7 +12,7 @@ export interface ListServicesParams {
 }
 
 const includeProfessional = {
-  profissionais: {
+  professionals: {
     include: {
       professional: {
         include: {
@@ -137,5 +137,47 @@ export class PrismaServicesRepository implements IServicesRepository {
       where: { id: professionalId },
     });
     return count > 0;
+  }
+
+  async getTopServicesByBookingCount(
+    startDate: Date,
+    endDate: Date,
+    limit: number,
+  ): Promise<
+    Array<{
+      id: string;
+      name: string;
+      totalBookings: number;
+    }>
+  > {
+    const results = await prisma.bookingItem.groupBy({
+      by: ['serviceId'],
+      where: {
+        serviceId: { not: null },
+        booking: {
+          status: 'COMPLETED',
+          startDateTime: { gte: startDate, lte: endDate },
+        },
+      },
+      _count: { _all: true },
+      orderBy: [{ _count: { id: 'desc' } }],
+      take: limit,
+    });
+
+    const serviceIds = results.map((r) => r.serviceId).filter((id): id is string => Boolean(id));
+    const services = await prisma.service.findMany({
+      where: { id: { in: serviceIds } },
+      select: { id: true, name: true },
+    });
+
+    const servicesMap = new Map(services.map((s) => [s.id, s.name]));
+
+    return results
+      .filter((r) => r.serviceId)
+      .map((item) => ({
+        id: item.serviceId as string,
+        name: servicesMap.get(item.serviceId as string) ?? 'Serviço',
+        totalBookings: (item._count as unknown as { _all: number })._all,
+      }));
   }
 }

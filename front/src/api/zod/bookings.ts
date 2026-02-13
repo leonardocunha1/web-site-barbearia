@@ -23,6 +23,36 @@ export const zodcreateBookingBody = zod.object({
 }).describe('Dados para criação de agendamento')
 
 /**
+ * Prévia de preço do agendamento.
+ */
+export const zodpreviewBookingPriceBodyUseBonusPointsDefault = false;export const zodpreviewBookingPriceBodyCouponCodeMax = 50;
+
+
+export const zodpreviewBookingPriceBody = zod.object({
+  "professionalId": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "serviceId": zod.string().uuid()
+})).min(1),
+  "useBonusPoints": zod.boolean().optional(),
+  "couponCode": zod.string().max(zodpreviewBookingPriceBodyCouponCodeMax).optional()
+}).describe('Dados para prévia de preço do agendamento')
+
+export const zodpreviewBookingPriceResponseTotalValueMin = 0;
+export const zodpreviewBookingPriceResponseCouponDiscountMin = 0;
+export const zodpreviewBookingPriceResponsePointsDiscountMin = 0;
+export const zodpreviewBookingPriceResponsePointsUsedMin = 0;
+export const zodpreviewBookingPriceResponseFinalValueMin = 0;
+
+
+export const zodpreviewBookingPriceResponse = zod.object({
+  "totalValue": zod.number().min(zodpreviewBookingPriceResponseTotalValueMin),
+  "couponDiscount": zod.number().min(zodpreviewBookingPriceResponseCouponDiscountMin),
+  "pointsDiscount": zod.number().min(zodpreviewBookingPriceResponsePointsDiscountMin),
+  "pointsUsed": zod.number().min(zodpreviewBookingPriceResponsePointsUsedMin),
+  "finalValue": zod.number().min(zodpreviewBookingPriceResponseFinalValueMin)
+}).describe('Resumo de preço do agendamento')
+
+/**
  * Atualiza o status de um agendamento (apenas para profissionais)
  */
 export const zodupdateBookingStatusParams = zod.object({

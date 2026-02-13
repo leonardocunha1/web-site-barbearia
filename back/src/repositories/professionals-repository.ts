@@ -39,4 +39,10 @@ export interface IProfessionalsRepository {
   >;
 
   countSearch(params: { query: string; active?: boolean }): Promise<number>;
+
+  countActiveOnly(): Promise<number>;
+
+  countNewByDateRange(startDate: Date, endDate: Date): Promise<number>;
+
+  findTopWithInclude(limit: number): Promise<(Professional & { user: User })[]>;
 }

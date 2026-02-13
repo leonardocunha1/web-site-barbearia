@@ -14,25 +14,14 @@ import {
 
 export type TestUser = User;
 
-export type TestProfessional = Professional & {
-  especialidade: string;
-  ativo: boolean;
-  documento: string | null;
-};
+export type TestProfessional = Professional;
 
-export type TestService = Service & {
-  descricao: string | null;
-  categoria: string | null;
-  ativo: boolean;
-};
+export type TestService = Service;
 
-export type TestBusinessHours = BusinessHours & {
-  ativo: boolean;
-};
+export type TestBusinessHours = BusinessHours;
 
 export type TestServiceProfessional = ServiceProfessional & {
   service: TestService;
-  ativo: boolean;
 };
 
 export type TestHoliday = Holiday;
@@ -87,10 +76,9 @@ export function makeUser(overrides: UserOverrides = {}): TestUser {
 export function makeProfessional(overrides: ProfessionalOverrides = {}): TestProfessional {
   const specialty = overrides.specialty ?? overrides.especialidade ?? 'Dentista';
   const active = overrides.active ?? overrides.ativo ?? true;
-
   const document = overrides.document ?? overrides.documento ?? null;
 
-  const base: Professional = {
+  return {
     id: overrides.id ?? 'prof-1',
     userId: overrides.userId ?? 'user-1',
     specialty,
@@ -100,13 +88,6 @@ export function makeProfessional(overrides: ProfessionalOverrides = {}): TestPro
     active,
     createdAt: overrides.createdAt ?? new Date(),
     updatedAt: overrides.updatedAt ?? new Date(),
-  };
-
-  return {
-    ...base,
-    especialidade: specialty,
-    ativo: active,
-    documento: document,
   };
 }
 
@@ -125,7 +106,7 @@ export function makeService(overrides: ServiceOverrides = {}): TestService {
         : 'Categoria';
   const active = overrides.active ?? overrides.ativo ?? true;
 
-  const base: Service = {
+  return {
     id: overrides.id ?? 'service-1',
     name: overrides.name ?? 'Servico',
     description,
@@ -134,40 +115,27 @@ export function makeService(overrides: ServiceOverrides = {}): TestService {
     createdAt: overrides.createdAt ?? new Date(),
     updatedAt: overrides.updatedAt ?? new Date(),
   };
-
-  return {
-    ...base,
-    descricao: description,
-    categoria: category,
-    ativo: active,
-  };
 }
 
 export function makeServiceProfessional(
   overrides: ServiceProfessionalOverrides = {},
 ): TestServiceProfessional {
   const service = overrides.service ?? makeService();
-  const active = overrides.ativo ?? true;
 
-  const base: ServiceProfessional = {
+  return {
     id: overrides.id ?? 'sp-1',
     serviceId: overrides.serviceId ?? service.id,
     professionalId: overrides.professionalId ?? 'prof-1',
     price: overrides.price ?? 100,
     duration: overrides.duration ?? 60,
-  };
-
-  return {
-    ...base,
     service,
-    ativo: active,
   };
 }
 
 export function makeBusinessHours(overrides: BusinessHoursOverrides = {}): TestBusinessHours {
   const active = overrides.active ?? overrides.ativo ?? true;
 
-  const base: BusinessHours = {
+  return {
     id: overrides.id ?? 'hours-1',
     professionalId: overrides.professionalId ?? 'prof-1',
     dayOfWeek: overrides.dayOfWeek ?? 1,
@@ -176,11 +144,6 @@ export function makeBusinessHours(overrides: BusinessHoursOverrides = {}): TestB
     breakStart: overrides.breakStart !== undefined ? overrides.breakStart : '12:00',
     breakEnd: overrides.breakEnd !== undefined ? overrides.breakEnd : '13:00',
     active,
-  };
-
-  return {
-    ...base,
-    ativo: active,
   };
 }
 

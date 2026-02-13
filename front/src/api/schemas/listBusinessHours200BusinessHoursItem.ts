@@ -5,7 +5,7 @@ export type ListBusinessHours200BusinessHoursItem = {
   /** ID do registro */
   id: string;
   /** Indica se o horário está ativo */
-  ativo: boolean;
+  active: boolean;
   /**
    * Dia da semana (0=domingo a 6=sábado)
    * @minimum 0

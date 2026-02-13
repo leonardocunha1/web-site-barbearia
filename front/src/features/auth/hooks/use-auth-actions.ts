@@ -32,7 +32,7 @@ export function useAuthActions({
       try {
         const res = await axios.post(
           `${API_BASE_URL}/auth/login`,
-          { email: data.email, senha: data.password },
+          { email: data.email, password: data.password },
           { withCredentials: true },
         );
 

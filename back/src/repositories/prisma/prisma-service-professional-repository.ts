@@ -51,8 +51,8 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
             id: true,
             name: true,
             description: true,
-            categoria: true,
-            ativo: true,
+            category: true,
+            active: true,
           },
         },
       },
@@ -84,8 +84,8 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
         id: string;
         name: string;
         description: string | null;
-        categoria: string | null;
-        ativo: boolean;
+        category: string | null;
+        active: boolean;
       };
       price: number;
       duration: number;
@@ -96,7 +96,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
 
     const where: Prisma.ServiceProfessionalWhereInput = {
       professionalId,
-      service: activeOnly ? { ativo: true } : undefined,
+      service: activeOnly ? { active: true } : undefined,
     };
 
     const [serviceProfessionals, total] = await Promise.all([
@@ -112,8 +112,8 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
               id: true,
               name: true,
               description: true,
-              categoria: true,
-              ativo: true,
+              category: true,
+              active: true,
             },
           },
         },
@@ -137,8 +137,8 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
   async updateByServiceAndProfessional({
     serviceId,
     professionalId,
-    preco,
-    duracao,
+    price,
+    duration,
   }: {
     serviceId: string;
     professionalId: string;
@@ -150,9 +150,9 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
         serviceId,
         professionalId,
       },
-      date: {
-        preco,
-        duracao,
+      data: {
+        price,
+        duration,
       },
     });
   }
@@ -163,33 +163,43 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
   ) {
     const { page = 1, limit = 10 } = options;
 
-    const [services, total] = await Promise.all([
-      prisma.service.findMany({
-        where: { ativo: true },
+    // Buscar apenas serviços que TÊM vínculo com o profissional
+    const [serviceProfessionals, total] = await Promise.all([
+      prisma.serviceProfessional.findMany({
+        where: {
+          professionalId,
+          service: { active: true },
+        },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { name: 'asc' },
+        orderBy: {
+          service: { name: 'asc' },
+        },
         include: {
-          profissionais: {
-            where: { professionalId },
-            select: { price: true, duration: true },
+          service: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              category: true,
+              active: true,
+            },
           },
         },
       }),
-      prisma.service.count({ where: { ativo: true } }),
+      prisma.serviceProfessional.count({
+        where: {
+          professionalId,
+          service: { active: true },
+        },
+      }),
     ]);
 
     return {
-      services: services.map((s) => ({
-        service: {
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          categoria: s.category,
-          ativo: s.active,
-        },
-        price: s.professionals[0]?.price ?? 0,
-        duration: s.professionals[0]?.duration ?? 0,
+      services: serviceProfessionals.map((sp) => ({
+        service: sp.service,
+        price: sp.price,
+        duration: sp.duration,
       })),
       total,
     };
@@ -204,8 +214,8 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
         id: string;
         name: string;
         description: string | null;
-        categoria: string | null;
-        ativo: boolean;
+        category: string | null;
+        active: boolean;
       };
       price: number | null;
       duration: number | null;
@@ -214,32 +224,35 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
   }> {
     const { page = 1, limit = 10 } = options;
 
-    const [services, total] = await Promise.all([
-      prisma.service.findMany({
+    // Buscar apenas serviços que TÊM vínculo com o profissional
+    const [serviceProfessionals, total] = await Promise.all([
+      prisma.serviceProfessional.findMany({
+        where: { professionalId },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { name: 'asc' },
+        orderBy: {
+          service: { name: 'asc' },
+        },
         include: {
-          profissionais: {
-            where: { professionalId },
-            select: { price: true, duration: true },
+          service: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              category: true,
+              active: true,
+            },
           },
         },
       }),
-      prisma.service.count(),
+      prisma.serviceProfessional.count({ where: { professionalId } }),
     ]);
 
     return {
-      services: services.map((s) => ({
-        service: {
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          categoria: s.category,
-          ativo: s.active,
-        },
-        price: s.professionals[0]?.price ?? null,
-        duration: s.professionals[0]?.duration ?? null,
+      services: serviceProfessionals.map((sp) => ({
+        service: sp.service,
+        price: sp.price,
+        duration: sp.duration,
       })),
       total,
     };

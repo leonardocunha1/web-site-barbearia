@@ -3,7 +3,7 @@ import { OverviewSection } from "./overview";
 import { ReservationsSection } from "./reservation";
 import { ProfileSection } from "./profile";
 import { RewardsSection } from "./rewards";
-import { DashboardLayout } from "../layout/dashboard-layout";
+import { DashboardLayout } from "../../layout/dashboard-layout";
 
 export default function ClientDashboard() {
   return (

@@ -10,16 +10,8 @@ import { BookingDTO } from '@/dtos/booking-dto';
 
 const bookingInclude = {
   items: {
-    select: {
-      id: true,
-      duration: true,
-      price: true,
-    },
     include: {
       serviceProfessional: {
-        select: {
-          id: true,
-        },
         include: {
           service: {
             select: {
@@ -32,9 +24,6 @@ const bookingInclude = {
     },
   },
   professional: {
-    select: {
-      id: true,
-    },
     include: {
       user: {
         select: {
@@ -309,5 +298,95 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     };
 
     return prisma.booking.count({ where });
+  }
+
+  async countByStatus(
+    status: Status,
+    filters?: {
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number> {
+    const where: Prisma.BookingWhereInput = {
+      status,
+      ...(filters?.startDate && { startDateTime: { gte: filters.startDate } }),
+      ...(filters?.endDate && { startDateTime: { lte: filters.endDate } }),
+    };
+
+    return prisma.booking.count({ where });
+  }
+
+  async countTodayBookings(): Promise<number> {
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return prisma.booking.count({
+      where: {
+        startDateTime: { gte: startOfDay, lte: endOfDay },
+      },
+    });
+  }
+
+  async countCanceledLast24h(): Promise<number> {
+    const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    return prisma.booking.count({
+      where: {
+        status: 'CANCELED',
+        canceledAt: { gte: last24h },
+      },
+    });
+  }
+
+  async getRevenueByDateRange(startDate: Date, endDate: Date, status?: Status): Promise<number> {
+    const result = await prisma.booking.aggregate({
+      where: {
+        startDateTime: { gte: startDate, lte: endDate },
+        ...(status && { status }),
+      },
+      _sum: { totalAmount: true },
+    });
+
+    return Number(result._sum.totalAmount) || 0;
+  }
+
+  async getCompletedBookingsCountByDateRange(startDate: Date, endDate: Date): Promise<number> {
+    return prisma.booking.count({
+      where: {
+        status: 'COMPLETED',
+        startDateTime: { gte: startDate, lte: endDate },
+      },
+    });
+  }
+
+  async getTopProfessionalsByCompletedBookings(
+    startDate: Date,
+    endDate: Date,
+    limit: number,
+  ): Promise<
+    Array<{
+      professionalId: string;
+      totalBookings: number;
+    }>
+  > {
+    const results = await prisma.booking.groupBy({
+      by: ['professionalId'],
+      where: {
+        status: 'COMPLETED',
+        startDateTime: { gte: startDate, lte: endDate },
+      },
+      _count: { _all: true },
+      orderBy: [{ _count: { id: 'desc' } }],
+      take: limit,
+    });
+
+    return results.map((item) => ({
+      professionalId: item.professionalId,
+      totalBookings: (item._count as unknown as { _all: number })._all,
+    }));
   }
 }

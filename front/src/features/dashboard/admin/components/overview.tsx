@@ -1,14 +1,57 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+"use client";
+
+import { useGetAdminDashboard } from "@/api";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import {
   CalendarIcon,
   UserPlusIcon,
   UserXIcon,
   UsersIcon,
-  StarIcon,
+  TrendingUpIcon,
   AlertCircleIcon,
 } from "lucide-react";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+
+const formatCurrency = (value?: number | null) => {
+  if (value === null || value === undefined) return "R$ 0,00";
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};
 
 export function OverviewSection() {
+  const { data: dashboard, isLoading } = useGetAdminDashboard();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="w-full rounded-2xl shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-12" />
+              <Skeleton className="mt-2 h-3 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  const metrics = dashboard?.metrics;
+  const topProfessionals = dashboard?.topProfessionals ?? [];
+  const topServices = dashboard?.topServices ?? [];
+  const financial = dashboard?.financial;
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
       <Card className="w-full rounded-2xl shadow">
@@ -17,7 +60,9 @@ export function OverviewSection() {
           <UsersIcon className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">18</div>
+          <div className="text-2xl font-bold">
+            {metrics?.professionalsActive}
+          </div>
           <p className="text-muted-foreground text-xs">Ativos no sistema</p>
         </CardContent>
       </Card>
@@ -28,7 +73,7 @@ export function OverviewSection() {
           <UserPlusIcon className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">4</div>
+          <div className="text-2xl font-bold">{metrics?.newProfessionals}</div>
           <p className="text-muted-foreground text-xs">este mês</p>
         </CardContent>
       </Card>
@@ -41,9 +86,9 @@ export function OverviewSection() {
           <CalendarIcon className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">27</div>
+          <div className="text-2xl font-bold">{metrics?.bookingsToday}</div>
           <p className="text-muted-foreground text-xs">
-            distribuídos entre 6 profissionais
+            Agendamentos realizados
           </p>
         </CardContent>
       </Card>
@@ -54,149 +99,93 @@ export function OverviewSection() {
           <UserXIcon className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">5</div>
+          <div className="text-2xl font-bold">
+            {metrics?.cancellationsLast24h}
+          </div>
           <p className="text-muted-foreground text-xs">nas últimas 24h</p>
         </CardContent>
       </Card>
 
-      <div className="col-span-full">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader>
-            <CardTitle>Top Profissionais do Mês</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              <li className="flex justify-between">
-                <span>João Pedro</span>
-                <span className="text-muted-foreground text-sm">
-                  22 atendimentos
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Amanda Souza</span>
-                <span className="text-muted-foreground text-sm">
-                  19 atendimentos
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Carlos Mendes</span>
-                <span className="text-muted-foreground text-sm">
-                  16 atendimentos
-                </span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+      {topProfessionals.length > 0 && (
+        <div className="col-span-full">
+          <Card className="w-full rounded-2xl shadow">
+            <CardHeader>
+              <CardTitle>Top Profissionais do Mês</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {topProfessionals.map((professional) => (
+                  <li key={professional.id} className="flex justify-between">
+                    <span>{professional.name}</span>
+                    <span className="text-muted-foreground text-sm">
+                      {professional.totalBookings} atendimento
+                      {professional.totalBookings !== 1 ? "s" : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      <div className="col-span-full">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader>
-            <CardTitle>Serviços Mais Agendados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              <li className="flex justify-between">
-                <span>Corte Masculino</span>
-                <span className="text-muted-foreground text-sm">
-                  38 agendamentos
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Barba</span>
-                <span className="text-muted-foreground text-sm">
-                  21 agendamentos
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Coloração</span>
-                <span className="text-muted-foreground text-sm">
-                  15 agendamentos
-                </span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+      {topServices.length > 0 && (
+        <div className="col-span-full">
+          <Card className="w-full rounded-2xl shadow">
+            <CardHeader>
+              <CardTitle>Serviços Mais Agendados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {topServices.map((service) => (
+                  <li key={service.id} className="flex justify-between">
+                    <span>{service.name}</span>
+                    <span className="text-muted-foreground text-sm">
+                      {service.totalBookings} agendamento
+                      {service.totalBookings !== 1 ? "s" : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      <div className="col-span-full">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader>
-            <CardTitle>Avaliações Recentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              <li className="border-b pb-2">
-                <p className="font-medium">Lucas</p>
-                <p className="text-muted-foreground text-sm">
-                  Excelente atendimento!
-                </p>
-                <div className="mt-1 flex items-center gap-1 text-sm text-yellow-500">
-                  <StarIcon className="h-4 w-4" /> 5 estrelas
+      {financial && (
+        <div className="col-span-full">
+          <Card className="w-full rounded-2xl shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUpIcon className="h-4 w-4" />
+                Resumo Financeiro - Este Mês
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+                <div>
+                  <p className="text-sm font-medium text-black">
+                    {formatCurrency(financial.revenueTotal)}
+                  </p>
+                  <p>Faturamento Total</p>
                 </div>
-              </li>
-              <li className="border-b pb-2">
-                <p className="font-medium">Fernanda</p>
-                <p className="text-muted-foreground text-sm">
-                  Corte muito bom.
-                </p>
-                <div className="mt-1 flex items-center gap-1 text-sm text-yellow-500">
-                  <StarIcon className="h-4 w-4" /> 4 estrelas
+                <div>
+                  <p className="text-sm font-medium text-black">
+                    {financial.completedBookings}
+                  </p>
+                  <p>Serviços Realizados</p>
                 </div>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="col-span-full">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader>
-            <CardTitle>Resumo Financeiro - Agosto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-muted-foreground grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-              <div>
-                <p className="text-sm font-medium text-black">R$ 8.900,00</p>
-                <p>Faturamento Total</p>
+                <div>
+                  <p className="text-sm font-medium text-black">
+                    {formatCurrency(financial.averageTicket)}
+                  </p>
+                  <p>Ticket Médio</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-black">135</p>
-                <p>Serviços Realizados</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-black">R$ 65,93</p>
-                <p>Ticket Médio</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="col-span-full">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader>
-            <CardTitle>Alertas do Sistema</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="text-muted-foreground space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <AlertCircleIcon className="h-4 w-4 text-orange-500" />
-                Login do admin às 10:23
-              </li>
-              <li className="flex items-center gap-2">
-                <AlertCircleIcon className="h-4 w-4 text-red-500" />
-                Erro na API de serviços ontem às 18:41
-              </li>
-              <li className="flex items-center gap-2">
-                <AlertCircleIcon className="h-4 w-4 text-yellow-500" />
-                Serviço Coloração desativado manualmente
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
-

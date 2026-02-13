@@ -22,12 +22,16 @@ describe('GetProfessionalScheduleUseCase', () => {
   let bookingsRepository: ReturnType<typeof createMockBookingsRepository>;
   let businessHoursRepository: ReturnType<typeof createMockBusinessHoursRepository>;
   let holidaysRepository: ReturnType<typeof createMockHolidaysRepository>;
+  let serviceProfessionalRepository: any;
   let sut: GetProfessionalScheduleUseCase;
 
   beforeEach(() => {
     bookingsRepository = createMockBookingsRepository();
     businessHoursRepository = createMockBusinessHoursRepository();
     holidaysRepository = createMockHolidaysRepository();
+    serviceProfessionalRepository = {
+      findByServiceAndProfessional: vi.fn().mockResolvedValue(null),
+    };
 
     // Configuração padrão dos mocks
     businessHoursRepository.findByProfessionalAndDay = vi
@@ -41,6 +45,7 @@ describe('GetProfessionalScheduleUseCase', () => {
       bookingsRepository,
       businessHoursRepository,
       holidaysRepository,
+      serviceProfessionalRepository,
     );
   });
 
@@ -94,8 +99,9 @@ describe('GetProfessionalScheduleUseCase', () => {
 
     expect(result.timeSlots[0].time).toBe('08:00');
     expect(result.timeSlots[0].available).toBe(true);
-    // CORREÇÃO: Asserção corrigida para 48 slots (8h de trabalho - 1h de pausa = 7h = 420 min. 420min / 10min/slot = 42 slots. Erro no cálculo anterior, 08:00-12:00 -> 4h*6 = 24 slots. 13:00-17:00 -> 4h*6 = 24 slots. Total 48 slots)
-    expect(result.timeSlots).toHaveLength(48);
+    // 8h de trabalho - 1h de pausa = 7h = 420 min. 420min / 15min/slot = 28 slots.
+    // 08:00-12:00 -> 4h*4 = 16 slots. 13:00-17:00 -> 4h*4 = 16 slots. Total 32 slots.
+    expect(result.timeSlots).toHaveLength(32);
   });
 
   it('deve marcar slots como indisponíveis quando houver agendamentos', async () => {
@@ -103,7 +109,7 @@ describe('GetProfessionalScheduleUseCase', () => {
     const mockBooking = {
       id: 'booking-1',
       startDateTime: new Date(`${testDate}T10:00:00`),
-      endDateTime: new Date(`${testDate}T10:30:00`), // 3 slots de 10 min: 10:00, 10:10, 10:20
+      endDateTime: new Date(`${testDate}T10:30:00`), // 2 slots de 15 min: 10:00, 10:15
       status: 'CONFIRMED',
       user: { id: 'user-1', name: 'Cliente Teste' },
       items: [
@@ -121,7 +127,7 @@ describe('GetProfessionalScheduleUseCase', () => {
     });
 
     const bookedSlots = result.timeSlots.filter((s) => !s.available);
-    expect(bookedSlots).toHaveLength(3); // 10:00, 10:10, 10:20
+    expect(bookedSlots).toHaveLength(2); // 10:00, 10:15
     expect(bookedSlots[0].booking).toEqual({
       id: 'booking-1',
       clientName: 'Cliente Teste',
@@ -145,9 +151,9 @@ describe('GetProfessionalScheduleUseCase', () => {
     });
 
     expect(result.timeSlots[0].time).toBe('08:00');
-    expect(result.timeSlots[result.timeSlots.length - 1].time).toBe('16:50');
-    // Com 9 horas de trabalho (08:00-17:00) e slots de 10 min, são 9*6 = 54 slots
-    expect(result.timeSlots).toHaveLength(54);
+    expect(result.timeSlots[result.timeSlots.length - 1].time).toBe('16:45');
+    // Com 9 horas de trabalho (08:00-17:00) e slots de 15 min, são 9*4 = 36 slots
+    expect(result.timeSlots).toHaveLength(36);
   });
 
   it('deve retornar os horários de funcionamento corretamente', async () => {

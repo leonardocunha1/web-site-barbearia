@@ -19,3 +19,5 @@ export * from "./zod/holidays";
 export * from "./zod/service-professional";
 export * from "./zod/bonus";
 export * from "./zod/coupons";
+export * from "./react-query/admin";
+export * from "./zod/admin";

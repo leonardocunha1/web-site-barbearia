@@ -1,50 +1,64 @@
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
+import {
+  formatBookingDateTime,
+  formatBookingStatus,
+} from "@/features/bookings/utils/booking-formatters";
+import type { GetProfessionalDashboard200NextAppointmentsItem } from "@/api";
 
 type Service = {
   id: string;
   time: string;
   client: string;
   service: string;
-  duration: string;
-  status: "Confirmado" | "Pendente" | "Cancelado" | "Concluído";
+  status: "Confirmado" | "Pendente" | "Cancelado" | "Concluido" | "Concluído";
 };
 
-export function RecentServices() {
-  const services: Service[] = [
-    {
-      id: "1",
-      time: "10:00",
-      client: "João Silva",
-      service: "Corte Social",
-      duration: "45 min",
-      status: "Confirmado",
-    },
-    {
-      id: "2",
-      time: "11:00",
-      client: "Carlos Oliveira",
-      service: "Barba Completa",
-      duration: "30 min",
-      status: "Confirmado",
-    },
-    {
-      id: "3",
-      time: "14:30",
-      client: "Miguel Santos",
-      service: "Corte + Barba",
-      duration: "1h 15min",
-      status: "Pendente",
-    },
-    {
-      id: "4",
-      time: "16:00",
-      client: "Lucas Pereira",
-      service: "Hidratação",
-      duration: "20 min",
-      status: "Cancelado",
-    },
-  ];
+type RecentServicesProps = {
+  appointments?: GetProfessionalDashboard200NextAppointmentsItem[];
+  isLoading?: boolean;
+  isError?: boolean;
+};
+
+export function RecentServices({
+  appointments,
+  isLoading,
+  isError,
+}: RecentServicesProps) {
+  if (isLoading) {
+    return (
+      <div className="text-muted-foreground text-sm">Carregando agenda...</div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-sm text-red-600">
+        Nao foi possivel carregar a agenda.
+      </div>
+    );
+  }
+
+  const services: Service[] =
+    appointments?.map((appointment) => {
+      const dateTime = formatBookingDateTime(appointment.date);
+      const label =
+        dateTime.date === "-" ? "-" : `${dateTime.date} ${dateTime.time}`;
+
+      return {
+        id: appointment.id,
+        time: label,
+        client: appointment.clientName,
+        service: appointment.service,
+        status: formatBookingStatus(
+          appointment.status as
+            | "PENDING"
+            | "CONFIRMED"
+            | "CANCELED"
+            | "COMPLETED",
+        ) as Service["status"],
+      };
+    }) ?? [];
 
   const columns: Column<Service>[] = [
     {
@@ -61,11 +75,6 @@ export function RecentServices() {
     {
       header: "Serviço",
       accessor: "service",
-    },
-    {
-      header: "Duração",
-      accessor: "duration",
-      align: "center",
     },
     {
       header: "Status",
@@ -91,4 +100,3 @@ export function RecentServices() {
     />
   );
 }
-

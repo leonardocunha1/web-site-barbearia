@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { Briefcase, UserCircle2 } from "lucide-react";
 import { OverviewSection } from "./overview";
-import { DashboardLayout } from "../layout/dashboard-layout";
 import ServicosSection from "../servicos-section/layout";
 import { ProfissionalSection } from "../professional-section/page";
+import CouponsSection from "../coupons-section/layout";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { DashboardLayout } from "../../layout/dashboard-layout";
 
 export default function AdminDashboard() {
   const searchParams = useSearchParams();
@@ -56,6 +57,7 @@ export default function AdminDashboard() {
           content: <ProfissionalSection />,
         },
         { value: "servicos", label: "Serviços", content: <ServicosSection /> },
+        { value: "coupons", label: "Cupons", content: <CouponsSection /> },
       ]}
       currentTab={currentTab}
       onTabChange={handleTabChange}

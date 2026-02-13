@@ -97,4 +97,31 @@ export interface IBookingsRepository {
   ): Promise<number>;
 
   countByUserIdAndStatus(userId: string, status: Status): Promise<number>;
+
+  countByStatus(
+    status: Status,
+    filters?: {
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<number>;
+
+  countTodayBookings(): Promise<number>;
+
+  countCanceledLast24h(): Promise<number>;
+
+  getRevenueByDateRange(startDate: Date, endDate: Date, status?: Status): Promise<number>;
+
+  getCompletedBookingsCountByDateRange(startDate: Date, endDate: Date): Promise<number>;
+
+  getTopProfessionalsByCompletedBookings(
+    startDate: Date,
+    endDate: Date,
+    limit: number,
+  ): Promise<
+    Array<{
+      professionalId: string;
+      totalBookings: number;
+    }>
+  >;
 }

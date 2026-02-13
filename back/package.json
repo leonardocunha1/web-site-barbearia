@@ -16,7 +16,8 @@
     "test:watch:e2e": "vitest --project e2e",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest ui",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -58,5 +59,8 @@
     "fastify-type-provider-zod": "^4.0.2",
     "zod": "3.24.1",
     "zod-to-json-schema": "^3.24.5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

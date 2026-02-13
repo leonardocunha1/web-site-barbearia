@@ -53,7 +53,7 @@ export function useTableParams(defaultParams: Partial<TableParams> = {}) {
       const baseUrl = window.location.pathname;
       router.push(queryString ? `?${queryString}` : baseUrl, { scroll: false });
     },
-    [router]
+    [router],
   );
 
   // 🔹 Atualiza parâmetros na URL
@@ -63,7 +63,11 @@ export function useTableParams(defaultParams: Partial<TableParams> = {}) {
 
       Object.entries(updates).forEach(([key, value]) => {
         if (key === "page" || key === "limit") {
-          if (value == null || (key === "page" && value === 1) || (key === "limit" && value === 10)) {
+          if (
+            value == null ||
+            (key === "page" && value === 1) ||
+            (key === "limit" && value === 10)
+          ) {
             newParams.delete(key);
           } else {
             newParams.set(key, value.toString());
@@ -83,33 +87,34 @@ export function useTableParams(defaultParams: Partial<TableParams> = {}) {
           }
         } else if (key === "filters") {
           // Remove apenas os filtros que estamos controlando
-          Object.keys(params.filters).forEach(filterKey => {
+          Object.keys(params.filters).forEach((filterKey) => {
             newParams.delete(filterKey);
           });
           // Adiciona novos filtros
-          Object.entries(value as Record<string, string>).forEach(([filterKey, filterValue]) => {
-            if (filterValue) newParams.set(filterKey, filterValue);
-          });
+          Object.entries(value as Record<string, string>).forEach(
+            ([filterKey, filterValue]) => {
+              if (filterValue) newParams.set(filterKey, filterValue);
+            },
+          );
         }
       });
-//       });
 
-//       pushParams(newParams);
-//     },
-//     [searchParams, pushParams]
-//   );
+      pushParams(newParams);
+    },
+    [searchParams, params.filters, pushParams],
+  );
 
-//   // 🔹 Limpa apenas a ordenação
-//   const clearSorting = useCallback(() => {
-//     const newParams = new URLSearchParams(searchParams);
-//     newParams.delete("sortBy");
-//     newParams.delete("sortDirection");
-//     pushParams(newParams);
-//   }, [searchParams, pushParams]);
+  // 🔹 Limpa apenas a ordenação
+  const clearSorting = useCallback(() => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("sortBy");
+    newParams.delete("sortDirection");
+    pushParams(newParams);
+  }, [searchParams, pushParams]);
 
-//   return {
-//     params,
-//     updateParams,
-//     clearSorting,
-//   };
-// }
+  return {
+    params,
+    updateParams,
+    clearSorting,
+  };
+}

@@ -103,6 +103,40 @@ export const zodtoggleProfessionalStatusResponse = zod.object({
   "message": zod.string()
 })
 
+export const zodgetPublicProfessionalScheduleParams = zod.object({
+  "professionalId": zod.string().uuid()
+})
+
+export const zodgetPublicProfessionalScheduleQueryDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const zodgetPublicProfessionalScheduleQueryServiceIdsDefault = [];
+
+export const zodgetPublicProfessionalScheduleQueryParams = zod.object({
+  "date": zod.string().regex(zodgetPublicProfessionalScheduleQueryDateRegExp),
+  "serviceIds": zod.string().or(zod.array(zod.string())).default(zodgetPublicProfessionalScheduleQueryServiceIdsDefault)
+})
+
+export const zodgetPublicProfessionalScheduleResponse = zod.object({
+  "date": zod.string(),
+  "timeSlots": zod.array(zod.object({
+  "time": zod.string(),
+  "available": zod.boolean(),
+  "booking": zod.object({
+  "id": zod.string(),
+  "clientName": zod.string(),
+  "services": zod.array(zod.string())
+}).optional()
+})),
+  "businessHours": zod.object({
+  "opensAt": zod.string(),
+  "closesAt": zod.string(),
+  "breakStart": zod.string().nullable(),
+  "breakEnd": zod.string().nullable()
+}).optional(),
+  "isHoliday": zod.boolean().optional(),
+  "holidayReason": zod.string().optional(),
+  "isClosed": zod.boolean().optional()
+})
+
 export const zodgetProfessionalDashboardQueryParams = zod.object({
   "range": zod.enum(['today', 'week', 'month', 'custom']).describe('Período de tempo para análise'),
   "startDate": zod.string().datetime({}).optional().describe('Data de início personalizada (obrigatória para período custom)'),
@@ -146,11 +180,12 @@ export const zodgetProfessionalDashboardResponse = zod.object({
 }).describe('Dados completos do dashboard')
 
 export const zodgetProfessionalScheduleQueryDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
-
+export const zodgetProfessionalScheduleQueryServiceIdsDefault = [];
 
 export const zodgetProfessionalScheduleQueryParams = zod.object({
   "professionalId": zod.string().uuid(),
-  "date": zod.string().regex(zodgetProfessionalScheduleQueryDateRegExp)
+  "date": zod.string().regex(zodgetProfessionalScheduleQueryDateRegExp),
+  "serviceIds": zod.string()
 })
 
 export const zodgetProfessionalScheduleResponse = zod.object({

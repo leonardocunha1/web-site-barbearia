@@ -3,7 +3,9 @@ import { OverviewSection } from "./overview";
 import { ServicesSection } from "./services";
 import { ScheduleSection } from "./schedule";
 import { ProfileSection } from "./profile";
-import { DashboardLayout } from "../layout/dashboard-layout";
+import { BusinessHoursSection } from "@/features/business-hours";
+import { HolidaysSection } from "@/features/holidays";
+import { DashboardLayout } from "../../layout/dashboard-layout";
 
 export default function ProfessionalDashboard() {
   return (
@@ -30,6 +32,16 @@ export default function ProfessionalDashboard() {
           value: "agenda",
           label: "Minha Agenda",
           content: <ScheduleSection />,
+        },
+        {
+          value: "horarios",
+          label: "Horarios",
+          content: <BusinessHoursSection />,
+        },
+        {
+          value: "feriados",
+          label: "Feriados",
+          content: <HolidaysSection />,
         },
         { value: "dados", label: "Meus Dados", content: <ProfileSection /> },
       ]}

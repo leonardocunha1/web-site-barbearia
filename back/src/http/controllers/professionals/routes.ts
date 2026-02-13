@@ -6,6 +6,7 @@ import { listOrSearchProfessionals } from './list-search';
 import { toggleProfessionalStatus } from './toggle-status-ativo';
 import { dashboard } from './get-dashboard';
 import { getSchedule } from './get-schedule';
+import { getPublicSchedule } from './get-public-schedule';
 import { FastifyTypedInstance } from '@/types';
 import {
   createProfessionalBodySchema,
@@ -18,7 +19,7 @@ import {
 } from '@/schemas/profissional';
 import { z } from 'zod';
 import { dashboardSchema } from '@/schemas/dashboard-schema';
-import { getScheduleQuerySchema } from '@/dtos/schedule-dto';
+import { getScheduleQuerySchema, getPublicScheduleQuerySchema } from '@/dtos/schedule-dto';
 
 export async function professionalsRoutes(app: FastifyTypedInstance) {
   app.post(
@@ -119,6 +120,57 @@ export async function professionalsRoutes(app: FastifyTypedInstance) {
       },
     },
     listOrSearchProfessionals,
+  );
+
+  // Endpoint público: agenda de um profissional específico
+  app.get(
+    '/professionals/:professionalId/schedule',
+    {
+      schema: {
+        operationId: 'getPublicProfessionalSchedule',
+        tags: ['professionals'],
+        params: z.object({
+          professionalId: z.string().uuid(),
+        }),
+        querystring: getPublicScheduleQuerySchema,
+        response: {
+          200: z.object({
+            date: z.string(),
+            timeSlots: z.array(
+              z.object({
+                time: z.string(),
+                available: z.boolean(),
+                booking: z
+                  .object({
+                    id: z.string(),
+                    clientName: z.string(),
+                    services: z.array(z.string()),
+                  })
+                  .optional(),
+              }),
+            ),
+            businessHours: z
+              .object({
+                opensAt: z.string(),
+                closesAt: z.string(),
+                breakStart: z.string().nullable(),
+                breakEnd: z.string().nullable(),
+              })
+              .optional(),
+            isHoliday: z.boolean().optional(),
+            holidayReason: z.string().optional(),
+            isClosed: z.boolean().optional(),
+          }),
+          404: z.object({
+            message: z.string(),
+          }),
+          400: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    getPublicSchedule,
   );
 
   // Dashboard do próprio profissional logado

@@ -48,7 +48,7 @@ export class PrismaBusinessHoursRepository implements IBusinessHoursRepository {
     return prisma.businessHours.findMany({
       where: {
         professionalId,
-        ativo: true,
+        active: true,
       },
       orderBy: {
         dayOfWeek: 'asc',

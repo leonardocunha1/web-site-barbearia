@@ -72,6 +72,9 @@ export const updateServiceBodySchema = z.object({
     .number()
     .int({ message: 'A duração deve ser um número inteiro' })
     .positive({ message: 'A duração deve ser um valor positivo' })
+    .refine((value) => value % 15 === 0, {
+      message: 'A duração deve ser múltipla de 15 minutos',
+    })
     .optional(),
   category: z
     .string()
@@ -121,7 +124,10 @@ export const addServiceToProfessionalBodySchema = z.object({
   duration: z
     .number()
     .int({ message: 'A duração deve ser um número inteiro' })
-    .positive({ message: 'A duração deve ser um valor positivo' }),
+    .positive({ message: 'A duração deve ser um valor positivo' })
+    .refine((value) => value % 15 === 0, {
+      message: 'A duração deve ser múltipla de 15 minutos',
+    }),
 });
 
 export const removeServiceFromProfessionalParamsSchema = z.object({
@@ -151,7 +157,13 @@ export const updateProfessionalServicesBodySchema = z.object({
     z.object({
       serviceId: z.string().uuid(),
       price: z.number().positive(),
-      duration: z.number().positive(),
+      duration: z
+        .number()
+        .int({ message: 'A duração deve ser um número inteiro' })
+        .positive({ message: 'A duração deve ser um valor positivo' })
+        .refine((value) => value % 15 === 0, {
+          message: 'A duração deve ser múltipla de 15 minutos',
+        }),
       linked: z.boolean(),
     }),
   ),

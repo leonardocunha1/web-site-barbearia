@@ -6,6 +6,7 @@ import { IServiceProfessionalRepository } from '@/repositories/service-professio
 import { ServiceAlreadyAddedError } from '../errors/service-already-added-error';
 import { InvalidServicePriceDurationError } from '../errors/invalid-service-price-duration';
 import { Professional, Service } from '@prisma/client';
+import { SCHEDULE_SLOT_MINUTES } from '@/consts/const';
 
 interface AddServiceToProfessionalRequest {
   serviceId: string;
@@ -33,6 +34,7 @@ export class AddServiceToProfessionalUseCase {
     await this.validateServiceNotAlreadyAdded(serviceId, professionalId);
     this.validatePricePositive(price);
     this.validateDurationPositive(duration);
+    this.validateDurationMultipleOfSlot(duration);
 
     // All validations passed - proceed with operation
     await this.serviceProfessionalRepository.create({
@@ -100,6 +102,16 @@ export class AddServiceToProfessionalUseCase {
    */
   private validateDurationPositive(duration: number): void {
     if (duration <= 0) {
+      throw new InvalidServicePriceDurationError();
+    }
+  }
+
+  /**
+   * Validates that duration is a multiple of the schedule slot size
+   * @throws {InvalidServicePriceDurationError} If duration is not a multiple of slot size
+   */
+  private validateDurationMultipleOfSlot(duration: number): void {
+    if (duration % SCHEDULE_SLOT_MINUTES !== 0) {
       throw new InvalidServicePriceDurationError();
     }
   }

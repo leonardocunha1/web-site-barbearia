@@ -49,6 +49,13 @@ const runRefreshOnce = () => {
   return refreshPromise;
 };
 
+const shouldRedirectToLogin = () => {
+  if (typeof window === "undefined") return false;
+
+  const path = window.location.pathname;
+  return path.startsWith("/conta");
+};
+
 const runLogout = async () => {
   try {
     await AXIOS_INSTANCE.post("/auth/logout", undefined, {
@@ -58,7 +65,7 @@ const runLogout = async () => {
     // ignore logout errors
   }
 
-  if (typeof window !== "undefined") {
+  if (shouldRedirectToLogin()) {
     window.location.href = "/login";
   }
 };
@@ -100,12 +107,16 @@ AXIOS_INSTANCE.interceptors.response.use(
         await runRefreshOnce();
         return AXIOS_INSTANCE(config);
       } catch (refreshError) {
-        await runLogoutOnce();
+        if (shouldRedirectToLogin()) {
+          await runLogoutOnce();
+        }
         return Promise.reject(refreshError);
       }
     }
 
-    await runLogoutOnce();
+    if (shouldRedirectToLogin()) {
+      await runLogoutOnce();
+    }
     return Promise.reject(error);
   },
 );

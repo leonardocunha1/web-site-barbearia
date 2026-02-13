@@ -25,6 +25,9 @@ export const useAuthValidation = (
 
         if (!ok || !data) {
           if (isMounted) {
+            console.warn(
+              "Usuário não autenticado ou falha ao obter dados do usuário",
+            );
             await logout();
             setUser(null);
           }

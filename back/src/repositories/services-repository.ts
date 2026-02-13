@@ -18,4 +18,16 @@ export interface IServicesRepository {
     professionalId?: string;
   }): Promise<{ services: ServiceDTO[]; total: number }>;
   existsProfessional(professionalId: string): Promise<boolean>;
+
+  getTopServicesByBookingCount(
+    startDate: Date,
+    endDate: Date,
+    limit: number,
+  ): Promise<
+    Array<{
+      id: string;
+      name: string;
+      totalBookings: number;
+    }>
+  >;
 }

@@ -1,5 +1,6 @@
 import { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { InvalidServicePriceDurationError } from '../errors/invalid-service-price-duration';
+import { SCHEDULE_SLOT_MINUTES } from '@/consts/const';
 
 interface UpdateServiceProfessionalRequest {
   serviceId: string;
@@ -19,6 +20,11 @@ export class UpdateServiceProfessionalUseCase {
   }: UpdateServiceProfessionalRequest): Promise<void> {
     // Validate price and duration
     if (price <= 0 || duration <= 0) {
+      throw new InvalidServicePriceDurationError();
+    }
+
+    // Validate that duration is a multiple of the schedule slot size
+    if (duration % SCHEDULE_SLOT_MINUTES !== 0) {
       throw new InvalidServicePriceDurationError();
     }
 

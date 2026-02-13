@@ -265,7 +265,7 @@ export class CreateBookingUseCase {
     if (totalPoints < MIN_POINTS_TO_REDEEM) throw new InsufficientBonusPointsError();
 
     const maxDiscount = totalValue - MIN_BOOKING_VALUE_AFTER_DISCOUNT;
-    const maxPoints = Math.ceil(maxDiscount / VALUE_PER_POINT);
+    const maxPoints = Math.floor(maxDiscount / VALUE_PER_POINT);
     const pointsToUse = Math.min(totalPoints, maxPoints);
     const discount = pointsToUse * VALUE_PER_POINT;
     const finalValue = Math.max(totalValue - discount, MIN_BOOKING_VALUE_AFTER_DISCOUNT);

@@ -44,7 +44,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
             type: data.type,
           },
         },
-        date: {
+        data: {
           points: {
             increment: data.points,
           },
@@ -130,7 +130,7 @@ export class PrismaUserBonusRepository implements IUserBonusRepository {
             gte: quantity,
           },
         },
-        date: {
+        data: {
           points: {
             decrement: quantity,
           },

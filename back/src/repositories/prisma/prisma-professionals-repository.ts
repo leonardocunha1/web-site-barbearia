@@ -5,7 +5,7 @@ import { IProfessionalsRepository } from '../professionals-repository';
 export class PrismaProfessionalsRepository implements IProfessionalsRepository {
   async listAllServices(): Promise<Service[]> {
     return prisma.service.findMany({
-      where: { ativo: true },
+      where: { active: true },
       orderBy: { name: 'asc' },
     });
   }
@@ -276,5 +276,27 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     };
 
     return prisma.professional.count({ where });
+  }
+
+  async countActiveOnly(): Promise<number> {
+    return prisma.professional.count({
+      where: { active: true },
+    });
+  }
+
+  async countNewByDateRange(startDate: Date, endDate: Date): Promise<number> {
+    return prisma.professional.count({
+      where: {
+        createdAt: { gte: startDate, lte: endDate },
+      },
+    });
+  }
+
+  async findTopWithInclude(limit: number): Promise<(Professional & { user: User })[]> {
+    return prisma.professional.findMany({
+      where: { active: true },
+      include: { user: true },
+      take: limit,
+    });
   }
 }

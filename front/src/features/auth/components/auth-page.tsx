@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { DynamicForm } from "@/shared/components/form/DynamicForm";
 import {
@@ -27,12 +27,15 @@ export type AuthMode = "login" | "register";
 
 export default function AuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<AuthMode>("login");
   const { setUser } = useUser();
 
+  const returnUrl = searchParams.get("returnUrl") || "/";
+
   const { login, register } = useAuthActions({
     setUser,
-    onLoginSuccess: () => router.push("/"),
+    onLoginSuccess: () => router.push(returnUrl),
     onRegisterSuccess: () => setMode("login"),
   });
 

@@ -36,6 +36,10 @@ import type {
   ListUserBookings403,
   ListUserBookings404,
   ListUserBookingsParams,
+  PreviewBookingPrice200,
+  PreviewBookingPrice400,
+  PreviewBookingPrice404,
+  PreviewBookingPriceBody,
   UpdateBookingStatus200,
   UpdateBookingStatus400,
   UpdateBookingStatus403,
@@ -127,6 +131,90 @@ export const useCreateBooking = <
   TContext
 > => {
   const mutationOptions = getCreateBookingMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * Prévia de preço do agendamento.
+ */
+export const previewBookingPrice = (
+  previewBookingPriceBody: PreviewBookingPriceBody,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<PreviewBookingPrice200>({
+    url: `/bookings/preview`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: previewBookingPriceBody,
+    signal,
+  });
+};
+
+export const getPreviewBookingPriceMutationOptions = <
+  TError = PreviewBookingPrice400 | PreviewBookingPrice404,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof previewBookingPrice>>,
+    TError,
+    { data: PreviewBookingPriceBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof previewBookingPrice>>,
+  TError,
+  { data: PreviewBookingPriceBody },
+  TContext
+> => {
+  const mutationKey = ["previewBookingPrice"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof previewBookingPrice>>,
+    { data: PreviewBookingPriceBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return previewBookingPrice(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PreviewBookingPriceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof previewBookingPrice>>
+>;
+export type PreviewBookingPriceMutationBody = PreviewBookingPriceBody;
+export type PreviewBookingPriceMutationError =
+  | PreviewBookingPrice400
+  | PreviewBookingPrice404;
+
+export const usePreviewBookingPrice = <
+  TError = PreviewBookingPrice400 | PreviewBookingPrice404,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof previewBookingPrice>>,
+      TError,
+      { data: PreviewBookingPriceBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof previewBookingPrice>>,
+  TError,
+  { data: PreviewBookingPriceBody },
+  TContext
+> => {
+  const mutationOptions = getPreviewBookingPriceMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

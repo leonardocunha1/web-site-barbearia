@@ -8,7 +8,7 @@ export type BusinessHours = {
   closesAt: string;
   breakStart: string | null;
   breakEnd: string | null;
-  ativo: boolean;
+  active: boolean;
 };
 
 export interface IBusinessHoursRepository {

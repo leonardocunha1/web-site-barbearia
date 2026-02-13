@@ -14,7 +14,7 @@ import {
 } from "@/shared/components/ui/popover";
 import { Button } from "@/shared/components/ui/button";
 import { Calendar } from "@/shared/components/ui/calendar";
-import { format } from "date-fns";
+import { format, isValid, parse, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function DateInput({ field }: { field: DateField }) {
@@ -27,6 +27,21 @@ export function DateInput({ field }: { field: DateField }) {
 
   const [dateValue, setDateValue] = useState("");
   const rawValue = watch(field.name) || "";
+  const hasCustomRange = Boolean(field.minDate || field.maxDate);
+
+  const parseConstraintDate = (value?: string) => {
+    if (!value) return null;
+
+    const parsed = value.includes("/")
+      ? parse(value, "dd/MM/yyyy", new Date())
+      : parseISO(value);
+
+    return isValid(parsed) ? parsed : null;
+  };
+
+  const selectedDate = parseConstraintDate(rawValue);
+  const minDate = parseConstraintDate(field.minDate);
+  const maxDate = parseConstraintDate(field.maxDate);
 
   // Aplica máscara quando o valor muda
   useEffect(() => {
@@ -95,10 +110,15 @@ export function DateInput({ field }: { field: DateField }) {
           <PopoverContent className="w-auto p-0">
             <Calendar
               mode="single"
-              selected={rawValue ? new Date(rawValue) : undefined}
+              selected={selectedDate ?? undefined}
               onSelect={handleDateSelect}
               disabled={(date) =>
-                date > new Date() || date < new Date("1900-01-01")
+                hasCustomRange
+                  ? Boolean(
+                      (minDate && date < minDate) ||
+                        (maxDate && date > maxDate),
+                    )
+                  : date > new Date() || date < new Date("1900-01-01")
               }
               locale={ptBR}
               autoFocus
@@ -111,12 +131,11 @@ export function DateInput({ field }: { field: DateField }) {
         <p className="text-muted-foreground text-sm">{field.description}</p>
       )}
 
-      {errors[field.name] && (
+      {/* {errors[field.name] && (
         <p className="text-destructive text-sm font-medium">
           {errors[field.name]?.message as string}
         </p>
-      )}
+      )} */}
     </div>
   );
 }
-

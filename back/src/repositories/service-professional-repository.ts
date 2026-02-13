@@ -17,8 +17,8 @@ export interface IServiceProfessionalRepository {
       id: string;
       name: string;
       description: string | null;
-      categoria: string | null;
-      ativo: boolean;
+      category: string | null;
+      active: boolean;
     };
     price: number;
     duration: number;
@@ -37,8 +37,8 @@ export interface IServiceProfessionalRepository {
         id: string;
         name: string;
         description: string | null;
-        categoria: string | null;
-        ativo: boolean;
+        category: string | null;
+        active: boolean;
       };
       price: number;
       duration: number;
@@ -68,8 +68,8 @@ export interface IServiceProfessionalRepository {
         id: string;
         name: string;
         description: string | null;
-        categoria: string | null;
-        ativo: boolean;
+        category: string | null;
+        active: boolean;
       };
       price: number | null;
       duration: number | null;
@@ -93,8 +93,8 @@ export interface IServiceProfessionalRepository {
         id: string;
         name: string;
         description: string | null;
-        categoria: string | null;
-        ativo: boolean;
+        category: string | null;
+        active: boolean;
       };
       price: number | null;
       duration: number | null;

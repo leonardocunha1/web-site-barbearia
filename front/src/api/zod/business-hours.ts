@@ -65,7 +65,7 @@ export const zodlistBusinessHoursResponseBusinessHoursItemDayOfWeekMax = 6;
 export const zodlistBusinessHoursResponse = zod.object({
   "businessHours": zod.array(zod.object({
   "id": zod.string().uuid().describe('ID do registro'),
-  "ativo": zod.boolean().describe('Indica se o horário está ativo'),
+  "active": zod.boolean().describe('Indica se o horário está ativo'),
   "dayOfWeek": zod.number().min(zodlistBusinessHoursResponseBusinessHoursItemDayOfWeekMin).max(zodlistBusinessHoursResponseBusinessHoursItemDayOfWeekMax).describe('Dia da semana (0=domingo a 6=sábado)'),
   "opensAt": zod.string().describe('Horário de abertura'),
   "closesAt": zod.string().describe('Horário de fechamento'),

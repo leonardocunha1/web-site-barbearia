@@ -6,15 +6,18 @@ import { listUserBookings } from './list-user-bookings';
 import { FastifyTypedInstance } from '@/types';
 import {
   bookingSchema,
+  bookingPricePreviewSchema,
   createBookingBodySchema,
   getOrUpdateBookingStatusParamsSchema,
   listBookingsQuerySchema,
   paginatedBookingResponseSchema,
+  previewBookingBodySchema,
   updateBookingStatusBodySchema,
 } from '@/schemas/bookings';
 import { z } from 'zod';
 import { listProfessionalBookings } from './list-professional-bookings';
 import { getBooking } from './get';
+import { previewBookingPrice } from './preview';
 
 export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.post(
@@ -35,6 +38,25 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
       },
     },
     createBooking,
+  );
+
+  app.post(
+    '/bookings/preview',
+    {
+      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
+      schema: {
+        operationId: 'previewBookingPrice',
+        tags: ['bookings'],
+        description: 'Prévia de preço do agendamento.',
+        body: previewBookingBodySchema,
+        response: {
+          200: bookingPricePreviewSchema,
+          400: z.object({ message: z.string() }).describe('Erro de validação'),
+          404: z.object({ message: z.string() }).describe('Recurso não encontrado'),
+        },
+      },
+    },
+    previewBookingPrice,
   );
 
   app.patch(

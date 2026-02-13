@@ -17,9 +17,13 @@ export class TokenService {
   private readonly isProduction: boolean;
   private readonly refreshTokenExpiration = REFRESH_TOKEN_EXPIRATION_SECONDS;
   private readonly accessTokenExpiration = ACCESS_TOKEN_EXPIRATION_SECONDS;
+  private readonly cookieDomain: string | undefined;
 
   constructor(private reply: FastifyReply) {
     this.isProduction = process.env.NODE_ENV === 'production';
+    this.cookieDomain = this.isProduction
+      ? process.env.COOKIE_DOMAIN
+      : process.env.COOKIE_DOMAIN || 'localhost';
   }
 
   private createTokenPayload(user: UserForToken | TokenPayload) {
@@ -56,6 +60,7 @@ export class TokenService {
   setAuthCookies(accessToken: string, refreshToken: string) {
     const cookieOptions = {
       path: '/',
+      ...(this.cookieDomain ? { domain: this.cookieDomain } : {}),
       httpOnly: true,
       secure: this.isProduction,
       sameSite: this.isProduction ? ('strict' as const) : ('lax' as const),
@@ -77,7 +82,12 @@ export class TokenService {
   }
 
   clearAuthCookies() {
-    this.reply.clearCookie('accessToken', { path: '/' }).clearCookie('refreshToken', { path: '/' });
+    const clearOptions = {
+      path: '/',
+      ...(this.cookieDomain ? { domain: this.cookieDomain } : {}),
+    };
+
+    this.reply.clearCookie('accessToken', clearOptions).clearCookie('refreshToken', clearOptions);
     return this.reply;
   }
 }

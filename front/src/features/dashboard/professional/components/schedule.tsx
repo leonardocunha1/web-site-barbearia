@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
+import { useMemo, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
-import { CalendarIcon, ClockIcon, PencilIcon, PlusIcon } from "lucide-react";
+import { CalendarIcon, ClockIcon, PlusIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,54 +17,96 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
+import { StatusBadge } from "@/shared/components/table/status-badge";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  getListProfessionalBookingsQueryKey,
+  useListProfessionalBookings,
+  useUpdateBookingStatus,
+} from "@/api";
+import {
+  buildDateRangeFilters,
+  formatBookingDateTime,
+  formatBookingServices,
+  formatBookingStatus,
+} from "@/features/bookings/utils/booking-formatters";
+import { useTableParams } from "@/shared/hooks/useTableParams";
+import { BookingFilters, useBookingDetailsModal } from "@/features/bookings";
+import { BonusAssignDialog } from "./bonus-assign-dialog";
+
+type ScheduleRow = {
+  id: string;
+  date: string;
+  time: string;
+  client: string;
+  userId: string;
+  service: string;
+  status: string;
+  statusValue: "PENDING" | "CONFIRMED" | "CANCELED" | "COMPLETED";
+};
+
+const statusOptions = [
+  { value: "PENDING", label: "Pendente" },
+  { value: "CONFIRMED", label: "Confirmar" },
+  { value: "CANCELED", label: "Cancelar" },
+  { value: "COMPLETED", label: "Concluir" },
+] as const;
 
 export function ScheduleSection() {
-  const [schedule, setSchedule] = useState([
-    {
-      id: 1,
-      date: "15/07/2023",
-      time: "10:00",
-      client: "João Silva",
-      service: "Corte Social",
-      status: "confirmed",
-    },
-    {
-      id: 2,
-      date: "15/07/2023",
-      time: "11:30",
-      client: "Carlos Oliveira",
-      service: "Barba Completa",
-      status: "confirmed",
-    },
-    {
-      id: 3,
-      date: "15/07/2023",
-      time: "14:00",
-      client: "Ana Paula",
-      service: "Coloração",
-      status: "pending",
-    },
-    {
-      id: 4,
-      date: "16/07/2023",
-      time: "09:00",
-      client: "Miguel Santos",
-      service: "Corte + Barba",
-      status: "canceled",
-    },
-  ]);
-
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
+  const queryClient = useQueryClient();
+  const { params, updateParams } = useTableParams();
+  const { openBookingDetails } = useBookingDetailsModal();
 
-  const toggleScheduleStatus = (id: number, newStatus: string) => {
-    setSchedule(
-      schedule.map((item) =>
-        item.id === id ? { ...item, status: newStatus } : item,
-      ),
-    );
+  const { startDate, endDate } = buildDateRangeFilters(
+    params.filters.startDate,
+    params.filters.endDate,
+  );
+
+  const listParams = {
+    page: params.page,
+    limit: params.limit,
+    status: params.filters.status || undefined,
+    startDate,
+    endDate,
   };
 
-  const columns: Column<(typeof schedule)[number]>[] = [
+  const { data, isLoading, isError } = useListProfessionalBookings(listParams);
+
+  const updateStatus = useUpdateBookingStatus({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getListProfessionalBookingsQueryKey(listParams),
+        });
+      },
+      onError: () => {
+        toast.error("Nao foi possivel atualizar o status.");
+      },
+    },
+  });
+
+  const schedule = useMemo<ScheduleRow[]>(() => {
+    return (
+      data?.bookings?.map((booking) => {
+        const { date, time } = formatBookingDateTime(booking.startDateTime);
+
+        return {
+          id: booking.id,
+          date,
+          time,
+          client: booking.user?.name ?? "-",
+          userId: booking.userId,
+          service: formatBookingServices(booking.items),
+          status: formatBookingStatus(booking.status),
+          statusValue: booking.status,
+        };
+      }) ?? []
+    );
+  }, [data]);
+
+  const columns: Column<ScheduleRow>[] = [
     {
       header: "Data",
       accessor: "date",
@@ -72,7 +118,7 @@ export function ScheduleSection() {
       ),
     },
     {
-      header: "Horário",
+      header: "Horario",
       accessor: "time",
       render: (value) => (
         <div className="flex items-center">
@@ -86,27 +132,13 @@ export function ScheduleSection() {
       accessor: "client",
       className: "font-medium",
     },
-    { header: "Serviço", accessor: "service" },
+    { header: "Servico", accessor: "service" },
     {
       header: "Status",
       accessor: "status",
-      render: (value) => (
-        <Badge
-          variant={
-            value === "confirmed"
-              ? "default"
-              : value === "pending"
-                ? "secondary"
-                : "destructive"
-          }
-        >
-          {value === "confirmed"
-            ? "Confirmado"
-            : value === "pending"
-              ? "Pendente"
-              : "Cancelado"}
-        </Badge>
-      ),
+      render: (value) => <StatusBadge status={value} />,
+      align: "center",
+      width: "120px",
     },
   ];
 
@@ -122,50 +154,93 @@ export function ScheduleSection() {
             }
           >
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Visualização" />
+              <SelectValue placeholder="Visualizacao" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="day">Dia</SelectItem>
               <SelectItem value="week">Semana</SelectItem>
-              <SelectItem value="month">Mês</SelectItem>
+              <SelectItem value="month">Mes</SelectItem>
             </SelectContent>
           </Select>
           <Button>
             <PlusIcon className="mr-2 h-4 w-4" />
-            Novo Horário
+            Novo Horario
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <GenericTable
-          data={schedule}
-          columns={columns}
-          rowKey="id"
-          actions={(row) => (
-            <div className="flex items-center gap-2">
-              <Select
-                value={row.status}
-                onValueChange={(value) => toggleScheduleStatus(row.id, value)}
-              >
-                <SelectTrigger className="h-8 w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="confirmed">Confirmar</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="canceled">Cancelar</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="ghost" size="sm">
-                <PencilIcon className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+      <CardContent className="space-y-4">
+        <BookingFilters
+          value={{
+            status: params.filters.status,
+            startDate: params.filters.startDate,
+            endDate: params.filters.endDate,
+          }}
+          onChange={(next) =>
+            updateParams({
+              page: 1,
+              filters: {
+                ...params.filters,
+                status: next.status ?? "",
+                startDate: next.startDate ?? "",
+                endDate: next.endDate ?? "",
+              },
+            })
+          }
         />
 
-        <div className="mt-4 flex items-center justify-between">
+        {isLoading ? (
           <div className="text-muted-foreground text-sm">
-            Total de {schedule.length} agendamentos
+            Carregando agenda...
+          </div>
+        ) : isError ? (
+          <div className="text-sm text-red-600">
+            Nao foi possivel carregar a agenda.
+          </div>
+        ) : (
+          <GenericTable
+            data={schedule}
+            columns={columns}
+            rowKey="id"
+            emptyMessage="Nenhum agendamento encontrado"
+            totalItems={data?.total ?? 0}
+            showPagination
+            onRowClick={(row) => openBookingDetails(row.id)}
+            actions={(row) => (
+              <div className="flex items-center gap-2">
+                <Select
+                  value={row.statusValue}
+                  onValueChange={(value) =>
+                    updateStatus.mutate({
+                      bookingId: row.id,
+                      data: { status: value },
+                    })
+                  }
+                  disabled={updateStatus.isPending}
+                >
+                  <SelectTrigger className="h-8 w-[140px]">
+                    <SelectValue placeholder="Atualizar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <BonusAssignDialog
+                  bookingId={row.id}
+                  userId={row.userId}
+                  clientName={row.client}
+                />
+              </div>
+            )}
+          />
+        )}
+
+        <div className="flex items-center justify-between">
+          <div className="text-muted-foreground text-sm">
+            Total de {data?.total ?? 0} agendamentos
           </div>
           <Button variant="outline">Exportar Agenda</Button>
         </div>
@@ -173,4 +248,3 @@ export function ScheduleSection() {
     </Card>
   );
 }
-
