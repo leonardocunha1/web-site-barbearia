@@ -7,6 +7,7 @@ import { createMockBookingsRepository } from '@/mock/mock-repositories';
 describe('GetBookingUseCase', () => {
   let useCase: GetBookingUseCase;
   let mockBookingsRepository: ReturnType<typeof createMockBookingsRepository>;
+  const mockBookingWithPoints = { ...mockBooking, pointsEarned: 0 };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -16,7 +17,7 @@ describe('GetBookingUseCase', () => {
 
   it('deve retornar um agendamento existente', async () => {
     // Configurar o mock
-    mockBookingsRepository.findById.mockResolvedValue(mockBooking);
+    mockBookingsRepository.findById.mockResolvedValue(mockBookingWithPoints);
 
     // Executar
     const result = await useCase.execute({ bookingId: 'booking-123' });
@@ -24,7 +25,7 @@ describe('GetBookingUseCase', () => {
     // Verificar
     expect(mockBookingsRepository.findById).toHaveBeenCalledWith('booking-123');
     expect(result).toEqual({
-      booking: mockBooking,
+      booking: mockBookingWithPoints,
     });
   });
 

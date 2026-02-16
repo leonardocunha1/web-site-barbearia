@@ -29,7 +29,7 @@ describe('AnonymizeUserUseCase', () => {
       name: 'John Doe',
       email: 'john@example.com',
       phone: '123456789',
-      role: Role.CLIENTE,
+      role: Role.CLIENT,
     });
 
     usersRepository.findById.mockResolvedValue(mockUser);
@@ -51,7 +51,7 @@ describe('AnonymizeUserUseCase', () => {
       name: 'John Doe',
       email: 'john@example.com',
       phone: '123456789',
-      role: Role.CLIENTE,
+      role: Role.CLIENT,
     });
 
     usersRepository.findById.mockResolvedValue(mockUser);
@@ -60,7 +60,7 @@ describe('AnonymizeUserUseCase', () => {
     await sut.execute({
       userIdToAnonymize: 'user-1',
       userId: 'user-1',
-      role: Role.CLIENTE,
+      role: Role.CLIENT,
     });
 
     expect(usersRepository.findById).toHaveBeenCalledWith('user-1');
@@ -87,7 +87,7 @@ describe('AnonymizeUserUseCase', () => {
       name: 'John Doe',
       email: 'john@example.com',
       phone: '123456789',
-      role: Role.CLIENTE,
+      role: Role.CLIENT,
     });
 
     usersRepository.findById.mockResolvedValue(mockUser);
@@ -97,7 +97,7 @@ describe('AnonymizeUserUseCase', () => {
       sut.execute({
         userIdToAnonymize: 'user-1',
         userId: 'another-user',
-        role: 'CLIENTE',
+        role: Role.CLIENT,
       }),
     ).rejects.toThrow(UsuarioTentandoPegarInformacoesDeOutro);
 
@@ -110,7 +110,7 @@ describe('AnonymizeUserUseCase', () => {
       name: 'John Doe',
       email: 'john@example.com',
       phone: '123456789',
-      role: Role.CLIENTE,
+      role: Role.CLIENT,
     });
 
     usersRepository.findById.mockResolvedValue(mockUser);
@@ -119,7 +119,7 @@ describe('AnonymizeUserUseCase', () => {
     await sut.execute({
       userIdToAnonymize: 'user-1',
       userId: 'professional-1',
-      role: Role.PROFISSIONAL,
+      role: Role.PROFESSIONAL,
     });
 
     expect(usersRepository.findById).toHaveBeenCalledWith('user-1');

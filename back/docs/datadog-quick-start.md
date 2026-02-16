@@ -39,6 +39,56 @@
 - Tratamento de erros
 - Logs correlacionados
 
+### 5. Span Filtering (Redução de Ruído)
+
+✅ `src/config/tracer.ts` - Configurado com `tracer.use()` para filtrar spans de baixo valor
+
+**Como Funciona:**
+
+Existem 3 abordagens para reduzir ruído nos traces (em ordem de eficiência):
+
+#### 1. Plugin-Level (MELHOR - Configurado ✅)
+
+Desabilita instrumentação antes que spans sejam criados:
+
+```typescript
+// Desabilita spans de middleware do Fastify (serialize, etc)
+tracer.use('fastify', { middleware: false });
+
+// Filtra health checks e endpoints internos
+tracer.use('http', { blocklist: ['/health', '/metrics'] });
+```
+
+**Benefícios:**
+
+- ✅ Mais eficiente (spans nem são criados)
+- ✅ Reduz overhead no código
+- ✅ Configuração centralizada no tracer
+
+#### 2. Agent-Side Filtering (Complementar)
+
+Filtra spans no Agent antes de enviar ao backend. Descomente em `docker-compose.yml`:
+
+```yaml
+- DD_APM_FILTER_TAGS_REJECT=["resource_name:serialize","resource_name:count"]
+```
+
+**Benefícios:**
+
+- ✅ Economiza banda e custo de ingestão
+- ✅ Não precisa alterar código
+- ⚠️ Spans ainda são criados (overhead)
+
+#### 3. UI-Side Filtering
+
+Configure filtros na interface do Datadog APM.
+
+**Benefícios:**
+
+- ✅ Fácil de ajustar
+- ❌ Spans ainda são enviados (custo)
+- ❌ Só muda visualização
+
 ---
 
 ## 🚀 Como Usar no Seu Código

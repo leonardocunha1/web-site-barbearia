@@ -9,6 +9,7 @@ import { createMockBookingsRepository } from '@/mock/mock-repositories';
 describe('ListProfessionalBookingsUseCase', () => {
   let useCase: ListProfessionalBookingsUseCase;
   let mockBookingsRepository: ReturnType<typeof createMockBookingsRepository>;
+  const mockBookingWithPoints = { ...mockBooking, pointsEarned: 0 };
 
   beforeEach(() => {
     mockBookingsRepository = createMockBookingsRepository();
@@ -17,7 +18,7 @@ describe('ListProfessionalBookingsUseCase', () => {
 
   it('deve retornar agendamentos com paginação', async () => {
     // Configurar mocks
-    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByProfessionalId.mockResolvedValue(1);
 
     // Executar
@@ -29,7 +30,7 @@ describe('ListProfessionalBookingsUseCase', () => {
 
     // Verificar
     expect(result).toEqual({
-      bookings: [mockBooking],
+      bookings: [mockBookingWithPoints],
       total: 1,
       page: 1,
       limit: 10,
@@ -47,7 +48,7 @@ describe('ListProfessionalBookingsUseCase', () => {
     const startDate = new Date('2023-01-01');
     const endDate = new Date('2023-01-31');
 
-    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByProfessionalId.mockResolvedValue(1);
 
     const result = await useCase.execute({
@@ -73,7 +74,7 @@ describe('ListProfessionalBookingsUseCase', () => {
   });
 
   it('deve lançar erro quando página é maior que total de páginas', async () => {
-    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByProfessionalId.mockResolvedValue(10);
 
     await expect(
@@ -113,7 +114,7 @@ describe('ListProfessionalBookingsUseCase', () => {
   });
 
   it('deve calcular corretamente o total de páginas', async () => {
-    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByProfessionalId.mockResolvedValue(25);
 
     const result = await useCase.execute({
@@ -125,7 +126,7 @@ describe('ListProfessionalBookingsUseCase', () => {
   });
 
   it('deve usar valores padrão quando não fornecidos', async () => {
-    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByProfessionalId.mockResolvedValue(1);
 
     const result = await useCase.execute({

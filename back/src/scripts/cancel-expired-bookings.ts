@@ -15,7 +15,7 @@
  */
 
 import 'dotenv/config';
-import './config/tracer'; // Importar tracer primeiro para rastrear operações
+import '../config/tracer'; // Importar tracer primeiro para rastrear operações
 import tracer from '@/observability/tracer';
 import logger from '@/observability/logger';
 import { makeCancelExpiredBookingsUseCase } from '../use-cases/factories/make-cancel-expired-bookings-use-case';

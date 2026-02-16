@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { UpdateBookingStatusUseCase } from './update-booking-status-use-case';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
@@ -6,12 +7,9 @@ import { InvalidBookingStatusError } from '../errors/invalid-booking-status-erro
 import { BookingUpdateError } from '../errors/booking-update-error';
 import { Status } from '@prisma/client';
 import { createMockBookingsRepository } from '@/mock/mock-repositories';
+import { mockBooking as mockBookingDTO } from '@/dtos/booking-dto';
 
-// Tipo para o mock do repositório
-type MockBookingsRepository = IBookingsRepository & {
-  findById: ReturnType<typeof vi.fn>;
-  update: ReturnType<typeof vi.fn>;
-};
+type MockBookingsRepository = Mocked<IBookingsRepository>;
 
 describe('UpdateBookingStatusUseCase', () => {
   let useCase: UpdateBookingStatusUseCase;
@@ -24,7 +22,9 @@ describe('UpdateBookingStatusUseCase', () => {
   });
 
   const mockBooking = {
+    ...mockBookingDTO,
     id: 'booking-123',
+    userId: 'user-123',
     professionalId: 'pro-123',
     status: 'PENDING' as Status,
     startDateTime: new Date('2023-01-01T10:00:00'),

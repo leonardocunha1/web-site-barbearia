@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { IBusinessHoursRepository } from '@/repositories/business-hours-repository';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
@@ -11,19 +12,8 @@ import {
 } from '@/mock/mock-repositories';
 import { makeBusinessHours, makeProfessional } from '@/test/factories';
 
-// Tipos para os mocks
-type MockBusinessHoursRepository = IBusinessHoursRepository & {
-  findByProfessionalAndDay: ReturnType<typeof vi.fn>;
-  update: ReturnType<typeof vi.fn>;
-  findById: ReturnType<typeof vi.fn>;
-  delete: ReturnType<typeof vi.fn>;
-  create: ReturnType<typeof vi.fn>;
-  listByProfessional: ReturnType<typeof vi.fn>;
-};
-
-type MockProfessionalsRepository = IProfessionalsRepository & {
-  findById: ReturnType<typeof vi.fn>;
-};
+type MockBusinessHoursRepository = Mocked<IBusinessHoursRepository>;
+type MockProfessionalsRepository = Mocked<IProfessionalsRepository>;
 
 describe('Update Business Hours Use Case', () => {
   let useCase: UpdateBusinessHoursUseCase;

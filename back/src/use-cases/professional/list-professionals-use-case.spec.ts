@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { InvalidPageError } from '../errors/invalid-page-error';
 import { InvalidLimitError } from '../errors/invalid-limit-error';
@@ -6,13 +7,7 @@ import { ListOrSearchProfessionalsUseCase } from './list-professionals-use-case'
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 import { makeProfessional, makeService, makeUser } from '@/test/factories';
 
-// Tipos para os mocks
-type MockProfessionalsRepository = IProfessionalsRepository & {
-  list: ReturnType<typeof vi.fn>;
-  count: ReturnType<typeof vi.fn>;
-  search: ReturnType<typeof vi.fn>;
-  countSearch: ReturnType<typeof vi.fn>;
-};
+type MockProfessionalsRepository = Mocked<IProfessionalsRepository>;
 
 describe('ListOrSearchProfessionalsUseCase', () => {
   let useCase: ListOrSearchProfessionalsUseCase;

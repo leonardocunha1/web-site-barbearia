@@ -57,5 +57,4 @@ README.md
 # Outros
 .prettierrc
 .eslintrc*
-tsconfig.json
 vitest.config.ts

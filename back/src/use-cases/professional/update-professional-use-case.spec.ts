@@ -1,15 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { UpdateProfessionalUseCase } from './update-professional-use-case';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 import { makeProfessional } from '@/test/factories';
 
-// Tipo para o mock do repositório
-type MockProfessionalsRepository = IProfessionalsRepository & {
-  findById: ReturnType<typeof vi.fn>;
-  update: ReturnType<typeof vi.fn>;
-};
+type MockProfessionalsRepository = Mocked<IProfessionalsRepository>;
 
 describe('UpdateProfessionalUseCase', () => {
   let professionalsRepository: MockProfessionalsRepository;
@@ -156,10 +153,10 @@ describe('UpdateProfessionalUseCase', () => {
     });
 
     professionalsRepository.findById.mockResolvedValue(mockProfessional);
-    professionalsRepository.update.mockImplementation(async (_id, data) => ({
+    professionalsRepository.update.mockResolvedValue({
       ...mockProfessional,
-      ...data,
-    }));
+      updatedAt: new Date(),
+    });
 
     const oldUpdatedAt = mockProfessional.updatedAt;
     const result = await sut.execute({

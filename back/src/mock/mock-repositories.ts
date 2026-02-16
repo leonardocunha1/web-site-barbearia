@@ -1,6 +1,9 @@
 import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+import type { IBookingsRepository } from '@/repositories/bookings-repository';
+import type { IProfessionalsRepository } from '@/repositories/professionals-repository';
 
-export const createMockBookingsRepository = () => ({
+export const createMockBookingsRepository = (): Mocked<IBookingsRepository> => ({
   create: vi.fn(),
   findOverlappingBooking: vi.fn(),
   findById: vi.fn(),
@@ -17,6 +20,14 @@ export const createMockBookingsRepository = () => ({
   findByProfessionalAndDate: vi.fn(),
   countByProfessionalId: vi.fn(),
   countByUserIdAndStatus: vi.fn(),
+  countByStatus: vi.fn(),
+  countTodayBookings: vi.fn(),
+  countCanceledLast24h: vi.fn(),
+  getRevenueByDateRange: vi.fn(),
+  getCompletedBookingsCountByDateRange: vi.fn(),
+  getTopProfessionalsByCompletedBookings: vi.fn(),
+  findExpiredPendingBookings: vi.fn(),
+  cancelExpiredBookings: vi.fn(),
 });
 
 export const createMockUsersRepository = () => ({
@@ -31,7 +42,7 @@ export const createMockUsersRepository = () => ({
   anonymize: vi.fn(),
 });
 
-export const createMockProfessionalsRepository = () => ({
+export const createMockProfessionalsRepository = (): Mocked<IProfessionalsRepository> => ({
   findById: vi.fn(),
   findByUserId: vi.fn(),
   findByProfessionalId: vi.fn(),
@@ -42,6 +53,9 @@ export const createMockProfessionalsRepository = () => ({
   count: vi.fn(),
   search: vi.fn(),
   countSearch: vi.fn(),
+  countActiveOnly: vi.fn(),
+  countNewByDateRange: vi.fn(),
+  findTopWithInclude: vi.fn(),
 });
 
 export const createMockServiceProfessionalRepository = () => ({

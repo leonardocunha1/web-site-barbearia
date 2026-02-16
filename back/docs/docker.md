@@ -86,7 +86,10 @@ JWT_SECRET=seu-jwt-secret-super-seguro
 
 # Datadog (opcional)
 DD_API_KEY=sua-chave-datadog
-DD_SITE=datadoghq.com
+# IMPORTANTE: DD_SITE deve ser apenas o domínio, SEM https://
+# Encontre sua região em: https://docs.datadoghq.com/getting_started/site/
+# Exemplos: us5.datadoghq.com (US5), datadoghq.eu (EU), datadoghq.com (US1)
+DD_SITE=us5.datadoghq.com
 ```
 
 ## Otimizações do Dockerfile

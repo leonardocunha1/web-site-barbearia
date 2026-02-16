@@ -9,6 +9,7 @@ import { createMockBookingsRepository } from '@/mock/mock-repositories';
 describe('ListBookingsUseCase', () => {
   let useCase: ListBookingsUseCase;
   let mockBookingsRepository: ReturnType<typeof createMockBookingsRepository>;
+  const mockBookingWithPoints = { ...mockBooking, pointsEarned: 0 };
 
   beforeEach(() => {
     mockBookingsRepository = createMockBookingsRepository();
@@ -18,7 +19,7 @@ describe('ListBookingsUseCase', () => {
 
   it('deve retornar agendamentos com paginação', async () => {
     // Configurar mocks
-    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByUserId.mockResolvedValue(1);
 
     // Executar
@@ -30,7 +31,7 @@ describe('ListBookingsUseCase', () => {
 
     // Verificar
     expect(result).toEqual({
-      bookings: [mockBooking],
+      bookings: [mockBookingWithPoints],
       total: 1,
       page: 1,
       limit: 10,
@@ -48,7 +49,7 @@ describe('ListBookingsUseCase', () => {
     const startDate = new Date('2023-01-01');
     const endDate = new Date('2023-01-31');
 
-    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByUserId.mockResolvedValue(1);
 
     const result = await useCase.execute({
@@ -75,7 +76,7 @@ describe('ListBookingsUseCase', () => {
 
   it('deve lançar erro quando página é maior que total de páginas', async () => {
     // Configurar para retornar 1 booking mas total de 10 registros
-    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByUserId.mockResolvedValue(10);
 
     await expect(
@@ -89,7 +90,7 @@ describe('ListBookingsUseCase', () => {
 
   it('deve lançar erro quando página é maior que total de registros', async () => {
     // Configurar para retornar 1 booking mas total de 10 registros
-    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByUserId.mockResolvedValue(10);
 
     await expect(
@@ -130,7 +131,7 @@ describe('ListBookingsUseCase', () => {
   });
 
   it('deve calcular corretamente o total de páginas', async () => {
-    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBooking]);
+    mockBookingsRepository.findManyByUserId.mockResolvedValue([mockBookingWithPoints]);
     mockBookingsRepository.countByUserId.mockResolvedValue(25); // 25 registros no total
 
     const result = await useCase.execute({

@@ -20,6 +20,7 @@ import { InvalidBonusRedemptionError } from '../errors/invalid-bonus-redemption-
 import { CouponBonusConflictError } from '../errors/coupon-bonus-conflict-error';
 import { InvalidCouponError } from './invalid-coupon-error';
 import { makeProfessional, makeService, makeServiceProfessional, makeUser } from '@/test/factories';
+import { mockBooking } from '@/dtos/booking-dto';
 
 // FunÃ§Ã£o para criar todos os mocks
 const createMockRepositories = () => ({
@@ -122,10 +123,12 @@ describe('CreateBookingUseCase', () => {
       userId: mockUserId,
       professionalId: mockProfessionalId,
       status: 'PENDING',
-      valorTotal: 100,
       totalAmount: 100,
-      desconto: 0,
       pointsUsed: 0,
+      couponId: null,
+      couponDiscount: 0,
+      canceledAt: null,
+      confirmedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -280,6 +283,7 @@ describe('CreateBookingUseCase', () => {
       }),
     );
     mockRepos.bookingsRepository.findOverlappingBooking.mockResolvedValue({
+      ...mockBooking,
       id: 'existing',
     });
 
@@ -344,7 +348,12 @@ describe('CreateBookingUseCase', () => {
     const createCall = mockRepos.bookingsRepository.create.mock.calls[0][0];
     expect(createCall.endDateTime).toEqual(new Date(futureDate.getTime() + 75 * 60000)); // 30 + 45 minutos
     expect(createCall.totalAmount).toBe(250); // 100 + 150
-    expect(createCall.items.create).toHaveLength(2);
+    const items = Array.isArray(createCall.items?.create)
+      ? createCall.items?.create
+      : createCall.items?.create
+        ? [createCall.items.create]
+        : [];
+    expect(items).toHaveLength(2);
   });
 
   it('deve aplicar desconto de bÃ´nus corretamente', async () => {
@@ -382,12 +391,16 @@ describe('CreateBookingUseCase', () => {
       id: 'booking-1',
       startDateTime: futureDate,
       endDateTime: new Date(futureDate.getTime() + 60 * 60000),
-      notes: undefined,
+      notes: null,
       userId: 'user-1',
       professionalId: 'pro-1',
       status: 'PENDING',
       totalAmount: 0,
       pointsUsed: 200,
+      couponId: null,
+      couponDiscount: 0,
+      canceledAt: null,
+      confirmedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -512,14 +525,16 @@ describe('CreateBookingUseCase', () => {
       id: mockBookingId, // Essencial para que booking.id nÃ£o seja undefined
       startDateTime: futureDate,
       endDateTime: new Date(futureDate.getTime() + 60 * 60000),
-      notes: undefined,
+      notes: null,
       userId: 'user-1',
       professionalId: 'pro-1',
       status: 'PENDING',
-      valorTotal: 50,
       totalAmount: 0, // Valor mÃ­nimo apÃ³s desconto
-      desconto: 50,
       pointsUsed: 100, // Pontos para cobrir R$49.99 (49.99 / 0.5 = 99.98, Math.ceil -> 100)
+      couponId: null,
+      couponDiscount: 0,
+      canceledAt: null,
+      confirmedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -627,11 +642,16 @@ describe('CreateBookingUseCase', () => {
       id: 'booking-1',
       startDateTime: futureDate,
       endDateTime: new Date(futureDate.getTime() + 60 * 60000),
+      notes: null,
       userId: 'user-1',
       professionalId: 'pro-1',
       status: 'PENDING',
       totalAmount: 80, // 100 - 20%
       pointsUsed: 0,
+      couponId: 'coupon-1',
+      couponDiscount: 20,
+      canceledAt: null,
+      confirmedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

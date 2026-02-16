@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import type { Mocked } from 'vitest';
 import { ListProfessionalServicesUseCase } from './list-professional-services-use-case';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
@@ -9,15 +10,8 @@ import {
 } from '@/mock/mock-repositories';
 import { makeProfessional, makeService } from '@/test/factories';
 
-// Tipos para os mocks
-type MockProfessionalsRepository = IProfessionalsRepository & {
-  findById: ReturnType<typeof vi.fn>;
-};
-
-type MockServiceProfessionalRepository = IServiceProfessionalRepository & {
-  findAllActiveWithProfessionalData: ReturnType<typeof vi.fn>;
-  findAllWithProfessionalData: ReturnType<typeof vi.fn>;
-};
+type MockProfessionalsRepository = Mocked<IProfessionalsRepository>;
+type MockServiceProfessionalRepository = Mocked<IServiceProfessionalRepository>;
 
 describe('ListProfessionalServicesUseCase', () => {
   let professionalsRepository: MockProfessionalsRepository;
