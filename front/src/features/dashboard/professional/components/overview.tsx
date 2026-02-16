@@ -67,7 +67,7 @@ export function OverviewSection() {
     range !== "custom" || (Boolean(startDate) && Boolean(endDate));
 
   const { data, isLoading, isError } = useGetProfessionalDashboard(params, {
-    query: { enabled: isCustomReady },
+    query: { enabled: isCustomReady, refetchInterval: 30000 },
   });
 
   const metrics = data?.metrics;
@@ -129,7 +129,7 @@ export function OverviewSection() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-6">
         <Card className="w-full rounded-2xl shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
@@ -202,7 +202,72 @@ export function OverviewSection() {
           </CardContent>
         </Card>
 
-        <div className="col-span-full">
+        <Card className="w-full rounded-2xl shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+            <CalendarIcon className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {metrics?.pendingCount ?? 0}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              aguardando confirmação
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full rounded-2xl shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">
+              Taxa Conclusão
+            </CardTitle>
+            <UserCheckIcon className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(metrics?.completionRate ?? 0).toFixed(1)}%
+            </div>
+            <p className="text-muted-foreground text-xs">
+              agendamentos concluídos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full rounded-2xl shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">
+              Taxa Cancelamento
+            </CardTitle>
+            <UserXIcon className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(metrics?.cancellationRate ?? 0).toFixed(1)}%
+            </div>
+            <p className="text-muted-foreground text-xs">
+              do total de agendamentos
+            </p>
+          </CardContent>
+        </Card>
+
+        <div className="col-span-full lg:col-span-2">
+          <Card className="h-full w-full rounded-2xl shadow">
+            <CardHeader>
+              <CardTitle>Ticket Médio</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(metrics?.averageTicket)}
+              </div>
+              <p className="text-muted-foreground text-xs">
+                ganho médio por agendamento
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="col-span-full lg:col-span-4">
           <Card className="w-full rounded-2xl shadow">
             <CardHeader>
               <CardTitle>Agenda ({rangeLabel})</CardTitle>

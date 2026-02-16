@@ -44,6 +44,7 @@ import type {
   ToggleProfessionalStatus404,
   UpdateProfessional200,
   UpdateProfessional400,
+  UpdateProfessional403,
   UpdateProfessional404,
   UpdateProfessionalBody,
 } from "../schemas";
@@ -452,7 +453,10 @@ export const updateProfessional = (
 };
 
 export const getUpdateProfessionalMutationOptions = <
-  TError = UpdateProfessional400 | UpdateProfessional404,
+  TError =
+    | UpdateProfessional400
+    | UpdateProfessional403
+    | UpdateProfessional404,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -494,10 +498,14 @@ export type UpdateProfessionalMutationResult = NonNullable<
 export type UpdateProfessionalMutationBody = UpdateProfessionalBody;
 export type UpdateProfessionalMutationError =
   | UpdateProfessional400
+  | UpdateProfessional403
   | UpdateProfessional404;
 
 export const useUpdateProfessional = <
-  TError = UpdateProfessional400 | UpdateProfessional404,
+  TError =
+    | UpdateProfessional400
+    | UpdateProfessional403
+    | UpdateProfessional404,
   TContext = unknown,
 >(
   options?: {

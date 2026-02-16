@@ -16,6 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,6 +32,10 @@ import {
   useUpdateBookingStatus,
 } from "@/api";
 import {
+  ListProfessionalBookingsStatus,
+  UpdateBookingStatusBodyStatus,
+} from "@/api";
+import {
   buildDateRangeFilters,
   formatBookingDateTime,
   formatBookingServices,
@@ -34,6 +44,7 @@ import {
 import { useTableParams } from "@/shared/hooks/useTableParams";
 import { BookingFilters } from "@/features/bookings";
 import { BonusAssignDialog } from "./bonus-assign-dialog";
+import { BookingDetailsModal } from "@/features/bookings/components/booking-details-modal";
 
 type ScheduleRow = {
   id: string;
@@ -44,30 +55,61 @@ type ScheduleRow = {
   service: string;
   status: string;
   statusValue: "PENDING" | "CONFIRMED" | "CANCELED" | "COMPLETED";
+  startDateTime: string;
+  endDateTime: string;
 };
 
-const statusOptions = [
-  { value: "PENDING", label: "Pendente" },
-  { value: "CONFIRMED", label: "Confirmar" },
-  { value: "CANCELED", label: "Cancelar" },
-  { value: "COMPLETED", label: "Concluir" },
-] as const;
+const statusOptions: { value: UpdateBookingStatusBodyStatus; label: string }[] =
+  [
+    { value: "PENDING", label: "Pendente" },
+    { value: "CONFIRMED", label: "Confirmar" },
+    { value: "CANCELED", label: "Cancelar" },
+    { value: "COMPLETED", label: "Concluir" },
+  ];
+
+const statusOptionsByCurrent: Record<
+  ScheduleRow["statusValue"],
+  { value: UpdateBookingStatusBodyStatus; label: string }[]
+> = {
+  PENDING: [
+    { value: "CONFIRMED", label: "Confirmar" },
+    { value: "CANCELED", label: "Cancelar" },
+  ],
+  CONFIRMED: [
+    { value: "COMPLETED", label: "Concluir" },
+    { value: "CANCELED", label: "Cancelar" },
+  ],
+  CANCELED: [],
+  COMPLETED: [],
+};
 
 export function ScheduleSection() {
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null,
+  );
   const queryClient = useQueryClient();
   const { params, updateParams } = useTableParams();
-  const { openBookingDetails } = useBookingDetailsModal();
 
   const { startDate, endDate } = buildDateRangeFilters(
     params.filters.startDate,
     params.filters.endDate,
   );
 
+  const parsedStatus = useMemo(() => {
+    const current = params.filters.status || undefined;
+    if (!current) return undefined;
+    return (Object.values(ListProfessionalBookingsStatus) as string[]).includes(
+      current,
+    )
+      ? (current as ListProfessionalBookingsStatus)
+      : undefined;
+  }, [params.filters.status]);
+
   const listParams = {
     page: params.page,
     limit: params.limit,
-    status: params.filters.status || undefined,
+    status: parsedStatus,
     startDate,
     endDate,
   };
@@ -101,10 +143,17 @@ export function ScheduleSection() {
           service: formatBookingServices(booking.items),
           status: formatBookingStatus(booking.status),
           statusValue: booking.status,
+          startDateTime: booking.startDateTime,
+          endDateTime: booking.endDateTime,
         };
       }) ?? []
     );
   }, [data]);
+
+  const canComplete = (row: ScheduleRow) => {
+    const endTime = new Date(row.endDateTime);
+    return endTime <= new Date();
+  };
 
   const columns: Column<ScheduleRow>[] = [
     {
@@ -204,28 +253,39 @@ export function ScheduleSection() {
             emptyMessage="Nenhum agendamento encontrado"
             totalItems={data?.total ?? 0}
             showPagination
-            onRowClick={(row) => openBookingDetails(row.id)}
+            onRowClick={(row) => setSelectedBookingId(row.id)}
             actions={(row) => (
               <div className="flex items-center gap-2">
                 <Select
                   value={row.statusValue}
+                  disabled={
+                    updateStatus.isPending ||
+                    row.statusValue === "CANCELED" ||
+                    row.statusValue === "COMPLETED"
+                  }
                   onValueChange={(value) =>
                     updateStatus.mutate({
                       bookingId: row.id,
-                      data: { status: value },
+                      data: { status: value as UpdateBookingStatusBodyStatus },
                     })
                   }
-                  disabled={updateStatus.isPending}
                 >
                   <SelectTrigger className="h-8 w-[140px]">
                     <SelectValue placeholder="Atualizar" />
                   </SelectTrigger>
                   <SelectContent>
-                    {statusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    {(statusOptionsByCurrent[row.statusValue].length
+                      ? statusOptionsByCurrent[row.statusValue]
+                      : statusOptions
+                    )
+                      .filter((option) =>
+                        option.value === "COMPLETED" ? canComplete(row) : true,
+                      )
+                      .map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <BonusAssignDialog
@@ -245,6 +305,20 @@ export function ScheduleSection() {
           <Button variant="outline">Exportar Agenda</Button>
         </div>
       </CardContent>
+
+      <Dialog
+        open={Boolean(selectedBookingId)}
+        onOpenChange={(open) => !open && setSelectedBookingId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Detalhes do agendamento</DialogTitle>
+          </DialogHeader>
+          {selectedBookingId && (
+            <BookingDetailsModal bookingId={selectedBookingId} />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

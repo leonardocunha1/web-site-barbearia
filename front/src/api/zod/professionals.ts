@@ -78,11 +78,16 @@ export const zodupdateProfessionalParams = zod.object({
   "id": zod.string().uuid().describe('ID do profissional para atualização')
 })
 
+export const zodupdateProfessionalBodyNameMin = 2;
+export const zodupdateProfessionalBodyPhoneRegExp = new RegExp('^\\+?[\\d\\s()-]{10,20}$');
 export const zodupdateProfessionalBodySpecialtyMin = 3;
 export const zodupdateProfessionalBodyAvatarUrlRegExp = new RegExp('^(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*$');
 
 
 export const zodupdateProfessionalBody = zod.object({
+  "name": zod.string().min(zodupdateProfessionalBodyNameMin).optional().describe('Nome atualizado do profissional'),
+  "email": zod.string().email().optional().describe('E-mail atualizado do profissional'),
+  "phone": zod.string().regex(zodupdateProfessionalBodyPhoneRegExp).nullish().describe('Telefone atualizado do profissional'),
   "specialty": zod.string().min(zodupdateProfessionalBodySpecialtyMin).optional().describe('Especialidade atualizada do profissional'),
   "bio": zod.string().nullish().describe('Biografia atualizada do profissional'),
   "document": zod.string().nullish().describe('Número do documento profissional'),
@@ -153,29 +158,53 @@ export const zodgetProfessionalDashboardResponseMetricsAppointmentsMin = 0;
 export const zodgetProfessionalDashboardResponseMetricsEarningsMin = 0;
 export const zodgetProfessionalDashboardResponseMetricsCanceledMin = 0;
 export const zodgetProfessionalDashboardResponseMetricsCompletedMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsPendingCountMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsCancellationRateMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsCompletionRateMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsAverageTicketMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsTopServicesItemCountMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsTopServicesItemPercentageMin = 0;
+export const zodgetProfessionalDashboardResponseMetricsTopServicesMax = 5;
 export const zodgetProfessionalDashboardResponseNextAppointmentsItemClientNameMin = 2;
 export const zodgetProfessionalDashboardResponseNextAppointmentsItemServiceMin = 3;
+export const zodgetProfessionalDashboardResponseNextAppointmentsItemTotalAmountMin = 0;
 export const zodgetProfessionalDashboardResponseNextAppointmentsMax = 10;
 
 
 export const zodgetProfessionalDashboardResponse = zod.object({
   "professional": zod.object({
+  "id": zod.string().uuid().describe('ID do profissional'),
   "name": zod.string().min(zodgetProfessionalDashboardResponseProfessionalNameMin).max(zodgetProfessionalDashboardResponseProfessionalNameMax).describe('Nome do profissional'),
+  "email": zod.string().email().describe('Email do profissional'),
+  "phone": zod.string().nullable().describe('Telefone do profissional'),
   "specialty": zod.string().min(zodgetProfessionalDashboardResponseProfessionalSpecialtyMin).max(zodgetProfessionalDashboardResponseProfessionalSpecialtyMax).describe('Especialidade do profissional'),
-  "avatarUrl": zod.string().url().nullable().describe('URL do avatar do profissional, pode ser nulo')
+  "bio": zod.string().nullable().describe('Biografia do profissional'),
+  "avatarUrl": zod.string().url().nullable().describe('URL do avatar do profissional'),
+  "document": zod.string().nullable().describe('Documento do profissional'),
+  "active": zod.boolean().describe('Status ativo do profissional')
 }).describe('Dados do profissional'),
   "metrics": zod.object({
   "appointments": zod.number().min(zodgetProfessionalDashboardResponseMetricsAppointmentsMin).describe('Quantidade total de agendamentos'),
   "earnings": zod.number().min(zodgetProfessionalDashboardResponseMetricsEarningsMin).describe('Total de ganhos'),
   "canceled": zod.number().min(zodgetProfessionalDashboardResponseMetricsCanceledMin).describe('Quantidade de agendamentos cancelados'),
-  "completed": zod.number().min(zodgetProfessionalDashboardResponseMetricsCompletedMin).describe('Quantidade de agendamentos concluídos')
+  "completed": zod.number().min(zodgetProfessionalDashboardResponseMetricsCompletedMin).describe('Quantidade de agendamentos concluídos'),
+  "pendingCount": zod.number().min(zodgetProfessionalDashboardResponseMetricsPendingCountMin).describe('Quantidade de agendamentos pendentes'),
+  "cancellationRate": zod.number().min(zodgetProfessionalDashboardResponseMetricsCancellationRateMin).describe('Taxa de cancelamento em percentual'),
+  "completionRate": zod.number().min(zodgetProfessionalDashboardResponseMetricsCompletionRateMin).describe('Taxa de conclusão em percentual'),
+  "averageTicket": zod.number().min(zodgetProfessionalDashboardResponseMetricsAverageTicketMin).describe('Ganho médio por agendamento'),
+  "topServices": zod.array(zod.object({
+  "service": zod.string().describe('Nome do serviço'),
+  "count": zod.number().min(zodgetProfessionalDashboardResponseMetricsTopServicesItemCountMin).describe('Quantidade de agendamentos'),
+  "percentage": zod.number().min(zodgetProfessionalDashboardResponseMetricsTopServicesItemPercentageMin).describe('Percentual do total')
+}).describe('Serviço com estatísticas')).max(zodgetProfessionalDashboardResponseMetricsTopServicesMax).describe('Top 5 serviços mais agendados')
 }).describe('Métricas do dashboard'),
   "nextAppointments": zod.array(zod.object({
   "id": zod.string().uuid().describe('ID do agendamento'),
   "date": zod.string().datetime({}).describe('Data e hora do agendamento no formato ISO'),
   "clientName": zod.string().min(zodgetProfessionalDashboardResponseNextAppointmentsItemClientNameMin).describe('Nome do cliente'),
   "service": zod.string().min(zodgetProfessionalDashboardResponseNextAppointmentsItemServiceMin).describe('Serviço agendado'),
-  "status": zod.enum(['PENDING', 'CONFIRMED']).describe('Status do agendamento')
+  "status": zod.enum(['PENDING', 'CONFIRMED']).describe('Status do agendamento'),
+  "totalAmount": zod.number().min(zodgetProfessionalDashboardResponseNextAppointmentsItemTotalAmountMin).optional().describe('Valor total do agendamento')
 }).describe('Próximo agendamento')).max(zodgetProfessionalDashboardResponseNextAppointmentsMax).describe('Lista dos próximos agendamentos')
 }).describe('Dados completos do dashboard')
 

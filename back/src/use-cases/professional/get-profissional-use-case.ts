@@ -1,9 +1,10 @@
-import { DashboardRequestDTO, DashboardResponseDTO, TimeRange } from '@/dtos/dashboard-dto';
+import { DashboardRequestDTO, TimeRange } from '@/dtos/dashboard-dto';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { startOfDay, endOfDay, subDays, isAfter, isValid } from 'date-fns';
 import { InvalidDataError } from '../errors/invalid-data-error';
+import type { Dashboard } from '@/schemas/dashboard-schema';
 
 export class GetProfessionalDashboardUseCase {
   constructor(
@@ -56,65 +57,109 @@ export class GetProfessionalDashboardUseCase {
   }
 
   async execute(
-    professionalId: string,
+    userId: string,
     { range, startDate, endDate }: DashboardRequestDTO,
-  ): Promise<DashboardResponseDTO> {
-    const professional = await this.professionalsRepository.findByProfessionalId(professionalId);
+  ): Promise<Dashboard> {
+    const professional = await this.professionalsRepository.findByUserIdWithUser(userId);
     if (!professional) throw new ProfessionalNotFoundError();
 
     const dateRange = this.getDateRange(range, startDate, endDate);
 
-    const [appointments, earnings, canceled, completed, nextAppointments] = await Promise.all([
+    const [
+      appointments,
+      earnings,
+      canceled,
+      completed,
+      pending,
+      serviceBreakdown,
+      nextAppointments,
+    ] = await Promise.all([
       this.bookingsRepository.countByProfessionalAndDate(
-        professionalId,
+        professional.id,
         dateRange.start,
         dateRange.end,
       ),
       this.bookingsRepository.getEarningsByProfessionalAndDate(
-        professionalId,
+        professional.id,
         dateRange.start,
         dateRange.end,
         'COMPLETED',
       ),
       this.bookingsRepository.countByProfessionalAndStatus(
-        professionalId,
+        professional.id,
         'CANCELED',
         dateRange.start,
         dateRange.end,
       ),
       this.bookingsRepository.countByProfessionalAndStatus(
-        professionalId,
+        professional.id,
         'COMPLETED',
         dateRange.start,
         dateRange.end,
       ),
-      this.bookingsRepository.findNextAppointments(professionalId, 3, {
+      this.bookingsRepository.countByProfessionalAndStatusRange(
+        professional.id,
+        'PENDING',
+        dateRange.start,
+        dateRange.end,
+      ),
+      this.bookingsRepository.getServiceBreakdownByProfessional(
+        professional.id,
+        dateRange.start,
+        dateRange.end,
+        5,
+      ),
+      this.bookingsRepository.findNextAppointments(professional.id, 3, {
         startDate: dateRange.start,
         endDate: dateRange.end,
       }),
     ]);
 
+    // Cálculo de métricas derivadas
+    const cancellationRate = appointments > 0 ? (canceled / appointments) * 100 : 0;
+    const completionRate = appointments > 0 ? (completed / appointments) * 100 : 0;
+    const averageTicket = appointments > 0 ? earnings / appointments : 0;
+
+    // Adicionar percentuais aos serviços
+    const topServices = serviceBreakdown.map((service) => ({
+      service: service.serviceName,
+      count: service.count,
+      percentage: appointments > 0 ? (service.count / appointments) * 100 : 0,
+    }));
+
     return {
       professional: {
+        id: professional.id,
         name: professional.user.name,
+        email: professional.user.email,
+        phone: professional.user.phone,
         specialty: professional.specialty,
+        bio: professional.bio,
         avatarUrl: professional.avatarUrl,
+        document: professional.document,
+        active: professional.active,
       },
       metrics: {
         appointments,
         earnings,
         canceled,
         completed,
+        pendingCount: pending,
+        cancellationRate: Math.round(cancellationRate * 100) / 100,
+        completionRate: Math.round(completionRate * 100) / 100,
+        averageTicket: Math.round(averageTicket * 100) / 100,
+        topServices,
       },
       nextAppointments: nextAppointments.map((appointment) => ({
         id: appointment.id,
-        date: appointment.startDateTime,
+        date: appointment.startDateTime.toISOString(),
         clientName: appointment.user.name,
         service:
           appointment.items.length > 1
             ? 'Vários serviços'
             : appointment.items[0]?.serviceProfessional.service.name || 'Serviço não especificado',
         status: appointment.status as 'PENDING' | 'CONFIRMED',
+        totalAmount: appointment.totalAmount,
       })),
     };
   }

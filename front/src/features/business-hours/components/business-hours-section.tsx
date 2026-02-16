@@ -47,26 +47,43 @@ type BusinessHourRow = {
   break: string;
 };
 
-export function BusinessHoursSection() {
+type BusinessHoursSectionProps = {
+  professionalId?: string;
+};
+
+export function BusinessHoursSection({
+  professionalId: professionalIdProp,
+}: BusinessHoursSectionProps) {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const { openBusinessHoursModal } = useBusinessHoursModal();
 
-  const professionalsQuery = useListOrSearchProfessionals({
-    page: 1,
-    limit: 50,
-    search: user?.user.email,
-  });
-
-  const professionalId = useMemo(
-    () =>
-      mapProfessionalId(
-        user?.user.id,
-        user?.user.email,
-        professionalsQuery.data?.professionals,
-      ),
-    [user?.user.id, user?.user.email, professionalsQuery.data?.professionals],
+  const professionalsQuery = useListOrSearchProfessionals(
+    {
+      page: 1,
+      limit: 50,
+      search: user?.user.email,
+    },
+    {
+      query: {
+        enabled: !professionalIdProp && Boolean(user?.user.email),
+      },
+    },
   );
+
+  const professionalId = useMemo(() => {
+    if (professionalIdProp) return professionalIdProp;
+    return mapProfessionalId(
+      user?.user.id,
+      user?.user.email,
+      professionalsQuery.data?.professionals,
+    );
+  }, [
+    professionalIdProp,
+    user?.user.id,
+    user?.user.email,
+    professionalsQuery.data?.professionals,
+  ]);
 
   const listQuery = useListBusinessHours(professionalId, {
     query: { enabled: Boolean(professionalId) },
@@ -120,6 +137,11 @@ export function BusinessHoursSection() {
     );
   }, [listQuery.data]);
 
+  const existingDays = useMemo(
+    () => listQuery.data?.businessHours?.map((item) => item.dayOfWeek) ?? [],
+    [listQuery.data],
+  );
+
   const columns: Column<BusinessHourRow>[] = [
     { header: "Dia", accessor: "dayOfWeek" },
     { header: "Abertura", accessor: "opensAt" },
@@ -130,6 +152,7 @@ export function BusinessHoursSection() {
   const handleCreate = () => {
     openBusinessHoursModal({
       mode: "create",
+      existingDays,
       onSubmit: async (values: BusinessHoursFormValues) => {
         await createBusinessHour.mutateAsync({ data: values });
       },
@@ -144,6 +167,7 @@ export function BusinessHoursSection() {
 
     openBusinessHoursModal({
       mode: "edit",
+      existingDays,
       initialValues: source
         ? {
             dayOfWeek: source.dayOfWeek,
@@ -164,7 +188,7 @@ export function BusinessHoursSection() {
     });
   };
 
-  if (professionalsQuery.isLoading) {
+  if (!professionalIdProp && professionalsQuery.isLoading) {
     return (
       <Card>
         <CardHeader>

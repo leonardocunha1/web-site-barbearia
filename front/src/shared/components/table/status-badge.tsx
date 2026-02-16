@@ -7,8 +7,9 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     switch (status) {
       case "Concluído":
       case "Concluido":
-      case "Confirmado":
         return "bg-green-100 text-green-800";
+      case "Confirmado":
+        return "bg-blue-100 text-blue-800";
       case "Cancelado":
         return "bg-red-100 text-red-800";
       case "Pendente":

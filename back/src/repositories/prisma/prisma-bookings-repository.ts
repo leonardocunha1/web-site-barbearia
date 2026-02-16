@@ -476,4 +476,71 @@ export class PrismaBookingsRepository implements IBookingsRepository {
       await this.cancelExpiredBookings(expired.map((b) => b.id));
     }
   }
+
+  async getServiceBreakdownByProfessional(
+    professionalId: string,
+    startDate: Date,
+    endDate: Date,
+    limit = 5,
+  ): Promise<
+    Array<{
+      serviceName: string;
+      count: number;
+    }>
+  > {
+    const results = await prisma.bookingItem.groupBy({
+      by: ['serviceId'],
+      where: {
+        booking: {
+          professionalId,
+          startDateTime: { gte: startDate, lte: endDate },
+          status: { not: 'CANCELED' },
+          canceledAt: null,
+        },
+        serviceId: { not: null },
+      },
+      _count: { _all: true },
+      orderBy: [{ _count: { id: 'desc' } }],
+      take: limit,
+    });
+
+    const serviceIds = results.map((r) => r.serviceId).filter((id): id is string => id !== null);
+
+    if (serviceIds.length === 0) {
+      return [];
+    }
+
+    const services = await prisma.service.findMany({
+      where: {
+        id: { in: serviceIds },
+      },
+      select: { id: true, name: true },
+    });
+
+    const serviceMap = new Map(services.map((s) => [s.id, s.name]));
+
+    return results
+      .map((r) => ({
+        serviceName: r.serviceId
+          ? serviceMap.get(r.serviceId) || 'Serviço não identificado'
+          : 'Serviço não identificado',
+        count: (r._count as unknown as { _all: number })._all,
+      }))
+      .filter((item) => item.serviceName !== 'Serviço não identificado');
+  }
+
+  async countByProfessionalAndStatusRange(
+    professionalId: string,
+    status: Status,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<number> {
+    return prisma.booking.count({
+      where: {
+        professionalId,
+        status,
+        startDateTime: { gte: startDate, lte: endDate },
+      },
+    });
+  }
 }

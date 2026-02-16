@@ -72,7 +72,7 @@ export default function Page() {
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
         >
-          <Card className="overflow-hidden border-stone-200 bg-white shadow-2xl">
+          <Card className="overflow-hidden border-stone-200 bg-white shadow-md">
             <div className="from-principal-400 to-principal-600 h-2 w-full bg-gradient-to-r" />
             <CardContent className="space-y-6 p-6 sm:p-8">
               <motion.div

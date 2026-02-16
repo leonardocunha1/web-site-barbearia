@@ -21,8 +21,28 @@ import {
 import { useState } from "react";
 import { Badge } from "@/shared/components/ui/badge";
 
+type WorkingHours = {
+  monday: string[];
+  tuesday: string[];
+  wednesday: string[];
+  thursday: string[];
+  friday: string[];
+  saturday: string[];
+  sunday: string[];
+};
+
+type ProfileState = {
+  name: string;
+  email: string;
+  phone: string;
+  specialty: string;
+  bio: string;
+  services: string[];
+  workingHours: WorkingHours;
+};
+
 export function ProfileSection() {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileState>({
     name: "Profissional Exemplo",
     email: "profissional@exemplo.com",
     phone: "(11) 99999-9999",
@@ -246,4 +266,3 @@ export function ProfileSection() {
     </Card>
   );
 }
-

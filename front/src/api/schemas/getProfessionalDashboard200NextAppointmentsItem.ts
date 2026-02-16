@@ -20,4 +20,9 @@ export type GetProfessionalDashboard200NextAppointmentsItem = {
   service: string;
   /** Status do agendamento */
   status: GetProfessionalDashboard200NextAppointmentsItemStatus;
+  /**
+   * Valor total do agendamento
+   * @minimum 0
+   */
+  totalAmount?: number;
 };

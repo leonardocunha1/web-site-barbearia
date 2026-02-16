@@ -128,4 +128,23 @@ export interface IBookingsRepository {
   findExpiredPendingBookings(currentDate: Date): Promise<Booking[]>;
 
   cancelExpiredBookings(bookingIds: string[]): Promise<number>;
+
+  getServiceBreakdownByProfessional(
+    professionalId: string,
+    startDate: Date,
+    endDate: Date,
+    limit?: number,
+  ): Promise<
+    Array<{
+      serviceName: string;
+      count: number;
+    }>
+  >;
+
+  countByProfessionalAndStatusRange(
+    professionalId: string,
+    status: Status,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<number>;
 }

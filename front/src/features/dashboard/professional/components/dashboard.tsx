@@ -1,50 +1,104 @@
-import { Briefcase, UserCircle2 } from "lucide-react";
-import { OverviewSection } from "./overview";
-import { ServicesSection } from "./services";
-import { ScheduleSection } from "./schedule";
-import { ProfileSection } from "./profile";
-import { BusinessHoursSection } from "@/features/business-hours";
-import { HolidaysSection } from "@/features/holidays";
-import { DashboardLayout } from "../../layout/dashboard-layout";
+"use client";
 
-export default function ProfessionalDashboard() {
+import { useState, useEffect } from "react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { Button } from "@/shared/components/ui/button";
+import { OverviewSection } from "./overview";
+import { BookingsSection } from "./bookings-section";
+import { AnalyticsSection } from "./analytics-section";
+import { SettingsSection } from "./settings-section";
+import { RotateCw } from "lucide-react";
+import { useGetProfessionalDashboard } from "@/api/react-query/professionals";
+
+export function ProfessionalDashboard() {
+  const { refetch, isLoading } = useGetProfessionalDashboard(
+    { range: "week" },
+    {
+      query: {
+        refetchInterval: 30000,
+      },
+    },
+  );
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setLastUpdated(new Date());
+  }, [isLoading]);
+
+  const handleManualRefresh = async () => {
+    await refetch();
+    setLastUpdated(new Date());
+  };
+
+  const getLastUpdateText = () => {
+    if (!lastUpdated) return "Aguardando atualização...";
+    const now = new Date();
+    const diffSeconds = Math.floor(
+      (now.getTime() - lastUpdated.getTime()) / 1000,
+    );
+
+    if (diffSeconds < 60) {
+      return `Atualizado há ${diffSeconds}s`;
+    }
+    return `Atualizado há ${Math.floor(diffSeconds / 60)}m`;
+  };
+
   return (
-    <DashboardLayout
-      title="Painel Profissional"
-      iconGroup={
-        <div className="flex items-center gap-2">
-          <Briefcase className="h-6 w-6 text-gray-600" />
-          <UserCircle2 className="h-8 w-8 text-gray-600" />
+    <div className="space-y-6">
+      {/* Header com refresh button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Dashboard do Profissional
+          </h1>
+          <p className="mt-1 text-sm text-stone-500">
+            {getLastUpdateText()} • Atualização automática a cada 30s
+          </p>
         </div>
-      }
-      tabs={[
-        {
-          value: "overview",
-          label: "Visão Geral",
-          content: <OverviewSection />,
-        },
-        {
-          value: "servicos",
-          label: "Meus Serviços",
-          content: <ServicesSection />,
-        },
-        {
-          value: "agenda",
-          label: "Minha Agenda",
-          content: <ScheduleSection />,
-        },
-        {
-          value: "horarios",
-          label: "Horarios",
-          content: <BusinessHoursSection />,
-        },
-        {
-          value: "feriados",
-          label: "Feriados",
-          content: <HolidaysSection />,
-        },
-        { value: "dados", label: "Meus Dados", content: <ProfileSection /> },
-      ]}
-    />
+        <Button
+          onClick={handleManualRefresh}
+          disabled={isLoading}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          <RotateCw className="h-4 w-4" />
+          Atualizar
+        </Button>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4 gap-0">
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="bookings">Agendamentos</TabsTrigger>
+          <TabsTrigger value="analytics">Análises</TabsTrigger>
+          <TabsTrigger value="settings">Configurações</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <OverviewSection />
+        </TabsContent>
+
+        <TabsContent value="bookings" className="space-y-4">
+          <BookingsSection />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <AnalyticsSection />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <SettingsSection />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
+
+export default ProfessionalDashboard;

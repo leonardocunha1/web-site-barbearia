@@ -1,3 +1,5 @@
+import type { GetProfessionalDashboard200MetricsTopServicesItem } from "./getProfessionalDashboard200MetricsTopServicesItem";
+
 /**
  * Métricas do dashboard
  */
@@ -22,4 +24,29 @@ export type GetProfessionalDashboard200Metrics = {
    * @minimum 0
    */
   completed: number;
+  /**
+   * Quantidade de agendamentos pendentes
+   * @minimum 0
+   */
+  pendingCount: number;
+  /**
+   * Taxa de cancelamento em percentual
+   * @minimum 0
+   */
+  cancellationRate: number;
+  /**
+   * Taxa de conclusão em percentual
+   * @minimum 0
+   */
+  completionRate: number;
+  /**
+   * Ganho médio por agendamento
+   * @minimum 0
+   */
+  averageTicket: number;
+  /**
+   * Top 5 serviços mais agendados
+   * @maxItems 5
+   */
+  topServices: GetProfessionalDashboard200MetricsTopServicesItem[];
 };

@@ -21,7 +21,11 @@ export function useProfessionalOperations(refetch: () => void) {
     async (values: ProfessionalFormValues) => {
       try {
         await createProfessional({
-          data: { ...values, ativo: values.ativo === "Ativo" },
+          data: {
+            email: values.email,
+            specialty: values.especialidade,
+            active: values.ativo === "Ativo",
+          },
         });
         toast.success("Profissional criado com sucesso!");
         refetch();
@@ -39,7 +43,13 @@ export function useProfessionalOperations(refetch: () => void) {
       try {
         await updateProfessional({
           id: professional.id,
-          data: { ...values, ativo: values.ativo === "Ativo" },
+          data: {
+            name: values.name,
+            email: values.email,
+            phone: values.phone ?? null,
+            specialty: values.especialidade,
+            active: values.ativo === "Ativo",
+          },
         });
         toast.success("Profissional atualizado com sucesso!");
         refetch();

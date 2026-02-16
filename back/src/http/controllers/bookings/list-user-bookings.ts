@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { makeListUserBookingsUseCase } from '@/use-cases/factories/make-list-user-bookings-use-case';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
-import { listBookingsQuerySchema } from '@/schemas/bookings';
+import { listUserBookingsQuerySchema } from '@/schemas/bookings';
 
 // Helper to convert Date objects to ISO strings for Zod validation
 function serializeBookingsResponse(data: any) {
@@ -32,7 +32,7 @@ function serializeBookingsResponse(data: any) {
 }
 
 export async function listUserBookings(request: FastifyRequest, reply: FastifyReply) {
-  const { page, limit, sort, startDate, endDate, status } = listBookingsQuerySchema.parse(
+  const { page, limit, sort, startDate, endDate, status } = listUserBookingsQuerySchema.parse(
     request.query,
   );
 

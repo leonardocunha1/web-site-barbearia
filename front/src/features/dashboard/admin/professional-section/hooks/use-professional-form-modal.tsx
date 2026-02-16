@@ -9,6 +9,8 @@ import { CreateProfessionalBody } from "@/api";
 
 export type ProfessionalFormValues = Omit<CreateProfessionalBody, "ativo"> & {
   ativo: "Ativo" | "Inativo";
+  name?: string;
+  phone?: string;
 };
 
 type OpenProfessionalFormProps = {
@@ -33,7 +35,9 @@ export function useProfessionalFormModal() {
         buttonText: mode === "create" ? "Adicionar" : "Salvar",
         resetAfterSubmit: mode === "create",
         initialValues: {
+          name: "",
           email: "",
+          phone: "",
           especialidade: "",
           ativo: "Ativo",
           ...initialValues,
@@ -51,4 +55,3 @@ export function useProfessionalFormModal() {
 
   return { openProfessionalForm };
 }
-

@@ -28,6 +28,8 @@ export const createMockBookingsRepository = (): Mocked<IBookingsRepository> => (
   getTopProfessionalsByCompletedBookings: vi.fn(),
   findExpiredPendingBookings: vi.fn(),
   cancelExpiredBookings: vi.fn(),
+  getServiceBreakdownByProfessional: vi.fn(),
+  countByProfessionalAndStatusRange: vi.fn(),
 });
 
 export const createMockUsersRepository = () => ({
@@ -46,6 +48,7 @@ export const createMockProfessionalsRepository = (): Mocked<IProfessionalsReposi
   findById: vi.fn(),
   findByUserId: vi.fn(),
   findByProfessionalId: vi.fn(),
+  findByUserIdWithUser: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),
   delete: vi.fn(),

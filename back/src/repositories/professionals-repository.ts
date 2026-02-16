@@ -4,6 +4,7 @@ export interface IProfessionalsRepository {
   findById(id: string): Promise<Professional | null>;
   findByUserId(userId: string): Promise<Professional | null>;
   findByProfessionalId(professionalId: string): Promise<(Professional & { user: User }) | null>;
+  findByUserIdWithUser(userId: string): Promise<(Professional & { user: User }) | null>;
   create(data: Prisma.ProfessionalCreateInput): Promise<Professional>;
   update(id: string, date: Prisma.ProfessionalUncheckedUpdateInput): Promise<Professional>;
   delete(id: string): Promise<void>;

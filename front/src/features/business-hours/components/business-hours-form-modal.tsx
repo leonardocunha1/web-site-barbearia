@@ -1,6 +1,7 @@
 "use client";
 
 import { FormProvider, useForm } from "react-hook-form";
+import { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -30,6 +31,7 @@ const dayOptions = [
 type BusinessHoursFormModalProps = {
   mode: "create" | "edit";
   initialValues?: Partial<BusinessHoursFormValues>;
+  existingDays?: number[];
   onSubmit: (values: BusinessHoursFormValues) => Promise<void>;
   onClose?: () => void;
   isSaving?: boolean;
@@ -38,6 +40,7 @@ type BusinessHoursFormModalProps = {
 export function BusinessHoursFormModal({
   mode,
   initialValues,
+  existingDays,
   onSubmit,
   onClose,
   isSaving,
@@ -58,10 +61,26 @@ export function BusinessHoursFormModal({
     handleSubmit,
     setValue,
     register,
+    setError,
     formState: { errors },
   } = methods;
 
+  const usedDays = useMemo(() => new Set(existingDays ?? []), [existingDays]);
+  const initialDay = initialValues?.dayOfWeek;
+
   const submitHandler = async (values: BusinessHoursFormValues) => {
+    const isDuplicateDay =
+      usedDays.has(values.dayOfWeek) &&
+      (mode === "create" || values.dayOfWeek !== initialDay);
+
+    if (isDuplicateDay) {
+      setError("dayOfWeek", {
+        type: "validate",
+        message: "Dia da semana ja cadastrado",
+      });
+      return;
+    }
+
     await onSubmit({
       ...values,
       breakStart: values.breakStart || undefined,
@@ -85,7 +104,14 @@ export function BusinessHoursFormModal({
             </SelectTrigger>
             <SelectContent>
               {dayOptions.map((option) => (
-                <SelectItem key={option.value} value={String(option.value)}>
+                <SelectItem
+                  key={option.value}
+                  value={String(option.value)}
+                  disabled={
+                    usedDays.has(option.value) &&
+                    (mode === "create" || option.value !== initialDay)
+                  }
+                >
                   {option.label}
                 </SelectItem>
               ))}

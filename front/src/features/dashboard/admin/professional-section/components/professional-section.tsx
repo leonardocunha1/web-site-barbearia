@@ -45,7 +45,9 @@ export function ProfissionalSection() {
     openProfessionalForm({
       mode: "edit",
       initialValues: {
+        name: professional.name,
         email: professional.email,
+        phone: professional.phone ?? "",
         especialidade: professional.especialidade,
         ativo: professional.ativo === "Ativo" ? "Ativo" : "Inativo",
       },

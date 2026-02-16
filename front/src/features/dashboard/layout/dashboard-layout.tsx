@@ -1,6 +1,11 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,7 +107,11 @@ export function DashboardLayout({
           <ScrollArea className="hidden w-full md:block">
             <TabsList className="inline-flex flex-nowrap bg-stone-200">
               {tabs.map((tabItem) => (
-                <TabsTrigger key={tabItem.value} value={tabItem.value}>
+                <TabsTrigger
+                  key={tabItem.value}
+                  value={tabItem.value}
+                  className="cursor-pointer"
+                >
                   {tabItem.label}
                 </TabsTrigger>
               ))}
@@ -269,4 +278,3 @@ export function DashboardLayout({
 //     </div>
 //   );
 // }
-

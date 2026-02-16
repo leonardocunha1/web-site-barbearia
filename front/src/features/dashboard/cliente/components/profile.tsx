@@ -30,17 +30,28 @@ import { toast } from "sonner";
 
 const PASSWORD_MIN_LENGTH = 6;
 
+const formatPhone = (phone: string) => {
+  if (!phone) return "";
+  const cleaned = phone.replace(/\D/g, "");
+
+  if (cleaned.length === 11) {
+    // (11) 99000-0205
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+  } else if (cleaned.length === 10) {
+    // (11) 9000-0205
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+  }
+
+  return phone;
+};
+
 export function ProfileSection() {
   const { data, isLoading, isError } = useGetUserProfile();
   const updateProfile = useUpdateUserProfile();
   const updatePassword = useUpdateUserPassword();
   const anonymizeUser = useAnonymizeUser();
 
-  const [profile, setProfile] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
+  const [name, setName] = useState("");
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -54,21 +65,13 @@ export function ProfileSection() {
 
   useEffect(() => {
     if (!data?.user) return;
-    setProfile({
-      name: data.user.name ?? "",
-      email: data.user.email ?? "",
-      phone: data.user.phone ?? "",
-    });
+    setName(data.user.name ?? "");
   }, [data]);
 
   const isProfileDirty = useMemo(() => {
     if (!data?.user) return false;
-    return (
-      profile.name !== (data.user.name ?? "") ||
-      profile.email !== (data.user.email ?? "") ||
-      profile.phone !== (data.user.phone ?? "")
-    );
-  }, [data, profile]);
+    return name !== (data.user.name ?? "");
+  }, [data, name]);
 
   const canSubmitPassword =
     passwordForm.currentPassword.length >= PASSWORD_MIN_LENGTH &&
@@ -86,14 +89,12 @@ export function ProfileSection() {
     updateProfile.mutate(
       {
         data: {
-          name: profile.name || undefined,
-          email: profile.email || undefined,
-          phone: profile.phone || undefined,
+          name: name || undefined,
         },
       },
       {
-        onSuccess: () => toast.success("Dados atualizados com sucesso."),
-        onError: () => toast.error("Nao foi possivel atualizar os dados."),
+        onSuccess: () => toast.success("Nome atualizado com sucesso."),
+        onError: () => toast.error("Nao foi possivel atualizar o nome."),
       },
     );
   };
@@ -175,7 +176,7 @@ export function ProfileSection() {
       <Card>
         <CardHeader>
           <CardTitle>Meus Dados</CardTitle>
-          <CardDescription>Atualize suas informacoes pessoais</CardDescription>
+          <CardDescription>Atualize suas informações pessoais</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleProfileSubmit}>
@@ -184,10 +185,8 @@ export function ProfileSection() {
                 <Label htmlFor="name">Nome Completo</Label>
                 <Input
                   id="name"
-                  value={profile.name}
-                  onChange={(event) =>
-                    setProfile({ ...profile, name: event.target.value })
-                  }
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
                 />
               </div>
 
@@ -196,10 +195,9 @@ export function ProfileSection() {
                 <Input
                   id="email"
                   type="email"
-                  value={profile.email}
-                  onChange={(event) =>
-                    setProfile({ ...profile, email: event.target.value })
-                  }
+                  value={data.user.email ?? ""}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
               </div>
 
@@ -207,33 +205,19 @@ export function ProfileSection() {
                 <Label htmlFor="phone">Telefone</Label>
                 <Input
                   id="phone"
-                  value={profile.phone}
-                  onChange={(event) =>
-                    setProfile({ ...profile, phone: event.target.value })
-                  }
+                  value={formatPhone(data.user.phone ?? "")}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() =>
-                  setProfile({
-                    name: data.user.name ?? "",
-                    email: data.user.email ?? "",
-                    phone: data.user.phone ?? "",
-                  })
-                }
-              >
-                Cancelar
-              </Button>
+            <div className="flex justify-end">
               <Button
                 type="submit"
                 disabled={!isProfileDirty || updateProfile.isPending}
               >
-                {updateProfile.isPending ? "Salvando..." : "Salvar Alteracoes"}
+                {updateProfile.isPending ? "Salvando..." : "Salvar Nome"}
               </Button>
             </div>
           </form>
@@ -314,7 +298,7 @@ export function ProfileSection() {
         <CardHeader>
           <CardTitle>Apagar Conta</CardTitle>
           <CardDescription>
-            Sua conta sera anonimizada e desativada para manter os registros.
+            Sua conta será anonimizada e desativada para manter os registros.
           </CardDescription>
         </CardHeader>
         <CardContent>

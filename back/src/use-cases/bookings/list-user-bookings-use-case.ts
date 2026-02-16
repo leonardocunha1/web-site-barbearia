@@ -29,13 +29,8 @@ export class ListBookingsUseCase {
       this.bookingsRepository.countByUserId(userId, filters),
     ]);
 
-    // Verificar se não há agendamentos
-    if (bookings.length === 0 && total === 0) {
-      throw new BookingNotFoundError();
-    }
-
     // Verificar se algum agendamento pertence a outro usuário
-    if (bookings.some((booking) => booking.userId !== userId)) {
+    if (bookings.length > 0 && bookings.some((booking) => booking.userId !== userId)) {
       throw new UsuarioTentandoPegarInformacoesDeOutro();
     }
 

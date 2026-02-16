@@ -32,13 +32,11 @@ export class ListProfessionalBookingsUseCase {
       this.bookingsRepository.countByProfessionalId(professionalId, filters),
     ]);
 
-    // Verificar se não há agendamentos
-    if (bookings.length === 0 && total === 0) {
-      throw new BookingNotFoundError();
-    }
-
     // Verificar se algum agendamento pertence a outro profissional
-    if (bookings.some((booking) => booking.professionalId !== professionalId)) {
+    if (
+      bookings.length > 0 &&
+      bookings.some((booking) => booking.professionalId !== professionalId)
+    ) {
       throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }
 

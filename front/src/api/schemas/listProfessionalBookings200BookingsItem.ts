@@ -19,7 +19,6 @@ export type ListProfessionalBookings200BookingsItem = {
   notes?: string | null;
   /**
    * @minimum 0
-   * @exclusiveMinimum
    * @nullable
    */
   totalAmount?: number | null;

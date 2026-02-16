@@ -147,6 +147,27 @@ export const updateProfessionalParamsSchema = z
 // Corpo para atualizar profissional
 export const updateProfessionalBodySchema = z
   .object({
+    name: z
+      .string()
+      .min(2, { message: 'O nome deve ter pelo menos 2 caracteres' })
+      .optional()
+      .describe('Nome atualizado do profissional'),
+
+    email: z
+      .string()
+      .email({ message: 'E-mail inválido' })
+      .optional()
+      .describe('E-mail atualizado do profissional'),
+
+    phone: z
+      .string()
+      .regex(/^\+?[\d\s()-]{10,20}$/, {
+        message: 'Formato de telefone inválido',
+      })
+      .nullable()
+      .optional()
+      .describe('Telefone atualizado do profissional'),
+
     specialty: z
       .string()
       .min(3, { message: 'A especialidade deve ter pelo menos 3 caracteres' })

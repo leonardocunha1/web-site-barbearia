@@ -7,6 +7,7 @@ import type { BusinessHoursFormValues } from "../schemas/business-hours-form-sch
 type OpenBusinessHoursModalProps = {
   mode: "create" | "edit";
   initialValues?: Partial<BusinessHoursFormValues>;
+  existingDays?: number[];
   onSubmit: (values: BusinessHoursFormValues) => Promise<void>;
   isSaving?: boolean;
 };
@@ -17,6 +18,7 @@ export function useBusinessHoursModal() {
   const openBusinessHoursModal = ({
     mode,
     initialValues,
+    existingDays,
     onSubmit,
     isSaving,
   }: OpenBusinessHoursModalProps) => {
@@ -24,6 +26,7 @@ export function useBusinessHoursModal() {
       <BusinessHoursFormModal
         mode={mode}
         initialValues={initialValues}
+        existingDays={existingDays}
         onSubmit={onSubmit}
         onClose={close}
         isSaving={isSaving}

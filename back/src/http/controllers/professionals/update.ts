@@ -9,6 +9,16 @@ export async function updateProfessional(request: FastifyRequest, reply: Fastify
   const { id } = updateProfessionalParamsSchema.parse(request.params);
   const data = updateProfessionalBodySchema.parse(request.body);
 
+  if (request.user.role === 'PROFESSIONAL') {
+    if (request.user.professionalId !== id) {
+      return reply.status(403).send({ message: 'Acesso negado' });
+    }
+
+    if (data.active !== undefined) {
+      return reply.status(403).send({ message: 'Apenas administradores podem alterar o status' });
+    }
+  }
+
   const updateProfessionalUseCase = makeUpdateProfessionalUseCase();
   await updateProfessionalUseCase.execute({
     id,

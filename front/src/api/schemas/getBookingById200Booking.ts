@@ -19,7 +19,6 @@ export type GetBookingById200Booking = {
   notes?: string | null;
   /**
    * @minimum 0
-   * @exclusiveMinimum
    * @nullable
    */
   totalAmount?: number | null;

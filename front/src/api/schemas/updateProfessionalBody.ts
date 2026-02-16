@@ -3,6 +3,19 @@
  */
 export type UpdateProfessionalBody = {
   /**
+   * Nome atualizado do profissional
+   * @minLength 2
+   */
+  name?: string;
+  /** E-mail atualizado do profissional */
+  email?: string;
+  /**
+   * Telefone atualizado do profissional
+   * @nullable
+   * @pattern ^\+?[\d\s()-]{10,20}$
+   */
+  phone?: string | null;
+  /**
    * Especialidade atualizada do profissional
    * @minLength 3
    */

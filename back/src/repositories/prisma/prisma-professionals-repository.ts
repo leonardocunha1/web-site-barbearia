@@ -18,6 +18,13 @@ export class PrismaProfessionalsRepository implements IProfessionalsRepository {
     return prisma.professional.findUnique({ where: { userId } });
   }
 
+  async findByUserIdWithUser(userId: string): Promise<(Professional & { user: User }) | null> {
+    return prisma.professional.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+  }
+
   async findByProfessionalId(id: string): Promise<(Professional & { user: User }) | null> {
     return prisma.professional.findUnique({
       where: { id },

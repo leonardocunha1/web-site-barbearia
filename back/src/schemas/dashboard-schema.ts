@@ -2,23 +2,37 @@ import { z } from 'zod';
 
 export const professionalSchema = z
   .object({
+    id: z.string().uuid().describe('ID do profissional'),
     name: z
       .string()
       .min(2, { message: 'O nome deve ter pelo menos 2 caracteres' })
       .max(100, { message: 'O nome não pode exceder 100 caracteres' })
       .describe('Nome do profissional'),
+    email: z.string().email({ message: 'Email inválido' }).describe('Email do profissional'),
+    phone: z.string().nullable().describe('Telefone do profissional'),
     specialty: z
       .string()
       .min(3, { message: 'A especialidade deve ter pelo menos 3 caracteres' })
       .max(50, { message: 'A especialidade não pode exceder 50 caracteres' })
       .describe('Especialidade do profissional'),
+    bio: z.string().nullable().describe('Biografia do profissional'),
     avatarUrl: z
       .string()
       .url({ message: 'URL do avatar inválida' })
       .nullable()
-      .describe('URL do avatar do profissional, pode ser nulo'),
+      .describe('URL do avatar do profissional'),
+    document: z.string().nullable().describe('Documento do profissional'),
+    active: z.boolean().describe('Status ativo do profissional'),
   })
   .describe('Dados do profissional');
+
+export const topServiceSchema = z
+  .object({
+    service: z.string().describe('Nome do serviço'),
+    count: z.number().int().nonnegative().describe('Quantidade de agendamentos'),
+    percentage: z.number().nonnegative().describe('Percentual do total'),
+  })
+  .describe('Serviço com estatísticas');
 
 export const metricsSchema = z
   .object({
@@ -45,6 +59,11 @@ export const metricsSchema = z
       .int({ message: 'O número de concluídos deve ser inteiro' })
       .nonnegative({ message: 'O número de concluídos não pode ser negativo' })
       .describe('Quantidade de agendamentos concluídos'),
+    pendingCount: z.number().int().nonnegative().describe('Quantidade de agendamentos pendentes'),
+    cancellationRate: z.number().nonnegative().describe('Taxa de cancelamento em percentual'),
+    completionRate: z.number().nonnegative().describe('Taxa de conclusão em percentual'),
+    averageTicket: z.number().nonnegative().describe('Ganho médio por agendamento'),
+    topServices: z.array(topServiceSchema).max(5).describe('Top 5 serviços mais agendados'),
   })
   .describe('Métricas do dashboard');
 
@@ -68,6 +87,7 @@ export const nextAppointmentSchema = z
         errorMap: () => ({ message: 'Status deve ser PENDENTE ou CONFIRMADO' }),
       })
       .describe('Status do agendamento'),
+    totalAmount: z.number().nonnegative().optional().describe('Valor total do agendamento'),
   })
   .describe('Próximo agendamento');
 
@@ -86,6 +106,7 @@ export const dashboardSchema = z
 
 // Tipos TypeScript inferidos
 export type Professional = z.infer<typeof professionalSchema>;
+export type TopService = z.infer<typeof topServiceSchema>;
 export type Metrics = z.infer<typeof metricsSchema>;
 export type NextAppointment = z.infer<typeof nextAppointmentSchema>;
 export type Dashboard = z.infer<typeof dashboardSchema>;

@@ -3,19 +3,24 @@ import type { Mocked } from 'vitest';
 import { UpdateProfessionalUseCase } from './update-professional-use-case';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
-import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
-import { makeProfessional } from '@/test/factories';
+import {
+  createMockProfessionalsRepository,
+  createMockUsersRepository,
+} from '@/mock/mock-repositories';
+import { makeProfessional, makeUser } from '@/test/factories';
 
 type MockProfessionalsRepository = Mocked<IProfessionalsRepository>;
 
 describe('UpdateProfessionalUseCase', () => {
   let professionalsRepository: MockProfessionalsRepository;
+  let usersRepository: ReturnType<typeof createMockUsersRepository>;
   let sut: UpdateProfessionalUseCase;
 
   beforeEach(() => {
     professionalsRepository = createMockProfessionalsRepository();
+    usersRepository = createMockUsersRepository();
 
-    sut = new UpdateProfessionalUseCase(professionalsRepository);
+    sut = new UpdateProfessionalUseCase(professionalsRepository, usersRepository);
   });
 
   it('deve atualizar um profissional com todos os campos', async () => {
@@ -67,6 +72,32 @@ describe('UpdateProfessionalUseCase', () => {
       active: false,
       avatarUrl: 'new-avatar.jpg',
       updatedAt: expect.any(Date),
+    });
+  });
+
+  it('deve atualizar dados do usuario quando informados', async () => {
+    const mockProfessional = makeProfessional({
+      id: 'prof-123',
+      userId: 'user-123',
+    });
+
+    const mockUser = makeUser({ id: 'user-123' });
+
+    professionalsRepository.findById.mockResolvedValue(mockProfessional);
+    professionalsRepository.update.mockResolvedValue(mockProfessional);
+    usersRepository.update.mockResolvedValue(mockUser);
+
+    await sut.execute({
+      id: 'prof-123',
+      name: 'Novo Nome',
+      email: 'novo@email.com',
+      phone: '+5511999999999',
+    });
+
+    expect(usersRepository.update).toHaveBeenCalledWith('user-123', {
+      name: 'Novo Nome',
+      email: 'novo@email.com',
+      phone: '+5511999999999',
     });
   });
 
@@ -141,6 +172,7 @@ describe('UpdateProfessionalUseCase', () => {
     ).rejects.toThrow(ProfessionalNotFoundError);
 
     expect(professionalsRepository.update).not.toHaveBeenCalled();
+    expect(usersRepository.update).not.toHaveBeenCalled();
   });
 
   it('deve atualizar a data de atualização mesmo quando outros campos não mudam', async () => {

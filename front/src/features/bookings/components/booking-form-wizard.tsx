@@ -320,7 +320,7 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-stone-200 bg-white/90 p-4 shadow-xl backdrop-blur-sm sm:p-6 lg:p-8"
+          className="rounded-2xl border border-stone-100 bg-white/90 p-4 backdrop-blur-sm sm:p-6 lg:p-8"
         >
           {/* Stepper responsivo */}
           <div className="mb-6 sm:mb-8">

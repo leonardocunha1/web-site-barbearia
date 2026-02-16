@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 import { makeListProfessionalBookingsUseCase } from '@/use-cases/factories/make-list-professional-bookings-use-case';
+import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
 import { listBookingsQuerySchema } from '@/schemas/bookings';
 
 // Helper to convert Date objects to ISO strings for Zod validation
@@ -46,10 +47,24 @@ export async function listProfessionalBookings(request: FastifyRequest, reply: F
     ...(endDate && { endDate: new Date(endDate) }),
   };
 
+  let professionalId = request.user.professionalId;
+
+  // Se não temos o professionalId no token, buscamos pelo userId
+  if (!professionalId) {
+    const professionalsRepository = new PrismaProfessionalsRepository();
+    const professional = await professionalsRepository.findByUserId(request.user.sub);
+
+    if (!professional) {
+      return reply.status(404).send({ message: 'Profissional não encontrado' });
+    }
+
+    professionalId = professional.id;
+  }
+
   const listProfessionalBookingsUseCase = makeListProfessionalBookingsUseCase();
 
   const result = await listProfessionalBookingsUseCase.execute({
-    professionalId: request.user.professionalId!,
+    professionalId,
     page,
     limit,
     sort: sortCriteria,

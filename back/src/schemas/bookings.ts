@@ -197,6 +197,18 @@ export const listUserBookingsQuerySchema = z
       return data;
     },
     paginationSchema.extend({
+      startDate: z
+        .string()
+        .datetime({ offset: true, message: 'Data de início inválida' })
+        .optional(),
+      endDate: z.string().datetime({ offset: true, message: 'Data de fim inválida' }).optional(),
+      status: z
+        .enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
+          errorMap: () => ({
+            message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO',
+          }),
+        })
+        .optional(),
       sort: z.array(sortSchema).optional(),
     }),
   )
@@ -218,8 +230,11 @@ export const listBookingsQuerySchema = z
       return data;
     },
     paginationSchema.extend({
-      startDate: z.string().datetime({ message: 'Data de início inválida' }).optional(),
-      endDate: z.string().datetime({ message: 'Data de fim inválida' }).optional(),
+      startDate: z
+        .string()
+        .datetime({ offset: true, message: 'Data de início inválida' })
+        .optional(),
+      endDate: z.string().datetime({ offset: true, message: 'Data de fim inválida' }).optional(),
       status: z
         .enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
           errorMap: () => ({
