@@ -42,6 +42,12 @@ const scopeOptions: Option[] = [
   { value: "PROFESSIONAL", label: "Profissional" },
 ];
 
+const expirationTypeOptions: Option[] = [
+  { value: "DATE", label: "Por data" },
+  { value: "QUANTITY", label: "Por quantidade" },
+  { value: "BOTH", label: "Data e quantidade" },
+];
+
 export function CouponFormModal({
   mode,
   initialValues,
@@ -58,6 +64,7 @@ export function CouponFormModal({
       type: "PERCENTAGE",
       value: 0,
       scope: "GLOBAL",
+      expirationType: "BOTH",
       description: "",
       maxUses: undefined,
       startDate: "",
@@ -79,6 +86,19 @@ export function CouponFormModal({
   } = methods;
 
   const scope = watch("scope");
+  const expirationType = watch("expirationType");
+
+  const handleExpirationTypeChange = (value: string) => {
+    const newType = value as CouponFormValues["expirationType"];
+    setValue("expirationType", newType, { shouldValidate: true });
+
+    // Limpar campos não necessários baseado no tipo
+    if (newType === "DATE") {
+      setValue("maxUses", undefined);
+    } else if (newType === "QUANTITY") {
+      setValue("endDate", "");
+    }
+  };
 
   const submitHandler = async (values: CouponFormValues) => {
     await onSubmit({
@@ -176,26 +196,68 @@ export function CouponFormModal({
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="startDate">Inicio</Label>
-            <Input id="startDate" type="date" {...register("startDate")} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="endDate">Fim</Label>
-            <Input id="endDate" type="date" {...register("endDate")} />
-          </div>
+        <div className="space-y-2">
+          <Label>Tipo de expiracao</Label>
+          <Select
+            value={expirationType}
+            onValueChange={handleExpirationTypeChange}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Tipo de expiracao" />
+            </SelectTrigger>
+            <SelectContent>
+              {expirationTypeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.expirationType && (
+            <p className="text-destructive text-sm font-medium">
+              {errors.expirationType.message}
+            </p>
+          )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="maxUses">Maximo de usos</Label>
-            <Input
-              id="maxUses"
-              type="number"
-              {...register("maxUses", { valueAsNumber: true })}
-            />
-          </div>
+          {(expirationType === "DATE" || expirationType === "BOTH") && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Data inicio</Label>
+                <Input id="startDate" type="date" {...register("startDate")} />
+                {errors.startDate && (
+                  <p className="text-destructive text-sm font-medium">
+                    {errors.startDate.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endDate">Data fim *</Label>
+                <Input id="endDate" type="date" {...register("endDate")} />
+                {errors.endDate && (
+                  <p className="text-destructive text-sm font-medium">
+                    {errors.endDate.message}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+          {(expirationType === "QUANTITY" || expirationType === "BOTH") && (
+            <div className="space-y-2">
+              <Label htmlFor="maxUses">Maximo de usos *</Label>
+              <Input
+                id="maxUses"
+                type="number"
+                {...register("maxUses", { valueAsNumber: true })}
+              />
+              {errors.maxUses && (
+                <p className="text-destructive text-sm font-medium">
+                  {errors.maxUses.message}
+                </p>
+              )}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="minBookingValue">Valor minimo</Label>
             <Input
@@ -204,6 +266,11 @@ export function CouponFormModal({
               step="0.01"
               {...register("minBookingValue", { valueAsNumber: true })}
             />
+            {errors.minBookingValue && (
+              <p className="text-destructive text-sm font-medium">
+                {errors.minBookingValue.message}
+              </p>
+            )}
           </div>
         </div>
 

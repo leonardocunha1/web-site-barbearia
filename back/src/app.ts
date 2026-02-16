@@ -24,6 +24,9 @@ import { bonusRoutes } from './http/controllers/bonus/routes';
 import { couponsRoutes } from './http/controllers/coupons/routes';
 import { adminRoutes } from './http/controllers/admin/routes';
 import { resolveHttpError } from './http/error-handler';
+import { health } from './http/controllers/health';
+import { tracingMiddleware, tracingResponseMiddleware } from './http/middlewares/tracing';
+import logger from './observability/logger';
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -58,6 +61,13 @@ app.register(fastifyCors, {
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
 });
 
+// Middleware de tracing para enriquecer spans com contexto da requisição
+app.addHook('onRequest', tracingMiddleware);
+app.addHook('onResponse', tracingResponseMiddleware);
+
+// Health check endpoint
+app.get('/health', health);
+
 app.register(usersRoutes);
 app.register(professionalsRoutes);
 app.register(servicesRoutes);
@@ -71,11 +81,18 @@ app.register(bonusRoutes);
 app.register(couponsRoutes);
 app.register(adminRoutes);
 
-app.setErrorHandler((error, _request, reply) => {
+app.setErrorHandler((error, request, reply) => {
+  // Logando o erro de forma estruturada para o Datadog
+  logger.error('Erro na requisição', {
+    error: error.message,
+    stack: error.stack,
+    url: request.url,
+    method: request.method,
+    // O dd-trace injetará automaticamente o trace_id aqui se o logger estiver em JSON
+  });
+
   if (env.NODE_ENV !== 'prod') {
     console.error(error);
-  } else {
-    // TODO. Aqui poderia ser enviado um email para o time de desenvolvimento.
   }
 
   const { status, body } = resolveHttpError(error);

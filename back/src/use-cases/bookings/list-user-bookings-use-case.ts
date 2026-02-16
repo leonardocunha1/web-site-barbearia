@@ -4,6 +4,8 @@ import { validatePagination } from '@/utils/validate-pagination';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
 import { ListBookingsUseCaseRequest, ListBookingsUseCaseResponse } from './types';
+import { calculatePointsEarned } from '@/utils/booking-points';
+import { toBookingDTO } from '@/dtos/booking-dto';
 
 export class ListBookingsUseCase {
   constructor(private bookingsRepository: IBookingsRepository) {}
@@ -42,8 +44,15 @@ export class ListBookingsUseCase {
       throw new InvalidPageRangeError();
     }
 
+    const bookingsWithPoints = bookings.map((booking) => ({
+      ...booking,
+      pointsEarned: calculatePointsEarned(booking.BonusTransaction),
+    }));
+
+    const bookingDTOs = bookingsWithPoints.map(toBookingDTO);
+
     return {
-      bookings,
+      bookings: bookingDTOs,
       total,
       page,
       limit,

@@ -3,6 +3,7 @@ import { GetProfessionalScheduleUseCase } from '../professional/get-schedule-use
 import { PrismaBusinessHoursRepository } from '@/repositories/prisma/prisma-business-hours-repository';
 import { PrismaHolidaysRepository } from '@/repositories/prisma/prisma-holidays-repository';
 import { PrismaServiceProfessionalRepository } from '@/repositories/prisma/prisma-service-professional-repository';
+import { traceUseCase } from '@/observability/use-case-trace';
 
 export function makeGetProfessionalScheduleUseCase() {
   const bookingsRepository = new PrismaBookingsRepository();
@@ -10,10 +11,12 @@ export function makeGetProfessionalScheduleUseCase() {
   const holidaysRepository = new PrismaHolidaysRepository();
   const serviceProfessionalRepository = new PrismaServiceProfessionalRepository();
 
-  return new GetProfessionalScheduleUseCase(
+  const useCase = new GetProfessionalScheduleUseCase(
     bookingsRepository,
     businessHoursRepository,
     holidaysRepository,
     serviceProfessionalRepository,
   );
+
+  return traceUseCase('professional.schedule.get', useCase);
 }

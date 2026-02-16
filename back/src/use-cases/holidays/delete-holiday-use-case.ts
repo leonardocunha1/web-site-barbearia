@@ -5,8 +5,8 @@ import { isBefore, startOfToday } from 'date-fns';
 import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { PastHolidayDeletionError } from '../errors/past-holiday-deletion-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
-import { DeleteHolidayUseCaseRequest } from './types';
-import { Holiday, Professional } from '@prisma/client';
+import { DeleteHolidayUseCaseRequest, HolidayRecord } from './types';
+import { Professional } from '@prisma/client';
 
 export class DeleteHolidayUseCase {
   constructor(
@@ -41,7 +41,7 @@ export class DeleteHolidayUseCase {
    * Validates that holiday exists
    * @throws {HolidayNotFoundError} If holiday is not found
    */
-  private async validateHolidayExists(holidayId: string): Promise<Holiday> {
+  private async validateHolidayExists(holidayId: string): Promise<HolidayRecord> {
     const holiday = await this.holidaysRepository.findById(holidayId);
     if (!holiday) {
       throw new HolidayNotFoundError();
@@ -53,7 +53,10 @@ export class DeleteHolidayUseCase {
    * Validates that holiday belongs to the specified professional
    * @throws {ProfissionalTentandoPegarInformacoesDeOutro} If holiday belongs to different professional
    */
-  private validateHolidayBelongsToProfessional(holiday: Holiday, professionalId: string): void {
+  private validateHolidayBelongsToProfessional(
+    holiday: HolidayRecord,
+    professionalId: string,
+  ): void {
     if (holiday.professionalId !== professionalId) {
       throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }

@@ -72,6 +72,24 @@ export const zodupdateBookingStatusResponse = zod.object({
 })
 
 /**
+ * Cancela um agendamento pendente do usuario autenticado.
+ */
+export const zodcancelUserBookingParams = zod.object({
+  "bookingId": zod.string().uuid()
+})
+
+export const zodcancelUserBookingBodyReasonMax = 255;
+
+
+export const zodcancelUserBookingBody = zod.object({
+  "reason": zod.string().max(zodcancelUserBookingBodyReasonMax).optional()
+}).describe('Dados para cancelamento de agendamento')
+
+export const zodcancelUserBookingResponse = zod.object({
+  "message": zod.string()
+})
+
+/**
  * Lista os agendamentos do usuário autenticado
  */
 export const zodlistUserBookingsQueryPageDefault = 1;
@@ -98,6 +116,7 @@ export const zodlistUserBookingsQueryParams = zod.object({
 
 export const zodlistUserBookingsResponseBookingsItemNotesMax = 500;
 export const zodlistUserBookingsResponseBookingsItemTotalAmountMin = 0;
+export const zodlistUserBookingsResponseBookingsItemPointsEarnedMin = 0;
 export const zodlistUserBookingsResponseBookingsItemProfessionalUserNameMin = 2;
 export const zodlistUserBookingsResponseBookingsItemUserNameMin = 2;
 export const zodlistUserBookingsResponseBookingsItemItemsItemDurationMin = 0;
@@ -122,6 +141,7 @@ export const zodlistUserBookingsResponse = zod.object({
   "confirmedAt": zod.string().datetime({}).nullish(),
   "updatedAt": zod.string().datetime({}),
   "createdAt": zod.string().datetime({}),
+  "pointsEarned": zod.number().min(zodlistUserBookingsResponseBookingsItemPointsEarnedMin).optional(),
   "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
@@ -179,6 +199,7 @@ export const zodlistProfessionalBookingsQueryParams = zod.object({
 
 export const zodlistProfessionalBookingsResponseBookingsItemNotesMax = 500;
 export const zodlistProfessionalBookingsResponseBookingsItemTotalAmountMin = 0;
+export const zodlistProfessionalBookingsResponseBookingsItemPointsEarnedMin = 0;
 export const zodlistProfessionalBookingsResponseBookingsItemProfessionalUserNameMin = 2;
 export const zodlistProfessionalBookingsResponseBookingsItemUserNameMin = 2;
 export const zodlistProfessionalBookingsResponseBookingsItemItemsItemDurationMin = 0;
@@ -203,6 +224,7 @@ export const zodlistProfessionalBookingsResponse = zod.object({
   "confirmedAt": zod.string().datetime({}).nullish(),
   "updatedAt": zod.string().datetime({}),
   "createdAt": zod.string().datetime({}),
+  "pointsEarned": zod.number().min(zodlistProfessionalBookingsResponseBookingsItemPointsEarnedMin).optional(),
   "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({
@@ -242,6 +264,7 @@ export const zodgetBookingByIdParams = zod.object({
 
 export const zodgetBookingByIdResponseBookingNotesMax = 500;
 export const zodgetBookingByIdResponseBookingTotalAmountMin = 0;
+export const zodgetBookingByIdResponseBookingPointsEarnedMin = 0;
 export const zodgetBookingByIdResponseBookingProfessionalUserNameMin = 2;
 export const zodgetBookingByIdResponseBookingUserNameMin = 2;
 export const zodgetBookingByIdResponseBookingItemsItemDurationMin = 0;
@@ -262,6 +285,7 @@ export const zodgetBookingByIdResponse = zod.object({
   "confirmedAt": zod.string().datetime({}).nullish(),
   "updatedAt": zod.string().datetime({}),
   "createdAt": zod.string().datetime({}),
+  "pointsEarned": zod.number().min(zodgetBookingByIdResponseBookingPointsEarnedMin).optional(),
   "professional": zod.object({
   "id": zod.string().uuid(),
   "user": zod.object({

@@ -19,6 +19,7 @@ export class GetCouponUseCase {
         type: coupon.type,
         value: coupon.value,
         scope: coupon.scope,
+        expirationType: coupon.expirationType,
         description: coupon.description,
         maxUses: coupon.maxUses,
         uses: coupon.uses,

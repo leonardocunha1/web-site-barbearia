@@ -60,16 +60,17 @@ export class PrismaCouponRepository implements ICouponRepository {
   }
 
   async listValidCoupons(professionalId: string, serviceIds: string[], currentDate: Date) {
-    return prisma.coupon.findMany({
+    const coupons = await prisma.coupon.findMany({
       where: {
         active: true,
         startDate: { lte: currentDate },
         AND: [
           {
-            OR: [{ endDate: null }, { endDate: { gte: currentDate } }],
-          },
-          {
-            OR: [{ maxUses: null }, { maxUses: { gt: 0 }, uses: { lt: 99999 } }],
+            OR: [
+              { expirationType: 'DATE', endDate: { gte: currentDate } },
+              { expirationType: 'QUANTITY' },
+              { expirationType: 'BOTH' },
+            ],
           },
           {
             OR: [
@@ -80,6 +81,26 @@ export class PrismaCouponRepository implements ICouponRepository {
           },
         ],
       },
+    });
+
+    return coupons.filter((coupon) => {
+      const hasValidQuantity =
+        coupon.maxUses !== null && coupon.maxUses !== undefined && coupon.uses < coupon.maxUses;
+      const hasValidDate = !!coupon.endDate && coupon.endDate >= currentDate;
+
+      switch (coupon.expirationType) {
+        case 'DATE':
+          return hasValidDate;
+        case 'QUANTITY':
+          return hasValidQuantity;
+        case 'BOTH':
+          return (
+            (!coupon.endDate || hasValidDate) &&
+            (coupon.maxUses === null || coupon.maxUses === undefined || hasValidQuantity)
+          );
+        default:
+          return false;
+      }
     });
   }
 

@@ -3,8 +3,9 @@ import { PrismaBonusTransactionRepository } from '@/repositories/prisma/prisma-b
 import { PrismaBookingsRepository } from '@/repositories/prisma/prisma-bookings-repository';
 import { AssignBonusUseCase } from '../bonus/assign-bonus-use-case';
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
+import { traceUseCase } from '@/observability/use-case-trace';
 
-export function makeAssignBonusUseCase(): AssignBonusUseCase {
+export function makeAssignBonusUseCase() {
   const userBonusRepository = new PrismaUserBonusRepository();
   const bonusTransactionRepository = new PrismaBonusTransactionRepository();
   const usersRepository = new PrismaUsersRepository();
@@ -17,5 +18,5 @@ export function makeAssignBonusUseCase(): AssignBonusUseCase {
     bookingsRepository,
   );
 
-  return assignBonusUseCase;
+  return traceUseCase('bonus.assign', assignBonusUseCase);
 }

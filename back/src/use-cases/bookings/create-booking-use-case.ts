@@ -59,7 +59,6 @@ export class CreateBookingUseCase {
 
     const totalValue = services.reduce((sum, s) => sum + s.price, 0);
 
-    // Verificar conflito entre cupom e pontos de bônus
     if (request.couponCode && request.useBonusPoints) {
       throw new CouponBonusConflictError();
     }
@@ -67,7 +66,6 @@ export class CreateBookingUseCase {
     let couponDiscount = 0;
     let couponId: string | undefined;
 
-    // Aplicar cupom de desconto se existir
     if (request.couponCode) {
       const couponValidation = await this.validateAndApplyCoupon(
         request.couponCode,
@@ -81,10 +79,8 @@ export class CreateBookingUseCase {
       couponId = couponValidation.couponId;
     }
 
-    // Calcular valor após desconto do cupom
     const valueAfterCoupon = totalValue - couponDiscount;
 
-    // Aplicar pontos de bônus (apenas se não tiver cupom)
     const bonusResult =
       !request.couponCode && request.useBonusPoints
         ? await this.applyBonusPoints(request.userId, valueAfterCoupon)
@@ -116,7 +112,6 @@ export class CreateBookingUseCase {
       },
     });
 
-    // Registrar resgate de pontos (se aplicável)
     if (bonusResult.pointsUsed > 0 && bonusResult.discount > 0) {
       await this.registerBonusRedemptions(
         request.userId,
@@ -126,7 +121,6 @@ export class CreateBookingUseCase {
       );
     }
 
-    // Registrar resgate de cupom (se aplicável)
     if (couponId && couponDiscount > 0) {
       await this.couponRepository.registerRedemption({
         couponId,
@@ -152,14 +146,42 @@ export class CreateBookingUseCase {
       throw new InvalidCouponError();
     }
 
-    // Verificar validade
-    if (coupon.endDate && coupon.endDate < new Date()) {
-      throw new InvalidCouponError('Cupom expirado');
+    const now = new Date();
+
+    if (coupon.startDate && coupon.startDate > now) {
+      throw new InvalidCouponError('Cupom ainda não está válido');
     }
 
-    // Verificar usos máximos
-    if (coupon.maxUses && coupon.uses >= coupon.maxUses) {
-      throw new InvalidCouponError('Limite de usos do cupom atingido');
+    // Verificar validade
+    const isDateExpired = !!coupon.endDate && coupon.endDate < now;
+    const isQuantityExceeded =
+      coupon.maxUses !== null && coupon.maxUses !== undefined && coupon.uses >= coupon.maxUses;
+
+    switch (coupon.expirationType) {
+      case 'DATE':
+        if (isDateExpired) {
+          throw new InvalidCouponError('Cupom expirado');
+        }
+        break;
+      case 'QUANTITY':
+        if (isQuantityExceeded) {
+          throw new InvalidCouponError('Limite de usos do cupom atingido');
+        }
+        break;
+      case 'BOTH':
+        if (isDateExpired) {
+          throw new InvalidCouponError('Cupom expirado');
+        }
+        if (isQuantityExceeded) {
+          throw new InvalidCouponError('Limite de usos do cupom atingido');
+        }
+        break;
+    }
+
+    // Verificar se o usuário já usou este cupom
+    const userAlreadyUsed = coupon.redemptions.some((r) => r.userId === userId);
+    if (userAlreadyUsed) {
+      throw new InvalidCouponError('Este cupom já foi utilizado por você');
     }
 
     // Verificar escopo
@@ -256,8 +278,8 @@ export class CreateBookingUseCase {
     ]);
 
     const allBonuses = [
-      { type: 'BOOKING_POINTS', ...bookingBonus },
-      { type: 'LOYALTY', ...loyaltyBonus },
+      { type: 'BOOKING_POINTS' as const, ...bookingBonus },
+      { type: 'LOYALTY' as const, ...loyaltyBonus },
     ].filter((bonus) => bonus.points > 0);
 
     const totalPoints = allBonuses.reduce((sum, b) => sum + b.points, 0);

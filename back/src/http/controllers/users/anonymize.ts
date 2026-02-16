@@ -3,7 +3,7 @@ import { makeAnonymizeUserUseCase } from '@/use-cases/factories/make-anonymize-u
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 export async function anonymizeUser(request: FastifyRequest, reply: FastifyReply) {
-  const { userIdToAnonymize } = anonymizeUserParamsSchema.parse(request.params);
+  const { userId: userIdToAnonymize } = anonymizeUserParamsSchema.parse(request.params);
 
   const role = request.user.role;
   const userId = request.user.sub;

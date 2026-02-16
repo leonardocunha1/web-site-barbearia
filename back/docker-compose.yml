@@ -1,9 +1,82 @@
+version: '3.8'
+
 services:
-  barber-api:
-    image: bitnami/postgresql
+  barber-db:
+    image: bitnami/postgresql:latest
+    container_name: barber-db
+    restart: always # Garante que o banco suba se cair
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
       - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+    volumes:
+      - ./postgres_data:/bitnami/postgresql
+    networks:
+      - barber-network
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:latest
+    container_name: datadog-agent
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_SITE=${DD_SITE}
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_PROCESS_AGENT_ENABLED=true
+    ports:
+      - '8126:8126'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      # Importante: o Agent precisa de acesso aos logs do Docker
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - barber-network
+
+  barber-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barber-api
+    ports:
+      - '3333:3333'
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@barber-db:5432/${POSTGRESQL_DATABASE}
+      - JWT_SECRET=${JWT_SECRET}
+      # Configurações Datadog
+      - DD_AGENT_HOST=datadog-agent
+      - DD_TRACE_AGENT_PORT=8126
+      - DD_ENV=production
+      - DD_SERVICE=barbearia-api
+      - DD_VERSION=1.0.0
+      - DD_LOGS_INJECTION=true
+    depends_on:
+      - barber-db
+      - datadog-agent
+    labels:
+      - 'com.datadoghq.ad.logs=[{"source":"nodejs","service":"barbearia-api"}]'
+    restart: unless-stopped
+    networks:
+      - barber-network
+    healthcheck:
+      # Verifica se o serviço está respondendo na porta 3333
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3333/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 10s # Aumentado um pouco para evitar falso negativo
+      retries: 3
+      start_period: 40s
+
+networks:
+  barber-network:
+    driver: bridge

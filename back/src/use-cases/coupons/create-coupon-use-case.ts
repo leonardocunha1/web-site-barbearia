@@ -22,6 +22,7 @@ export class CreateCouponUseCase {
     this.validateCouponValue(request.type, request.value);
     this.validateMinBookingValue(request.minBookingValue);
     this.validateMaxUses(request.maxUses);
+    this.validateExpirationRules(request.expirationType, request.maxUses, request.endDate);
     this.validateCouponScope(request.scope, request.serviceId, request.professionalId);
     this.validateCouponDates(request.startDate, request.endDate);
     await this.validateScopeEntitiesExist(request);
@@ -63,6 +64,46 @@ export class CreateCouponUseCase {
   private validateMaxUses(maxUses?: number): void {
     if (maxUses && maxUses <= 0) {
       throw new InvalidCouponValueError('O número máximo de usos deve ser maior que zero');
+    }
+  }
+
+  private validateExpirationRules(
+    expirationType: 'DATE' | 'QUANTITY' | 'BOTH',
+    maxUses?: number,
+    endDate?: Date | null,
+  ): void {
+    if (expirationType === 'DATE') {
+      if (!endDate) {
+        throw new InvalidCouponValueError(
+          'A data de término é obrigatória para expiração por data',
+        );
+      }
+      if (maxUses !== undefined) {
+        throw new InvalidCouponValueError(
+          'O número máximo de usos não deve ser informado para expiração por data',
+        );
+      }
+      return;
+    }
+
+    if (expirationType === 'QUANTITY') {
+      if (!maxUses) {
+        throw new InvalidCouponValueError(
+          'O número máximo de usos é obrigatório para expiração por quantidade',
+        );
+      }
+      if (endDate !== undefined && endDate !== null) {
+        throw new InvalidCouponValueError(
+          'A data de término não deve ser informada para expiração por quantidade',
+        );
+      }
+      return;
+    }
+
+    if (!maxUses || !endDate) {
+      throw new InvalidCouponValueError(
+        'Data de término e número máximo de usos são obrigatórios para expiração combinada',
+      );
     }
   }
 

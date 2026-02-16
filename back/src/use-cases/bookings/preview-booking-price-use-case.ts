@@ -127,12 +127,40 @@ export class PreviewBookingPriceUseCase {
       throw new InvalidCouponError();
     }
 
-    if (coupon.endDate && coupon.endDate < new Date()) {
-      throw new InvalidCouponError('Cupom expirado');
+    const now = new Date();
+
+    if (coupon.startDate && coupon.startDate > now) {
+      throw new InvalidCouponError('Cupom ainda não está válido');
     }
 
-    if (coupon.maxUses && coupon.uses >= coupon.maxUses) {
-      throw new InvalidCouponError('Limite de usos do cupom atingido');
+    const isDateExpired = !!coupon.endDate && coupon.endDate < now;
+    const isQuantityExceeded =
+      coupon.maxUses !== null && coupon.maxUses !== undefined && coupon.uses >= coupon.maxUses;
+
+    switch (coupon.expirationType) {
+      case 'DATE':
+        if (isDateExpired) {
+          throw new InvalidCouponError('Cupom expirado');
+        }
+        break;
+      case 'QUANTITY':
+        if (isQuantityExceeded) {
+          throw new InvalidCouponError('Limite de usos do cupom atingido');
+        }
+        break;
+      case 'BOTH':
+        if (isDateExpired) {
+          throw new InvalidCouponError('Cupom expirado');
+        }
+        if (isQuantityExceeded) {
+          throw new InvalidCouponError('Limite de usos do cupom atingido');
+        }
+        break;
+    }
+
+    const userAlreadyUsed = coupon.redemptions.some((r) => r.userId === userId);
+    if (userAlreadyUsed) {
+      throw new InvalidCouponError('Este cupom já foi utilizado por você');
     }
 
     switch (coupon.scope) {

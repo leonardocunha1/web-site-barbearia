@@ -1,6 +1,7 @@
 import { IBookingsRepository } from '@/repositories/bookings-repository';
-import { BookingDTO } from '@/dtos/booking-dto';
+import { BookingDTO, toBookingDTO } from '@/dtos/booking-dto';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
+import { calculatePointsEarned } from '@/utils/booking-points';
 
 interface GetBookingRequest {
   bookingId: string;
@@ -24,8 +25,13 @@ export class GetBookingUseCase {
       throw new BookingNotFoundError();
     }
 
+    const bookingWithPoints = {
+      ...booking,
+      pointsEarned: calculatePointsEarned(booking.BonusTransaction),
+    };
+
     return {
-      booking,
+      booking: toBookingDTO(bookingWithPoints),
     };
   }
 }

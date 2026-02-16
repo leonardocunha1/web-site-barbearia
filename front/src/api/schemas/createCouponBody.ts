@@ -1,5 +1,6 @@
 import type { CreateCouponBodyType } from "./createCouponBodyType";
 import type { CreateCouponBodyScope } from "./createCouponBodyScope";
+import type { CreateCouponBodyExpirationType } from "./createCouponBodyExpirationType";
 
 /**
  * Dados para criação de cupom
@@ -14,6 +15,7 @@ export type CreateCouponBody = {
   /** @minimum 0 */
   value: number;
   scope: CreateCouponBodyScope;
+  expirationType: CreateCouponBodyExpirationType;
   /** @maxLength 255 */
   description?: string;
   /**

@@ -1,4 +1,3 @@
-import { Holiday } from '@prisma/client';
 import type { DeleteHolidayParams } from '@/schemas/holidays';
 
 /**
@@ -8,6 +7,13 @@ import type { DeleteHolidayParams } from '@/schemas/holidays';
  */
 
 export interface CreateHolidayUseCaseRequest {
+  professionalId: string;
+  date: Date;
+  reason: string;
+}
+
+export interface HolidayRecord {
+  id: string;
   professionalId: string;
   date: Date;
   reason: string;
@@ -31,7 +37,7 @@ export interface ListHolidaysUseCaseRequest {
  * Standard format: { [itemsKey]: T[], total, page, limit, totalPages }
  */
 export interface ListHolidaysUseCaseResponse {
-  holidays: Holiday[];
+  holidays: HolidayRecord[];
   total: number;
   page: number;
   limit: number;

@@ -29,6 +29,8 @@ export type GetBookingById200Booking = {
   confirmedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  /** @minimum 0 */
+  pointsEarned?: number;
   professional: GetBookingById200BookingProfessional;
   user: GetBookingById200BookingUser;
   /** @minItems 1 */

@@ -7,6 +7,7 @@ import {
 } from '../bookings-repository';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
 import { BookingDTO } from '@/dtos/booking-dto';
+import tracer from '@/observability/tracer';
 
 const bookingInclude = {
   items: {
@@ -37,6 +38,13 @@ const bookingInclude = {
     select: {
       id: true,
       name: true,
+    },
+  },
+  BonusTransaction: {
+    select: {
+      points: true,
+      operation: true,
+      type: true,
     },
   },
 } satisfies Prisma.BookingInclude;
@@ -87,22 +95,38 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     professionalId: string,
     { page, limit, sort = [], filters = {} }: FindManyByProfessionalIdParams,
   ): Promise<BookingDTO[]> {
-    const orderBy = mapSortToOrderBy(sort);
+    return tracer.trace('repository.booking.find_many_by_professional', async (span) => {
+      span.setTag('resource', 'booking');
+      span.setTag('operation', 'read');
+      span.setTag('professional.id', professionalId);
+      span.setTag('pagination.page', page);
+      span.setTag('pagination.limit', limit);
+      span.setTag('filters.count', Object.keys(filters).length);
 
-    const where: Prisma.BookingWhereInput = {
-      professionalId,
-      ...(filters.status && { status: filters.status }),
-      ...(filters.startDate && { startDateTime: { gte: filters.startDate } }),
-      ...(filters.endDate && { endDateTime: { lte: filters.endDate } }),
-    };
+      // Check passivo: cancelar expirados antes de buscar
+      await this.cancelExpiredIfNeeded();
 
-    return prisma.booking.findMany({
-      where,
+      const orderBy = mapSortToOrderBy(sort);
 
-      include: bookingInclude,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
+      const where: Prisma.BookingWhereInput = {
+        professionalId,
+        ...(filters.status && { status: filters.status }),
+        ...(filters.startDate && { startDateTime: { gte: filters.startDate } }),
+        ...(filters.endDate && { endDateTime: { lte: filters.endDate } }),
+      };
+
+      const bookings = await prisma.booking.findMany({
+        where,
+
+        include: bookingInclude,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      span.setTag('results.count', bookings.length);
+
+      return bookings;
     });
   }
 
@@ -128,22 +152,36 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     userId: string,
     { page, limit, sort = [], filters = {} }: FindManyByUserIdParams,
   ): Promise<BookingDTO[]> {
-    const orderBy = mapSortToOrderBy(sort);
+    return tracer.trace('repository.booking.find_many_by_user', async (span) => {
+      span.setTag('resource', 'booking');
+      span.setTag('operation', 'read');
+      span.setTag('user.id', userId);
+      span.setTag('pagination.page', page);
+      span.setTag('pagination.limit', limit);
 
-    const where: Prisma.BookingWhereInput = {
-      userId,
-      ...(filters?.status && { status: filters.status }),
-      ...(filters?.startDate && { startDateTime: { gte: filters.startDate } }),
-      ...(filters?.endDate && { endDateTime: { lte: filters.endDate } }),
-    };
+      // Check passivo: cancelar expirados antes de buscar
+      await this.cancelExpiredIfNeeded();
 
-    return prisma.booking.findMany({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy,
+      const orderBy = mapSortToOrderBy(sort);
 
-      include: bookingInclude,
+      const where: Prisma.BookingWhereInput = {
+        userId,
+        ...(filters?.status && { status: filters.status }),
+        ...(filters?.startDate && { startDateTime: { gte: filters.startDate } }),
+        ...(filters?.endDate && { endDateTime: { lte: filters.endDate } }),
+      };
+
+      const bookings = await prisma.booking.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy,
+        include: bookingInclude,
+      });
+
+      span.setTag('results.count', bookings.length);
+
+      return bookings;
     });
   }
 
@@ -388,5 +426,54 @@ export class PrismaBookingsRepository implements IBookingsRepository {
       professionalId: item.professionalId,
       totalBookings: (item._count as unknown as { _all: number })._all,
     }));
+  }
+
+  async findExpiredPendingBookings(currentDate: Date) {
+    return prisma.booking.findMany({
+      where: {
+        status: 'PENDING',
+        startDateTime: { lt: currentDate },
+        canceledAt: null,
+      },
+    });
+  }
+
+  async cancelExpiredBookings(bookingIds: string[]): Promise<number> {
+    if (bookingIds.length === 0) return 0;
+
+    const result = await prisma.booking.updateMany({
+      where: { id: { in: bookingIds } },
+      data: {
+        status: 'CANCELED',
+        canceledAt: new Date(),
+        notes: 'Cancelado automaticamente por falta de confirmação',
+      },
+    });
+
+    return result.count;
+  }
+
+  /**
+   * Check passivo: cancela agendamentos expirados se necessário
+   * Evita chamadas frequentes usando cache de 5 minutos
+   */
+  private lastCheck: Date | null = null;
+  private readonly CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
+
+  private async cancelExpiredIfNeeded(): Promise<void> {
+    const now = new Date();
+
+    // Se já checou nos últimos 5 minutos, ignora
+    if (this.lastCheck && now.getTime() - this.lastCheck.getTime() < this.CHECK_INTERVAL_MS) {
+      return;
+    }
+
+    this.lastCheck = now;
+
+    // Busca e cancela em uma query
+    const expired = await this.findExpiredPendingBookings(now);
+    if (expired.length > 0) {
+      await this.cancelExpiredBookings(expired.map((b) => b.id));
+    }
   }
 }

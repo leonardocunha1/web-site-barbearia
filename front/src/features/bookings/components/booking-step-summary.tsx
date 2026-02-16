@@ -279,7 +279,7 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
         {/* Cupom de desconto */}
         <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
           <Label htmlFor="couponCode" className="text-stone-700">
-            Cupom de desconto (opcional)
+            Cupom de desconto
           </Label>
           <Input
             id="couponCode"
@@ -291,7 +291,7 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
           />
           {useBonusPoints && (
             <p className="text-muted-foreground mt-2 text-xs">
-              Para usar pontos, o cupom precisa ficar desativado.
+              Para usar pontos, os pontos bônus precisa ficar desativado.
             </p>
           )}
           {errors.couponCode && (

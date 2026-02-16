@@ -1,9 +1,9 @@
 import { UserCircle2 } from "lucide-react";
 import { OverviewSection } from "./overview";
 import { ReservationsSection } from "./reservation";
-import { ProfileSection } from "./profile";
 import { RewardsSection } from "./rewards";
 import { DashboardLayout } from "../../layout/dashboard-layout";
+import { ProfileSection } from "./profile";
 
 export default function ClientDashboard() {
   return (

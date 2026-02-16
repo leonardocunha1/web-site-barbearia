@@ -2,11 +2,13 @@ import { verifyJwt } from '@/http/middlewares/verify-jwt';
 import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import { createBooking } from './create';
 import { updateBookingStatus } from './toggle-status';
+import { cancelUserBooking } from './cancel-user-booking';
 import { listUserBookings } from './list-user-bookings';
 import { FastifyTypedInstance } from '@/types';
 import {
   bookingSchema,
   bookingPricePreviewSchema,
+  cancelBookingBodySchema,
   createBookingBodySchema,
   getOrUpdateBookingStatusParamsSchema,
   listBookingsQuerySchema,
@@ -78,6 +80,27 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
       },
     },
     updateBookingStatus,
+  );
+
+  app.patch(
+    '/bookings/:bookingId/cancel',
+    {
+      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
+      schema: {
+        operationId: 'cancelUserBooking',
+        tags: ['bookings'],
+        description: 'Cancela um agendamento pendente do usuario autenticado.',
+        params: getOrUpdateBookingStatusParamsSchema,
+        body: cancelBookingBodySchema,
+        response: {
+          200: z.object({ message: z.string() }),
+          400: z.object({ message: z.string() }).describe('Bad Request'),
+          403: z.object({ message: z.string() }).describe('Forbidden'),
+          404: z.object({ message: z.string() }).describe('Not Found'),
+        },
+      },
+    },
+    cancelUserBooking,
   );
 
   app.get(

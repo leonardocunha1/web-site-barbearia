@@ -13,8 +13,7 @@ export const getScheduleQuerySchema = z.object({
       }
     })
     .refine((val) => Array.isArray(val), { message: 'serviceIds deve ser um array válido' })
-    .optional()
-    .default([]),
+    .optional(),
 });
 
 // Schema para rota pública (professionalId vem da URL, não do querystring)

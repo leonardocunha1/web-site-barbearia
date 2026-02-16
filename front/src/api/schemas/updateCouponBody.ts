@@ -1,5 +1,6 @@
 import type { UpdateCouponBodyType } from "./updateCouponBodyType";
 import type { UpdateCouponBodyScope } from "./updateCouponBodyScope";
+import type { UpdateCouponBodyExpirationType } from "./updateCouponBodyExpirationType";
 
 /**
  * Dados para atualização de cupom
@@ -14,9 +15,13 @@ export type UpdateCouponBody = {
   /** @minimum 0 */
   value?: number;
   scope?: UpdateCouponBodyScope;
+  expirationType?: UpdateCouponBodyExpirationType;
   description?: string;
-  /** @minimum 1 */
-  maxUses?: number;
+  /**
+   * @minimum 1
+   * @nullable
+   */
+  maxUses?: number | null;
   startDate?: string;
   /** @nullable */
   endDate?: string | null;

@@ -44,6 +44,12 @@ enum CouponScope {
   PROFESSIONAL // Válido para um profissional específico
 }
 
+enum CouponExpirationType {
+  DATE // Expira por data
+  QUANTITY // Expira por quantidade de usos
+  BOTH // Expira por data ou quantidade
+}
+
 // Tabelas principais
 model User {
   id            String   @id @default(uuid())
@@ -283,6 +289,7 @@ model Coupon {
   type            CouponType
   value           Float // Percentual ou valor fixo, dependendo do type
   scope           CouponScope @default(GLOBAL)
+  expirationType  CouponExpirationType @default(BOTH)
   maxUses         Int? // Número máximo de usos (null = ilimitado)
   uses            Int         @default(0) // Número de vezes já usado
   startDate       DateTime    @default(now())

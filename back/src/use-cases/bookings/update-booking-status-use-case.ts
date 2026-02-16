@@ -41,6 +41,7 @@ export class UpdateBookingStatusUseCase {
         );
       }
     }
+
     // Preparar dados para atualização
     const updateData = {
       status,

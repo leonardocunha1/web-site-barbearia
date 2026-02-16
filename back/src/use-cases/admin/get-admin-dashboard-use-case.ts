@@ -1,4 +1,4 @@
-import { startOfDay, endOfDay, subDays, startOfMonth } from 'date-fns';
+import { startOfMonth } from 'date-fns';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { IServicesRepository } from '@/repositories/services-repository';
@@ -13,8 +13,6 @@ export class GetAdminDashboardUseCase {
 
   async execute(): Promise<AdminDashboardResponseDTO> {
     const now = new Date();
-    const todayStart = startOfDay(now);
-    const todayEnd = endOfDay(now);
     const monthStart = startOfMonth(now);
 
     // Aggregate metrics in parallel

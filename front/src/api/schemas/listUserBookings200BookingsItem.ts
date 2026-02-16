@@ -29,6 +29,8 @@ export type ListUserBookings200BookingsItem = {
   confirmedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  /** @minimum 0 */
+  pointsEarned?: number;
   professional: ListUserBookings200BookingsItemProfessional;
   user: ListUserBookings200BookingsItemUser;
   /** @minItems 1 */

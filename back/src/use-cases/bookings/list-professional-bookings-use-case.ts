@@ -7,6 +7,8 @@ import {
   ListProfessionalBookingsUseCaseRequest,
   ListProfessionalBookingsUseCaseResponse,
 } from './types';
+import { calculatePointsEarned } from '@/utils/booking-points';
+import { toBookingDTO } from '@/dtos/booking-dto';
 
 export class ListProfessionalBookingsUseCase {
   constructor(private bookingsRepository: IBookingsRepository) {}
@@ -45,8 +47,15 @@ export class ListProfessionalBookingsUseCase {
       throw new InvalidPageRangeError();
     }
 
+    const bookingsWithPoints = bookings.map((booking) => ({
+      ...booking,
+      pointsEarned: calculatePointsEarned(booking.BonusTransaction),
+    }));
+
+    const bookingDTOs = bookingsWithPoints.map(toBookingDTO);
+
     return {
-      bookings,
+      bookings: bookingDTOs,
       total,
       page,
       limit,

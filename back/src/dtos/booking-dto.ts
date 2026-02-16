@@ -1,10 +1,16 @@
-import { Booking } from '@prisma/client';
+import { Booking, BonusType } from '@prisma/client';
 
 export type BookingDTO = Booking & {
   user: {
     id: string;
     name: string;
   };
+  BonusTransaction?: {
+    points: number;
+    operation: string;
+    type: BonusType;
+  }[];
+  pointsEarned?: number;
   items: {
     id: string;
     duration: number;
@@ -40,10 +46,10 @@ export type BookingDTO = Booking & {
  * return reply.send({ booking: toBookingDTO(booking) });
  * ```
  */
-export function toBookingDTO(booking: BookingDTO): BookingDTO {
+export function toBookingDTO(booking: any): BookingDTO {
   return {
     id: booking.id,
-    startDateTime: booking.dateHoraInicio,
+    startDateTime: booking.startDateTime,
     endDateTime: booking.endDateTime,
     status: booking.status,
     canceledAt: booking.canceledAt,
@@ -57,18 +63,19 @@ export function toBookingDTO(booking: BookingDTO): BookingDTO {
     couponId: booking.couponId ?? null,
     couponDiscount: booking.couponDiscount ?? null,
     createdAt: booking.createdAt,
+    pointsEarned: booking.pointsEarned ?? undefined,
     professional: {
-      id: booking.profissional.id,
+      id: booking.professional.id,
       user: {
-        id: booking.profissional.user.id,
-        name: booking.profissional.user.name,
+        id: booking.professional.user.id,
+        name: booking.professional.user.name,
       },
     },
     user: {
       id: booking.user.id,
       name: booking.user.name,
     },
-    items: booking.items.map((item) => ({
+    items: booking.items.map((item: any) => ({
       id: item.id,
       price: item.price,
       duration: item.duration,

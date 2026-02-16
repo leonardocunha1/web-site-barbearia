@@ -20,8 +20,8 @@ export class AnonymizeUserUseCase {
       throw new UserNotFoundError();
     }
 
-    // Only CLIENTE (CLIENT) role users are restricted to anonymize only themselves
-    if (role === 'CLIENTE' && userId !== userIdToAnonymize) {
+    // Client users can only anonymize their own account
+    if (role === 'CLIENT' && userId !== userIdToAnonymize) {
       throw new UsuarioTentandoPegarInformacoesDeOutro();
     }
 

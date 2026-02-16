@@ -124,4 +124,8 @@ export interface IBookingsRepository {
       totalBookings: number;
     }>
   >;
+
+  findExpiredPendingBookings(currentDate: Date): Promise<Booking[]>;
+
+  cancelExpiredBookings(bookingIds: string[]): Promise<number>;
 }

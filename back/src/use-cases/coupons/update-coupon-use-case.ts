@@ -17,7 +17,7 @@ export class UpdateCouponUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute({ couponId, data }: UpdateCouponRequest): Promise<UpdateCouponResponse> {
+  async execute({ couponId, date: data }: UpdateCouponRequest): Promise<UpdateCouponResponse> {
     // Verifica se o cupom existe
     const existingCoupon = await this.couponRepository.findById(couponId);
     if (!existingCoupon) {
@@ -55,6 +55,17 @@ export class UpdateCouponUseCase {
       );
     }
 
+    const effectiveExpirationType = data.expirationType || existingCoupon.expirationType;
+    const effectiveMaxUses = data.maxUses !== undefined ? data.maxUses : existingCoupon.maxUses;
+    const effectiveEndDate =
+      data.endDate !== undefined
+        ? data.endDate
+          ? new Date(data.endDate)
+          : null
+        : existingCoupon.endDate;
+
+    this.validateExpirationRules(effectiveExpirationType, effectiveMaxUses, effectiveEndDate);
+
     // Validações adicionais
     if (
       data.minBookingValue !== undefined &&
@@ -64,7 +75,7 @@ export class UpdateCouponUseCase {
       throw new InvalidCouponValueError('O valor mínimo de agendamento deve ser maior que zero');
     }
 
-    if (data.maxUses !== undefined && data.maxUses <= 0) {
+    if (data.maxUses !== undefined && data.maxUses !== null && data.maxUses <= 0) {
       throw new InvalidCouponValueError('O número máximo de usos deve ser maior que zero');
     }
 
@@ -90,7 +101,7 @@ export class UpdateCouponUseCase {
 
     // Atualiza o cupom
     const coupon = await this.couponRepository.update(couponId, {
-      ...date,
+      ...data,
       startDate: data.startDate ? new Date(data.startDate) : undefined,
       endDate:
         data.endDate !== undefined ? (data.endDate ? new Date(data.endDate) : null) : undefined,
@@ -160,6 +171,46 @@ export class UpdateCouponUseCase {
 
     if (startDate && endDate && endDate < startDate) {
       throw new InvalidCouponDatesError('A data de término não pode ser anterior à data de início');
+    }
+  }
+
+  private validateExpirationRules(
+    expirationType: 'DATE' | 'QUANTITY' | 'BOTH',
+    maxUses?: number | null,
+    endDate?: Date | null,
+  ): void {
+    if (expirationType === 'DATE') {
+      if (!endDate) {
+        throw new InvalidCouponValueError(
+          'A data de término é obrigatória para expiração por data',
+        );
+      }
+      if (maxUses !== null && maxUses !== undefined) {
+        throw new InvalidCouponValueError(
+          'O número máximo de usos não deve ser informado para expiração por data',
+        );
+      }
+      return;
+    }
+
+    if (expirationType === 'QUANTITY') {
+      if (!maxUses) {
+        throw new InvalidCouponValueError(
+          'O número máximo de usos é obrigatório para expiração por quantidade',
+        );
+      }
+      if (endDate !== undefined && endDate !== null) {
+        throw new InvalidCouponValueError(
+          'A data de término não deve ser informada para expiração por quantidade',
+        );
+      }
+      return;
+    }
+
+    if (!maxUses || !endDate) {
+      throw new InvalidCouponValueError(
+        'Data de término e número máximo de usos são obrigatórios para expiração combinada',
+      );
     }
   }
 }

@@ -1,5 +1,6 @@
 import type { UpdateCoupon200CouponType } from "./updateCoupon200CouponType";
 import type { UpdateCoupon200CouponScope } from "./updateCoupon200CouponScope";
+import type { UpdateCoupon200CouponExpirationType } from "./updateCoupon200CouponExpirationType";
 import type { UpdateCoupon200CouponService } from "./updateCoupon200CouponService";
 import type { UpdateCoupon200CouponProfessional } from "./updateCoupon200CouponProfessional";
 import type { UpdateCoupon200CouponUser } from "./updateCoupon200CouponUser";
@@ -17,6 +18,7 @@ export type UpdateCoupon200Coupon = {
   /** @minimum 0 */
   value: number;
   scope: UpdateCoupon200CouponScope;
+  expirationType: UpdateCoupon200CouponExpirationType;
   /** @nullable */
   maxUses: number | null;
   /** @minimum 0 */

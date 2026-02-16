@@ -3,14 +3,14 @@ import { makeCreateHolidayUseCase } from '@/use-cases/factories/make-create-holi
 import { createHolidayBodySchema } from '@/schemas/holidays';
 
 export async function createHoliday(request: FastifyRequest, reply: FastifyReply) {
-  const { date, motivo } = createHolidayBodySchema.parse(request.body);
+  const { date, reason } = createHolidayBodySchema.parse(request.body);
 
   const createHolidayUseCase = makeCreateHolidayUseCase();
 
   await createHolidayUseCase.execute({
     professionalId: request.user.professionalId!,
     date: new Date(date),
-    motivo,
+    reason,
   });
 
   return reply.status(201).send();

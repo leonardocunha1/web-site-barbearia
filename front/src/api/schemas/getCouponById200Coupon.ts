@@ -1,5 +1,6 @@
 import type { GetCouponById200CouponType } from "./getCouponById200CouponType";
 import type { GetCouponById200CouponScope } from "./getCouponById200CouponScope";
+import type { GetCouponById200CouponExpirationType } from "./getCouponById200CouponExpirationType";
 import type { GetCouponById200CouponService } from "./getCouponById200CouponService";
 import type { GetCouponById200CouponProfessional } from "./getCouponById200CouponProfessional";
 import type { GetCouponById200CouponUser } from "./getCouponById200CouponUser";
@@ -17,6 +18,7 @@ export type GetCouponById200Coupon = {
   /** @minimum 0 */
   value: number;
   scope: GetCouponById200CouponScope;
+  expirationType: GetCouponById200CouponExpirationType;
   /** @nullable */
   maxUses: number | null;
   /** @minimum 0 */

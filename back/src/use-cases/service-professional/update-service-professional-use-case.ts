@@ -24,7 +24,7 @@ export class UpdateServiceProfessionalUseCase {
     }
 
     // Validate that duration is a multiple of the schedule slot size
-    if (duration % SCHEDULE_SLOT_MINUTES !== 0) {
+    if (Number.isInteger(duration) && duration % SCHEDULE_SLOT_MINUTES !== 0) {
       throw new InvalidServicePriceDurationError();
     }
 

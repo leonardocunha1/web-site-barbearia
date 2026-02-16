@@ -13,14 +13,14 @@ export class CreateHolidayUseCase {
     private professionalsRepository: IProfessionalsRepository,
   ) {}
 
-  async execute({ professionalId, date, motivo }: CreateHolidayUseCaseRequest): Promise<void> {
+  async execute({ professionalId, date, reason }: CreateHolidayUseCaseRequest): Promise<void> {
     // Fail-fast: validate all business rules before any database operation
     await this.validateProfessionalExists(professionalId);
     this.validateDateNotInPast(date);
-    this.validateMotivo(motivo);
+    this.validateReason(reason);
     await this.validateNoDuplicateHoliday(professionalId, date);
 
-    await this.holidaysRepository.addHoliday(professionalId, date, motivo);
+    await this.holidaysRepository.addHoliday(professionalId, date, reason);
   }
 
   /**
@@ -49,8 +49,8 @@ export class CreateHolidayUseCase {
    * Validates holiday description/reason
    * @throws {InvalidHolidayDescriptionError} If motivo is invalid
    */
-  private validateMotivo(motivo: string): void {
-    if (!motivo || motivo.trim().length < 3 || motivo.length > 100) {
+  private validateReason(reason: string): void {
+    if (!reason || reason.trim().length < 3 || reason.length > 100) {
       throw new InvalidHolidayDescriptionError();
     }
   }

@@ -111,7 +111,7 @@ export class AddServiceToProfessionalUseCase {
    * @throws {InvalidServicePriceDurationError} If duration is not a multiple of slot size
    */
   private validateDurationMultipleOfSlot(duration: number): void {
-    if (duration % SCHEDULE_SLOT_MINUTES !== 0) {
+    if (Number.isInteger(duration) && duration % SCHEDULE_SLOT_MINUTES !== 0) {
       throw new InvalidServicePriceDurationError();
     }
   }

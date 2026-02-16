@@ -17,6 +17,7 @@ export class GetProfessionalScheduleUseCase {
 
   async execute(params: { professionalId: string; date: string; serviceIds?: string[] }) {
     const { professionalId, date, serviceIds = [] } = params;
+
     const parsedDate = parseISO(date); // Parse ISO string to Date object
     const startOfParsedDate = startOfDay(parsedDate); // Zera hora/minuto/segundo para comparação precisa
 

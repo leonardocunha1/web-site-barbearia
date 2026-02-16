@@ -4,6 +4,7 @@ import { PrismaServiceProfessionalRepository } from '@/repositories/prisma/prism
 import { PrismaUserBonusRepository } from '@/repositories/prisma/prisma-user-bonus-repository';
 import { PrismaCouponRepository } from '@/repositories/prisma/prisma-coupon-repository';
 import { PreviewBookingPriceUseCase } from '@/use-cases/bookings/preview-booking-price-use-case';
+import { traceUseCase } from '@/observability/use-case-trace';
 
 export function makePreviewBookingPriceUseCase() {
   const usersRepository = new PrismaUsersRepository();
@@ -12,11 +13,13 @@ export function makePreviewBookingPriceUseCase() {
   const userBonusRepository = new PrismaUserBonusRepository();
   const couponRepository = new PrismaCouponRepository();
 
-  return new PreviewBookingPriceUseCase(
+  const useCase = new PreviewBookingPriceUseCase(
     usersRepository,
     professionalsRepository,
     serviceProfessionalRepository,
     userBonusRepository,
     couponRepository,
   );
+
+  return traceUseCase('booking.preview_price', useCase);
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CouponType, CouponScope } from '@prisma/client';
+import { CouponExpirationType, CouponScope, CouponType } from '@prisma/client';
 import { paginationSchema } from './pagination';
 
 /**
@@ -49,6 +49,9 @@ export const couponSchema = z
     value: z.number().min(0, { message: 'Valor não pode ser negativo' }),
     scope: z.nativeEnum(CouponScope, {
       errorMap: () => ({ message: 'Escopo do cupom inválido' }),
+    }),
+    expirationType: z.nativeEnum(CouponExpirationType, {
+      errorMap: () => ({ message: 'Tipo de expiração inválido' }),
     }),
     maxUses: z.number().int().nullable(),
     uses: z.number().int().nonnegative({ message: 'Usos não pode ser negativo' }),
@@ -107,6 +110,9 @@ export const createCouponBodySchema = z
     value: z.number().min(0, { message: 'Valor não pode ser negativo' }),
     scope: z.nativeEnum(CouponScope, {
       errorMap: () => ({ message: 'Escopo do cupom inválido' }),
+    }),
+    expirationType: z.nativeEnum(CouponExpirationType, {
+      errorMap: () => ({ message: 'Tipo de expiração inválido' }),
     }),
     description: z
       .string()
@@ -226,11 +232,19 @@ export const updateCouponBodySchema = z
         }),
       })
       .optional(),
+    expirationType: z
+      .enum(['DATE', 'QUANTITY', 'BOTH'], {
+        errorMap: () => ({
+          message: 'Tipo de expiração inválido. Valores válidos: DATE, QUANTITY, BOTH',
+        }),
+      })
+      .optional(),
     description: z.string().optional(),
     maxUses: z
       .number()
       .int({ message: 'Máximo de usos deve ser inteiro' })
       .min(1, { message: 'Máximo de usos deve ser pelo menos 1' })
+      .nullable()
       .optional(),
     startDate: z.string().datetime({ message: 'Data de início inválida' }).optional(),
     endDate: z.string().datetime({ message: 'Data de término inválida' }).nullable().optional(),

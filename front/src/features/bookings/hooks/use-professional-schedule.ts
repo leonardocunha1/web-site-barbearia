@@ -22,7 +22,8 @@ export function useProfessionalSchedule({
     {
       date: scheduleDate,
       serviceIds: queryEnabled
-        ? (JSON.stringify(serviceIds) as any)
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (JSON.stringify(serviceIds) as any)
         : undefined,
     },
     {

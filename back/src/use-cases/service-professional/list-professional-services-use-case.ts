@@ -39,17 +39,14 @@ export class ListProfessionalServicesUseCase {
       throw new ProfessionalNotFoundError();
     }
 
-    // 🔽 Novo trecho
     let data;
 
     if (activeOnly) {
-      // Pega todos os serviços ativos (vinculados ou não)
       data = await this.serviceProfessionalRepository.findAllActiveWithProfessionalData(
         professionalId,
         { page, limit },
       );
     } else {
-      //  listar todos (ativos + inativos)
       data = await this.serviceProfessionalRepository.findAllWithProfessionalData(professionalId, {
         page,
         limit,
@@ -65,8 +62,8 @@ export class ListProfessionalServicesUseCase {
         description: s.service.description,
         category: s.service.category,
         active: s.service.active,
-        price: s.price ?? null, // se não tiver vínculo
-        duration: s.duration ?? null, // se não tiver vínculo
+        price: s.price ?? null,
+        duration: s.duration ?? null,
       })),
       total,
     };

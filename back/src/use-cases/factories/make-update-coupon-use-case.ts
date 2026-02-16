@@ -2,6 +2,7 @@ import { PrismaCouponRepository } from '@/repositories/prisma/prisma-coupon-repo
 import { PrismaServicesRepository } from '@/repositories/prisma/prisma-services-repository';
 import { PrismaProfessionalsRepository } from '@/repositories/prisma/prisma-professionals-repository';
 import { UpdateCouponUseCase } from '../coupons/update-coupon-use-case';
+import { traceUseCase } from '@/observability/use-case-trace';
 
 export function makeUpdateCouponUseCase() {
   const couponRepository = new PrismaCouponRepository();
@@ -13,5 +14,5 @@ export function makeUpdateCouponUseCase() {
     professionalsRepository,
   );
 
-  return useCase;
+  return traceUseCase('coupon.update', useCase);
 }

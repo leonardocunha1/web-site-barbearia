@@ -10,7 +10,6 @@ interface AuthenticateRequest {
   email: string;
   password: string;
 }
-
 interface AuthenticateResponse {
   user: User;
 }

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import { addDays, addHours, addMinutes, startOfMonth } from 'date-fns';
+import { addDays, addMinutes, startOfMonth } from 'date-fns';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();
@@ -368,6 +368,7 @@ async function main() {
         type: 'PERCENTAGE',
         value: 10,
         scope: 'GLOBAL',
+        expirationType: 'BOTH',
         maxUses: 50,
         startDate: monthStart,
         endDate: addDays(monthStart, 30),
@@ -382,9 +383,10 @@ async function main() {
         value: 20,
         scope: 'SERVICE',
         serviceId: services[0].id,
+        expirationType: 'DATE',
         maxUses: null,
         startDate: monthStart,
-        endDate: null,
+        endDate: addDays(monthStart, 90),
         active: true,
       },
     }),
@@ -396,6 +398,7 @@ async function main() {
         value: 30,
         scope: 'GLOBAL',
         minBookingValue: 100,
+        expirationType: 'QUANTITY',
         maxUses: 100,
         startDate: monthStart,
         endDate: null,
@@ -410,7 +413,8 @@ async function main() {
         value: 15,
         scope: 'PROFESSIONAL',
         professionalId: professionals[0].id,
-        maxUses: null,
+        expirationType: 'BOTH',
+        maxUses: 200,
         startDate: monthStart,
         endDate: addDays(monthStart, 60),
         active: true,

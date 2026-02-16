@@ -21,6 +21,7 @@ export class UpdateServiceUseCase {
     }
 
     const service = await this.servicesRepository.update(id, data);
+
     return { service };
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { differenceInMinutes, parseISO } from "date-fns";
 import {
   Card,
   CardContent,
@@ -9,7 +10,12 @@ import {
 } from "@/shared/components/ui/card";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
-import { useListUserBookings } from "@/api";
+import { Button } from "@/shared/components/ui/button";
+import {
+  useListUserBookings,
+  useCancelUserBooking,
+  ListUserBookingsStatus,
+} from "@/api";
 import {
   buildDateRangeFilters,
   formatBookingDateTime,
@@ -17,9 +23,9 @@ import {
   formatBookingStatus,
 } from "@/features/bookings/utils/booking-formatters";
 import { useTableParams } from "@/shared/hooks/useTableParams";
-import {
-  BookingFilters,
-} from "@/features/bookings";
+import { BookingFilters } from "@/features/bookings";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 type ReservationRow = {
   id: string;
@@ -28,10 +34,24 @@ type ReservationRow = {
   service: string;
   barber: string;
   status: string;
+  statusValue: "PENDING" | "CONFIRMED" | "CANCELED" | "COMPLETED";
+  startDateTime: string;
 };
 
 export function ReservationsSection() {
   const { params, updateParams } = useTableParams();
+  const queryClient = useQueryClient();
+  const cancelBooking = useCancelUserBooking({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["/bookings/me"] });
+        toast.success("Agendamento cancelado.");
+      },
+      onError: () => {
+        toast.error("Nao foi possivel cancelar o agendamento.");
+      },
+    },
+  });
 
   const { startDate, endDate } = buildDateRangeFilters(
     params.filters.startDate,
@@ -41,7 +61,9 @@ export function ReservationsSection() {
   const listParams = {
     page: params.page,
     limit: params.limit,
-    status: params.filters.status || undefined,
+    status: params.filters.status
+      ? (params.filters.status as ListUserBookingsStatus)
+      : undefined,
     startDate,
     endDate,
   };
@@ -60,10 +82,21 @@ export function ReservationsSection() {
           service: formatBookingServices(booking.items),
           barber: booking.professional?.user?.name ?? "-",
           status: formatBookingStatus(booking.status),
+          statusValue: booking.status,
+          startDateTime: booking.startDateTime,
         };
       }) ?? []
     );
   }, [data]);
+
+  const canCancelBooking = (row: ReservationRow) => {
+    if (row.statusValue !== "PENDING") return false;
+    const minutesToStart = differenceInMinutes(
+      parseISO(row.startDateTime),
+      new Date(),
+    );
+    return minutesToStart >= 120;
+  };
 
   const columns: Column<ReservationRow>[] = [
     { header: "Data", accessor: "date" },
@@ -120,9 +153,31 @@ export function ReservationsSection() {
             emptyMessage="Nenhuma reserva encontrada"
             totalItems={data?.total ?? 0}
             showPagination
+            actions={(row) => {
+              const isCancelable = canCancelBooking(row);
+              return (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!isCancelable || cancelBooking.isPending}
+                  title={
+                    isCancelable
+                      ? "Cancelar agendamento"
+                      : "Cancelamento permitido apenas ate 2 horas antes"
+                  }
+                  onClick={() =>
+                    cancelBooking.mutate({
+                      bookingId: row.id,
+                      data: {},
+                    })
+                  }
+                >
+                  Cancelar
+                </Button>
+              );
+            }}
           />
         )}
-
       </CardContent>
     </Card>
   );

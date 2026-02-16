@@ -1,6 +1,7 @@
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
 import { makeSendVerificationEmailUseCase } from './make-send-verification-email-use-case';
 import { RegisterUserUseCase } from '../users/register-use-case';
+import { traceUseCase } from '@/observability/use-case-trace';
 
 export function makeRegisterUserUseCase() {
   const usersRepository = new PrismaUsersRepository();
@@ -11,5 +12,5 @@ export function makeRegisterUserUseCase() {
     sendVerificationEmail: (email) => sendVerificationEmailUseCase.execute({ email }),
   });
 
-  return registerUserUseCase;
+  return traceUseCase('user.register', registerUserUseCase);
 }

@@ -1,5 +1,6 @@
 import type { ListCoupons200CouponsItemType } from "./listCoupons200CouponsItemType";
 import type { ListCoupons200CouponsItemScope } from "./listCoupons200CouponsItemScope";
+import type { ListCoupons200CouponsItemExpirationType } from "./listCoupons200CouponsItemExpirationType";
 import type { ListCoupons200CouponsItemService } from "./listCoupons200CouponsItemService";
 import type { ListCoupons200CouponsItemProfessional } from "./listCoupons200CouponsItemProfessional";
 import type { ListCoupons200CouponsItemUser } from "./listCoupons200CouponsItemUser";
@@ -17,6 +18,7 @@ export type ListCoupons200CouponsItem = {
   /** @minimum 0 */
   value: number;
   scope: ListCoupons200CouponsItemScope;
+  expirationType: ListCoupons200CouponsItemExpirationType;
   /** @nullable */
   maxUses: number | null;
   /** @minimum 0 */

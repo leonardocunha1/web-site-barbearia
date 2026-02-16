@@ -1,5 +1,6 @@
 import type { CreateCoupon201CouponType } from "./createCoupon201CouponType";
 import type { CreateCoupon201CouponScope } from "./createCoupon201CouponScope";
+import type { CreateCoupon201CouponExpirationType } from "./createCoupon201CouponExpirationType";
 import type { CreateCoupon201CouponService } from "./createCoupon201CouponService";
 import type { CreateCoupon201CouponProfessional } from "./createCoupon201CouponProfessional";
 import type { CreateCoupon201CouponUser } from "./createCoupon201CouponUser";
@@ -17,6 +18,7 @@ export type CreateCoupon201Coupon = {
   /** @minimum 0 */
   value: number;
   scope: CreateCoupon201CouponScope;
+  expirationType: CreateCoupon201CouponExpirationType;
   /** @nullable */
   maxUses: number | null;
   /** @minimum 0 */

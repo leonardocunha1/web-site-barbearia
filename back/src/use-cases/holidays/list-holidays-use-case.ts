@@ -12,7 +12,7 @@ export class ListHolidaysUseCase {
     professionalId,
     page = 1,
     limit = 10,
-  }: ListHolidaysUseCaseRequest): ListHolidaysUseCaseResponse {
+  }: ListHolidaysUseCaseRequest): Promise<ListHolidaysUseCaseResponse> {
     validatePagination(page, limit);
 
     const total = await this.holidaysRepository.countByProfessionalId(professionalId);

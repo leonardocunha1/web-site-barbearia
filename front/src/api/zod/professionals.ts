@@ -180,12 +180,12 @@ export const zodgetProfessionalDashboardResponse = zod.object({
 }).describe('Dados completos do dashboard')
 
 export const zodgetProfessionalScheduleQueryDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
-export const zodgetProfessionalScheduleQueryServiceIdsDefault = [];
+
 
 export const zodgetProfessionalScheduleQueryParams = zod.object({
   "professionalId": zod.string().uuid(),
   "date": zod.string().regex(zodgetProfessionalScheduleQueryDateRegExp),
-  "serviceIds": zod.string()
+  "serviceIds": zod.string().optional()
 })
 
 export const zodgetProfessionalScheduleResponse = zod.object({

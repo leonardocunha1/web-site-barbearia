@@ -50,7 +50,7 @@ describe('CreateHolidayUseCase', () => {
     await useCase.execute({
       professionalId: 'pro-123',
       date: tomorrow,
-      motivo: 'Feriado teste',
+      reason: 'Feriado teste',
     });
 
     // Verificar
@@ -68,7 +68,7 @@ describe('CreateHolidayUseCase', () => {
       useCase.execute({
         professionalId: 'pro-123',
         date: tomorrow,
-        motivo: 'Feriado teste',
+        reason: 'Feriado teste',
       }),
     ).rejects.toThrow(ProfessionalNotFoundError);
   });
@@ -83,7 +83,7 @@ describe('CreateHolidayUseCase', () => {
       useCase.execute({
         professionalId: 'pro-123',
         date: yesterday,
-        motivo: 'Feriado teste',
+        reason: 'Feriado teste',
       }),
     ).rejects.toThrow(PastDateError);
   });
@@ -95,7 +95,7 @@ describe('CreateHolidayUseCase', () => {
       useCase.execute({
         professionalId: 'pro-123',
         date: tomorrow,
-        motivo: 'a', // Muito curto
+        reason: 'a', // Muito curto
       }),
     ).rejects.toThrow(InvalidHolidayDescriptionError);
   });
@@ -107,7 +107,7 @@ describe('CreateHolidayUseCase', () => {
       useCase.execute({
         professionalId: 'pro-123',
         date: tomorrow,
-        motivo: 'a'.repeat(101), // 101 caracteres (limite é 100)
+        reason: 'a'.repeat(101), // 101 caracteres (limite é 100)
       }),
     ).rejects.toThrow(InvalidHolidayDescriptionError);
   });
@@ -119,7 +119,7 @@ describe('CreateHolidayUseCase', () => {
       useCase.execute({
         professionalId: 'pro-123',
         date: tomorrow,
-        motivo: '', // Vazio
+        reason: '', // Vazio
       }),
     ).rejects.toThrow(InvalidHolidayDescriptionError);
   });
@@ -128,14 +128,14 @@ describe('CreateHolidayUseCase', () => {
     mockProfessionalsRepository.findById.mockResolvedValue(makeProfessional({ id: 'pro-123' }));
     mockHolidaysRepository.findByProfessionalAndDate.mockResolvedValue({
       id: 'feriado-123',
-      motivo: 'Feriado existente',
+      reason: 'Feriado existente',
     });
 
     await expect(
       useCase.execute({
         professionalId: 'pro-123',
         date: tomorrow,
-        motivo: 'Novo feriado',
+        reason: 'Novo feriado',
       }),
     ).rejects.toThrow(DuplicateHolidayError);
   });
@@ -147,7 +147,7 @@ describe('CreateHolidayUseCase', () => {
     await useCase.execute({
       professionalId: 'pro-123',
       date: tomorrow,
-      motivo: 'abc', // 3 caracteres (mínimo)
+      reason: 'abc', // 3 caracteres (mínimo)
     });
 
     expect(mockHolidaysRepository.addHoliday).toHaveBeenCalled();
@@ -160,7 +160,7 @@ describe('CreateHolidayUseCase', () => {
     await useCase.execute({
       professionalId: 'pro-123',
       date: tomorrow,
-      motivo: 'a'.repeat(100), // 100 caracteres (máximo)
+      reason: 'a'.repeat(100), // 100 caracteres (máximo)
     });
 
     expect(mockHolidaysRepository.addHoliday).toHaveBeenCalled();

@@ -45,7 +45,7 @@ export const bookingSchema = z
       .optional(),
     totalAmount: z
       .number()
-      .positive({ message: 'Valor final deve ser positivo' })
+      .nonnegative({ message: 'Valor final não pode ser negativo' })
       .nullable()
       .optional(),
     canceledAt: z
@@ -60,6 +60,11 @@ export const bookingSchema = z
       .optional(),
     updatedAt: z.string().datetime({ message: 'Data de atualização inválida' }),
     createdAt: z.string().datetime({ message: 'Data de criação inválida' }),
+    pointsEarned: z
+      .number()
+      .int({ message: 'Pontos do agendamento devem ser inteiros' })
+      .nonnegative({ message: 'Pontos do agendamento não podem ser negativos' })
+      .optional(),
     professional: z.object({
       id: z.string().uuid({ message: 'ID do profissional inválido' }),
       user: z.object({
@@ -168,30 +173,63 @@ export const updateBookingStatusBodySchema = z
   .describe('Dados para atualização de status de agendamento');
 
 /**
+ * Schema para cancelamento de agendamento pelo cliente.
+ */
+export const cancelBookingBodySchema = z
+  .object({
+    reason: z.string().max(255, { message: 'Motivo não pode exceder 255 caracteres' }).optional(),
+  })
+  .describe('Dados para cancelamento de agendamento');
+
+/**
  * Filtros de listagem de reservas para o usuário.
  */
-export const listUserBookingsQuerySchema = paginationSchema
-  .extend({
-    sort: z.array(sortSchema).optional(),
-  })
+export const listUserBookingsQuerySchema = z
+  .preprocess(
+    (data: any) => {
+      // Normalizar sort: se vier como objeto indexado { '0': {...}, '1': {...} }, converter para array
+      if (data?.sort && typeof data.sort === 'object' && !Array.isArray(data.sort)) {
+        const sortArray = Object.keys(data.sort)
+          .sort()
+          .map((key) => data.sort[key]);
+        return { ...data, sort: sortArray };
+      }
+      return data;
+    },
+    paginationSchema.extend({
+      sort: z.array(sortSchema).optional(),
+    }),
+  )
   .describe('Filtros para listagem de agendamentos do usuário');
 
 /**
  * Filtros de listagem de reservas para o profissional.
  */
-export const listBookingsQuerySchema = paginationSchema
-  .extend({
-    startDate: z.string().datetime({ message: 'Data de início inválida' }).optional(),
-    endDate: z.string().datetime({ message: 'Data de fim inválida' }).optional(),
-    status: z
-      .enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
-        errorMap: () => ({
-          message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO',
-        }),
-      })
-      .optional(),
-    sort: z.array(sortSchema).optional(),
-  })
+export const listBookingsQuerySchema = z
+  .preprocess(
+    (data: any) => {
+      // Normalizar sort: se vier como objeto indexado { '0': {...}, '1': {...} }, converter para array
+      if (data?.sort && typeof data.sort === 'object' && !Array.isArray(data.sort)) {
+        const sortArray = Object.keys(data.sort)
+          .sort()
+          .map((key) => data.sort[key]);
+        return { ...data, sort: sortArray };
+      }
+      return data;
+    },
+    paginationSchema.extend({
+      startDate: z.string().datetime({ message: 'Data de início inválida' }).optional(),
+      endDate: z.string().datetime({ message: 'Data de fim inválida' }).optional(),
+      status: z
+        .enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
+          errorMap: () => ({
+            message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO',
+          }),
+        })
+        .optional(),
+      sort: z.array(sortSchema).optional(),
+    }),
+  )
   .describe('Filtros para listagem de agendamentos do profissional');
 
 /**
