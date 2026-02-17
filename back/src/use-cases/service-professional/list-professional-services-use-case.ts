@@ -17,6 +17,7 @@ interface ListProfessionalServicesResponse {
     price: number | null;
     duration: number | null;
     category: string | null;
+    type: 'CORTE' | 'BARBA' | 'SOBRANCELHA' | 'ESTETICA';
     active: boolean;
   }>;
   total: number;
@@ -61,6 +62,7 @@ export class ListProfessionalServicesUseCase {
         name: s.service.name,
         description: s.service.description,
         category: s.service.category,
+        type: s.service.type,
         active: s.service.active,
         price: s.price ?? null,
         duration: s.duration ?? null,

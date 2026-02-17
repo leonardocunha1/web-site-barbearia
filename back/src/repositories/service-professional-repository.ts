@@ -18,6 +18,7 @@ export interface IServiceProfessionalRepository {
       name: string;
       description: string | null;
       category: string | null;
+      type: 'CORTE' | 'BARBA' | 'SOBRANCELHA' | 'ESTETICA';
       active: boolean;
     };
     price: number;
@@ -38,6 +39,7 @@ export interface IServiceProfessionalRepository {
         name: string;
         description: string | null;
         category: string | null;
+        type: 'CORTE' | 'BARBA' | 'SOBRANCELHA' | 'ESTETICA';
         active: boolean;
       };
       price: number;
@@ -69,6 +71,7 @@ export interface IServiceProfessionalRepository {
         name: string;
         description: string | null;
         category: string | null;
+        type: 'CORTE' | 'BARBA' | 'SOBRANCELHA' | 'ESTETICA';
         active: boolean;
       };
       price: number | null;
@@ -94,6 +97,7 @@ export interface IServiceProfessionalRepository {
         name: string;
         description: string | null;
         category: string | null;
+        type: 'CORTE' | 'BARBA' | 'SOBRANCELHA' | 'ESTETICA';
         active: boolean;
       };
       price: number | null;

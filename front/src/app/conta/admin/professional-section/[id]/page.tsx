@@ -1,5 +1,5 @@
 import { servicesProfessionalGet } from "@/app/api/actions/services-professional";
-import ProfessionalServicesTable from "@/features/dashboard/admin/professional-section/id/professional-service-table";
+import ProfessionalServicesTable from "@/features/dashboard/admin/professionals/id/components/professional-service-table";
 import { GoBackButton } from "@/shared/components/ui/go-back-button";
 
 interface ProfissionalPageProps {

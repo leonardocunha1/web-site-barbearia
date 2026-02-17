@@ -25,7 +25,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.post(
     '/bookings',
     {
-      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
+      onRequest: [verifyJwt, verifyUserRole(['CLIENT', 'PROFESSIONAL'])],
       schema: {
         operationId: 'createBooking',
         tags: ['bookings'],
@@ -45,7 +45,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.post(
     '/bookings/preview',
     {
-      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
+      onRequest: [verifyJwt, verifyUserRole(['CLIENT', 'PROFESSIONAL'])],
       schema: {
         operationId: 'previewBookingPrice',
         tags: ['bookings'],
@@ -85,7 +85,7 @@ export async function bookingsRoutes(app: FastifyTypedInstance) {
   app.patch(
     '/bookings/:bookingId/cancel',
     {
-      onRequest: [verifyJwt, verifyUserRole('CLIENT')],
+      onRequest: [verifyJwt, verifyUserRole(['CLIENT', 'PROFESSIONAL'])],
       schema: {
         operationId: 'cancelUserBooking',
         tags: ['bookings'],

@@ -6,10 +6,7 @@
 declare module "@/features/dashboard/shared/components" {
   // This is a marker file for the shared components directory
   // Add specific shared components here as they're created
-  import type React from "react";
 
-  export interface SharedAccountComponentsMarker {
-    // Placeholder for shared components
-  }
+  // Marker type to avoid empty interface lint while keeping a named export.
+  export type SharedAccountComponentsMarker = object;
 }
-

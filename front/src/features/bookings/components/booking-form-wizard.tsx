@@ -28,6 +28,7 @@ import { BookingStepServices } from "./booking-step-services";
 import { BookingStepSchedule } from "./booking-step-schedule";
 import { cn } from "@/shared/utils/utils";
 import { BookingStepSummary } from "./booking-step-summary";
+import { useProfessionalSchedule } from "../hooks/use-professional-schedule";
 
 const STEPS: Step[] = [
   {
@@ -163,6 +164,14 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
     },
   });
 
+  const scheduleQuery = useProfessionalSchedule({
+    professionalId,
+    date: selectedDate ?? "",
+    serviceIds: selectedServices,
+  });
+
+  const isHoliday = Boolean(scheduleQuery.data?.isHoliday);
+
   const createBooking = useCreateBooking({
     mutation: {
       onSuccess: () => {
@@ -240,6 +249,11 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
 
       if (!user) {
         setShowLoginDialog(true);
+        return;
+      }
+
+      if (isHoliday) {
+        toast.error("Data selecionada esta indisponivel (feriado).");
         return;
       }
 
@@ -395,7 +409,10 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
                       handleSubmit(handleCreateBooking)();
                     }}
                     disabled={
-                      isSubmitting || createBooking.isPending || !isValid
+                      isSubmitting ||
+                      createBooking.isPending ||
+                      !isValid ||
+                      isHoliday
                     }
                     className="from-principal-600 to-principal-500 hover:from-principal-700 hover:to-principal-600 relative w-full overflow-hidden bg-gradient-to-r sm:w-auto"
                   >

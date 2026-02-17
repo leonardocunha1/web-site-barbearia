@@ -17,6 +17,8 @@ import { InsufficientBonusPointsError } from '../errors/insufficient-bonus-point
 import { CouponBonusConflictError } from '../errors/coupon-bonus-conflict-error';
 import { InvalidCouponError } from './invalid-coupon-error';
 import { CouponNotApplicableError } from '../errors/coupon-not-applicable-error';
+import { MultipleServicesPerTypeError } from '../errors/multiple-services-per-type-error';
+import { ServiceType } from '@prisma/client';
 
 export interface BookingPricePreviewRequest {
   userId: string;
@@ -47,6 +49,7 @@ export class PreviewBookingPriceUseCase {
     await this.loadEntities(request.userId, request.professionalId);
 
     const services = await this.loadAndValidateServices(request.services, request.professionalId);
+    this.ensureServiceTypeRules(services);
 
     const totalValue = services.reduce((sum, s) => sum + s.price, 0);
 
@@ -112,6 +115,19 @@ export class PreviewBookingPriceUseCase {
     );
     if (result.length === 0) throw new InvalidDurationError();
     return result;
+  }
+
+  private ensureServiceTypeRules(services: Array<{ service: { type: ServiceType } }>) {
+    const seen = new Set<ServiceType>();
+
+    for (const service of services) {
+      const type = service.service.type ?? 'ESTETICA';
+      if (type === 'ESTETICA') continue;
+      if (seen.has(type)) {
+        throw new MultipleServicesPerTypeError(type);
+      }
+      seen.add(type);
+    }
   }
 
   private async validateAndApplyCoupon(

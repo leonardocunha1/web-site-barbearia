@@ -3,12 +3,13 @@ import { makeCreateServiceUseCase } from '@/use-cases/factories/make-create-serv
 import { createServiceBodySchema } from '@/schemas/services';
 
 export async function createService(request: FastifyRequest, reply: FastifyReply) {
-  const { name, description, category, active } = createServiceBodySchema.parse(request.body);
+  const { name, type, description, category, active } = createServiceBodySchema.parse(request.body);
 
   const createServiceUseCase = makeCreateServiceUseCase();
 
   await createServiceUseCase.execute({
     name,
+    type,
     description,
     category,
     active,

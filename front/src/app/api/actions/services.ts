@@ -56,8 +56,9 @@ export async function servicesUpdate(
     precoPadrao?: number;
     duracao?: number;
     categoria?: string;
+    tipo?: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
     ativo?: boolean;
-  }
+  },
 ) {
   try {
     const cookieStore = await cookies();
@@ -66,9 +67,22 @@ export async function servicesUpdate(
     if (!token) throw new Error("Token de autenticação não encontrado");
 
     const validatedParams = zodupdateServiceByIdParams.parse({ id });
-    const validatedData = zodupdateServiceByIdBody.parse(data);
+    const payload = {
+      name: data.nome,
+      description: data.descricao,
+      defaultPrice: data.precoPadrao,
+      duration: data.duracao,
+      category: data.categoria,
+      type: data.tipo,
+      active: data.ativo,
+    };
+    const validatedData = zodupdateServiceByIdBody.parse(payload);
 
-    const { url, options } = SERVICES_UPDATE(validatedParams.id, validatedData, token);
+    const { url, options } = SERVICES_UPDATE(
+      validatedParams.id,
+      validatedData,
+      token,
+    );
 
     const response = await fetch(url, {
       ...options,
@@ -98,13 +112,13 @@ export async function servicesUpdate(
   }
 }
 
-
 export async function servicesCreate(data: {
   nome: string;
   descricao?: string;
   precoPadrao?: number;
   duracao?: number;
   categoria?: string;
+  tipo: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   ativo?: boolean;
 }) {
   try {
@@ -113,7 +127,16 @@ export async function servicesCreate(data: {
 
     if (!token) throw new Error("Token de autenticação não encontrado");
 
-    const validatedData = zodcreateServiceBody.parse(data);
+    const payload = {
+      name: data.nome,
+      description: data.descricao,
+      defaultPrice: data.precoPadrao,
+      duration: data.duracao,
+      category: data.categoria,
+      type: data.tipo,
+      active: data.ativo,
+    };
+    const validatedData = zodcreateServiceBody.parse(payload);
     const { url, options } = SERVICES_CREATE(validatedData, token);
 
     const response = await fetch(url, {
@@ -141,4 +164,3 @@ export async function servicesCreate(data: {
     return apiError(error);
   }
 }
-

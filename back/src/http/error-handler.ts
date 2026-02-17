@@ -19,6 +19,34 @@ export type ErrorResponse = {
  * @returns HTTP status and response body
  */
 export function resolveHttpError(error: unknown): ErrorResponse {
+  // Fastify validation errors (from schema validation)
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    error.code === 'FST_ERR_VALIDATION' &&
+    'message' in error
+  ) {
+    const fastifyError = error as {
+      statusCode?: number;
+      validation?: Array<{ message?: string; instancePath?: string }>;
+      message: string;
+    };
+
+    const validationMessages =
+      fastifyError.validation?.map((v) => `${v.instancePath}: ${v.message}`).join(', ') ||
+      fastifyError.message;
+
+    return {
+      status: fastifyError.statusCode || 400,
+      body: {
+        code: 'VALIDATION_ERROR',
+        message: validationMessages,
+        details: { issues: fastifyError.validation },
+      },
+    };
+  }
+
   // Zod validation errors
   if (error instanceof ZodError) {
     return {

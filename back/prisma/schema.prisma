@@ -50,6 +50,13 @@ enum CouponExpirationType {
   BOTH // Expira por data ou quantidade
 }
 
+enum ServiceType {
+  CORTE
+  BARBA
+  SOBRANCELHA
+  ESTETICA
+}
+
 // Tabelas principais
 model User {
   id            String   @id @default(uuid())
@@ -130,6 +137,7 @@ model Service {
   name          String
   description   String?
   category      String?
+  type          ServiceType           @default(ESTETICA)
   active        Boolean               @default(true)
   professionals ServiceProfessional[]
   BookingItem   BookingItem[]

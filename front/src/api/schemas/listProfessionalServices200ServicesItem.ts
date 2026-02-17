@@ -5,6 +5,7 @@ export type ListProfessionalServices200ServicesItem = {
   description: string | null;
   /** @nullable */
   category: string | null;
+  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active: boolean;
   /** @nullable */
   price: number | null;

@@ -8,5 +8,6 @@ export type CreateServiceBody = {
   description?: string;
   /** @maxLength 50 */
   category?: string;
+  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active?: boolean;
 };

@@ -50,6 +50,7 @@ export * from './expired-token-error';
 export * from './duplicate-holiday-error';
 export * from './duplicate-coupon-error';
 export * from './duplicate-business-hours-error';
+export * from './multiple-services-per-type-error';
 export * from './coupon-not-found-error';
 export * from './coupon-not-applicable-error';
 export * from './coupon-in-use-error';

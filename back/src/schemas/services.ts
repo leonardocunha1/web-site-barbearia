@@ -1,4 +1,6 @@
 import { z } from 'zod';
+
+const serviceTypeSchema = z.enum(['CORTE', 'BARBA', 'SOBRANCELHA', 'ESTETICA']);
 import { paginationSchema } from './pagination';
 
 export const createServiceBodySchema = z.object({
@@ -6,6 +8,7 @@ export const createServiceBodySchema = z.object({
     .string()
     .min(3, { message: 'O nome do serviço deve ter pelo menos 3 caracteres' })
     .max(100, { message: 'O nome do serviço não pode exceder 100 caracteres' }),
+  type: serviceTypeSchema,
   description: z
     .string()
     .max(500, { message: 'A descrição não pode exceder 500 caracteres' })
@@ -44,6 +47,7 @@ export const servicesProfessionalSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   category: z.string().nullable(),
+  type: serviceTypeSchema,
   active: z.boolean(),
   price: z.number().nullable(),
   duration: z.number().nullable(),
@@ -54,6 +58,7 @@ export const servicesSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   category: z.string().nullable(),
+  type: serviceTypeSchema,
   active: z.boolean(),
 });
 
@@ -63,6 +68,7 @@ export const updateServiceBodySchema = z.object({
     .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
     .max(100, { message: 'O nome não pode exceder 100 caracteres' })
     .optional(),
+  type: serviceTypeSchema.optional(),
   description: z
     .string()
     .max(500, { message: 'A descrição não pode exceder 500 caracteres' })
@@ -101,6 +107,7 @@ export const serviceSchemaWithProfessional = z.object({
   name: z.string(),
   description: z.string().optional(),
   category: z.string().optional(),
+  type: serviceTypeSchema,
   active: z.boolean(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

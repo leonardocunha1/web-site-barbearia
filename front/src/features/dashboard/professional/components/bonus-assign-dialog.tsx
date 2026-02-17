@@ -52,11 +52,11 @@ export function BonusAssignDialog({
   const assignBonus = useAssignBonusToUser({
     mutation: {
       onSuccess: () => {
-        toast.success("Bonus atribuido com sucesso.");
+        toast.success("Bônus atribuído com sucesso.");
         setOpen(false);
         setDescription("");
       },
-      onError: () => toast.error("Nao foi possivel atribuir o bonus."),
+      onError: () => toast.error("Não foi possível atribuir o bônus."),
     },
   });
 
@@ -86,12 +86,12 @@ export function BonusAssignDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" disabled={!userId}>
-          Bonus
+          Bônus
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Atribuir bonus</DialogTitle>
+          <DialogTitle>Atribuir bônus</DialogTitle>
           <DialogDescription>
             Vincule pontos ao cliente referente a este agendamento.
           </DialogDescription>
@@ -125,7 +125,7 @@ export function BonusAssignDialog({
             <Input
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Ex: bonus por fidelidade"
+              placeholder="Ex: bônus por fidelidade"
             />
           </div>
           <DialogFooter>

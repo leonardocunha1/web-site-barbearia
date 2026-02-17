@@ -5,5 +5,6 @@ export type ListServices200ServicesItem = {
   description: string | null;
   /** @nullable */
   category: string | null;
+  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active: boolean;
 };

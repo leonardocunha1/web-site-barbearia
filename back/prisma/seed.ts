@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { addDays, addMinutes, startOfMonth } from 'date-fns';
+import { randomUUID } from 'crypto';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();
@@ -141,6 +142,34 @@ async function main() {
   );
   console.log(`✅ ${professionalUsers.length} profissionais criados`);
 
+  // 1.1 Criar tokens de verificacao e reset
+  console.log('\n🔐 Criando tokens de verificacao e reset...');
+  const verificationTokens = await Promise.all(
+    clientUsers.slice(0, 4).map((user) =>
+      prisma.verificationToken.create({
+        data: {
+          token: randomUUID(),
+          userId: user.id,
+          expiresAt: addDays(new Date(), 2),
+        },
+      }),
+    ),
+  );
+  const passwordResetTokens = await Promise.all(
+    clientUsers.slice(0, 3).map((user) =>
+      prisma.passwordResetToken.create({
+        data: {
+          token: randomUUID(),
+          userId: user.id,
+          expiresAt: addDays(new Date(), 1),
+        },
+      }),
+    ),
+  );
+  console.log(
+    `✅ ${verificationTokens.length} tokens de verificacao e ${passwordResetTokens.length} tokens de reset`,
+  );
+
   // 2. Criar Profissionais
   console.log('\n💼 Criando perfis de profissionais...');
 
@@ -198,60 +227,160 @@ async function main() {
   }
   console.log('✅ Horários de funcionamento criados');
 
+  // 3.1 Criar feriados
+  console.log('\n🏖️  Criando feriados...');
+  const holidayBase = new Date();
+  const holidayReasons = ['Feriado local', 'Descanso', 'Treinamento'];
+  const holidaysCreates = professionals.flatMap((professional) => {
+    const holidayCount = 1 + Math.floor(Math.random() * 2);
+    return Array.from({ length: holidayCount }, (_, index) => {
+      const dayOffset = 7 + index + Math.floor(Math.random() * 10);
+      return prisma.holiday.create({
+        data: {
+          professionalId: professional.id,
+          date: addDays(holidayBase, dayOffset),
+          reason: holidayReasons[index % holidayReasons.length],
+        },
+      });
+    });
+  });
+  const holidays = await Promise.all(holidaysCreates);
+  console.log(`✅ ${holidays.length} feriados criados`);
+
   // 4. Criar Serviços
   console.log('\n✂️  Criando serviços...');
 
-  const services = await Promise.all([
-    prisma.service.create({
-      data: {
-        name: 'Corte Cabelo',
-        description: 'Corte tradicional de cabelo',
-        category: 'Cortes',
-        active: true,
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Barba Completa',
-        description: 'Design e aparo completo de barba',
-        category: 'Barba',
-        active: true,
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Corte na Máquina',
-        description: 'Corte rápido com máquina',
-        category: 'Cortes',
-        active: true,
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Sobrancelha',
-        description: 'Design e aparo de sobrancelha',
-        category: 'Complementos',
-        active: true,
-      },
-    }),
-  ]);
+  const serviceSeeds = [
+    {
+      name: 'Corte na Tesoura',
+      description: 'Corte detalhado na tesoura',
+      category: 'Tesoura',
+      type: 'CORTE',
+      price: 45.0,
+      duration: 40,
+    },
+    {
+      name: 'Corte na Maquina',
+      description: 'Corte rapido com maquina',
+      category: 'Maquina',
+      type: 'CORTE',
+      price: 30.0,
+      duration: 25,
+    },
+    {
+      name: 'Barba Completa',
+      description: 'Design e aparo completo de barba',
+      category: 'Completa',
+      type: 'BARBA',
+      price: 40.0,
+      duration: 30,
+    },
+    {
+      name: 'Bigode',
+      description: 'Modelagem e alinhamento do bigode',
+      category: 'Bigode',
+      type: 'BARBA',
+      price: 20.0,
+      duration: 15,
+    },
+    {
+      name: 'Linha do Pescoco',
+      description: 'Acabamento na linha do pescoco',
+      category: 'Acabamento',
+      type: 'BARBA',
+      price: 15.0,
+      duration: 10,
+    },
+    {
+      name: 'Sobrancelha na Linha',
+      description: 'Design com linha para sobrancelha',
+      category: 'Linha',
+      type: 'SOBRANCELHA',
+      price: 18.0,
+      duration: 15,
+    },
+    {
+      name: 'Sobrancelha na Pinca',
+      description: 'Design com pinca',
+      category: 'Pinca',
+      type: 'SOBRANCELHA',
+      price: 20.0,
+      duration: 15,
+    },
+    {
+      name: 'Sobrancelha na Cera',
+      description: 'Modelagem com cera',
+      category: 'Cera',
+      type: 'SOBRANCELHA',
+      price: 22.0,
+      duration: 20,
+    },
+    {
+      name: 'Sobrancelha na Lamina',
+      description: 'Acabamento com lamina',
+      category: 'Lamina',
+      type: 'SOBRANCELHA',
+      price: 15.0,
+      duration: 10,
+    },
+    {
+      name: 'Pintura de Cabelo',
+      description: 'Aplicacao de tinta para cabelo',
+      category: 'Coloracao',
+      type: 'ESTETICA',
+      price: 80.0,
+      duration: 60,
+    },
+    {
+      name: 'Limpeza de Pele',
+      description: 'Limpeza e hidratacao facial',
+      category: 'Facial',
+      type: 'ESTETICA',
+      price: 70.0,
+      duration: 50,
+    },
+    {
+      name: 'Hidratacao Facial',
+      description: 'Hidratacao e revitalizacao da pele',
+      category: 'Facial',
+      type: 'ESTETICA',
+      price: 60.0,
+      duration: 40,
+    },
+    {
+      name: 'Mascara de Argila',
+      description: 'Tratamento com mascara de argila',
+      category: 'Facial',
+      type: 'ESTETICA',
+      price: 55.0,
+      duration: 35,
+    },
+  ];
+
+  const services = await Promise.all(
+    serviceSeeds.map((service) =>
+      prisma.service.create({
+        data: {
+          name: service.name,
+          description: service.description,
+          category: service.category,
+          type: service.type,
+          active: true,
+        },
+      }),
+    ),
+  );
   console.log(`✅ ${services.length} serviços criados`);
 
   // 5. Vincular Serviços aos Profissionais
   console.log('\n🔗 Vinculando serviços aos profissionais...');
 
-  const durationByServiceId = new Map([
-    [services[0].id, 30],
-    [services[1].id, 30],
-    [services[2].id, 15],
-    [services[3].id, 15],
-  ]);
-  const priceByServiceId = new Map([
-    [services[0].id, 40.0],
-    [services[1].id, 40.0],
-    [services[2].id, 25.0],
-    [services[3].id, 15.0],
-  ]);
+  const durationByServiceId = new Map(
+    services.map((service, index) => [service.id, serviceSeeds[index].duration]),
+  );
+  const priceByServiceId = new Map(
+    services.map((service, index) => [service.id, serviceSeeds[index].price]),
+  );
 
   const serviceProfessionalCreates = professionals.flatMap((professional) => {
     const serviceCount = 2 + Math.floor(Math.random() * 3); // 2-4 serviços
@@ -319,8 +448,47 @@ async function main() {
       const client = clientUsers[index % clientUsers.length];
       const professional = professionals[Math.floor(Math.random() * professionals.length)];
       const professionalServices = serviceProfessionalsByProfessional.get(professional.id) ?? [];
-      const serviceProfessional =
-        professionalServices[Math.floor(Math.random() * professionalServices.length)];
+      const servicesByType = new Map<string, typeof professionalServices>();
+      professionalServices.forEach((sp) => {
+        const serviceType = serviceById.get(sp.serviceId)?.type ?? 'ESTETICA';
+        const group = servicesByType.get(serviceType) ?? [];
+        group.push(sp);
+        servicesByType.set(serviceType, group);
+      });
+
+      const selectedMap = new Map<string, (typeof professionalServices)[number]>();
+
+      const pickRandom = (list: typeof professionalServices) =>
+        list.length ? list[Math.floor(Math.random() * list.length)] : undefined;
+
+      const baseTypes = ['CORTE', 'BARBA', 'SOBRANCELHA'];
+      const baseType = baseTypes[Math.floor(Math.random() * baseTypes.length)];
+      const baseService = pickRandom(servicesByType.get(baseType) ?? []);
+      if (baseService) selectedMap.set(baseService.id, baseService);
+
+      const extraTypes = shuffleArray(baseTypes.filter((type) => type !== baseType)).slice(
+        0,
+        Math.floor(Math.random() * 2),
+      );
+
+      extraTypes.forEach((type) => {
+        const service = pickRandom(servicesByType.get(type) ?? []);
+        if (service) selectedMap.set(service.id, service);
+      });
+
+      const esteticaServices = shuffleArray(servicesByType.get('ESTETICA') ?? []).slice(
+        0,
+        Math.floor(Math.random() * 3),
+      );
+
+      esteticaServices.forEach((service) => selectedMap.set(service.id, service));
+
+      if (selectedMap.size === 0) {
+        const fallback = pickRandom(professionalServices);
+        if (fallback) selectedMap.set(fallback.id, fallback);
+      }
+
+      const selectedServiceProfessionals = Array.from(selectedMap.values());
 
       const dayOffset = Math.floor(Math.random() * 14) - 7;
       const hour = 9 + Math.floor(Math.random() * 8);
@@ -329,9 +497,10 @@ async function main() {
       const startDateTime = addDays(today, dayOffset);
       startDateTime.setHours(hour, minute, 0, 0);
 
-      const endDateTime = addMinutes(startDateTime, serviceProfessional.duration);
+      const totalDuration = selectedServiceProfessionals.reduce((sum, sp) => sum + sp.duration, 0);
+      const endDateTime = addMinutes(startDateTime, totalDuration);
       const status = bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)];
-      const service = serviceById.get(serviceProfessional.serviceId);
+      const totalAmount = selectedServiceProfessionals.reduce((sum, sp) => sum + sp.price, 0);
 
       return prisma.booking.create({
         data: {
@@ -340,16 +509,19 @@ async function main() {
           startDateTime,
           endDateTime,
           status,
-          totalAmount: serviceProfessional.price,
+          totalAmount,
           canceledAt: status === 'CANCELED' ? addMinutes(startDateTime, -30) : undefined,
           items: {
-            create: {
-              serviceProfessionalId: serviceProfessional.id,
-              serviceId: serviceProfessional.serviceId,
-              name: service?.name ?? 'Serviço',
-              price: serviceProfessional.price,
-              duration: serviceProfessional.duration,
-            },
+            create: selectedServiceProfessionals.map((sp) => {
+              const service = serviceById.get(sp.serviceId);
+              return {
+                serviceProfessionalId: sp.id,
+                serviceId: sp.serviceId,
+                name: service?.name ?? 'Servico',
+                price: sp.price,
+                duration: sp.duration,
+              };
+            }),
           },
         },
       });
@@ -423,6 +595,104 @@ async function main() {
   ]);
   console.log(`✅ ${coupons.length} cupons criados`);
 
+  // 9. Criar resgates, transacoes e logs
+  console.log('\n🧾 Criando logs, transacoes e resgates...');
+  const completedBookings = bookings.filter((booking) => booking.status === 'COMPLETED');
+  const bonusTransactions = await Promise.all(
+    completedBookings.slice(0, 8).map((booking, index) =>
+      prisma.bonusTransaction.create({
+        data: {
+          userId: booking.userId,
+          bookingId: booking.id,
+          points: 10 + index * 2,
+          type: 'BOOKING_POINTS',
+          operation: 'CREDIT',
+          description: 'Pontos por agendamento concluido',
+        },
+      }),
+    ),
+  );
+
+  const bonusRedemptions = await Promise.all(
+    bookings.slice(0, 4).map((booking, index) =>
+      prisma.bonusRedemption.create({
+        data: {
+          userId: booking.userId,
+          bookingId: booking.id,
+          pointsUsed: 50 + index * 10,
+          discount: 10 + index * 5,
+        },
+      }),
+    ),
+  );
+
+  await Promise.all(
+    bonusRedemptions.map((redemption) =>
+      prisma.bonusTransaction.create({
+        data: {
+          userId: redemption.userId,
+          bookingId: redemption.bookingId,
+          points: redemption.pointsUsed,
+          type: 'BOOKING_POINTS',
+          operation: 'DEBIT',
+          description: 'Resgate de pontos no agendamento',
+        },
+      }),
+    ),
+  );
+
+  const couponTarget = coupons[0];
+  const couponTargetBookings = bookings.slice(0, 5);
+  const couponRedemptions = await Promise.all(
+    couponTargetBookings.map(async (booking) => {
+      const discount = Math.min(booking.totalAmount * 0.1, booking.totalAmount);
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          couponId: couponTarget.id,
+          couponDiscount: discount,
+        },
+      });
+      return prisma.couponRedemption.create({
+        data: {
+          couponId: couponTarget.id,
+          userId: booking.userId,
+          bookingId: booking.id,
+          discount,
+        },
+      });
+    }),
+  );
+
+  await prisma.coupon.update({
+    where: { id: couponTarget.id },
+    data: { uses: { increment: couponRedemptions.length } },
+  });
+
+  const logsData = bookings.slice(0, 8).map((booking, index) => ({
+    userId: booking.userId,
+    type: index % 2 === 0 ? 'BOOKING_CREATE' : 'STATUS_UPDATE',
+    description:
+      index % 2 === 0 ? 'Agendamento criado via seed' : `Status atualizado para ${booking.status}`,
+    reference: booking.id,
+    entity: 'Booking',
+  }));
+
+  logsData.push(
+    ...services.slice(0, 4).map((service) => ({
+      userId: adminUsers[0]?.id ?? null,
+      type: 'SERVICE_CREATE',
+      description: `Servico ${service.name} criado no seed`,
+      reference: service.id,
+      entity: 'Service',
+    })),
+  );
+
+  await prisma.log.createMany({ data: logsData });
+  console.log(
+    `✅ ${bonusTransactions.length} transacoes de bonus, ${bonusRedemptions.length} resgates e ${couponRedemptions.length} cupons resgatados`,
+  );
+
   console.log('\n✨ Seed concluído com sucesso!\n');
   console.log('📋 Dados criados:');
   console.log(`  - ${adminUsers.length} Admins`);
@@ -431,7 +701,14 @@ async function main() {
   console.log(`  - ${services.length} Serviços`);
   console.log(`  - ${serviceProfessionals.length} Relações Serviço-Profissional`);
   console.log(`  - ${bookings.length} Agendamentos`);
+  console.log(`  - ${holidays.length} Feriados`);
   console.log(`  - ${coupons.length} Cupons`);
+  console.log(`  - ${verificationTokens.length} Tokens de verificação`);
+  console.log(`  - ${passwordResetTokens.length} Tokens de reset`);
+  console.log(`  - ${bonusTransactions.length} Transações de bônus`);
+  console.log(`  - ${bonusRedemptions.length} Resgates de bônus`);
+  console.log(`  - ${couponRedemptions.length} Resgates de cupom`);
+  console.log(`  - ${logsData.length} Logs`);
   console.log('\n🔐 Senhas padrão (.env):');
   console.log(`  Admins: ${ADMIN_PASSWORD}`);
   console.log(`  Profissionais: ${PROFESSIONAL_PASSWORD}`);

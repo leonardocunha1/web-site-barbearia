@@ -5,5 +5,6 @@ export type UpdateServiceById200Service = {
   description: string | null;
   /** @nullable */
   category: string | null;
+  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active: boolean;
 };

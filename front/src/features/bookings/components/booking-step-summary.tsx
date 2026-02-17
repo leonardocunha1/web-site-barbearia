@@ -17,6 +17,7 @@ import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useEffect, useRef } from "react";
 import { useUser } from "@/contexts/user";
+import { useProfessionalSchedule } from "../hooks/use-professional-schedule";
 
 interface BookingStepSummaryProps {
   bonusBalance?: GetBonusBalance200;
@@ -50,6 +51,15 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
     limit: 100,
     status: "active",
   });
+
+  const scheduleQuery = useProfessionalSchedule({
+    professionalId,
+    date: selectedDate,
+    serviceIds: selectedServices,
+  });
+
+  const isHoliday = Boolean(scheduleQuery.data?.isHoliday);
+  const holidayReason = scheduleQuery.data?.holidayReason;
 
   const servicesQuery = useListProfessionalServices(
     professionalId,
@@ -216,6 +226,15 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
             <span className="text-muted-foreground">Horário:</span>
             <span className="font-medium text-stone-900">{selectedTime}</span>
           </div>
+
+          {isHoliday && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <p className="font-medium">Dia indisponível (feriado).</p>
+              {holidayReason && (
+                <p className="mt-1 text-amber-700">Motivo: {holidayReason}</p>
+              )}
+            </div>
+          )}
 
           <div className="border-t border-stone-200 pt-2">
             <div className="flex items-start gap-3 text-sm">

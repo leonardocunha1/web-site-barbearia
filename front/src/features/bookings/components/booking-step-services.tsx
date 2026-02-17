@@ -56,7 +56,8 @@ export function BookingStepServices() {
           Escolha os serviços
         </h3>
         <p className="text-muted-foreground mt-2">
-          Selecione um ou mais serviços para seu agendamento
+          Para Corte, Barba e Sobrancelha, selecione apenas 1 por tipo. Em
+          Estetica, voce pode combinar mais de um.
         </p>
       </div>
 

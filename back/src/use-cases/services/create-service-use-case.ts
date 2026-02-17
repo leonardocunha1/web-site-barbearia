@@ -1,11 +1,12 @@
 import { IServicesRepository } from '@/repositories/services-repository';
-import type { Service } from '@prisma/client';
+import type { Service, ServiceType } from '@prisma/client';
 import { ServiceAlreadyExistsError } from '../errors/service-already-exists-error';
 interface CreateServiceResponse {
   service: Service;
 }
 interface CreateServiceRequest {
   name: string;
+  type: ServiceType;
   description?: string;
   category?: string;
   active: boolean;
@@ -16,6 +17,7 @@ export class CreateServiceUseCase {
 
   async execute({
     name,
+    type,
     description,
     category,
     active,
@@ -27,6 +29,7 @@ export class CreateServiceUseCase {
 
     const service = await this.servicesRepository.create({
       name,
+      type,
       description,
       category,
       active,

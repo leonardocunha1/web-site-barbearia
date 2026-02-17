@@ -1,7 +1,6 @@
 import { IHolidaysRepository } from '@/repositories/holidays-repository';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
-import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { validatePagination } from '@/utils/validate-pagination';
 import { ListHolidaysUseCaseRequest, ListHolidaysUseCaseResponse } from './types';
 
@@ -27,11 +26,7 @@ export class ListHolidaysUseCase {
       limit,
     });
 
-    // Verificar se não há feriados
-    if (holidays.length === 0 && total === 0) {
-      throw new HolidayNotFoundError();
-    }
-
+    // Validar que os feriados retornados pertencem ao profissional correto
     if (holidays.length > 0 && holidays[0].professionalId !== professionalId) {
       throw new ProfissionalTentandoPegarInformacoesDeOutro();
     }

@@ -4,7 +4,7 @@ import { IProfessionalsRepository } from '@/repositories/professionals-repositor
 import { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
 import { IBonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
-import { Booking } from '@prisma/client';
+import { Booking, ServiceType } from '@prisma/client';
 
 import {
   MIN_BOOKING_VALUE_AFTER_DISCOUNT,
@@ -23,6 +23,7 @@ import { CouponBonusConflictError } from '../errors/coupon-bonus-conflict-error'
 import { InvalidCouponError } from './invalid-coupon-error';
 import { CouponNotApplicableError } from '../errors/coupon-not-applicable-error';
 import { ICouponRepository } from '@/repositories/coupon-repository';
+import { MultipleServicesPerTypeError } from '../errors/multiple-services-per-type-error';
 
 export interface BookingRequest {
   userId: string;
@@ -51,6 +52,7 @@ export class CreateBookingUseCase {
     await this.loadEntities(request.userId, request.professionalId);
 
     const services = await this.loadAndValidateServices(request.services, request.professionalId);
+    this.ensureServiceTypeRules(services);
 
     const totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
     const endDateTime = new Date(request.startDateTime.getTime() + totalDuration * 60000);
@@ -258,6 +260,19 @@ export class CreateBookingUseCase {
     );
     if (result.length === 0) throw new InvalidDurationError();
     return result;
+  }
+
+  private ensureServiceTypeRules(services: Array<{ service: { type: ServiceType } }>) {
+    const seen = new Set<ServiceType>();
+
+    for (const service of services) {
+      const type = service.service.type ?? 'ESTETICA';
+      if (type === 'ESTETICA') continue;
+      if (seen.has(type)) {
+        throw new MultipleServicesPerTypeError(type);
+      }
+      seen.add(type);
+    }
   }
 
   private async ensureNoConflict(professionalId: string, start: Date, end: Date) {

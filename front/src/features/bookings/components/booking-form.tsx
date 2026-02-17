@@ -204,6 +204,9 @@ export function BookingForm({ className }: BookingFormProps) {
     serviceIds: selectedServices,
   });
 
+  const isHoliday = Boolean(scheduleQuery.data?.isHoliday);
+  const holidayReason = scheduleQuery.data?.holidayReason;
+
   const professionalOptions = useMemo(() => {
     return (
       professionalsQuery.data?.professionals?.map((professional) => ({
@@ -296,7 +299,10 @@ export function BookingForm({ className }: BookingFormProps) {
             timeSlots={scheduleQuery.data?.timeSlots ?? []}
             isLoading={scheduleQuery.isLoading}
             disabled={
-              !professionalId || selectedServices.length === 0 || !isDateValid
+              !professionalId ||
+              selectedServices.length === 0 ||
+              !isDateValid ||
+              isHoliday
             }
             error={errors.time?.message}
           />
@@ -304,6 +310,14 @@ export function BookingForm({ className }: BookingFormProps) {
             <p className="text-xs text-amber-600">
               Selecione uma data válida para ver os horários.
             </p>
+          )}
+          {isHoliday && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <p className="font-medium">Dia indisponível (feriado).</p>
+              {holidayReason && (
+                <p className="mt-1 text-amber-700">Motivo: {holidayReason}</p>
+              )}
+            </div>
           )}
         </div>
       </motion.div>

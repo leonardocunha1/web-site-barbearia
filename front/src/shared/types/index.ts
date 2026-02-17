@@ -42,6 +42,7 @@ export interface Service {
   name: string;
   description?: string | null;
   category?: string | null;
+  type?: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active: boolean;
   defaultPrice?: number;
 }

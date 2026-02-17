@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { IHolidaysRepository } from '@/repositories/holidays-repository';
 import { ListHolidaysUseCase } from './list-holidays-use-case';
-import { HolidayNotFoundError } from '../errors/holiday-not-found-error';
 import { InvalidPageRangeError } from '../errors/invalid-page-range-error';
 import { ProfissionalTentandoPegarInformacoesDeOutro } from '../errors/profissional-pegando-informacao-de-outro-usuario-error';
 import { createMockHolidaysRepository } from '@/mock/mock-repositories';
@@ -81,15 +80,21 @@ describe('ListHolidaysUseCase', () => {
     ).rejects.toThrow(InvalidPageRangeError);
   });
 
-  it('deve lançar erro quando não encontra feriados', async () => {
+  it('deve retornar lista vazia quando não há feriados cadastrados', async () => {
     mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([]);
     mockHolidaysRepository.countByProfessionalId.mockResolvedValue(0);
 
-    await expect(
-      useCase.execute({
-        professionalId: 'pro-123',
-      }),
-    ).rejects.toThrow(HolidayNotFoundError);
+    const result = await useCase.execute({
+      professionalId: 'pro-123',
+    });
+
+    expect(result).toEqual({
+      holidays: [],
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 0,
+    });
   });
 
   it('deve lançar erro quando profissional não é o dono dos feriados', async () => {
@@ -120,21 +125,16 @@ describe('ListHolidaysUseCase', () => {
     expect(result.totalPages).toBe(3); // 25/10 = 2.5 → arredonda para 3
   });
 
-  it('deve garantir pelo menos 1 página mesmo sem registros', async () => {
+  it('deve retornar totalPages = 0 quando não há registros', async () => {
     mockHolidaysRepository.findManyByProfessionalId.mockResolvedValue([]);
     mockHolidaysRepository.countByProfessionalId.mockResolvedValue(0);
 
-    // Forçar o teste a não lançar erro (removemos a validação de HolidayNotFoundError)
-    try {
-      await useCase.execute({
-        professionalId: 'pro-123',
-      });
-    } catch (e) {
-      // Ignoramos o erro esperado
-    }
+    const result = await useCase.execute({
+      professionalId: 'pro-123',
+    });
 
-    // Verificamos que o cálculo de totalPages seria 1
-    const totalPages = Math.max(1, Math.ceil(0 / 10));
-    expect(totalPages).toBe(1);
+    expect(result.totalPages).toBe(0);
+    expect(result.total).toBe(0);
+    expect(result.holidays).toEqual([]);
   });
 });

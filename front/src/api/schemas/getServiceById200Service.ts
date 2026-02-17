@@ -5,6 +5,7 @@ export type GetServiceById200Service = {
   name: string;
   description?: string;
   category?: string;
+  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active: boolean;
   createdAt: string;
   updatedAt: string;

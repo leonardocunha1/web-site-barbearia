@@ -23,15 +23,31 @@ import {
 } from "../../../../shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { BusinessHoursSection } from "@/features/business-hours/components/business-hours-section";
+import { BusinessHoursSection } from "./settings/business-hours/components/business-hours-section";
 import { toast } from "sonner";
 import {
   getGetProfessionalDashboardQueryKey,
   type UpdateProfessionalBody,
   useGetProfessionalDashboard,
   useUpdateProfessional,
+  useUpdateUserPassword,
 } from "@/api";
 import { useQueryClient } from "@tanstack/react-query";
+
+const formatPhone = (phone: string) => {
+  if (!phone) return "";
+  const cleaned = phone.replace(/\D/g, "");
+
+  if (cleaned.length === 11) {
+    // (11) 99000-0205
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+  } else if (cleaned.length === 10) {
+    // (11) 9000-0205
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+  }
+
+  return phone;
+};
 
 const optionalString = (schema: z.ZodString) =>
   z.preprocess(
@@ -57,11 +73,125 @@ const profileSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
+
+const passwordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(6, "Senha atual deve ter pelo menos 6 caracteres"),
+    newPassword: z
+      .string()
+      .min(6, "Nova senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
 type UpdateProfessionalPayload = UpdateProfessionalBody & {
   name?: string;
   email?: string;
   phone?: string | null;
 };
+
+function PasswordChangeCard() {
+  const updatePassword = useUpdateUserPassword();
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onPasswordSubmit = async (values: PasswordFormValues) => {
+    try {
+      await updatePassword.mutateAsync({
+        data: {
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+        },
+      });
+
+      toast.success("Senha alterada com sucesso!");
+      passwordForm.reset();
+    } catch (error) {
+      console.log("Error updating password:", error);
+      toast.error("Erro ao alterar senha. Verifique a senha atual.");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Alterar Senha</CardTitle>
+        <CardDescription>
+          Atualize sua senha para manter sua conta segura
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...passwordForm}>
+          <form
+            onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={passwordForm.control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha Atual</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="******" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={passwordForm.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nova Senha</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="******" {...field} />
+                  </FormControl>
+                  <FormDescription>Mínimo de 6 caracteres</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={passwordForm.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar Nova Senha</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="******" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" disabled={updatePassword.isPending}>
+              {updatePassword.isPending ? "Alterando..." : "Alterar Senha"}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function SettingsSection() {
   const dashboardParams = { range: "week" } as const;
@@ -74,7 +204,7 @@ export function SettingsSection() {
     defaultValues: {
       name: data?.professional?.name ?? "",
       email: data?.professional?.email ?? "",
-      phone: data?.professional?.phone ?? "",
+      phone: formatPhone(data?.professional?.phone ?? ""),
       specialty: data?.professional?.specialty ?? "",
       bio: "",
       document: "",
@@ -88,7 +218,7 @@ export function SettingsSection() {
     form.reset({
       name: data.professional.name ?? "",
       email: data.professional.email ?? "",
-      phone: data.professional.phone ?? "",
+      phone: formatPhone(data.professional.phone ?? ""),
       specialty: data.professional.specialty ?? "",
       bio: "",
       document: "",
@@ -175,8 +305,12 @@ export function SettingsSection() {
                           type="email"
                           placeholder="email@exemplo.com"
                           {...field}
+                          disabled
                         />
                       </FormControl>
+                      <FormDescription>
+                        O email não pode ser alterado
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -189,8 +323,15 @@ export function SettingsSection() {
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input placeholder="(11) 99999-9999" {...field} />
+                        <Input
+                          placeholder="(11) 99999-9999"
+                          {...field}
+                          disabled
+                        />
                       </FormControl>
+                      <FormDescription>
+                        O telefone não pode ser alterado
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -288,6 +429,9 @@ export function SettingsSection() {
           </Form>
         </CardContent>
       </Card>
+
+      {/* Password Change Section */}
+      <PasswordChangeCard />
 
       <BusinessHoursSection professionalId={data?.professional?.id} />
 
