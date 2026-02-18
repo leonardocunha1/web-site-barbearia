@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { Filter, X, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/shared/utils/utils";
 
 export type BookingFilterValues = {
@@ -158,17 +158,13 @@ export function BookingFilters({
                   <Label className="text-xs font-medium text-stone-600">
                     Data inicial
                   </Label>
-                  <div className="relative">
-                    <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-stone-400" />
-                    <Input
-                      type="date"
-                      value={value.startDate ?? ""}
-                      onChange={(event) =>
-                        onChange({ ...value, startDate: event.target.value })
-                      }
-                      className="h-10 border-stone-200 bg-white/50 pl-9"
-                    />
-                  </div>
+                  <DatePicker
+                    value={value.startDate ?? ""}
+                    max={value.endDate || undefined}
+                    onChange={(date) => onChange({ ...value, startDate: date })}
+                    placeholder="Selecione a data inicial"
+                    className="h-10 border-stone-200 bg-white/50"
+                  />
                 </div>
 
                 {/* Data final */}
@@ -176,17 +172,13 @@ export function BookingFilters({
                   <Label className="text-xs font-medium text-stone-600">
                     Data final
                   </Label>
-                  <div className="relative">
-                    <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-stone-400" />
-                    <Input
-                      type="date"
-                      value={value.endDate ?? ""}
-                      onChange={(event) =>
-                        onChange({ ...value, endDate: event.target.value })
-                      }
-                      className="h-10 border-stone-200 bg-white/50 pl-9"
-                    />
-                  </div>
+                  <DatePicker
+                    value={value.endDate ?? ""}
+                    min={value.startDate || undefined}
+                    onChange={(date) => onChange({ ...value, endDate: date })}
+                    placeholder="Selecione a data final"
+                    className="h-10 border-stone-200 bg-white/50"
+                  />
                 </div>
               </div>
 

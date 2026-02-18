@@ -88,8 +88,8 @@ export function DashboardLayout({
           {iconGroup}
           <Button
             onClick={handleLogout}
-            variant="outline"
-            className="cursor-pointer"
+            variant="destructive"
+            className="cursor-pointer gap-2"
           >
             Sair
           </Button>

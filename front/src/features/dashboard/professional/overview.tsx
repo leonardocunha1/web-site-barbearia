@@ -16,8 +16,8 @@ import {
 import { useGetProfessionalDashboard } from "@/api";
 import { formatBookingDateTime } from "@/features/bookings/utils/booking-formatters";
 import { RecentServices } from "./recent-services";
-import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -110,18 +110,20 @@ export function OverviewSection() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <div className="space-y-2">
                 <Label>Inicio</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  onChange={(event) => setStartDate(event.target.value)}
+                  max={endDate || undefined}
+                  onChange={setStartDate}
+                  placeholder="Data inicial"
                 />
               </div>
               <div className="space-y-2">
                 <Label>Fim</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  onChange={(event) => setEndDate(event.target.value)}
+                  min={startDate || undefined}
+                  onChange={setEndDate}
+                  placeholder="Data final"
                 />
               </div>
             </div>

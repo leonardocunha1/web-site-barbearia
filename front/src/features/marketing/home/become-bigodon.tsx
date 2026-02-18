@@ -89,7 +89,7 @@ const cardVariants = {
   },
 };
 
-export default function SejaUmBigodon() {
+export default function BecomeBigodon() {
   return (
     <>
       <svg
@@ -109,7 +109,7 @@ export default function SejaUmBigodon() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: false, amount: 0.3 }} // once: false para reanimar sempre
+            viewport={{ once: false, amount: 0.3 }}
             className="space-y-8 lg:sticky lg:top-8 lg:h-fit"
           >
             <motion.div className="space-y-6" variants={titleVariants}>
@@ -127,7 +127,7 @@ export default function SejaUmBigodon() {
 
             <motion.div
               variants={imageVariants}
-              viewport={{ once: false, amount: 0.3 }} // once: false para reanimar sempre
+              viewport={{ once: false, amount: 0.3 }}
               className="mt-8"
             >
               <Image
@@ -146,7 +146,7 @@ export default function SejaUmBigodon() {
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: false, amount: 0.2 }} // once: false para reanimar sempre
+            viewport={{ once: false, amount: 0.2 }}
           >
             <div className="absolute inset-y-0 left-6 hidden w-1 rounded-full bg-gradient-to-b from-amber-500 via-amber-700 to-amber-900 shadow-lg sm:block"></div>
 
@@ -160,7 +160,7 @@ export default function SejaUmBigodon() {
                   <motion.div
                     whileHover={{
                       rotate: [0, -8, 8, 0],
-                      transition: { duration: 0.5, ease: easeInOut }, // ✅
+                      transition: { duration: 0.5, ease: easeInOut },
                     }}
                     className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-stone-800 p-3 shadow-inner"
                   >

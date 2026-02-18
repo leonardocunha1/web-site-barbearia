@@ -9,7 +9,7 @@ import { useUser } from "@/contexts/user";
 import { motion, Variants } from "framer-motion";
 
 export default function Header() {
-  const user = useUser();
+  const { user } = useUser();
 
   // Variantes de animação do header
   const headerVariants: Variants = {
@@ -50,12 +50,12 @@ export default function Header() {
 
         {/* Botões de autenticação */}
         <div className="hidden md:flex">
-          <AuthButtons user={user.user} />
+          <AuthButtons user={user?.user} />
         </div>
 
         {/* Mobile */}
         <div className="md:hidden">
-          <MobileMenu user={user.user} />
+          <MobileMenu user={user?.user} />
         </div>
       </nav>
     </motion.header>

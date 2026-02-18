@@ -2,7 +2,7 @@ import { servicesProfessionalGet } from "@/app/api/actions/services-professional
 import ProfessionalServicesTable from "@/features/dashboard/admin/professionals/id/components/professional-service-table";
 import { GoBackButton } from "@/shared/components/ui/go-back-button";
 
-interface ProfissionalPageProps {
+interface ProfessionalPageProps {
   params: { id: string };
   searchParams?: {
     page?: string;
@@ -11,10 +11,10 @@ interface ProfissionalPageProps {
   };
 }
 
-export default async function ProfissionalPage({
+export default async function ProfessionalPage({
   params,
   searchParams,
-}: ProfissionalPageProps) {
+}: ProfessionalPageProps) {
   const { id } = await params;
   const sp = await searchParams;
 

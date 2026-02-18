@@ -5,8 +5,8 @@ import { Briefcase, UserCircle2 } from "lucide-react";
 import { OverviewSection } from "./overview";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { DashboardLayout } from "../../layout/dashboard-layout";
-import { ProfissionalSection } from "../professionals/components/professional-section";
-import ServicosSection from "../services/components/servicos-section";
+import { ProfessionalSection } from "../professionals/components/professional-section";
+import ServicesSection from "../services/components/services-section";
 import CouponsSection from "../coupons/components/coupons-section";
 
 export default function AdminDashboard() {
@@ -54,9 +54,9 @@ export default function AdminDashboard() {
         {
           value: "info-professional",
           label: "Funcionários",
-          content: <ProfissionalSection />,
+          content: <ProfessionalSection />,
         },
-        { value: "servicos", label: "Serviços", content: <ServicosSection /> },
+        { value: "servicos", label: "Serviços", content: <ServicesSection /> },
         { value: "coupons", label: "Cupons", content: <CouponsSection /> },
       ]}
       currentTab={currentTab}

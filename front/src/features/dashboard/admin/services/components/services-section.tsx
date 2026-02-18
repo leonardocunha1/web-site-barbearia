@@ -30,7 +30,7 @@ const formatServiceType = (value: Service["tipo"]) => {
   }
 };
 
-export default function ServicosSection() {
+export default function ServicesSection() {
   const { services, isLoading, error, refetch } = useServicesData();
   const [creating, setCreating] = useState(false);
 

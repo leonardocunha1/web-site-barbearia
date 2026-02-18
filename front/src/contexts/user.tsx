@@ -20,7 +20,7 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<GetUserProfile200 | null | undefined>();
+  const [user, setUser] = useState<GetUserProfile200 | null | undefined>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // gerenciar a validação

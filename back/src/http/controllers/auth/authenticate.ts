@@ -15,6 +15,7 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
     role: user.role,
     professionalId,
   });
+  console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', professionalId)
 
   const userWithoutPassword: UserDTO = {
     id: user.id,

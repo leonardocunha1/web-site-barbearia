@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
-import { SignInIcon } from "@phosphor-icons/react";
-import { GetUserProfile200 } from "@/api";
+import { SignInIcon, SignOutIcon } from "@phosphor-icons/react";
+import { GetUserProfile200User } from "@/api";
+import { useLogout } from "@/shared/hooks/useLogout";
 
 export function AuthButtons({
   user,
 }: {
-  user: GetUserProfile200 | null | undefined;
+  user: GetUserProfile200User | null | undefined;
 }) {
-  console.log("AuthButtons user:", user);
-  if (user === undefined) return null;
+  const { logout: handleLogout } = useLogout();
 
   if (!user) {
     return (
@@ -27,16 +27,32 @@ export function AuthButtons({
       </div>
     );
   }
+  // Se user existe, mostra botão de ir para conta + sair
+  const dashboardUrl = 
+    user.role === "PROFESSIONAL" ? "/dashboard/professional" :
+    user.role === "ADMIN" ? "/dashboard/admin" :
+    "/conta";
 
   return (
-    <Link href="/conta">
+    <div className="flex items-center space-x-2">
+      <Link href={dashboardUrl}>
+        <Button
+          variant="default"
+          size="sm"
+          className="border-principal-500 hover:bg-principal-600 cursor-pointer border text-stone-200 duration-300"
+        >
+          Minha conta
+        </Button>
+      </Link>
       <Button
-        variant="default"
+        onClick={handleLogout}
+        variant="outline"
         size="sm"
-        className="border-principal-500 hover:bg-principal-600 cursor-pointer border text-stone-200 duration-300"
+        className="cursor-pointer text-red-600 hover:bg-red-50 border-red-200"
       >
-        Minha conta
+        Sair
+        <SignOutIcon className="size-4" />
       </Button>
-    </Link>
+    </div>
   );
 }

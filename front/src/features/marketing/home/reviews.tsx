@@ -8,7 +8,7 @@ import { Smile, Laugh, Meh, Frown } from "lucide-react";
 import "swiper/css";
 import "swiper/css/pagination";
 
-export default function Avaliacoes() {
+export default function Reviews() {
   const reviews = [
     {
       id: 1,

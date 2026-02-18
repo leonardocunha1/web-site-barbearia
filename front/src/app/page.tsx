@@ -1,11 +1,11 @@
 import Container from "@/shared/components/ui/container";
-import Feedbacks from "@/features/marketing/home/feedbacks";
+import Reviews from "@/features/marketing/home/reviews";
 import Hero from "@/features/marketing/home/hero";
-import Localizacao from "@/features/marketing/home/localizacao";
+import Location from "@/features/marketing/home/location";
 import { MarqueeDetails } from "@/features/marketing/home/marquee";
-import SejaUmBigodon from "@/features/marketing/home/seja-um-bigodon";
-import Servicos from "@/features/marketing/home/servicos";
-import { WhatsAppFloat } from "@/features/marketing/home/wpp";
+import BecomeBigodon from "@/features/marketing/home/become-bigodon";
+import Services from "@/features/marketing/home/services";
+import { WhatsAppFloat } from "@/features/marketing/home/whatsapp-float";
 
 export default function Page() {
   return (
@@ -16,16 +16,16 @@ export default function Page() {
 
       <MarqueeDetails />
 
-      <SejaUmBigodon />
+      <BecomeBigodon />
 
       <Container>
-        <Servicos />
+        <Services />
       </Container>
 
-      <Localizacao />
+      <Location />
 
       <Container>
-        <Feedbacks />
+        <Reviews />
       </Container>
 
       <WhatsAppFloat />

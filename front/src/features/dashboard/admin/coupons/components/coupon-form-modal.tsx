@@ -1,6 +1,6 @@
 "use client";
 
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Select,
@@ -13,6 +13,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import {
   couponFormSchema,
   CouponFormValues,
@@ -82,6 +83,7 @@ export function CouponFormModal({
     setValue,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = methods;
 
@@ -225,7 +227,18 @@ export function CouponFormModal({
             <>
               <div className="space-y-2">
                 <Label htmlFor="startDate">Data inicio</Label>
-                <Input id="startDate" type="date" {...register("startDate")} />
+                <Controller
+                  name="startDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      max={watch("endDate") || undefined}
+                      placeholder="Data de início"
+                    />
+                  )}
+                />
                 {errors.startDate && (
                   <p className="text-destructive text-sm font-medium">
                     {errors.startDate.message}
@@ -234,7 +247,18 @@ export function CouponFormModal({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">Data fim *</Label>
-                <Input id="endDate" type="date" {...register("endDate")} />
+                <Controller
+                  name="endDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      min={watch("startDate") || undefined}
+                      placeholder="Data de término"
+                    />
+                  )}
+                />
                 {errors.endDate && (
                   <p className="text-destructive text-sm font-medium">
                     {errors.endDate.message}

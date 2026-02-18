@@ -16,7 +16,7 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-export default function Localizacao() {
+export default function Location() {
   const position: [number, number] = [-20.5398626, -47.4012536];
 
   return (

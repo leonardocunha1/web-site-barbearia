@@ -12,7 +12,7 @@ import { useProfessionalData } from "../hooks/use-professional-data";
 import { useTableParams } from "@/shared/hooks/useTableParams";
 import { Professional as ProfessionalType } from "@/app/api/actions/professional";
 
-export function ProfissionalSection() {
+export function ProfessionalSection() {
   const { params } = useTableParams();
   const { professionals, totalCount, isLoading, error, refetch } =
     useProfessionalData({

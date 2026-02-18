@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Spectral, Poppins, Calistoga } from "next/font/google";
 import "./globals.css";
-import Header from "@/features/marketing/menu/header";
+import { ConditionalHeader } from "@/features/marketing/menu/conditional-header";
 import { ApplicationProviders } from "./providers";
-import { Footer } from "@/shared/components/footer";
+import { ConditionalFooter } from "@/shared/components/conditional-footer";
 import { ModalPortal } from "@/shared/components/modal-portal";
 
 const poppins = Poppins({
@@ -45,11 +45,11 @@ export default async function RootLayout({
         <div id="modal-root"></div>
         <ApplicationProviders>
           <div className="font-poppins flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
-            <Header />
+            <ConditionalHeader />
             <main className="animate-fadeIn flex flex-1 justify-center">
               {children}
             </main>
-            <Footer />
+            <ConditionalFooter />
           </div>
           <ModalPortal />
         </ApplicationProviders>

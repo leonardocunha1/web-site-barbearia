@@ -4,7 +4,7 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/utils";
 import { motion, easeOut } from "framer-motion";
 
-export default function Servicos() {
+export default function Services() {
   const services = [
     {
       id: 1,
@@ -153,4 +153,3 @@ export default function Servicos() {
     </motion.section>
   );
 }
-

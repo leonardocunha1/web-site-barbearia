@@ -1,12 +1,13 @@
 "use client";
 
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useMemo } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import {
   holidayFormSchema,
   HolidayFormValues,
@@ -35,6 +36,7 @@ export function HolidayFormModal({
   const {
     handleSubmit,
     register,
+    control,
     formState: { errors },
   } = methods;
 
@@ -43,7 +45,18 @@ export function HolidayFormModal({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="date">Data</Label>
-          <Input id="date" type="date" min={minDate} {...register("date")} />
+          <Controller
+            name="date"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                value={field.value}
+                onChange={field.onChange}
+                min={minDate}
+                placeholder="Selecione a data"
+              />
+            )}
+          />
           {errors.date && (
             <p className="text-destructive text-sm font-medium">
               {errors.date.message}

@@ -10,9 +10,32 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/shared/components/ui/sheet";
-import { SignInIcon, UserCircleIcon } from "@phosphor-icons/react";
+import { SignInIcon, UserCircleIcon, SignOutIcon } from "@phosphor-icons/react";
+import { GetUserProfile200User } from "@/api";
+import { useLogout } from "@/shared/hooks/useLogout";
 
-export function MobileMenu({ user }: { user: unknown | null }) {
+export function MobileMenu({ user }: { user: GetUserProfile200User | null | undefined }) {
+  const { logout: handleLogout } = useLogout();
+
+  // Se undefined, ainda está carregando
+  if (user === undefined) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-principal-100 hover:bg-stone-100/50 animate-pulse"
+        disabled
+      >
+        <Menu className="h-6 w-6" />
+      </Button>
+    );
+  }
+
+  const dashboardUrl = !user ? "/conta" :
+    user.role === "PROFESSIONAL" ? "/dashboard/professional" :
+    user.role === "ADMIN" ? "/dashboard/admin" :
+    "/conta";
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -57,16 +80,27 @@ export function MobileMenu({ user }: { user: unknown | null }) {
               </Button>
             </Link>
           ) : (
-            <Link href="/conta">
+            <>
+              <Link href={dashboardUrl}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2 border-stone-300 font-medium text-stone-800 hover:bg-stone-100"
+                >
+                  <UserCircleIcon className="size-4" />
+                  Minha conta
+                </Button>
+              </Link>
               <Button
+                onClick={handleLogout}
                 variant="outline"
                 size="sm"
-                className="w-full gap-2 border-stone-300 font-medium text-stone-800 hover:bg-stone-100"
+                className="w-full gap-2 border-red-200 font-medium text-red-600 hover:bg-red-50"
               >
-                <UserCircleIcon className="size-4" />
-                Minha conta
+                <SignOutIcon className="size-4" />
+                Sair
               </Button>
-            </Link>
+            </>
           )}
         </nav>
 
@@ -78,4 +112,3 @@ export function MobileMenu({ user }: { user: unknown | null }) {
     </Sheet>
   );
 }
-
