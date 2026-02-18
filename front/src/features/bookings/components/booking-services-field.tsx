@@ -72,7 +72,44 @@ export function BookingServicesField({
   const selected = useMemo(() => selectedRaw ?? [], [selectedRaw]);
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
-  // 🔥 CORREÇÃO: useCallback para evitar recriação da função
+  // 🔥 CORREÇÃO: Declarar estados e memos antes do useCallback
+  const [ruleMessage, setRuleMessage] = useState<string | null>(null);
+
+  const serviceTypeById = useMemo(() => {
+    return new Map(
+      services.map((service) => [service.id, service.type ?? "ESTETICA"]),
+    );
+  }, [services]);
+
+  const selectedServices = useMemo(
+    () => services.filter((service) => selectedSet.has(service.id)),
+    [services, selectedSet],
+  );
+
+  const selectedTypeCount = useMemo(() => {
+    const counts = new Map<string, number>();
+    selectedServices.forEach((service) => {
+      const type = service.type ?? "ESTETICA";
+      counts.set(type, (counts.get(type) ?? 0) + 1);
+    });
+    return counts;
+  }, [selectedServices]);
+
+  const typeLabel = useCallback((type?: string | null) => {
+    switch (type) {
+      case "CORTE":
+        return "Corte";
+      case "BARBA":
+        return "Barba";
+      case "SOBRANCELHA":
+        return "Sobrancelha";
+      case "ESTETICA":
+      default:
+        return "Estetica";
+    }
+  }, []);
+
+  // useCallback para evitar recriação da função
   const toggleService = useCallback(
     (serviceId: string) => {
       if (disabled) return;
@@ -116,42 +153,6 @@ export function BookingServicesField({
       typeLabel,
     ],
   );
-
-  const selectedServices = useMemo(
-    () => services.filter((service) => selectedSet.has(service.id)),
-    [services, selectedSet],
-  );
-
-  const [ruleMessage, setRuleMessage] = useState<string | null>(null);
-
-  const serviceTypeById = useMemo(() => {
-    return new Map(
-      services.map((service) => [service.id, service.type ?? "ESTETICA"]),
-    );
-  }, [services]);
-
-  const selectedTypeCount = useMemo(() => {
-    const counts = new Map<string, number>();
-    selectedServices.forEach((service) => {
-      const type = service.type ?? "ESTETICA";
-      counts.set(type, (counts.get(type) ?? 0) + 1);
-    });
-    return counts;
-  }, [selectedServices]);
-
-  const typeLabel = useCallback((type?: string | null) => {
-    switch (type) {
-      case "CORTE":
-        return "Corte";
-      case "BARBA":
-        return "Barba";
-      case "SOBRANCELHA":
-        return "Sobrancelha";
-      case "ESTETICA":
-      default:
-        return "Estetica";
-    }
-  }, []);
 
   const totalPrice = useMemo(
     () =>
@@ -328,8 +329,8 @@ export function BookingServicesField({
                 </span>
               </div>
               <span className="text-xs text-stone-400">
-                {group.services.length} opcao
-                {group.services.length === 1 ? "" : "es"}
+                {group.services.length} Opção
+                {group.services.length === 1 ? "" : "(es)"}
               </span>
             </div>
 

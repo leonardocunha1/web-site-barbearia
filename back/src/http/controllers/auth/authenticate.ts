@@ -7,10 +7,14 @@ import { UserDTO } from '@/dtos/user-dto';
 export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
   const { email, password } = loginUserSchema.parse(request.body);
   const authenticateUseCase = makeAuthenticateUseCase();
-  const { user } = await authenticateUseCase.execute({ email, password });
-
+  const { user, professionalId } = await authenticateUseCase.execute({ email, password });
+  console.log('Usuário autenticado:', user);
   const tokenService = new TokenService(reply);
-  const { token, refreshToken } = await tokenService.generateTokens(user);
+  const { token, refreshToken } = await tokenService.generateTokens({
+    id: user.id,
+    role: user.role,
+    professionalId,
+  });
 
   const userWithoutPassword: UserDTO = {
     id: user.id,

@@ -12,6 +12,7 @@ interface AuthenticateRequest {
 }
 interface AuthenticateResponse {
   user: User;
+  professionalId?: string;
 }
 
 export class AuthenticateUseCase {
@@ -27,9 +28,9 @@ export class AuthenticateUseCase {
     await this.validatePassword(password, user.password);
     this.validateEmailVerified(user);
     this.validateUserActive(user);
-    await this.validateProfessionalActive(user);
+    const professionalId = await this.validateProfessionalActive(user);
 
-    return { user };
+    return { user, professionalId };
   }
 
   /**
@@ -76,14 +77,19 @@ export class AuthenticateUseCase {
   /**
    * Validates if professional is active (for professional users)
    * @throws {InactiveUserError} If professional is inactive
+   * @returns {Promise<string | undefined>} Professional ID if user is a professional, undefined otherwise
    */
-  private async validateProfessionalActive(user: User): Promise<void> {
+  private async validateProfessionalActive(user: User): Promise<string | undefined> {
     if (user.role === 'PROFESSIONAL') {
       const professional = await this.professionalsRepository.findByUserId(user.id);
 
       if (!professional?.active) {
         throw new InactiveUserError();
       }
+
+      return professional.id;
     }
+
+    return undefined;
   }
 }

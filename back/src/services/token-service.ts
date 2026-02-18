@@ -35,6 +35,7 @@ export class TokenService {
       payload.professionalId = user.professionalId;
     }
 
+    console.log('Criando payload de token:', payload);
     return payload;
   }
 

@@ -22,7 +22,7 @@ export const useAuthValidation = (
     const validateAuth = async () => {
       try {
         const { ok, data } = await userGet();
-
+        console.log("Validação de autenticação:", { ok, data });
         if (!ok || !data) {
           if (isMounted) {
             console.warn(

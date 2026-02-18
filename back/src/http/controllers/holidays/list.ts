@@ -25,5 +25,14 @@ export async function listHolidays(request: FastifyRequest, reply: FastifyReply)
     limit,
   });
 
-  return reply.status(200).send(result);
+  // Converter objetos Date para strings ISO 8601
+  const formattedResult = {
+    ...result,
+    holidays: result.holidays.map((holiday) => ({
+      ...holiday,
+      date: holiday.date.toISOString(),
+    })),
+  };
+
+  return reply.status(200).send(formattedResult);
 }
