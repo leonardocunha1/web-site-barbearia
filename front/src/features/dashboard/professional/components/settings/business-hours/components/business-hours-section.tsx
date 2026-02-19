@@ -10,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { useUser } from "@/contexts/user";
 import {
@@ -195,9 +197,10 @@ export function BusinessHoursSection({
           <CardTitle>Horarios de funcionamento</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Carregando dados do profissional...
-          </p>
+          <LoadingState
+            message="Carregando dados do profissional..."
+            size="sm"
+          />
         </CardContent>
       </Card>
     );
@@ -210,9 +213,10 @@ export function BusinessHoursSection({
           <CardTitle>Horarios de funcionamento</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Nao foi possivel identificar o profissional logado.
-          </p>
+          <ErrorState
+            type="warning"
+            message="Nao foi possivel identificar o profissional logado."
+          />
         </CardContent>
       </Card>
     );
@@ -226,13 +230,12 @@ export function BusinessHoursSection({
       </CardHeader>
       <CardContent className="space-y-4">
         {listQuery.isLoading ? (
-          <p className="text-muted-foreground text-sm">
-            Carregando horarios...
-          </p>
+          <LoadingState message="Carregando horarios..." size="sm" />
         ) : listQuery.isError ? (
-          <p className="text-sm text-red-600">
-            Nao foi possivel carregar os horarios.
-          </p>
+          <ErrorState
+            type="error"
+            message="Nao foi possivel carregar os horarios."
+          />
         ) : (
           <GenericTable
             data={rows}

@@ -4,13 +4,16 @@ import { Card } from "@/shared/components/ui/card";
 import { useEffect } from "react";
 
 import { useProfessionalFormModal } from "../hooks/use-professional-form-modal";
-import { LoadingState } from "./loading-state";
+import { LoadingState } from "@/shared/components/ui/loading-state";
 import { ProfessionalActions } from "./professional-actions";
 import { ProfessionalTable } from "./professional-table";
 import { useProfessionalOperations } from "../hooks/use-professional-operations";
-import { useProfessionalData } from "../hooks/use-professional-data";
+import {
+  Professional as ProfessionalType,
+  useProfessionalData,
+} from "../hooks/use-professional-data";
 import { useTableParams } from "@/shared/hooks/useTableParams";
-import { Professional as ProfessionalType } from "@/app/api/actions/professional";
+import { ListOrSearchProfessionalsStatus } from "@/api";
 
 export function ProfessionalSection() {
   const { params } = useTableParams();
@@ -19,7 +22,7 @@ export function ProfessionalSection() {
       page: params.page,
       limit: params.limit,
       search: params.filters.search,
-      status: params.filters.status,
+      status: params.filters.status as ListOrSearchProfessionalsStatus,
       sortBy: params.sortBy ?? undefined,
       sortDirection: params.sortDirection ?? undefined,
     });
@@ -48,14 +51,14 @@ export function ProfessionalSection() {
         name: professional.name,
         email: professional.email,
         phone: professional.phone ?? "",
-        especialidade: professional.especialidade,
-        ativo: professional.ativo === "Ativo" ? "Ativo" : "Inativo",
+        specialty: professional.specialty,
+        status: professional.status === "Active" ? "active" : "inactive",
       },
       onSubmit: (values) => handleUpdate(professional, values),
     });
   };
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading) return <LoadingState message="Aguarde um momento" />;
 
   return (
     <div className="space-y-6">

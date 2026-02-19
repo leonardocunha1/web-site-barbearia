@@ -28,10 +28,10 @@ export function AuthButtons({
     );
   }
   // Se user existe, mostra botão de ir para conta + sair
-  const dashboardUrl = 
-    user.role === "PROFESSIONAL" ? "/dashboard/professional" :
-    user.role === "ADMIN" ? "/dashboard/admin" :
-    "/conta";
+  const dashboardUrl =
+    user.role === "PROFESSIONAL" ? "/painel/professional" :
+    user.role === "ADMIN" ? "/painel/admin" :
+    "/cliente";
 
   return (
     <div className="flex items-center space-x-2">

@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
 import { Button } from "@/shared/components/ui/button";
@@ -206,13 +208,12 @@ export function BookingsSection() {
         />
 
         {isLoading ? (
-          <div className="text-sm text-stone-500">
-            Carregando agendamentos...
-          </div>
+          <LoadingState message="Carregando agendamentos..." size="sm" />
         ) : isError ? (
-          <div className="text-sm text-red-600">
-            Não foi possível carregar agendamentos.
-          </div>
+          <ErrorState
+            type="error"
+            message="Nao foi possivel carregar agendamentos."
+          />
         ) : (
           <GenericTable
             data={bookings}

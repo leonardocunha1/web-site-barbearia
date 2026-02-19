@@ -6,10 +6,14 @@ import { useUser } from "@/contexts/user";
 type Role = "ADMIN" | "PROFESSIONAL" | "CLIENT";
 
 export function useRouteProtection(allowedRoles: Role[]) {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     if (user === null) {
       toast.error("Você precisa estar logado para acessar esta área.");
       router.push("/");
@@ -20,7 +24,8 @@ export function useRouteProtection(allowedRoles: Role[]) {
       toast.error("Acesso negado!");
       router.push("/");
     }
-  }, [user, router, allowedRoles]);
+  }, [user, isLoading, router, allowedRoles]);
 
-  return { user, isAuthorized: user && allowedRoles.includes(user.user.role as Role) };
+  const isAuthorized = !!user && allowedRoles.includes(user.user.role as Role);
+  return { user, isAuthorized, isLoading };
 }

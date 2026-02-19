@@ -3,9 +3,11 @@
 import React, { createContext, useContext, useState } from "react";
 import { GetUserProfile200 } from "@/api";
 import { useAuthValidation } from "@/shared/hooks/useAuth";
+import { LoadingState } from "@/shared/components/ui/loading-state";
 
 type UserContextType = {
   user: GetUserProfile200 | null | undefined;
+  isLoading: boolean;
   setUser: React.Dispatch<
     React.SetStateAction<GetUserProfile200 | null | undefined>
   >;
@@ -29,18 +31,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-stone-50">
-        <div className="text-center">
-          <div className="border-principal-500 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-t-transparent">
-            <span className="sr-only">Carregando...</span>
-          </div>
-          <p className="text-principal-600 mt-2 text-sm">Aguarde um momento</p>
-        </div>
+        <LoadingState message="Aguarde um momento" size="lg" />
       </div>
     );
   }
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, isLoading, setUser }}>
       {children}
     </UserContext.Provider>
   );

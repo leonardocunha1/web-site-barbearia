@@ -5,6 +5,8 @@ import {
   formatBookingStatus,
 } from "@/features/bookings/utils/booking-formatters";
 import type { GetProfessionalDashboard200NextAppointmentsItem } from "@/api";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 
 type Service = {
   id: string;
@@ -26,16 +28,15 @@ export function RecentServices({
   isError,
 }: RecentServicesProps) {
   if (isLoading) {
-    return (
-      <div className="text-muted-foreground text-sm">Carregando agenda...</div>
-    );
+    return <LoadingState message="Carregando agenda..." size="sm" />;
   }
 
   if (isError) {
     return (
-      <div className="text-sm text-red-600">
-        Nao foi possivel carregar a agenda.
-      </div>
+      <ErrorState
+        type="error"
+        message="Nao foi possivel carregar a agenda."
+      />
     );
   }
 

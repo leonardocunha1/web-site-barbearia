@@ -31,10 +31,10 @@ export function MobileMenu({ user }: { user: GetUserProfile200User | null | unde
     );
   }
 
-  const dashboardUrl = !user ? "/conta" :
-    user.role === "PROFESSIONAL" ? "/dashboard/professional" :
-    user.role === "ADMIN" ? "/dashboard/admin" :
-    "/conta";
+  const dashboardUrl = !user ? "/cliente" :
+    user.role === "PROFESSIONAL" ? "/painel/professional" :
+    user.role === "ADMIN" ? "/painel/admin" :
+    "/cliente";
 
   return (
     <Sheet>
@@ -60,7 +60,7 @@ export function MobileMenu({ user }: { user: GetUserProfile200User | null | unde
 
         <nav className="flex flex-col gap-3">
           <Link
-            href="/services"
+            href="/agendar"
             className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-100 hover:text-amber-700"
           >
             ✂️ Agende seu horário

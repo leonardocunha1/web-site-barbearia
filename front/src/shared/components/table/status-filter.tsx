@@ -29,9 +29,9 @@ export function StatusFilter({ value, onChange, className }: StatusFilterProps) 
         <SelectValue placeholder="Status" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">Todos</SelectItem>
-        <SelectItem value="ativo">Ativo</SelectItem>
-        <SelectItem value="inativo">Inativo</SelectItem>
+        <SelectItem value="all">All</SelectItem>
+        <SelectItem value="active">Active</SelectItem>
+        <SelectItem value="inactive">Inactive</SelectItem>
       </SelectContent>
     </Select>
   );

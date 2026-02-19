@@ -1,15 +1,10 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { useCreateProfessional, useUpdateProfessional } from "@/api";
+import { useCreateProfessional, useUpdateProfessional, zodupdateProfessionalBody, zodupdateProfessionalParams } from "@/api";
 import { ProfessionalFormValues } from "./use-professional-form-modal";
+import { z } from "zod";
 
-interface Professional {
-  id: string;
-  name: string;
-  email: string;
-  especialidade: string;
-  ativo: string;
-}
+export type Professional = z.infer<typeof zodupdateProfessionalBody> & z.infer<typeof zodupdateProfessionalParams>;
 
 export function useProfessionalOperations(refetch: () => void) {
   const { mutateAsync: createProfessional, isPending: isCreating } =
@@ -23,8 +18,8 @@ export function useProfessionalOperations(refetch: () => void) {
         await createProfessional({
           data: {
             email: values.email,
-            specialty: values.especialidade,
-            active: values.ativo === "Ativo",
+            specialty: values.specialty,
+            active: values.status === "active",
           },
         });
         toast.success("Profissional criado com sucesso!");
@@ -47,8 +42,8 @@ export function useProfessionalOperations(refetch: () => void) {
             name: values.name,
             email: values.email,
             phone: values.phone ?? null,
-            specialty: values.especialidade,
-            active: values.ativo === "Ativo",
+            specialty: values.specialty,
+            active: values.status === "active",
           },
         });
         toast.success("Profissional atualizado com sucesso!");

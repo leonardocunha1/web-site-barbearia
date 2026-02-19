@@ -71,7 +71,7 @@ export default function Hero() {
             </motion.p>
 
             <motion.div className="pt-2" variants={fadeInUp}>
-              <Link href="/services">
+              <Link href="/agendar">
                 <ShinyButton className="border-stone-900 px-8 py-3 text-lg font-medium">
                   Agende seu horário
                 </ShinyButton>

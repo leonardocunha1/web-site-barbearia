@@ -20,6 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import {
   Dialog,
   DialogContent,
@@ -300,9 +302,10 @@ export function ServicesSection() {
           <CardTitle>Meus Servicos</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Carregando dados do profissional...
-          </p>
+          <LoadingState
+            message="Carregando dados do profissional..."
+            size="sm"
+          />
         </CardContent>
       </Card>
     );
@@ -315,9 +318,10 @@ export function ServicesSection() {
           <CardTitle>Meus Servicos</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Nao foi possivel identificar o profissional logado.
-          </p>
+          <ErrorState
+            type="warning"
+            message="Nao foi possivel identificar o profissional logado."
+          />
         </CardContent>
       </Card>
     );
@@ -330,13 +334,12 @@ export function ServicesSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         {listQuery.isLoading ? (
-          <p className="text-muted-foreground text-sm">
-            Carregando servicos...
-          </p>
+          <LoadingState message="Carregando servicos..." size="sm" />
         ) : listQuery.isError ? (
-          <p className="text-sm text-red-600">
-            Nao foi possivel carregar os servicos.
-          </p>
+          <ErrorState
+            type="error"
+            message="Nao foi possivel carregar os servicos."
+          />
         ) : (
           <GenericTable
             data={rows}

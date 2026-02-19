@@ -10,9 +10,10 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Label } from "@/shared/components/ui/label";
+import { LoadingState } from "@/shared/components/ui/loading-state";
 import type { BookingFormValues } from "../schemas/booking-form-schema";
 import type { GetProfessionalSchedule200TimeSlotsItem } from "@/api";
-import { Clock, Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { Clock, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/shared/utils/utils";
 import { useMemo } from "react";
 
@@ -77,10 +78,9 @@ export function BookingTimeField({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-1.5 text-xs text-stone-500"
+            className="flex items-center"
           >
-            <Loader2 className="h-3 w-3 animate-spin" />
-            <span>Carregando...</span>
+            <LoadingState message="Carregando..." size="sm" variant="inline" />
           </motion.div>
         )}
       </div>

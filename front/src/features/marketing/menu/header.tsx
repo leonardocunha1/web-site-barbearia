@@ -44,7 +44,7 @@ export default function Header() {
         {/* Desktop Menu */}
         <ul className="hidden items-center space-x-6 tracking-wider md:flex">
           <li>
-            <NavLink href="/services">Agende seu horário!</NavLink>
+            <NavLink href="/agendar">Agende seu horário!</NavLink>
           </li>
         </ul>
 

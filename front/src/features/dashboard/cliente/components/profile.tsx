@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -150,7 +152,7 @@ export function ProfileSection() {
           <CardTitle>Meus Dados</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">Carregando dados...</p>
+          <LoadingState message="Carregando dados..." size="sm" />
         </CardContent>
       </Card>
     );
@@ -163,9 +165,10 @@ export function ProfileSection() {
           <CardTitle>Meus Dados</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-red-600">
-            Nao foi possivel carregar seus dados.
-          </p>
+          <ErrorState
+            type="error"
+            message="Nao foi possivel carregar seus dados."
+          />
         </CardContent>
       </Card>
     );

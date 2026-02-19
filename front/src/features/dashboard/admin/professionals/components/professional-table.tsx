@@ -18,8 +18,9 @@ interface Professional {
   id: string;
   name: string;
   email: string;
-  especialidade: string;
-  ativo: string;
+  phone: string | null;
+  specialty: string;
+  status: "Active" | "Inactive";
 }
 
 interface ProfessionalTableProps {
@@ -43,10 +44,10 @@ export function ProfessionalTable({
   const columns: Column<Professional>[] = [
     { header: "Nome", accessor: "name" },
     { header: "Email", accessor: "email" },
-    { header: "Especialidade", accessor: "especialidade" },
+    { header: "Specialty", accessor: "specialty" },
     {
       header: "Status",
-      accessor: "ativo",
+      accessor: "status",
       render: (value) => <ButtonStatus value={value} />,
       align: "center",
     },
@@ -96,7 +97,7 @@ export function ProfessionalTable({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() =>
-                router.push(`conta/admin/professional-section/${row.id}`)
+                router.push(`/painel/admin/professionals/${row.id}`)
               }
             >
               <Link className="mr-2 h-4 w-4" />

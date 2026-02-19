@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Edit } from "lucide-react";
 import { GenericTable, Column } from "@/shared/components/table/generic-table";
 import { toast } from "sonner";
 import { ButtonStatus } from "@/shared/components/table/button-status";
+import {
+  getListServicesQueryKey,
+  useCreateService,
+  useUpdateServiceById,
+} from "@/api";
+import { LoadingState } from "@/shared/components/ui/loading-state";
 
 import {
   useServiceFormModal,
@@ -14,7 +21,6 @@ import {
 } from "../hooks/use-service-form-modal";
 import { useServicesData } from "../hooks/use-services-data";
 import type { Service } from "../types";
-import { servicesCreate, servicesUpdate } from "@/app/api/actions/services";
 
 const formatServiceType = (value: Service["tipo"]) => {
   switch (value) {
@@ -26,13 +32,29 @@ const formatServiceType = (value: Service["tipo"]) => {
       return "Sobrancelha";
     case "ESTETICA":
     default:
-      return "Estetica";
+      return "Estética";
   }
 };
 
 export default function ServicesSection() {
+  const queryClient = useQueryClient();
   const { services, isLoading, error, refetch } = useServicesData();
-  const [creating, setCreating] = useState(false);
+  const { mutateAsync: createService, isPending: isCreating } =
+    useCreateService({
+      mutation: {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListServicesQueryKey() });
+        },
+      },
+    });
+  const { mutateAsync: updateService, isPending: isUpdating } =
+    useUpdateServiceById({
+      mutation: {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListServicesQueryKey() });
+        },
+      },
+    });
 
   const { openServiceForm } = useServiceFormModal();
 
@@ -46,23 +68,21 @@ export default function ServicesSection() {
     openServiceForm({
       mode: "create",
       onSubmit: async (values: ServiceFormValues) => {
-        setCreating(true);
-        const { ok, error } = await servicesCreate({
-          nome: values.nome,
-          descricao: values.descricao,
-          categoria: values.categoria,
-          tipo: values.tipo,
-          ativo: values.ativo === "Ativo",
-        });
-
-        if (ok) {
+        try {
+          await createService({
+            data: {
+              name: values.nome,
+              description: values.descricao,
+              category: values.categoria,
+              type: values.tipo,
+              active: values.ativo === "Ativo",
+            },
+          });
           toast.success("Serviço criado com sucesso!");
           await refetch();
-        } else {
-          toast.error(error || "Erro ao criar serviço");
+        } catch {
+          toast.error("Erro ao criar serviço");
         }
-
-        setCreating(false);
       },
     });
   };
@@ -78,19 +98,21 @@ export default function ServicesSection() {
         ativo: service.ativo,
       },
       onSubmit: async (values: ServiceFormValues) => {
-        const { ok, error } = await servicesUpdate(service.id, {
-          nome: values.nome,
-          descricao: values.descricao,
-          categoria: values.categoria,
-          tipo: values.tipo,
-          ativo: values.ativo === "Ativo",
-        });
-
-        if (ok) {
+        try {
+          await updateService({
+            id: service.id,
+            data: {
+              name: values.nome,
+              description: values.descricao,
+              category: values.categoria,
+              type: values.tipo,
+              active: values.ativo === "Ativo",
+            },
+          });
           toast.success("Serviço atualizado com sucesso!");
           await refetch();
-        } else {
-          toast.error(error || "Erro ao atualizar serviço");
+        } catch {
+          toast.error("Erro ao atualizar serviço");
         }
       },
     });
@@ -114,14 +136,7 @@ export default function ServicesSection() {
   ];
 
   if (isLoading) {
-    return (
-      <div className="text-center">
-        <div className="border-principal-500 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-t-transparent" />
-        <p className="text-principal-600 mt-2 text-sm">
-          Carregando serviços...
-        </p>
-      </div>
-    );
+    return <LoadingState message="Carregando servicos..." />;
   }
 
   return (
@@ -130,7 +145,7 @@ export default function ServicesSection() {
         <div>
           <Button
             onClick={handleAdd}
-            disabled={creating}
+            disabled={isCreating || isUpdating}
             className="bg-principal-500 hover:bg-principal-600 cursor-pointer text-white"
           >
             Novo Serviço

@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import { Button } from "@/shared/components/ui/button";
 import { CalendarIcon, ClockIcon, PlusIcon } from "lucide-react";
 import {
@@ -238,13 +240,12 @@ export function ScheduleSection() {
         />
 
         {isLoading ? (
-          <div className="text-muted-foreground text-sm">
-            Carregando agenda...
-          </div>
+              <LoadingState message="Carregando agenda..." size="sm" />
         ) : isError ? (
-          <div className="text-sm text-red-600">
-            Nao foi possivel carregar a agenda.
-          </div>
+              <ErrorState
+                type="error"
+                message="Nao foi possivel carregar a agenda."
+              />
         ) : (
           <GenericTable
             data={schedule}

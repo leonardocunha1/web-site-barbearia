@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import {
   LineChart,
   Line,
@@ -132,14 +134,15 @@ export function AnalyticsSection() {
   }, [appointments, averageTicket]);
 
   if (isLoading) {
-    return <div className="text-sm text-stone-500">Carregando análises...</div>;
+    return <LoadingState message="Carregando analises..." size="sm" />;
   }
 
   if (isError) {
     return (
-      <div className="text-sm text-red-600">
-        Não foi possível carregar as análises.
-      </div>
+      <ErrorState
+        type="error"
+        message="Nao foi possivel carregar as analises."
+      />
     );
   }
 

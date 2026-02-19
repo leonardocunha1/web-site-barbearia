@@ -62,7 +62,7 @@ export default function ProfessionalServicesTable({
             checked={activeOnly}
             onChange={() => {
               router.push(
-                `/conta/admin/professional-section/${id}?activeOnly=${!activeOnly}`,
+                `/painel/admin/professionals/${id}?activeOnly=${!activeOnly}`,
               );
             }}
           />

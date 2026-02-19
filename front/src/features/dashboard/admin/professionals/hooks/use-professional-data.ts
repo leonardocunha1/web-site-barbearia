@@ -1,55 +1,42 @@
+import { useMemo } from "react";
 import {
-  Professional,
-  professionalsList,
-} from "@/app/api/actions/professional";
-import { useState, useEffect, useCallback } from "react";
+  ListOrSearchProfessionalsParams,
+  useListOrSearchProfessionals,
+} from "@/api";
 
-interface UseProfessionalDataParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  especialidade?: string;
-  status?: string;
-  sortBy?: string;
-  sortDirection?: "asc" | "desc";
-}
+export type Professional = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  specialty: string;
+  status: "Active" | "Inactive";
+};
 
-export function useProfessionalData(params?: UseProfessionalDataParams) {
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useProfessionalData(params?: ListOrSearchProfessionalsParams) {
+  const query = useListOrSearchProfessionals(params);
 
-  const fetchData = useCallback(
-    async (queryParams?: UseProfessionalDataParams) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, ok, error } = await professionalsList(queryParams);
-        if (ok && data) {
-          setProfessionals(data.professionals);
-          setTotalCount(data.total);
-        } else {
-          setError(error || "Erro ao carregar profissionais");
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [],
-  );
+  const professionals = useMemo<Professional[]>(() => {
+    return (
+      query.data?.professionals?.map((p) => ({
+        id: p.id,
+        name: p.user.name,
+        email: p.user.email,
+        phone: p.user.phone ?? null,
+        specialty: p.specialty,
+        status: p.active ? "Active" : "Inactive",
+      })) ?? []
+    );
+  }, [query.data]);
 
-  useEffect(() => {
-    fetchData(params);
-  }, [params, fetchData]);
+  const totalCount = query.data?.total ?? 0;
+  const error = query.error ? "Erro ao carregar profissionais" : null;
 
   return {
     professionals,
     totalCount,
-    isLoading,
+    isLoading: query.isLoading,
     error,
-    refetch: () => fetchData(params),
+    refetch: () => query.refetch().then(() => undefined),
   };
 }

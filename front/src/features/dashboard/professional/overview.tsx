@@ -25,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 
 const formatCurrency = (value?: number | null) =>
   new Intl.NumberFormat("pt-BR", {
@@ -141,9 +143,9 @@ export function OverviewSection() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-muted-foreground text-sm">Carregando...</div>
+              <LoadingState message="Carregando..." size="sm" />
             ) : isError ? (
-              <div className="text-sm text-red-600">Erro ao carregar</div>
+              <ErrorState type="error" message="Erro ao carregar" />
             ) : nextAppointment ? (
               <>
                 <div className="text-2xl font-bold">

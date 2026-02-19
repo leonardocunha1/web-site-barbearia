@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import { CalendarIcon, UserIcon, Info } from "lucide-react";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
@@ -316,13 +318,12 @@ export function UnifiedClientSection() {
           />
 
           {isLoading ? (
-            <div className="text-muted-foreground text-sm">
-              Carregando reservas...
-            </div>
+            <LoadingState message="Carregando reservas..." size="sm" />
           ) : isError ? (
-            <div className="text-sm text-red-600">
-              Não foi possível carregar suas reservas.
-            </div>
+            <ErrorState
+              type="error"
+              message="Nao foi possivel carregar suas reservas."
+            />
           ) : (
             <GenericTable
               data={reservations}

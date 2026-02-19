@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
 import { Button } from "@/shared/components/ui/button";
 import {
   Form,
@@ -261,9 +262,7 @@ export function SettingsSection() {
   };
 
   if (isLoading) {
-    return (
-      <div className="text-sm text-stone-500">Carregando configurações...</div>
-    );
+    return <LoadingState message="Carregando configuracoes..." size="sm" />;
   }
 
   return (

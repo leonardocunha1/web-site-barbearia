@@ -70,7 +70,7 @@ export default async function userGet() {
         };
       }
 
-      // Faça a requisição novamente com o novo token
+      // Fazendo a requisição novamente com o novo token
       response = await fetch(url, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },

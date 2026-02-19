@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { servicesGet } from "@/app/api/actions/services";
+import { useMemo } from "react";
+import { useListServices } from "@/api";
 import type { Service } from "../types";
 
 type UseServicesDataResult = {
@@ -26,35 +26,19 @@ const mapService = (service: {
 });
 
 export function useServicesData(): UseServicesDataResult {
-  const [services, setServices] = useState<Service[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useListServices();
 
-  const fetchServices = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const services = useMemo(
+    () => query.data?.services?.map(mapService) ?? [],
+    [query.data],
+  );
 
-    const { data, ok, error } = await servicesGet();
-
-    if (!ok || !data) {
-      setError(error || "Erro ao carregar serviços");
-      setIsLoading(false);
-      return;
-    }
-
-    const mappedServices = data.services?.map(mapService) ?? [];
-    setServices(mappedServices);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+  const error = query.error ? "Erro ao carregar serviços" : null;
 
   return {
     services,
-    isLoading,
+    isLoading: query.isLoading,
     error,
-    refetch: fetchServices,
+    refetch: () => query.refetch().then(() => undefined),
   };
 }

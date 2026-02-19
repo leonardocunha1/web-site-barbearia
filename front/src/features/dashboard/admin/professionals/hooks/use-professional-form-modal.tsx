@@ -5,12 +5,13 @@ import {
   professionalSchema,
   professionalFields,
 } from "../config/professional-form-config";
-import { CreateProfessionalBody } from "@/api";
 
-export type ProfessionalFormValues = Omit<CreateProfessionalBody, "ativo"> & {
-  ativo: "Ativo" | "Inativo";
+export type ProfessionalFormValues = {
   name?: string;
+  email: string;
   phone?: string;
+  specialty: string;
+  status: "active" | "inactive";
 };
 
 type OpenProfessionalFormProps = {
@@ -38,8 +39,8 @@ export function useProfessionalFormModal() {
           name: "",
           email: "",
           phone: "",
-          especialidade: "",
-          ativo: "Ativo",
+          specialty: "",
+          status: "active",
           ...initialValues,
         },
         onSubmit,

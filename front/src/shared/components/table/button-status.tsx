@@ -2,14 +2,17 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/utils/utils";
 
 export function ButtonStatus({ value }: { value: string }) {
+  const normalized = value.toLowerCase();
+  const isActive = normalized === "ativo" || normalized === "active";
+
   return (
     <Button
-      variant={value === "Ativo" ? "default" : "destructive"}
+      variant={isActive ? "default" : "destructive"}
       size="sm"
       className={cn(
         "font-medium transition-all duration-200",
         "min-w-[80px]",
-        value === "Ativo"
+        isActive
           ? "bg-green-500 text-white hover:bg-green-600"
           : "bg-red-500 text-white hover:bg-red-600",
         "shadow-sm hover:shadow-md",

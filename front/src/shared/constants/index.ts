@@ -10,10 +10,10 @@ export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
   REGISTER: "/register",
-  ACCOUNT: "/conta",
-  ACCOUNT_ADMIN: "/conta?tab=admin",
-  ACCOUNT_PROFESSIONAL: "/conta?tab=professional",
-  ACCOUNT_CLIENT: "/conta?tab=client",
+  ACCOUNT: "/cliente",
+  ACCOUNT_ADMIN: "/cliente?tab=admin",
+  ACCOUNT_PROFESSIONAL: "/cliente?tab=professional",
+  ACCOUNT_CLIENT: "/cliente?tab=client",
 } as const;
 
 export const USER_ROLES = {

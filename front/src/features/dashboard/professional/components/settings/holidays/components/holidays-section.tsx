@@ -10,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LoadingState } from "@/shared/components/ui/loading-state";
+import { ErrorState } from "@/shared/components/ui/error-state";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { useTableParams } from "@/shared/hooks/useTableParams";
 import {
@@ -103,13 +105,12 @@ export function HolidaysSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         {listQuery.isLoading ? (
-          <p className="text-muted-foreground text-sm">
-            Carregando feriados...
-          </p>
+          <LoadingState message="Carregando feriados..." size="sm" />
         ) : listQuery.isError ? (
-          <p className="text-sm text-red-600">
-            Nao foi possivel carregar os feriados.
-          </p>
+          <ErrorState
+            type="error"
+            message="Nao foi possivel carregar os feriados."
+          />
         ) : (
           <GenericTable
             data={rows}

@@ -53,7 +53,7 @@ const shouldRedirectToLogin = () => {
   if (typeof window === "undefined") return false;
 
   const path = window.location.pathname;
-  return path.startsWith("/conta");
+  return path.startsWith("/cliente");
 };
 
 const runLogout = async () => {

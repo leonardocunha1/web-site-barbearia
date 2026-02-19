@@ -13,8 +13,8 @@ export const professionalSchema = z.object({
   phone: optionalString(
     z.string().regex(/^\+?[\d\s()-]{10,20}$/, "Telefone inválido"),
   ),
-  especialidade: z.string().min(1, "Informe a função"),
-  ativo: z.enum(["Ativo", "Inativo"], {
+  specialty: z.string().min(1, "Informe a função"),
+  status: z.enum(["active", "inactive"], {
     errorMap: () => ({ message: "Selecione um status" }),
   }),
 });
@@ -39,7 +39,7 @@ export const professionalFields: FormField[] = [
     placeholder: "(11) 99999-9999",
   },
   {
-    name: "especialidade",
+    name: "specialty",
     label: "Especialidade",
     type: "select",
     placeholder: "Selecione a especialidade",
@@ -49,13 +49,13 @@ export const professionalFields: FormField[] = [
     ],
   },
   {
-    name: "ativo",
+    name: "status",
     label: "Status",
     type: "select",
     placeholder: "Selecione o status",
     options: [
-      { value: "Ativo", label: "Ativo" },
-      { value: "Inativo", label: "Inativo" },
+      { value: "active", label: "Active" },
+      { value: "inactive", label: "Inactive" },
     ],
   },
 ];
