@@ -6,7 +6,7 @@ import { CouponSortField, CouponSortOrder } from '@/schemas/coupon';
 export class PrismaCouponRepository implements ICouponRepository {
   async findByCode(code: string) {
     return prisma.coupon.findUnique({
-      where: { code },
+      where: { code: code.toUpperCase() },
       include: { redemptions: true },
     });
   }

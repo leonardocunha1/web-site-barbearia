@@ -1,3 +1,11 @@
+export type AdminDashboardTimeRange = 'all' | 'today' | 'week' | 'month' | 'custom';
+
+export type AdminDashboardRequestDTO = {
+  range: AdminDashboardTimeRange;
+  startDate?: Date; // Apenas para 'custom'
+  endDate?: Date; // Apenas para 'custom'
+};
+
 export type AdminDashboardResponseDTO = {
   metrics: {
     professionalsActive: number;

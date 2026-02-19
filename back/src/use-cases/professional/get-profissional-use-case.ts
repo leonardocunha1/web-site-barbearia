@@ -16,6 +16,12 @@ export class GetProfessionalDashboardUseCase {
     const now = new Date();
 
     switch (range) {
+      case 'all':
+        return {
+          start: new Date('1900-01-01'), // Retorna todos os registros desde uma data bem antiga
+          end: endOfDay(now),
+        };
+
       case 'today':
         return {
           start: startOfDay(now),

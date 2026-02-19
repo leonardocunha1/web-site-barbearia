@@ -2,7 +2,12 @@
 
 import { useGetProfessionalDashboard } from "@/api/react-query/professionals";
 import { GetProfessionalDashboardRange } from "@/api/schemas/getProfessionalDashboardRange";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -92,7 +97,11 @@ function StatsCard({
   );
 }
 
-function TopServices({ data }: { data: Array<{ service: string; count: number; percentage: number }> }) {
+function TopServices({
+  data,
+}: {
+  data: Array<{ service: string; count: number; percentage: number }>;
+}) {
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -134,11 +143,17 @@ function TopServices({ data }: { data: Array<{ service: string; count: number; p
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-stone-900 text-xs font-bold text-white">
                     {index + 1}
                   </div>
-                  <span className="font-medium text-stone-900">{service.service}</span>
+                  <span className="font-medium text-stone-900">
+                    {service.service}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-stone-900">{service.count}x</p>
-                  <p className="text-xs text-stone-500">{service.percentage.toFixed(1)}%</p>
+                  <p className="text-sm font-semibold text-stone-900">
+                    {service.count}x
+                  </p>
+                  <p className="text-xs text-stone-500">
+                    {service.percentage.toFixed(1)}%
+                  </p>
                 </div>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-stone-100">
@@ -157,14 +172,18 @@ function TopServices({ data }: { data: Array<{ service: string; count: number; p
   );
 }
 
-function UpcomingBookings({ data }: { data: Array<{
-  id: string;
-  date: string;
-  clientName: string;
-  service: string;
-  status: "PENDING" | "CONFIRMED";
-  totalAmount?: number;
-}> }) {
+function UpcomingBookings({
+  data,
+}: {
+  data: Array<{
+    id: string;
+    date: string;
+    clientName: string;
+    service: string;
+    status: "PENDING" | "CONFIRMED";
+    totalAmount?: number;
+  }>;
+}) {
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -222,7 +241,9 @@ function UpcomingBookings({ data }: { data: Array<{
                 <div className="flex items-start gap-3">
                   {getStatusIcon(booking.status)}
                   <div>
-                    <p className="font-medium text-stone-900">{booking.clientName}</p>
+                    <p className="font-medium text-stone-900">
+                      {booking.clientName}
+                    </p>
                     <p className="text-sm text-stone-600">{booking.service}</p>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-xs text-stone-500">
@@ -232,7 +253,8 @@ function UpcomingBookings({ data }: { data: Array<{
                         <>
                           <span className="text-xs text-stone-400">•</span>
                           <span className="text-xs font-medium text-green-600">
-                            R$ {booking.totalAmount.toFixed(2).replace('.', ',')}
+                            R${" "}
+                            {booking.totalAmount.toFixed(2).replace(".", ",")}
                           </span>
                         </>
                       )}
@@ -241,10 +263,16 @@ function UpcomingBookings({ data }: { data: Array<{
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-stone-900">
-                    {bookingDate.toLocaleDateString("pt-BR", { day: '2-digit', month: 'short' })}
+                    {bookingDate.toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "short",
+                    })}
                   </p>
                   <p className="text-xs text-stone-500">
-                    {bookingDate.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
+                    {bookingDate.toLocaleTimeString("pt-BR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
               </motion.div>
@@ -257,10 +285,13 @@ function UpcomingBookings({ data }: { data: Array<{
 }
 
 export default function ProfessionalOverviewPage() {
-  const [range, setRange] = useState<typeof GetProfessionalDashboardRange[keyof typeof GetProfessionalDashboardRange]>("week");
+  const [range, setRange] =
+    useState<
+      (typeof GetProfessionalDashboardRange)[keyof typeof GetProfessionalDashboardRange]
+    >("week");
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
-  
+
   // Formatar datas para o formato ISO datetime que a API espera
   const formatDateToISO = (dateString: string) => {
     if (!dateString) return undefined;
@@ -269,9 +300,10 @@ export default function ProfessionalOverviewPage() {
   };
 
   const { data, refetch, isLoading } = useGetProfessionalDashboard(
-    { 
+    {
       range,
-      startDate: range === "custom" ? formatDateToISO(customStartDate) : undefined,
+      startDate:
+        range === "custom" ? formatDateToISO(customStartDate) : undefined,
       endDate: range === "custom" ? formatDateToISO(customEndDate) : undefined,
     },
     {
@@ -279,37 +311,32 @@ export default function ProfessionalOverviewPage() {
         refetchInterval: 30000,
         enabled: range !== "custom" || (!!customStartDate && !!customEndDate),
       },
-    }
+    },
   );
 
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-  useEffect(() => {
-    if (!isLoading) {
-      setLastUpdated(new Date());
-    }
-  }, [isLoading]);
+  useEffect(() => {}, [isLoading]);
 
   const handleManualRefresh = async () => {
     await refetch();
-    setLastUpdated(new Date());
   };
 
-  const getLastUpdateText = () => {
-    if (!lastUpdated) return "Aguardando atualização...";
-    const now = new Date();
-    const diffSeconds = Math.floor(
-      (now.getTime() - lastUpdated.getTime()) / 1000
-    );
+  // const getLastUpdateText = () => {
+  //   if (!lastUpdated) return "Aguardando atualização...";
+  //   const now = new Date();
+  //   const diffSeconds = Math.floor(
+  //     (now.getTime() - lastUpdated.getTime()) / 1000,
+  //   );
 
-    if (diffSeconds < 60) {
-      return `Atualizado há ${diffSeconds}s`;
-    }
-    return `Atualizado há ${Math.floor(diffSeconds / 60)}m`;
-  };
+  //   if (diffSeconds < 60) {
+  //     return `Atualizado há ${diffSeconds}s`;
+  //   }
+  //   return `Atualizado há ${Math.floor(diffSeconds / 60)}m`;
+  // };
 
   const getRangeLabel = () => {
     switch (range) {
+      case "all":
+        return "Todos os Períodos";
       case "today":
         return "Hoje";
       case "week":
@@ -318,8 +345,14 @@ export default function ProfessionalOverviewPage() {
         return "Este Mês";
       case "custom":
         if (customStartDate && customEndDate) {
-          const start = new Date(customStartDate).toLocaleDateString("pt-BR", { day: '2-digit', month: 'short' });
-          const end = new Date(customEndDate).toLocaleDateString("pt-BR", { day: '2-digit', month: 'short' });
+          const start = new Date(customStartDate).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "short",
+          });
+          const end = new Date(customEndDate).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "short",
+          });
           return `${start} - ${end}`;
         }
         return "Personalizado";
@@ -355,15 +388,19 @@ export default function ProfessionalOverviewPage() {
             Olá, {data?.professional?.name || "Profissional"}
           </h1>
           <p className="mt-1 text-sm text-stone-500">
-            {getLastUpdateText()} • Atualização automática a cada 30s
+            Atualização automática a cada 30s
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Select value={range} onValueChange={(value) => setRange(value as typeof range)}>
+          <Select
+            value={range}
+            onValueChange={(value) => setRange(value as typeof range)}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Selecione o período" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Todos os Períodos</SelectItem>
               <SelectItem value="today">Hoje</SelectItem>
               <SelectItem value="week">Esta Semana</SelectItem>
               <SelectItem value="month">Este Mês</SelectItem>
@@ -377,7 +414,9 @@ export default function ProfessionalOverviewPage() {
             size="sm"
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Atualizar
           </Button>
         </div>
@@ -442,9 +481,9 @@ export default function ProfessionalOverviewPage() {
           />
           <StatsCard
             title="Receita do Período"
-            value={`R$ ${(metrics?.earnings || 0).toFixed(2).replace('.', ',')}`}
+            value={`R$ ${(metrics?.earnings || 0).toFixed(2).replace(".", ",")}`}
             icon={DollarSign}
-            description={`Ticket médio: R$ ${(metrics?.averageTicket || 0).toFixed(2).replace('.', ',')}`}
+            description={`Ticket médio: R$ ${(metrics?.averageTicket || 0).toFixed(2).replace(".", ",")}`}
           />
           <StatsCard
             title="Agendamentos Pendentes"
@@ -492,7 +531,7 @@ export default function ProfessionalOverviewPage() {
           />
           <StatsCard
             title="Ticket Médio"
-            value={`R$ ${(metrics?.averageTicket || 0).toFixed(2).replace('.', ',')}`}
+            value={`R$ ${(metrics?.averageTicket || 0).toFixed(2).replace(".", ",")}`}
             icon={BarChart3}
             description="Receita média por agendamento"
           />

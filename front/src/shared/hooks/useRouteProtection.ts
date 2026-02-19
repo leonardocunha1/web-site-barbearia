@@ -15,7 +15,7 @@ export function useRouteProtection(allowedRoles: Role[]) {
     }
 
     if (user === null) {
-      toast.error("Você precisa estar logado para acessar esta área.");
+      // Redireciona sem mostrar toast (pode ser logout voluntário)
       router.push("/");
       return;
     }

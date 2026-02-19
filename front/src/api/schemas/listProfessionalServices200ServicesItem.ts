@@ -1,3 +1,5 @@
+import type { ListProfessionalServices200ServicesItemType } from "./listProfessionalServices200ServicesItemType";
+
 export type ListProfessionalServices200ServicesItem = {
   id: string;
   name: string;
@@ -5,7 +7,7 @@ export type ListProfessionalServices200ServicesItem = {
   description: string | null;
   /** @nullable */
   category: string | null;
-  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
+  type: ListProfessionalServices200ServicesItemType;
   active: boolean;
   /** @nullable */
   price: number | null;

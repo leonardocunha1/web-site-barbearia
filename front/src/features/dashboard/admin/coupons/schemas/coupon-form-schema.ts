@@ -1,76 +1,81 @@
 import { z } from "zod";
+import { zodcreateCouponBody } from "@/api"; // Ajuste o caminho para o seu arquivo Orval
+
+// Helper para converter lixo de UI (strings vazias) em undefined
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const preprocessData = (data: any) => {
+  const result = { ...data };
+
+  const fieldsToClean = [
+    "serviceId",
+    "professionalId",
+    "startDate",
+    "endDate",
+    "description",
+  ];
+
+  fieldsToClean.forEach((field) => {
+    if (result[field] === "" || result[field] === null) {
+      result[field] = undefined;
+    }
+  });
+
+  // Garante que números não sejam NaN
+  if (typeof result.maxUses !== "number" || Number.isNaN(result.maxUses))
+    result.maxUses = undefined;
+  if (
+    typeof result.minBookingValue !== "number" ||
+    Number.isNaN(result.minBookingValue)
+  )
+    result.minBookingValue = undefined;
+
+  return result;
+};
 
 export const couponFormSchema = z
-  .object({
-    code: z.string().min(3, "Codigo invalido"),
-    type: z.enum(["PERCENTAGE", "FIXED", "FREE"]),
-    value: z.number().min(0, "Valor invalido"),
-    scope: z.enum(["GLOBAL", "SERVICE", "PROFESSIONAL"]),
-    expirationType: z.enum(["DATE", "QUANTITY", "BOTH"]),
-    description: z.string().max(255, "Descricao muito longa").optional(),
-    maxUses: z.number().min(1, "Maximo invalido").optional(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    minBookingValue: z.number().min(0, "Valor minimo invalido").optional(),
-    serviceId: z.string().uuid("Servico invalido").optional(),
-    professionalId: z.string().uuid("Profissional invalido").optional(),
-    active: z.boolean().optional(),
-  })
+  .preprocess(
+    preprocessData,
+    zodcreateCouponBody.extend({
+      active: z.boolean().optional(),
+    }),
+  )
   .superRefine((data, ctx) => {
-    // Validação para expirationType DATE
-    if (data.expirationType === "DATE") {
+    // Validação de Datas baseada no tipo de expiração
+    if (data.expirationType === "DATE" || data.expirationType === "BOTH") {
       if (!data.endDate) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Data fim e obrigatoria para expiracao por data",
-          path: ["endDate"],
-        });
-      }
-      if (data.maxUses !== undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "Maximo de usos nao deve ser informado para expiracao por data",
-          path: ["maxUses"],
-        });
-      }
-    }
-
-    // Validação para expirationType QUANTITY
-    if (data.expirationType === "QUANTITY") {
-      if (!data.maxUses) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Maximo de usos e obrigatorio para expiracao por quantidade",
-          path: ["maxUses"],
-        });
-      }
-      if (data.endDate) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "Data fim nao deve ser informada para expiracao por quantidade",
+          message: "Data de término é obrigatória",
           path: ["endDate"],
         });
       }
     }
 
-    // Validação para expirationType BOTH
-    if (data.expirationType === "BOTH") {
-      if (!data.endDate) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Data fim e obrigatoria para expiracao combinada",
-          path: ["endDate"],
-        });
-      }
+    if (data.expirationType === "QUANTITY" || data.expirationType === "BOTH") {
       if (!data.maxUses) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Maximo de usos e obrigatorio para expiracao combinada",
+          message: "Limite de usos é obrigatório",
           path: ["maxUses"],
         });
       }
+    }
+
+    // Validação de Escopo
+    if (data.scope === "SERVICE" && !data.serviceId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecione um serviço",
+        path: ["serviceId"],
+      });
+    }
+
+    if (data.scope === "PROFESSIONAL" && !data.professionalId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecione um profissional",
+        path: ["professionalId"],
+      });
     }
   });
 

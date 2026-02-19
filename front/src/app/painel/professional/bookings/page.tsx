@@ -27,7 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import {
   useListProfessionalBookings,
   useUpdateBookingStatus,
@@ -47,7 +52,7 @@ import { useTableParams } from "@/shared/hooks/useTableParams";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/shared/components/ui/page-header";
-import { Calendar, Clock, DollarSign, User } from "lucide-react";
+import { Calendar, Clock, DollarSign, User, X } from "lucide-react";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 
 type BookingRow = {
@@ -66,8 +71,12 @@ type BookingRow = {
 export default function BookingsPage() {
   const { params } = useTableParams();
   const queryClient = useQueryClient();
-  const [bookingToUpdate, setBookingToUpdate] = useState<BookingRow | null>(null);
-  const [newStatus, setNewStatus] = useState<UpdateBookingStatusBodyStatus | "">("");
+  const [bookingToUpdate, setBookingToUpdate] = useState<BookingRow | null>(
+    null,
+  );
+  const [newStatus, setNewStatus] = useState<
+    UpdateBookingStatusBodyStatus | ""
+  >("");
   const updateBookingStatus = useUpdateBookingStatus();
   const [activeTab, setActiveTab] = useState<string>("all");
   const [startDate, setStartDate] = useState<string>("");
@@ -93,27 +102,29 @@ export default function BookingsPage() {
       startDate: formatDateToISO(startDate),
       endDate: formatDateToISO(endDate),
     },
-    {}
+    {},
   );
 
   const bookings = useMemo<BookingRow[]>(() => {
     return (
-      data?.bookings?.map((booking: ListProfessionalBookings200BookingsItem) => {
-        const { date, time } = formatBookingDateTime(booking.startDateTime);
+      data?.bookings?.map(
+        (booking: ListProfessionalBookings200BookingsItem) => {
+          const { date, time } = formatBookingDateTime(booking.startDateTime);
 
-        return {
-          id: booking.id,
-          date,
-          time,
-          service: formatBookingServices(booking.items),
-          client: booking.user?.name ?? "-",
-          status: formatBookingStatus(booking.status),
-          statusValue: booking.status,
-          startDateTime: booking.startDateTime,
-          endDateTime: booking.endDateTime,
-          totalAmount: booking.totalAmount ?? 0,
-        };
-      }) ?? []
+          return {
+            id: booking.id,
+            date,
+            time,
+            service: formatBookingServices(booking.items),
+            client: booking.user?.name ?? "-",
+            status: formatBookingStatus(booking.status),
+            statusValue: booking.status,
+            startDateTime: booking.startDateTime,
+            endDateTime: booking.endDateTime,
+            totalAmount: booking.totalAmount ?? 0,
+          };
+        },
+      ) ?? []
     );
   }, [data]);
 
@@ -140,7 +151,7 @@ export default function BookingsPage() {
 
   const availableStatusOptions = bookingToUpdate
     ? statusOptionsByCurrent[bookingToUpdate.statusValue].filter((option) =>
-        option.value === "COMPLETED" ? canComplete(bookingToUpdate) : true
+        option.value === "COMPLETED" ? canComplete(bookingToUpdate) : true,
       )
     : [];
 
@@ -193,8 +204,12 @@ export default function BookingsPage() {
   const stats = useMemo(() => {
     const all = bookings.length;
     const pending = bookings.filter((b) => b.statusValue === "PENDING").length;
-    const confirmed = bookings.filter((b) => b.statusValue === "CONFIRMED").length;
-    const completed = bookings.filter((b) => b.statusValue === "COMPLETED").length;
+    const confirmed = bookings.filter(
+      (b) => b.statusValue === "CONFIRMED",
+    ).length;
+    const completed = bookings.filter(
+      (b) => b.statusValue === "COMPLETED",
+    ).length;
     const total = bookings.reduce((sum, b) => sum + b.totalAmount, 0);
 
     return { all, pending, confirmed, completed, total };
@@ -242,15 +257,15 @@ export default function BookingsPage() {
                 placeholder="Selecione a data final"
               />
             </div>
-            {(startDate || endDate) && (
-              <Button
-                variant="outline"
-                onClick={handleClearFilters}
-                className="gap-2"
-              >
-                Limpar Filtros
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              onClick={handleClearFilters}
+              disabled={!startDate && !endDate}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Limpar Filtros
+            </Button>
           </div>
         </CardContent>
       </Card>

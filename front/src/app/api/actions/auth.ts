@@ -9,6 +9,7 @@ import { zodloginUserResponse } from "@/api";
 
 type LoginResponse = z.infer<typeof zodloginUserResponse>;
 
+// NAO ESTA SENDO USADO
 export async function loginUserAction(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

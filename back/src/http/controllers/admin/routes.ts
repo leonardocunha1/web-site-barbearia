@@ -3,6 +3,7 @@ import { verifyUserRole } from '@/http/middlewares/verify-user-role';
 import type { FastifyTypedInstance } from '@/types';
 import { z } from 'zod';
 import { adminDashboardSchema } from '@/schemas/admin-dashboard-schema';
+import { dashboardQuerySchema } from '@/schemas/admin';
 import { dashboard } from './get-dashboard';
 
 export async function adminRoutes(app: FastifyTypedInstance) {
@@ -13,6 +14,7 @@ export async function adminRoutes(app: FastifyTypedInstance) {
       schema: {
         operationId: 'getAdminDashboard',
         tags: ['admin'],
+        querystring: dashboardQuerySchema,
         response: {
           200: adminDashboardSchema,
           400: z.object({ message: z.string() }),

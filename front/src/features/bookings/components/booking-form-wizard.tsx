@@ -285,7 +285,7 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
         isSubmittingRef.current = false;
       }
     },
-    [user, currentStep, createBooking],
+    [user, currentStep, createBooking, isHoliday],
   );
 
   const renderCurrentStep = () => {

@@ -137,7 +137,9 @@ export class PreviewBookingPriceUseCase {
     services: Array<{ serviceId: string }>,
     totalValue: number,
   ) {
-    const coupon = await this.couponRepository.findByCode(code);
+    // Normalize coupon code to uppercase for lookup
+    const normalizedCode = code.toUpperCase();
+    const coupon = await this.couponRepository.findByCode(normalizedCode);
 
     if (!coupon || !coupon.active) {
       throw new InvalidCouponError();

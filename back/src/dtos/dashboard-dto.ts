@@ -1,4 +1,4 @@
-export type TimeRange = 'today' | 'week' | 'month' | 'custom';
+export type TimeRange = 'all' | 'today' | 'week' | 'month' | 'custom';
 
 export type DashboardRequestDTO = {
   range: TimeRange;

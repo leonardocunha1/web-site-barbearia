@@ -1,3 +1,5 @@
+import type { ListServices200ServicesItemType } from "./listServices200ServicesItemType";
+
 export type ListServices200ServicesItem = {
   id: string;
   name: string;
@@ -5,6 +7,6 @@ export type ListServices200ServicesItem = {
   description: string | null;
   /** @nullable */
   category: string | null;
-  type: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
+  type: ListServices200ServicesItemType;
   active: boolean;
 };

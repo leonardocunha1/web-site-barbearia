@@ -18,6 +18,12 @@ export class UpdateCouponUseCase {
   ) {}
 
   async execute({ couponId, date: data }: UpdateCouponRequest): Promise<UpdateCouponResponse> {
+    // Normalize coupon code to uppercase if provided
+    const normalizedData = {
+      ...data,
+      ...(data.code && { code: data.code.toUpperCase() }),
+    };
+
     // Verifica se o cupom existe
     const existingCoupon = await this.couponRepository.findById(couponId);
     if (!existingCoupon) {
@@ -25,8 +31,8 @@ export class UpdateCouponUseCase {
     }
 
     // Verifica se o novo código já existe (se estiver sendo alterado)
-    if (data.code && data.code !== existingCoupon.code) {
-      const couponWithSameCode = await this.couponRepository.findByCode(data.code);
+    if (normalizedData.code && normalizedData.code !== existingCoupon.code) {
+      const couponWithSameCode = await this.couponRepository.findByCode(normalizedData.code);
       if (couponWithSameCode) {
         throw new DuplicateCouponError();
       }
@@ -101,10 +107,14 @@ export class UpdateCouponUseCase {
 
     // Atualiza o cupom
     const coupon = await this.couponRepository.update(couponId, {
-      ...data,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      ...normalizedData,
+      startDate: normalizedData.startDate ? new Date(normalizedData.startDate) : undefined,
       endDate:
-        data.endDate !== undefined ? (data.endDate ? new Date(data.endDate) : null) : undefined,
+        normalizedData.endDate !== undefined
+          ? normalizedData.endDate
+            ? new Date(normalizedData.endDate)
+            : null
+          : undefined,
     });
 
     return { coupon };

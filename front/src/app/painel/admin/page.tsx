@@ -8,17 +8,28 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Button } from "@/shared/components/ui/button";
+import {
   CalendarIcon,
   UserPlusIcon,
   UserXIcon,
   UsersIcon,
   TrendingUpIcon,
   Activity,
+  RefreshCw,
 } from "lucide-react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { formatCurrency } from "@/shared/utils";
+import { useState } from "react";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 
 const container = {
   hidden: { opacity: 0 },
@@ -67,7 +78,40 @@ function StatsCard({
 }
 
 export default function AdminOverviewPage() {
-  const { data: dashboard, isLoading } = useGetAdminDashboard();
+  const [range, setRange] = useState<
+    "all" | "today" | "week" | "month" | "custom"
+  >("month");
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+
+  // Formatar datas para o formato ISO datetime que a API espera
+  const formatDateToISO = (dateString: string) => {
+    if (!dateString) return undefined;
+    const date = new Date(dateString);
+    return date.toISOString();
+  };
+
+  const {
+    data: dashboard,
+    isLoading,
+    refetch,
+  } = useGetAdminDashboard(
+    {
+      range,
+      startDate:
+        range === "custom" ? formatDateToISO(customStartDate) : undefined,
+      endDate: range === "custom" ? formatDateToISO(customEndDate) : undefined,
+    } as const,
+    {
+      query: {
+        enabled: range !== "custom" || (!!customStartDate && !!customEndDate),
+      },
+    },
+  );
+
+  const handleManualRefresh = async () => {
+    await refetch();
+  };
 
   if (isLoading) {
     return (
@@ -93,10 +137,85 @@ export default function AdminOverviewPage() {
   return (
     <div className="h-full space-y-6 p-6">
       {/* Header */}
-      <PageHeader
-        title="Painel do Administrador"
-        description="Visão geral do negócio e métricas importantes"
-      />
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <PageHeader
+            title="Painel do Administrador"
+            description="Visão geral do negócio e métricas importantes"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            value={range}
+            onValueChange={(
+              value: "all" | "today" | "week" | "month" | "custom",
+            ) => setRange(value)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecione o período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Períodos</SelectItem>
+              <SelectItem value="today">Hoje</SelectItem>
+              <SelectItem value="week">Esta Semana</SelectItem>
+              <SelectItem value="month">Este Mês</SelectItem>
+              <SelectItem value="custom">Personalizado</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={handleManualRefresh}
+            disabled={isLoading}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Atualizar
+          </Button>
+        </div>
+      </div>
+
+      {/* Custom Date Range Picker */}
+      {range === "custom" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Período Personalizado</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-stone-700">
+                  Data Inicial
+                </label>
+                <DatePicker
+                  value={customStartDate}
+                  max={customEndDate || undefined}
+                  onChange={setCustomStartDate}
+                  placeholder="Selecione a data inicial"
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-stone-700">
+                  Data Final
+                </label>
+                <DatePicker
+                  value={customEndDate}
+                  min={customStartDate || undefined}
+                  onChange={setCustomEndDate}
+                  placeholder="Selecione a data final"
+                />
+              </div>
+            </div>
+            {range === "custom" && (!customStartDate || !customEndDate) && (
+              <p className="mt-2 text-xs text-yellow-600">
+                Selecione ambas as datas para visualizar as métricas
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Grid */}
       <motion.div
@@ -115,7 +234,7 @@ export default function AdminOverviewPage() {
           title="Novos Cadastros"
           value={metrics?.newProfessionals || 0}
           icon={UserPlusIcon}
-          description="Este mês"
+          description="No período"
         />
         <StatsCard
           title="Agendamentos Hoje"

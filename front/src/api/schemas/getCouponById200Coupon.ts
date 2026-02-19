@@ -1,6 +1,10 @@
 import type { GetCouponById200CouponType } from "./getCouponById200CouponType";
 import type { GetCouponById200CouponScope } from "./getCouponById200CouponScope";
 import type { GetCouponById200CouponExpirationType } from "./getCouponById200CouponExpirationType";
+import type { GetCouponById200CouponStartDate } from "./getCouponById200CouponStartDate";
+import type { GetCouponById200CouponEndDate } from "./getCouponById200CouponEndDate";
+import type { GetCouponById200CouponCreatedAt } from "./getCouponById200CouponCreatedAt";
+import type { GetCouponById200CouponUpdatedAt } from "./getCouponById200CouponUpdatedAt";
 import type { GetCouponById200CouponService } from "./getCouponById200CouponService";
 import type { GetCouponById200CouponProfessional } from "./getCouponById200CouponProfessional";
 import type { GetCouponById200CouponUser } from "./getCouponById200CouponUser";
@@ -23,17 +27,17 @@ export type GetCouponById200Coupon = {
   maxUses: number | null;
   /** @minimum 0 */
   uses: number;
-  startDate: string;
+  startDate: GetCouponById200CouponStartDate;
   /** @nullable */
-  endDate: string | null;
+  endDate: GetCouponById200CouponEndDate;
   /**
    * @minimum 0
    * @nullable
    */
   minBookingValue: number | null;
   active: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: GetCouponById200CouponCreatedAt;
+  updatedAt: GetCouponById200CouponUpdatedAt;
   /** @nullable */
   service?: GetCouponById200CouponService;
   /** @nullable */

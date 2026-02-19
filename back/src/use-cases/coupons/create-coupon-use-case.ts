@@ -17,18 +17,32 @@ export class CreateCouponUseCase {
   ) {}
 
   async execute(request: CreateCouponRequest): Promise<CreateCouponResponse> {
+    // Normalize coupon code to uppercase for consistency
+    const normalizedRequest = {
+      ...request,
+      code: request.code.toUpperCase(),
+    };
+
     // Fail-fast: validate all business rules before creation
-    await this.validateCouponCodeUnique(request.code);
-    this.validateCouponValue(request.type, request.value);
-    this.validateMinBookingValue(request.minBookingValue);
-    this.validateMaxUses(request.maxUses);
-    this.validateExpirationRules(request.expirationType, request.maxUses, request.endDate);
-    this.validateCouponScope(request.scope, request.serviceId, request.professionalId);
-    this.validateCouponDates(request.startDate, request.endDate);
-    await this.validateScopeEntitiesExist(request);
+    await this.validateCouponCodeUnique(normalizedRequest.code);
+    this.validateCouponValue(normalizedRequest.type, normalizedRequest.value);
+    this.validateMinBookingValue(normalizedRequest.minBookingValue);
+    this.validateMaxUses(normalizedRequest.maxUses);
+    this.validateExpirationRules(
+      normalizedRequest.expirationType,
+      normalizedRequest.maxUses,
+      normalizedRequest.endDate,
+    );
+    this.validateCouponScope(
+      normalizedRequest.scope,
+      normalizedRequest.serviceId,
+      normalizedRequest.professionalId,
+    );
+    this.validateCouponDates(normalizedRequest.startDate, normalizedRequest.endDate);
+    await this.validateScopeEntitiesExist(normalizedRequest);
 
     const coupon = await this.couponRepository.create({
-      ...request,
+      ...normalizedRequest,
       active: true,
       uses: 0,
     });

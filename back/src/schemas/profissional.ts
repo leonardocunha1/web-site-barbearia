@@ -221,9 +221,9 @@ export const createProfessionalBodySchema = z
 export const dashboardQuerySchema = z
   .object({
     range: z
-      .enum(['today', 'week', 'month', 'custom'], {
+      .enum(['all', 'today', 'week', 'month', 'custom'], {
         errorMap: () => ({
-          message: 'O período deve ser: today, week, month ou custom',
+          message: 'O período deve ser: all, today, week, month ou custom',
         }),
       })
       .describe('Período de tempo para análise'),

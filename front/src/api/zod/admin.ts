@@ -4,6 +4,14 @@ import {
 
 
 
+export const zodgetAdminDashboardQueryRangeDefault = "month";
+
+export const zodgetAdminDashboardQueryParams = zod.object({
+  "range": zod.enum(['all', 'today', 'week', 'month', 'custom']).default(zodgetAdminDashboardQueryRangeDefault).describe('Período de tempo para análise'),
+  "startDate": zod.string().datetime({}).optional().describe('Data de início personalizada (obrigatória para período custom)'),
+  "endDate": zod.string().datetime({}).optional().describe('Data de término personalizada (obrigatória para período custom)')
+})
+
 export const zodgetAdminDashboardResponseMetricsProfessionalsActiveMin = 0;
 export const zodgetAdminDashboardResponseMetricsNewProfessionalsMin = 0;
 export const zodgetAdminDashboardResponseMetricsBookingsTodayMin = 0;

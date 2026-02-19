@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Tabs,
   TabsContent,
@@ -25,29 +25,25 @@ export function ProfessionalDashboard() {
       },
     },
   );
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  useEffect(() => {
-    setLastUpdated(new Date());
-  }, [isLoading]);
+  useEffect(() => {}, [isLoading]);
 
   const handleManualRefresh = async () => {
     await refetch();
-    setLastUpdated(new Date());
   };
 
-  const getLastUpdateText = () => {
-    if (!lastUpdated) return "Aguardando atualização...";
-    const now = new Date();
-    const diffSeconds = Math.floor(
-      (now.getTime() - lastUpdated.getTime()) / 1000,
-    );
+  // const getLastUpdateText = () => {
+  //   if (!lastUpdated) return "Aguardando atualização...";
+  //   const now = new Date();
+  //   const diffSeconds = Math.floor(
+  //     (now.getTime() - lastUpdated.getTime()) / 1000,
+  //   );
 
-    if (diffSeconds < 60) {
-      return `Atualizado há ${diffSeconds}s`;
-    }
-    return `Atualizado há ${Math.floor(diffSeconds / 60)}m`;
-  };
+  //   if (diffSeconds < 60) {
+  //     return `Atualizado há ${diffSeconds}s`;
+  //   }
+  //   return `Atualizado há ${Math.floor(diffSeconds / 60)}m`;
+  // };
 
   return (
     <div className="space-y-6">
@@ -58,7 +54,7 @@ export function ProfessionalDashboard() {
             Olá, {data?.professional?.name || "Profissional"}
           </h1>
           <p className="mt-1 text-sm text-stone-500">
-            {getLastUpdateText()} • Atualização automática a cada 30s
+            Atualização automática a cada 30s
           </p>
         </div>
         <Button

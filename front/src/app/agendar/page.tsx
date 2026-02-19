@@ -7,20 +7,7 @@ import { BookingFormWizard } from "@/features/bookings";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { User } from "lucide-react";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+import { fadeInUp, staggerContainer } from "@/shared/animations/variants";
 
 export default function Page() {
   const { user } = useUser();

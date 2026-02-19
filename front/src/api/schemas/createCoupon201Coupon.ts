@@ -1,6 +1,10 @@
 import type { CreateCoupon201CouponType } from "./createCoupon201CouponType";
 import type { CreateCoupon201CouponScope } from "./createCoupon201CouponScope";
 import type { CreateCoupon201CouponExpirationType } from "./createCoupon201CouponExpirationType";
+import type { CreateCoupon201CouponStartDate } from "./createCoupon201CouponStartDate";
+import type { CreateCoupon201CouponEndDate } from "./createCoupon201CouponEndDate";
+import type { CreateCoupon201CouponCreatedAt } from "./createCoupon201CouponCreatedAt";
+import type { CreateCoupon201CouponUpdatedAt } from "./createCoupon201CouponUpdatedAt";
 import type { CreateCoupon201CouponService } from "./createCoupon201CouponService";
 import type { CreateCoupon201CouponProfessional } from "./createCoupon201CouponProfessional";
 import type { CreateCoupon201CouponUser } from "./createCoupon201CouponUser";
@@ -23,17 +27,17 @@ export type CreateCoupon201Coupon = {
   maxUses: number | null;
   /** @minimum 0 */
   uses: number;
-  startDate: string;
+  startDate: CreateCoupon201CouponStartDate;
   /** @nullable */
-  endDate: string | null;
+  endDate: CreateCoupon201CouponEndDate;
   /**
    * @minimum 0
    * @nullable
    */
   minBookingValue: number | null;
   active: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: CreateCoupon201CouponCreatedAt;
+  updatedAt: CreateCoupon201CouponUpdatedAt;
   /** @nullable */
   service?: CreateCoupon201CouponService;
   /** @nullable */

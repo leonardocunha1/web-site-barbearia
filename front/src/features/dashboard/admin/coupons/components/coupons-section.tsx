@@ -29,8 +29,15 @@ const formatDate = (value?: string | null) => {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(value));
 };
 
-const toIsoDateTime = (value?: string) =>
-  value ? new Date(`${value}T00:00:00`).toISOString() : undefined;
+const toIsoDateTime = (value?: string) => {
+  if (!value) return undefined;
+  // Se já é uma data ISO válida, retorna como está
+  if (value.includes("T")) return value;
+  // Se é YYYY-MM-DD, converte para ISO
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (isNaN(date.getTime())) return undefined;
+  return date.toISOString();
+};
 
 type CouponRow = {
   id: string;
@@ -100,7 +107,8 @@ export default function CouponsSection() {
         });
         toast.success("Cupom criado com sucesso.");
       },
-      onError: () => toast.error("Nao foi possivel criar o cupom."),
+      onError: (error) =>
+        toast.error(error.message || "Nao foi possivel criar o cupom."),
     },
   });
 
@@ -112,7 +120,8 @@ export default function CouponsSection() {
         });
         toast.success("Cupom atualizado com sucesso.");
       },
-      onError: () => toast.error("Nao foi possivel atualizar o cupom."),
+      onError: (error) =>
+        toast.error(error.message || "Nao foi possivel atualizar o cupom."),
     },
   });
 
@@ -124,7 +133,8 @@ export default function CouponsSection() {
         });
         toast.success("Cupom removido.");
       },
-      onError: () => toast.error("Nao foi possivel remover o cupom."),
+      onError: (error) =>
+        toast.error(error.message || "Nao foi possivel remover o cupom."),
     },
   });
 
@@ -134,6 +144,7 @@ export default function CouponsSection() {
         queryClient.invalidateQueries({
           queryKey: getListCouponsQueryKey(listParams),
         });
+        toast.success("Cupom atualizado com sucesso.");
       },
     },
   });
@@ -151,8 +162,8 @@ export default function CouponsSection() {
             : `R$ ${coupon.value}`,
         active: coupon.active,
         uses: coupon.uses,
-        period: `${formatDate(coupon.startDate)} - ${formatDate(
-          coupon.endDate,
+        period: `${formatDate((coupon.startDate as string | null | undefined) ?? undefined)} - ${formatDate(
+          (coupon.endDate as string | null | undefined) ?? undefined,
         )}`,
       })) ?? []
     );
@@ -213,21 +224,22 @@ export default function CouponsSection() {
       mode: "edit",
       initialValues: {
         code: source.code,
-        type: source.type,
-        value: source.value,
-        scope: source.scope,
-        expirationType: source.expirationType,
-        description: source.description ?? "",
+        type: source.type as "PERCENTAGE" | "FIXED" | "FREE",
+        value: source.value as number,
+        scope: source.scope as "GLOBAL" | "SERVICE" | "PROFESSIONAL",
+        expirationType: source.expirationType as "DATE" | "QUANTITY",
+        description: source.description ?? undefined,
         maxUses: source.maxUses ?? undefined,
-        startDate: source.startDate?.slice(0, 10) ?? "",
-        endDate: source.endDate?.slice(0, 10) ?? "",
+        startDate: source.startDate as string | undefined,
+        endDate: source.endDate as string | undefined,
         minBookingValue: source.minBookingValue ?? undefined,
-        serviceId: source.service?.id ?? "",
-        professionalId: source.professional?.id ?? "",
+        serviceId: source.service?.id ?? undefined,
+        professionalId: source.professional?.id ?? undefined,
         active: source.active,
       },
       onSubmit: async (values: CouponFormValues) => {
         const normalizedValue = values.type === "FREE" ? 0 : values.value;
+
         await updateCoupon.mutateAsync({
           couponId: source.id,
           data: {
@@ -237,9 +249,15 @@ export default function CouponsSection() {
             scope: values.scope,
             expirationType: values.expirationType,
             description: values.description || undefined,
-            maxUses: values.maxUses,
+            maxUses:
+              values.expirationType === "DATE"
+                ? null
+                : (values.maxUses ?? null),
             startDate: toIsoDateTime(values.startDate),
-            endDate: values.endDate ? toIsoDateTime(values.endDate) : null,
+            endDate:
+              values.expirationType === "QUANTITY"
+                ? null
+                : toIsoDateTime(values.endDate),
             minBookingValue: values.minBookingValue ?? null,
             serviceId:
               values.scope === "SERVICE" ? (values.serviceId ?? null) : null,
@@ -247,7 +265,7 @@ export default function CouponsSection() {
               values.scope === "PROFESSIONAL"
                 ? (values.professionalId ?? null)
                 : null,
-            active: values.active ?? source.active,
+            active: values.active,
           },
         });
       },

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { FormProvider, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -31,24 +32,6 @@ type CouponFormModalProps = {
   professionals: Option[];
 };
 
-const typeOptions: Option[] = [
-  { value: "PERCENTAGE", label: "Percentual" },
-  { value: "FIXED", label: "Valor fixo" },
-  { value: "FREE", label: "Gratis" },
-];
-
-const scopeOptions: Option[] = [
-  { value: "GLOBAL", label: "Global" },
-  { value: "SERVICE", label: "Servico" },
-  { value: "PROFESSIONAL", label: "Profissional" },
-];
-
-const expirationTypeOptions: Option[] = [
-  { value: "DATE", label: "Por data" },
-  { value: "QUANTITY", label: "Por quantidade" },
-  { value: "BOTH", label: "Data e quantidade" },
-];
-
 export function CouponFormModal({
   mode,
   initialValues,
@@ -65,14 +48,8 @@ export function CouponFormModal({
       type: "PERCENTAGE",
       value: 0,
       scope: "GLOBAL",
-      expirationType: "BOTH",
+      expirationType: "DATE",
       description: "",
-      maxUses: undefined,
-      startDate: "",
-      endDate: "",
-      minBookingValue: undefined,
-      serviceId: "",
-      professionalId: "",
       active: true,
       ...initialValues,
     },
@@ -89,48 +66,70 @@ export function CouponFormModal({
 
   const scope = watch("scope");
   const expirationType = watch("expirationType");
+  const couponType = watch("type");
 
-  const handleExpirationTypeChange = (value: string) => {
-    const newType = value as CouponFormValues["expirationType"];
-    setValue("expirationType", newType, { shouldValidate: true });
-
-    // Limpar campos não necessários baseado no tipo
-    if (newType === "DATE") {
-      setValue("maxUses", undefined);
-    } else if (newType === "QUANTITY") {
-      setValue("endDate", "");
+  const handleDateChange = (
+    name: "startDate" | "endDate",
+    dateValue: string | undefined,
+  ) => {
+    if (!dateValue) {
+      setValue(name, undefined, { shouldValidate: true });
+      return;
+    }
+    // Converte para ISO String (YYYY-MM-DDTHH:mm:ss.sssZ) para satisfazer o Zod .datetime()
+    const date = new Date(dateValue);
+    if (!isNaN(date.getTime())) {
+      setValue(name, date.toISOString(), { shouldValidate: true });
     }
   };
 
-  const submitHandler = async (values: CouponFormValues) => {
-    await onSubmit({
-      ...values,
-      maxUses: Number.isNaN(values.maxUses) ? undefined : values.maxUses,
-      minBookingValue: Number.isNaN(values.minBookingValue)
-        ? undefined
-        : values.minBookingValue,
-    });
+  // Helper para converter qualquer formato de data para YYYY-MM-DD
+  const formatDateForDisplay = (value: string | undefined): string => {
+    if (!value) return "";
+    // Se já é YYYY-MM-DD, retorna como está
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    // Se é ISO string, extrai a data
+    if (value.includes("T")) return value.split("T")[0];
+    // Tenta criar uma data válida
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) return date.toISOString().split("T")[0];
+    return "";
+  };
+
+  // Define valor 0 quando tipo mudar para FREE
+  useEffect(() => {
+    if (couponType === "FREE") {
+      setValue("value", 0, { shouldValidate: true });
+    }
+  }, [couponType, setValue]);
+
+  const handleFormSubmit = async (values: CouponFormValues) => {
+    try {
+      await onSubmit(values);
+      onClose?.();
+    } catch (error) {
+      // Erro será tratado pelo componente pai
+      throw error;
+    }
   };
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="code">Codigo</Label>
+            <Label htmlFor="code">Código</Label>
             <Input id="code" {...register("code")} />
             {errors.code && (
-              <p className="text-destructive text-sm font-medium">
-                {errors.code.message}
-              </p>
+              <p className="text-destructive text-xs">{errors.code.message}</p>
             )}
           </div>
           <div className="space-y-2">
             <Label>Tipo</Label>
             <Select
               value={watch("type")}
-              onValueChange={(value) =>
-                setValue("type", value as CouponFormValues["type"], {
+              onValueChange={(v) =>
+                setValue("type", v as "PERCENTAGE" | "FIXED" | "FREE", {
                   shouldValidate: true,
                 })
               }
@@ -139,42 +138,37 @@ export function CouponFormModal({
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
-                {typeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="PERCENTAGE">Percentual</SelectItem>
+                <SelectItem value="FIXED">Valor fixo</SelectItem>
+                <SelectItem value="FREE">Grátis</SelectItem>
               </SelectContent>
             </Select>
-            {errors.type && (
-              <p className="text-destructive text-sm font-medium">
-                {errors.type.message}
-              </p>
-            )}
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="value">Valor</Label>
-            <Input
-              id="value"
-              type="number"
-              step="0.01"
-              {...register("value", { valueAsNumber: true })}
-            />
-            {errors.value && (
-              <p className="text-destructive text-sm font-medium">
-                {errors.value.message}
-              </p>
-            )}
-          </div>
+          {couponType !== "FREE" && (
+            <div className="space-y-2">
+              <Label htmlFor="value">Valor</Label>
+              <Input
+                id="value"
+                type="number"
+                step="0.01"
+                {...register("value", { valueAsNumber: true })}
+              />
+              {errors.value && (
+                <p className="text-destructive text-xs">
+                  {errors.value.message}
+                </p>
+              )}
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Escopo</Label>
             <Select
               value={scope}
-              onValueChange={(value) =>
-                setValue("scope", value as CouponFormValues["scope"], {
+              onValueChange={(v) =>
+                setValue("scope", v as "GLOBAL" | "SERVICE" | "PROFESSIONAL", {
                   shouldValidate: true,
                 })
               }
@@ -183,143 +177,111 @@ export function CouponFormModal({
                 <SelectValue placeholder="Escopo" />
               </SelectTrigger>
               <SelectContent>
-                {scopeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="GLOBAL">Global</SelectItem>
+                <SelectItem value="SERVICE">Serviço</SelectItem>
+                <SelectItem value="PROFESSIONAL">Profissional</SelectItem>
               </SelectContent>
             </Select>
-            {errors.scope && (
-              <p className="text-destructive text-sm font-medium">
-                {errors.scope.message}
-              </p>
-            )}
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Tipo de expiracao</Label>
+          <Label>Tipo de expiração</Label>
           <Select
             value={expirationType}
-            onValueChange={handleExpirationTypeChange}
+            onValueChange={(v) =>
+              setValue("expirationType", v as "DATE" | "QUANTITY" | "BOTH", {
+                shouldValidate: true,
+              })
+            }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Tipo de expiracao" />
+              <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
-              {expirationTypeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              <SelectItem value="DATE">Por data</SelectItem>
+              <SelectItem value="QUANTITY">Por quantidade</SelectItem>
+              <SelectItem value="BOTH">Data e quantidade</SelectItem>
             </SelectContent>
           </Select>
-          {errors.expirationType && (
-            <p className="text-destructive text-sm font-medium">
-              {errors.expirationType.message}
-            </p>
-          )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {(expirationType === "DATE" || expirationType === "BOTH") && (
+          {expirationType !== "QUANTITY" && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="startDate">Data inicio</Label>
+                <Label>Data início</Label>
                 <Controller
                   name="startDate"
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      value={field.value}
-                      onChange={field.onChange}
-                      max={watch("endDate") || undefined}
-                      placeholder="Data de início"
+                      value={formatDateForDisplay(field.value)}
+                      onChange={(d) => handleDateChange("startDate", d)}
                     />
                   )}
                 />
-                {errors.startDate && (
-                  <p className="text-destructive text-sm font-medium">
-                    {errors.startDate.message}
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endDate">Data fim *</Label>
+                <Label>Data fim *</Label>
                 <Controller
                   name="endDate"
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      value={field.value}
-                      onChange={field.onChange}
-                      min={watch("startDate") || undefined}
-                      placeholder="Data de término"
+                      value={formatDateForDisplay(field.value)}
+                      onChange={(d) => handleDateChange("endDate", d)}
                     />
                   )}
                 />
                 {errors.endDate && (
-                  <p className="text-destructive text-sm font-medium">
+                  <p className="text-destructive text-xs">
                     {errors.endDate.message}
                   </p>
                 )}
               </div>
             </>
           )}
-          {(expirationType === "QUANTITY" || expirationType === "BOTH") && (
+
+          {expirationType !== "DATE" && (
             <div className="space-y-2">
-              <Label htmlFor="maxUses">Maximo de usos *</Label>
+              <Label htmlFor="maxUses">Máximo de usos *</Label>
               <Input
                 id="maxUses"
                 type="number"
                 {...register("maxUses", { valueAsNumber: true })}
               />
               {errors.maxUses && (
-                <p className="text-destructive text-sm font-medium">
+                <p className="text-destructive text-xs">
                   {errors.maxUses.message}
                 </p>
               )}
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="minBookingValue">Valor minimo</Label>
-            <Input
-              id="minBookingValue"
-              type="number"
-              step="0.01"
-              {...register("minBookingValue", { valueAsNumber: true })}
-            />
-            {errors.minBookingValue && (
-              <p className="text-destructive text-sm font-medium">
-                {errors.minBookingValue.message}
-              </p>
-            )}
-          </div>
         </div>
 
         {scope === "SERVICE" && (
           <div className="space-y-2">
-            <Label>Servico</Label>
+            <Label>Serviço</Label>
             <Select
-              value={watch("serviceId") || ""}
-              onValueChange={(value) =>
-                setValue("serviceId", value, { shouldValidate: true })
+              value={watch("serviceId")}
+              onValueChange={(v) =>
+                setValue("serviceId", v, { shouldValidate: true })
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o servico" />
+                <SelectValue placeholder="Selecione o serviço" />
               </SelectTrigger>
               <SelectContent>
-                {services.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {services.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {errors.serviceId && (
-              <p className="text-destructive text-sm font-medium">
+              <p className="text-destructive text-xs">
                 {errors.serviceId.message}
               </p>
             )}
@@ -330,24 +292,24 @@ export function CouponFormModal({
           <div className="space-y-2">
             <Label>Profissional</Label>
             <Select
-              value={watch("professionalId") || ""}
-              onValueChange={(value) =>
-                setValue("professionalId", value, { shouldValidate: true })
+              value={watch("professionalId")}
+              onValueChange={(v) =>
+                setValue("professionalId", v, { shouldValidate: true })
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o profissional" />
               </SelectTrigger>
               <SelectContent>
-                {professionals.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {professionals.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {errors.professionalId && (
-              <p className="text-destructive text-sm font-medium">
+              <p className="text-destructive text-xs">
                 {errors.professionalId.message}
               </p>
             )}
@@ -355,7 +317,7 @@ export function CouponFormModal({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="description">Descricao</Label>
+          <Label htmlFor="description">Descrição</Label>
           <Input id="description" {...register("description")} />
         </div>
 
@@ -363,15 +325,13 @@ export function CouponFormModal({
           <div className="flex items-center gap-3">
             <Checkbox
               checked={Boolean(watch("active"))}
-              onCheckedChange={(value) =>
-                setValue("active", Boolean(value), { shouldValidate: true })
-              }
+              onCheckedChange={(v) => setValue("active", Boolean(v))}
             />
             <Label>Ativo</Label>
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancelar
           </Button>

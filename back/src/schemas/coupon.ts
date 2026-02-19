@@ -55,15 +55,24 @@ export const couponSchema = z
     }),
     maxUses: z.number().int().nullable(),
     uses: z.number().int().nonnegative({ message: 'Usos não pode ser negativo' }),
-    startDate: z.string().datetime({ message: 'Data de início inválida' }),
-    endDate: z.string().datetime({ message: 'Data de término inválida' }).nullable(),
+    startDate: z
+      .union([z.string().datetime(), z.instanceof(Date)])
+      .transform((d) => (d instanceof Date ? d.toISOString() : d)),
+    endDate: z
+      .union([z.string().datetime(), z.instanceof(Date)])
+      .transform((d) => (d instanceof Date ? d.toISOString() : d))
+      .nullable(),
     minBookingValue: z
       .number()
       .min(0, { message: 'Valor mínimo não pode ser negativo' })
       .nullable(),
     active: z.boolean(),
-    createdAt: z.string().datetime({ message: 'Data de criação inválida' }),
-    updatedAt: z.string().datetime({ message: 'Data de atualização inválida' }),
+    createdAt: z
+      .union([z.string().datetime(), z.instanceof(Date)])
+      .transform((d) => (d instanceof Date ? d.toISOString() : d)),
+    updatedAt: z
+      .union([z.string().datetime(), z.instanceof(Date)])
+      .transform((d) => (d instanceof Date ? d.toISOString() : d)),
 
     // Relacionamentos
     service: z

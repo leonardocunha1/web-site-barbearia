@@ -10,20 +10,21 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/shared/components/ui/sheet";
-import { SignInIcon, UserCircleIcon, SignOutIcon } from "@phosphor-icons/react";
+import { SignInIcon, UserCircleIcon } from "@phosphor-icons/react";
 import { GetUserProfile200User } from "@/api";
-import { useLogout } from "@/shared/hooks/useLogout";
 
-export function MobileMenu({ user }: { user: GetUserProfile200User | null | undefined }) {
-  const { logout: handleLogout } = useLogout();
-
+export function MobileMenu({
+  user,
+}: {
+  user: GetUserProfile200User | null | undefined;
+}) {
   // Se undefined, ainda está carregando
   if (user === undefined) {
     return (
       <Button
         variant="ghost"
         size="icon"
-        className="text-principal-100 hover:bg-stone-100/50 animate-pulse"
+        className="text-principal-100 animate-pulse hover:bg-stone-100/50"
         disabled
       >
         <Menu className="h-6 w-6" />
@@ -31,10 +32,13 @@ export function MobileMenu({ user }: { user: GetUserProfile200User | null | unde
     );
   }
 
-  const dashboardUrl = !user ? "/cliente" :
-    user.role === "PROFESSIONAL" ? "/painel/professional" :
-    user.role === "ADMIN" ? "/painel/admin" :
-    "/cliente";
+  const dashboardUrl = !user
+    ? "/cliente"
+    : user.role === "PROFESSIONAL"
+      ? "/painel/professional"
+      : user.role === "ADMIN"
+        ? "/painel/admin"
+        : "/cliente";
 
   return (
     <Sheet>
@@ -80,27 +84,16 @@ export function MobileMenu({ user }: { user: GetUserProfile200User | null | unde
               </Button>
             </Link>
           ) : (
-            <>
-              <Link href={dashboardUrl}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 border-stone-300 font-medium text-stone-800 hover:bg-stone-100"
-                >
-                  <UserCircleIcon className="size-4" />
-                  Minha conta
-                </Button>
-              </Link>
+            <Link href={dashboardUrl}>
               <Button
-                onClick={handleLogout}
                 variant="outline"
                 size="sm"
-                className="w-full gap-2 border-red-200 font-medium text-red-600 hover:bg-red-50"
+                className="w-full gap-2 border-stone-300 font-medium text-stone-800 hover:bg-stone-100"
               >
-                <SignOutIcon className="size-4" />
-                Sair
+                <UserCircleIcon className="size-4" />
+                Minha conta
               </Button>
-            </>
+            </Link>
           )}
         </nav>
 

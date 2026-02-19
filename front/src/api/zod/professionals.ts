@@ -143,7 +143,7 @@ export const zodgetPublicProfessionalScheduleResponse = zod.object({
 })
 
 export const zodgetProfessionalDashboardQueryParams = zod.object({
-  "range": zod.enum(['today', 'week', 'month', 'custom']).describe('Período de tempo para análise'),
+  "range": zod.enum(['all', 'today', 'week', 'month', 'custom']).describe('Período de tempo para análise'),
   "startDate": zod.string().datetime({}).optional().describe('Data de início personalizada (obrigatória para período custom)'),
   "endDate": zod.string().datetime({}).optional().describe('Data de término personalizada (obrigatória para período custom)')
 })

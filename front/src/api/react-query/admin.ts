@@ -15,41 +15,55 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { GetAdminDashboard200, GetAdminDashboard400 } from "../schemas";
+import type {
+  GetAdminDashboard200,
+  GetAdminDashboard400,
+  GetAdminDashboardParams,
+} from "../schemas";
 
 import { axiosInstance } from "../http/axios-instance";
 
-export const getAdminDashboard = (signal?: AbortSignal) => {
+export const getAdminDashboard = (
+  params?: GetAdminDashboardParams,
+  signal?: AbortSignal,
+) => {
   return axiosInstance<GetAdminDashboard200>({
     url: `/admin/dashboard`,
     method: "GET",
+    params,
     signal,
   });
 };
 
-export const getGetAdminDashboardQueryKey = () => {
-  return [`/admin/dashboard`] as const;
+export const getGetAdminDashboardQueryKey = (
+  params?: GetAdminDashboardParams,
+) => {
+  return [`/admin/dashboard`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetAdminDashboardInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getAdminDashboard>>>,
   TError = GetAdminDashboard400,
->(options?: {
-  query?: Partial<
-    UseInfiniteQueryOptions<
-      Awaited<ReturnType<typeof getAdminDashboard>>,
-      TError,
-      TData
-    >
-  >;
-}) => {
+>(
+  params?: GetAdminDashboardParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getAdminDashboard>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetAdminDashboardQueryKey();
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAdminDashboardQueryKey(params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAdminDashboard>>
-  > = ({ signal }) => getAdminDashboard(signal);
+  > = ({ signal }) => getAdminDashboard(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseInfiniteQueryOptions<
     Awaited<ReturnType<typeof getAdminDashboard>>,
@@ -67,6 +81,7 @@ export function useGetAdminDashboardInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getAdminDashboard>>>,
   TError = GetAdminDashboard400,
 >(
+  params: undefined | GetAdminDashboardParams,
   options: {
     query: Partial<
       UseInfiniteQueryOptions<
@@ -92,6 +107,7 @@ export function useGetAdminDashboardInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getAdminDashboard>>>,
   TError = GetAdminDashboard400,
 >(
+  params?: GetAdminDashboardParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -117,6 +133,7 @@ export function useGetAdminDashboardInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getAdminDashboard>>>,
   TError = GetAdminDashboard400,
 >(
+  params?: GetAdminDashboardParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -135,6 +152,7 @@ export function useGetAdminDashboardInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getAdminDashboard>>>,
   TError = GetAdminDashboard400,
 >(
+  params?: GetAdminDashboardParams,
   options?: {
     query?: Partial<
       UseInfiniteQueryOptions<
@@ -148,7 +166,10 @@ export function useGetAdminDashboardInfinite<
 ): UseInfiniteQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetAdminDashboardInfiniteQueryOptions(options);
+  const queryOptions = getGetAdminDashboardInfiniteQueryOptions(
+    params,
+    options,
+  );
 
   const query = useInfiniteQuery(
     queryOptions,
@@ -165,22 +186,26 @@ export function useGetAdminDashboardInfinite<
 export const getGetAdminDashboardQueryOptions = <
   TData = Awaited<ReturnType<typeof getAdminDashboard>>,
   TError = GetAdminDashboard400,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof getAdminDashboard>>,
-      TError,
-      TData
-    >
-  >;
-}) => {
+>(
+  params?: GetAdminDashboardParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAdminDashboard>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
   const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetAdminDashboardQueryKey();
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAdminDashboardQueryKey(params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAdminDashboard>>
-  > = ({ signal }) => getAdminDashboard(signal);
+  > = ({ signal }) => getAdminDashboard(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getAdminDashboard>>,
@@ -198,6 +223,7 @@ export function useGetAdminDashboard<
   TData = Awaited<ReturnType<typeof getAdminDashboard>>,
   TError = GetAdminDashboard400,
 >(
+  params: undefined | GetAdminDashboardParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -223,6 +249,7 @@ export function useGetAdminDashboard<
   TData = Awaited<ReturnType<typeof getAdminDashboard>>,
   TError = GetAdminDashboard400,
 >(
+  params?: GetAdminDashboardParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -248,6 +275,7 @@ export function useGetAdminDashboard<
   TData = Awaited<ReturnType<typeof getAdminDashboard>>,
   TError = GetAdminDashboard400,
 >(
+  params?: GetAdminDashboardParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -266,6 +294,7 @@ export function useGetAdminDashboard<
   TData = Awaited<ReturnType<typeof getAdminDashboard>>,
   TError = GetAdminDashboard400,
 >(
+  params?: GetAdminDashboardParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -279,7 +308,7 @@ export function useGetAdminDashboard<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetAdminDashboardQueryOptions(options);
+  const queryOptions = getGetAdminDashboardQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

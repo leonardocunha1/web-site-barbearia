@@ -1,9 +1,12 @@
+import type { UpdateServiceByIdBodyType } from "./updateServiceByIdBodyType";
+
 export type UpdateServiceByIdBody = {
   /**
    * @minLength 3
    * @maxLength 100
    */
   name?: string;
+  type?: UpdateServiceByIdBodyType;
   /** @maxLength 500 */
   description?: string;
   /**
@@ -18,6 +21,5 @@ export type UpdateServiceByIdBody = {
   duration?: number;
   /** @maxLength 50 */
   category?: string;
-  type?: "CORTE" | "BARBA" | "SOBRANCELHA" | "ESTETICA";
   active?: boolean;
 };
