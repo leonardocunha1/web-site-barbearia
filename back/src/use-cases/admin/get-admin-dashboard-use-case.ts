@@ -70,8 +70,6 @@ export class GetAdminDashboardUseCase {
     const range = params?.range ?? 'month';
     const startDate = params?.startDate;
     const endDate = params?.endDate;
-
-    const now = new Date();
     const dateRange = this.getDateRange(range, startDate, endDate);
 
     // Aggregate metrics in parallel

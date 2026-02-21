@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { IServiceProfessionalRepository } from '../service-professional-repository';
-import { Prisma } from '@prisma/client';
+import { Prisma, ServiceType } from '@prisma/client';
 
 export class PrismaServiceProfessionalRepository implements IServiceProfessionalRepository {
   async create(data: Prisma.ServiceProfessionalCreateInput): Promise<{
@@ -86,6 +86,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
         name: string;
         description: string | null;
         category: string | null;
+        type: ServiceType;
         active: boolean;
       };
       price: number;
@@ -218,6 +219,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
         name: string;
         description: string | null;
         category: string | null;
+        type: ServiceType;
         active: boolean;
       };
       price: number | null;

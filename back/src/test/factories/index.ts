@@ -1,6 +1,7 @@
 import {
   BusinessHours,
   Coupon,
+  CouponExpirationType,
   CouponScope,
   CouponType,
   Holiday,
@@ -8,6 +9,7 @@ import {
   Role,
   Service,
   ServiceProfessional,
+  ServiceType,
   Status,
   User,
 } from '@prisma/client';
@@ -111,6 +113,7 @@ export function makeService(overrides: ServiceOverrides = {}): TestService {
     name: overrides.name ?? 'Servico',
     description,
     category,
+    type: overrides.type ?? ServiceType.ESTETICA,
     active,
     createdAt: overrides.createdAt ?? new Date(),
     updatedAt: overrides.updatedAt ?? new Date(),
@@ -176,6 +179,7 @@ export function makeCoupon(overrides: Partial<Coupon> = {}): TestCoupon {
     serviceId: overrides.serviceId ?? null,
     createdAt: overrides.createdAt ?? new Date(),
     updatedAt: overrides.updatedAt ?? new Date(),
+    expirationType: overrides.expirationType ?? CouponExpirationType.DATE,
   };
 }
 
