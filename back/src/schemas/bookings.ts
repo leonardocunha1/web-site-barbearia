@@ -218,33 +218,34 @@ export const listUserBookingsQuerySchema = z
  * Filtros de listagem de reservas para o profissional.
  */
 export const listBookingsQuerySchema = z
-  .preprocess(
-    (data: any) => {
-      // Normalizar sort: se vier como objeto indexado { '0': {...}, '1': {...} }, converter para array
-      if (data?.sort && typeof data.sort === 'object' && !Array.isArray(data.sort)) {
-        const sortArray = Object.keys(data.sort)
-          .sort()
-          .map((key) => data.sort[key]);
-        return { ...data, sort: sortArray };
-      }
-      return data;
-    },
-    paginationSchema.extend({
-      startDate: z
-        .string()
-        .datetime({ offset: true, message: 'Data de início inválida' })
-        .optional(),
-      endDate: z.string().datetime({ offset: true, message: 'Data de fim inválida' }).optional(),
-      status: z
-        .enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
-          errorMap: () => ({
-            message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO',
-          }),
-        })
-        .optional(),
-      sort: z.array(sortSchema).optional(),
-    }),
-  )
+  .object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(10),
+    sortBy: z
+      .enum(['startDateTime', 'totalAmount'])
+      .optional()
+      .describe('Campo para ordenação'),
+    sortDirection: z
+      .enum(['asc', 'desc'])
+      .default('asc')
+      .describe('Direção da ordenação'),
+    startDate: z
+      .string()
+      .datetime({ offset: true, message: 'Data de início inválida' })
+      .optional(),
+    endDate: z
+      .string()
+      .datetime({ offset: true, message: 'Data de fim inválida' })
+      .optional(),
+    status: z
+      .enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'], {
+        errorMap: () => ({
+          message: 'Status inválido. Valores válidos: PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO',
+        }),
+      })
+      .optional(),
+    sort: z.array(sortSchema).optional(),
+  })
   .describe('Filtros para listagem de agendamentos do profissional');
 
 /**

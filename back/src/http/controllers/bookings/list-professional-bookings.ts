@@ -33,12 +33,13 @@ function serializeBookingsResponse(data: any) {
 }
 
 export async function listProfessionalBookings(request: FastifyRequest, reply: FastifyReply) {
-  const { page, limit, sort, startDate, endDate, status } = listBookingsQuerySchema.parse(
+  const { page, limit, sortBy, sortDirection, startDate, endDate, status } = listBookingsQuerySchema.parse(
     request.query,
   );
 
-  const sortCriteria: SortBookingSchema[] = sort?.length
-    ? sort
+  // Converter sortBy e sortDirection em formato de array que o use-case espera
+  const sortCriteria: SortBookingSchema[] = sortBy
+    ? [{ field: sortBy as 'startDateTime' | 'totalAmount', order: sortDirection || 'asc' }]
     : [{ field: 'startDateTime', order: 'asc' }];
 
   const filters = {

@@ -81,6 +81,8 @@ export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"startDateTime" | "totalAmount">("startDateTime");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Formatar datas para o formato ISO datetime que a API espera
   const formatDateToISO = (dateString: string) => {
@@ -101,6 +103,8 @@ export default function BookingsPage() {
       status: parsedStatus,
       startDate: formatDateToISO(startDate),
       endDate: formatDateToISO(endDate),
+      sortBy,
+      sortDirection,
     },
     {},
   );
@@ -175,6 +179,8 @@ export default function BookingsPage() {
           status: parsedStatus,
           startDate: formatDateToISO(startDate),
           endDate: formatDateToISO(endDate),
+          sortBy,
+          sortDirection,
         }),
       });
     } catch {
@@ -331,15 +337,48 @@ export default function BookingsPage() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">Todos</TabsTrigger>
-                <TabsTrigger value="pending">Pendentes</TabsTrigger>
-                <TabsTrigger value="confirmed">Confirmados</TabsTrigger>
-                <TabsTrigger value="completed">Concluídos</TabsTrigger>
-                <TabsTrigger value="canceled">Cancelados</TabsTrigger>
-              </TabsList>
+              <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <TabsList>
+                  <TabsTrigger value="all">Todos</TabsTrigger>
+                  <TabsTrigger value="pending">Pendentes</TabsTrigger>
+                  <TabsTrigger value="confirmed">Confirmados</TabsTrigger>
+                  <TabsTrigger value="completed">Concluídos</TabsTrigger>
+                  <TabsTrigger value="canceled">Cancelados</TabsTrigger>
+                </TabsList>
+                
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Ordenar por
+                    </label>
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as "startDateTime" | "totalAmount")}>
+                      <SelectTrigger className="w-full sm:w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="startDateTime">Data e Hora</SelectItem>
+                        <SelectItem value="totalAmount">Valor Total</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-stone-700">
+                      Direção
+                    </label>
+                    <Select value={sortDirection} onValueChange={(value) => setSortDirection(value as "asc" | "desc")}>
+                      <SelectTrigger className="w-full sm:w-52">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="desc">Descendente (Mais Recente)</SelectItem>
+                        <SelectItem value="asc">Ascendente (Mais Antigo)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
 
-              <TabsContent value={activeTab} className="mt-0">
+              <TabsContent value={activeTab} className="mt-4">
                 <GenericTable
                   columns={columns}
                   data={bookings}
