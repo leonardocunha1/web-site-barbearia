@@ -3,10 +3,10 @@ import { IUsersRepository } from '@/repositories/users-repository';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
 import { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
 import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
-import { IBonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
-import { Booking, ServiceType } from '@prisma/client';
+import { Booking, ServiceType, Status } from '@prisma/client';
 
 import {
+  COUPON_MESSAGES,
   MIN_BOOKING_VALUE_AFTER_DISCOUNT,
   MIN_POINTS_TO_REDEEM,
   VALUE_PER_POINT,
@@ -42,11 +42,11 @@ export class CreateBookingUseCase {
     private professionalsRepository: IProfessionalsRepository,
     private serviceProfessionalRepository: IServiceProfessionalRepository,
     private userBonusRepository: IUserBonusRepository,
-    private bonusRedemptionRepository: IBonusRedemptionRepository,
     private couponRepository: ICouponRepository,
   ) {}
 
   async execute(request: BookingRequest): Promise<Booking> {
+    // --- Fase 1: Validações (leitura) ---
     this.validateDate(request.startDateTime);
 
     await this.loadEntities(request.userId, request.professionalId);
@@ -59,7 +59,7 @@ export class CreateBookingUseCase {
 
     await this.ensureNoConflict(request.professionalId, request.startDateTime, endDateTime);
 
-    const totalValue = services.reduce((sum, s) => sum + s.price, 0);
+    const totalValue = services.reduce((sum, s) => sum + Number(s.price), 0);
 
     if (request.couponCode && request.useBonusPoints) {
       throw new CouponBonusConflictError();
@@ -85,54 +85,68 @@ export class CreateBookingUseCase {
 
     const bonusResult =
       !request.couponCode && request.useBonusPoints
-        ? await this.applyBonusPoints(request.userId, valueAfterCoupon)
+        ? await this.calculateBonusDiscount(request.userId, valueAfterCoupon)
         : {
             finalValue: valueAfterCoupon,
             pointsUsed: 0,
             discount: 0,
+            bonusBreakdown: [] as Array<{ type: 'BOOKING_POINTS' | 'LOYALTY'; toConsume: number }>,
           };
 
-    const booking = await this.bookingsRepository.create({
-      startDateTime: request.startDateTime,
-      endDateTime,
-      notes: request.notes,
-      user: { connect: { id: request.userId } },
-      professional: { connect: { id: request.professionalId } },
-      status: 'PENDING',
-      totalAmount: parseFloat(bonusResult.finalValue.toFixed(2)),
-      pointsUsed: bonusResult.pointsUsed,
-      coupon: couponId ? { connect: { id: couponId } } : undefined,
-      couponDiscount,
-      items: {
-        create: services.map((s) => ({
-          serviceProfessionalId: s.id,
-          price: s.price,
-          name: s.service.name,
-          duration: s.duration,
-          serviceId: s.service.id,
-        })),
-      },
-    });
-
-    if (bonusResult.pointsUsed > 0 && bonusResult.discount > 0) {
-      await this.registerBonusRedemptions(
-        request.userId,
-        booking.id,
-        bonusResult.pointsUsed,
-        bonusResult.discount,
-      );
-    }
-
-    if (couponId && couponDiscount > 0) {
-      await this.couponRepository.registerRedemption({
-        couponId,
-        userId: request.userId,
-        bookingId: booking.id,
-        discount: couponDiscount,
+    // --- Fase 2: Escrita atômica via repository ---
+    try {
+      return await this.bookingsRepository.createWithRedemptions({
+        bookingData: {
+          startDateTime: request.startDateTime,
+          endDateTime,
+          notes: request.notes,
+          user: { connect: { id: request.userId } },
+          professional: { connect: { id: request.professionalId } },
+          status: Status.PENDING,
+          totalAmount: parseFloat(bonusResult.finalValue.toFixed(2)),
+          pointsUsed: bonusResult.pointsUsed,
+          coupon: couponId ? { connect: { id: couponId } } : undefined,
+          couponDiscount,
+          items: {
+            create: services.map((s) => ({
+              serviceProfessionalId: s.id,
+              price: s.price,
+              name: s.service.name,
+              duration: s.duration,
+              serviceId: s.service.id,
+            })),
+          },
+        },
+        conflictCheck: {
+          professionalId: request.professionalId,
+          startDateTime: request.startDateTime,
+          endDateTime,
+        },
+        bonusRedemption:
+          bonusResult.pointsUsed > 0 && bonusResult.discount > 0
+            ? {
+                userId: request.userId,
+                pointsUsed: bonusResult.pointsUsed,
+                discount: parseFloat(bonusResult.discount.toFixed(2)),
+                breakdown: bonusResult.bonusBreakdown,
+              }
+            : undefined,
+        couponRedemption:
+          couponId && couponDiscount > 0
+            ? {
+                couponId,
+                userId: request.userId,
+                discount: couponDiscount,
+              }
+            : undefined,
       });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'TIME_SLOT_ALREADY_BOOKED') throw new TimeSlotAlreadyBookedError();
+        if (error.message === 'INSUFFICIENT_BONUS_POINTS') throw new InsufficientBonusPointsError();
+      }
+      throw error;
     }
-
-    return booking;
   }
 
   private async validateAndApplyCoupon(
@@ -142,7 +156,6 @@ export class CreateBookingUseCase {
     services: Array<{ serviceId: string }>,
     totalValue: number,
   ) {
-    // Normalize coupon code to uppercase for lookup
     const normalizedCode = code.toUpperCase();
     const coupon = await this.couponRepository.findByCode(normalizedCode);
 
@@ -153,10 +166,9 @@ export class CreateBookingUseCase {
     const now = new Date();
 
     if (coupon.startDate && coupon.startDate > now) {
-      throw new InvalidCouponError('Cupom ainda não está válido');
+      throw new InvalidCouponError(COUPON_MESSAGES.NOT_YET_VALID);
     }
 
-    // Verificar validade
     const isDateExpired = !!coupon.endDate && coupon.endDate < now;
     const isQuantityExceeded =
       coupon.maxUses !== null && coupon.maxUses !== undefined && coupon.uses >= coupon.maxUses;
@@ -164,31 +176,29 @@ export class CreateBookingUseCase {
     switch (coupon.expirationType) {
       case 'DATE':
         if (isDateExpired) {
-          throw new InvalidCouponError('Cupom expirado');
+          throw new InvalidCouponError(COUPON_MESSAGES.EXPIRED);
         }
         break;
       case 'QUANTITY':
         if (isQuantityExceeded) {
-          throw new InvalidCouponError('Limite de usos do cupom atingido');
+          throw new InvalidCouponError(COUPON_MESSAGES.MAX_USES_REACHED);
         }
         break;
       case 'BOTH':
         if (isDateExpired) {
-          throw new InvalidCouponError('Cupom expirado');
+          throw new InvalidCouponError(COUPON_MESSAGES.EXPIRED);
         }
         if (isQuantityExceeded) {
-          throw new InvalidCouponError('Limite de usos do cupom atingido');
+          throw new InvalidCouponError(COUPON_MESSAGES.MAX_USES_REACHED);
         }
         break;
     }
 
-    // Verificar se o usuário já usou este cupom
     const userAlreadyUsed = coupon.redemptions.some((r) => r.userId === userId);
     if (userAlreadyUsed) {
-      throw new InvalidCouponError('Este cupom já foi utilizado por você');
+      throw new InvalidCouponError(COUPON_MESSAGES.ALREADY_USED);
     }
 
-    // Verificar escopo
     switch (coupon.scope) {
       case 'PROFESSIONAL':
         if (coupon.professionalId !== professionalId) {
@@ -204,21 +214,21 @@ export class CreateBookingUseCase {
       }
     }
 
-    // Verificar valor mínimo
-    if (coupon.minBookingValue && totalValue < coupon.minBookingValue) {
+    const minBookingValue = coupon.minBookingValue ? Number(coupon.minBookingValue) : null;
+    if (minBookingValue && totalValue < minBookingValue) {
       throw new CouponNotApplicableError(
-        `Valor mínimo para este cupom: R$ ${coupon.minBookingValue.toFixed(2)}`,
+        `Valor mínimo para este cupom: R$ ${minBookingValue.toFixed(2)}`,
       );
     }
 
-    // Calcular desconto
+    const couponValue = Number(coupon.value);
     let discount = 0;
     switch (coupon.type) {
       case 'PERCENTAGE':
-        discount = totalValue * (coupon.value / 100);
+        discount = totalValue * (couponValue / 100);
         break;
       case 'FIXED':
-        discount = Math.min(coupon.value, totalValue);
+        discount = Math.min(couponValue, totalValue);
         break;
       case 'FREE':
         discount = totalValue;
@@ -286,7 +296,7 @@ export class CreateBookingUseCase {
     if (conflicting) throw new TimeSlotAlreadyBookedError();
   }
 
-  private async applyBonusPoints(userId: string, totalValue: number) {
+  private async calculateBonusDiscount(userId: string, totalValue: number) {
     if (totalValue <= 0) throw new InvalidBonusRedemptionError();
 
     const [bookingBonus, loyaltyBonus] = await Promise.all([
@@ -316,11 +326,13 @@ export class CreateBookingUseCase {
       return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
     });
 
+    const bonusBreakdown: Array<{ type: 'BOOKING_POINTS' | 'LOYALTY'; toConsume: number }> = [];
+
     for (const bonus of bonusesSorted) {
       if (remaining <= 0) break;
 
       const toConsume = Math.min(remaining, bonus.points);
-      await this.userBonusRepository.consumePoints(userId, toConsume, bonus.type);
+      bonusBreakdown.push({ type: bonus.type, toConsume });
       remaining -= toConsume;
     }
 
@@ -328,20 +340,7 @@ export class CreateBookingUseCase {
       finalValue,
       pointsUsed: pointsToUse,
       discount,
+      bonusBreakdown,
     };
-  }
-
-  private async registerBonusRedemptions(
-    userId: string,
-    bookingId: string,
-    totalPoints: number,
-    discount: number,
-  ) {
-    await this.bonusRedemptionRepository.create({
-      user: { connect: { id: userId } },
-      booking: { connect: { id: bookingId } },
-      pointsUsed: totalPoints,
-      discount: parseFloat(discount.toFixed(2)),
-    });
   }
 }

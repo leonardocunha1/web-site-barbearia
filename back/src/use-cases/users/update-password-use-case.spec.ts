@@ -3,6 +3,7 @@ import { UpdatePasswordUseCase } from './update-password-use-case';
 import { IUsersRepository } from '@/repositories/users-repository';
 import { UserNotFoundError } from '../errors/user-not-found-error';
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error';
+import { PASSWORD_HASH_ROUNDS } from '@/consts/const';
 import { SamePasswordError } from '../errors/same-password-error';
 import { createMockUsersRepository } from '@/mock/mock-repositories';
 import { makeUser } from '@/test/factories';
@@ -72,7 +73,7 @@ describe('Update Password Use Case', () => {
     expect(result.user.email).toBe('john@example.com');
     expect(bcryptCompare).toHaveBeenCalledWith('current-password', 'hashed-current-password');
     expect(bcryptCompare).toHaveBeenCalledWith('new-password', 'hashed-current-password');
-    expect(bcryptHash).toHaveBeenCalledWith('new-password', 6);
+    expect(bcryptHash).toHaveBeenCalledWith('new-password', PASSWORD_HASH_ROUNDS);
     expect(mockUsersRepository.updatePassword).toHaveBeenCalledWith(
       'user-123',
       'hashed-new-password',
@@ -122,7 +123,7 @@ describe('Update Password Use Case', () => {
     expect(mockUsersRepository.updatePassword).not.toHaveBeenCalled();
   });
 
-  it('deve chamar bcrypt.hash com o custo 6', async () => {
+  it('deve chamar bcrypt.hash com o custo correto', async () => {
     mockUsersRepository.findById.mockResolvedValue(mockUser);
     bcryptCompare.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
     bcryptHash.mockResolvedValue('hashed-new-password');
@@ -134,7 +135,7 @@ describe('Update Password Use Case', () => {
       newPassword: 'new-password',
     });
 
-    expect(bcryptHash).toHaveBeenCalledWith('new-password', 6);
+    expect(bcryptHash).toHaveBeenCalledWith('new-password', PASSWORD_HASH_ROUNDS);
   });
 
   it('deve retornar apenas id e email do usuário após atualização', async () => {

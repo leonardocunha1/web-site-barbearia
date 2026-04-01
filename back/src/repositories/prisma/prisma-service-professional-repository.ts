@@ -3,24 +3,8 @@ import { IServiceProfessionalRepository } from '../service-professional-reposito
 import { Prisma, ServiceType } from '@prisma/client';
 
 export class PrismaServiceProfessionalRepository implements IServiceProfessionalRepository {
-  async create(data: Prisma.ServiceProfessionalCreateInput): Promise<{
-    id: string;
-    serviceId: string;
-    professionalId: string;
-    price: number;
-    duration: number;
-  }> {
-    const created = await prisma.serviceProfessional.create({
-      data,
-    });
-
-    return {
-      id: created.id,
-      serviceId: created.serviceId,
-      professionalId: created.professionalId,
-      price: created.price,
-      duration: created.duration,
-    };
+  async create(data: Prisma.ServiceProfessionalCreateInput) {
+    return prisma.serviceProfessional.create({ data });
   }
 
   async delete(id: string): Promise<void> {
@@ -67,7 +51,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
       id: result.id,
       professionalId: result.professionalId,
       service: result.service,
-      price: result.price,
+      price: Number(result.price),
       duration: result.duration,
     };
   }
@@ -130,7 +114,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
     return {
       services: serviceProfessionals.map((sp) => ({
         service: sp.service,
-        price: sp.price,
+        price: Number(sp.price),
         duration: sp.duration,
       })),
       total,
@@ -202,7 +186,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
     return {
       services: serviceProfessionals.map((sp) => ({
         service: sp.service,
-        price: sp.price,
+        price: Number(sp.price),
         duration: sp.duration,
       })),
       total,
@@ -257,7 +241,7 @@ export class PrismaServiceProfessionalRepository implements IServiceProfessional
     return {
       services: serviceProfessionals.map((sp) => ({
         service: sp.service,
-        price: sp.price,
+        price: Number(sp.price),
         duration: sp.duration,
       })),
       total,

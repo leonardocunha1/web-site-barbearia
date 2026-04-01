@@ -42,7 +42,7 @@ export class UpdateCouponUseCase {
     if (data.type || data.value) {
       this.validateCouponValue(
         data.type || existingCoupon.type,
-        data.value || existingCoupon.value,
+        data.value ?? Number(existingCoupon.value),
       );
     }
 

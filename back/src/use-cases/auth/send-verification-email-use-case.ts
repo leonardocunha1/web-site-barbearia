@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import dayjs from 'dayjs';
+import { addHours } from 'date-fns';
 import { IUsersRepository } from '@/repositories/users-repository';
 import { IVerificationTokensRepository } from '@/repositories/verification-tokens-repository';
 import { EmailService } from '@/services/email-service';
@@ -30,7 +30,7 @@ export class SendVerificationEmailUseCase {
     }
 
     const token = randomUUID();
-    const expiresAt = dayjs().add(EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS, 'hours').toDate();
+    const expiresAt = addHours(new Date(), EMAIL_VERIFICATION_TOKEN_EXPIRATION_HOURS);
 
     await this.verificationTokensRepository.create(token, user.id, expiresAt);
 

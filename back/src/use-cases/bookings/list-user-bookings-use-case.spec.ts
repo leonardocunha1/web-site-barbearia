@@ -102,16 +102,17 @@ describe('ListBookingsUseCase', () => {
     ).rejects.toThrow(InvalidPageRangeError);
   });
 
-  it('deve lançar erro quando não encontra agendamentos', async () => {
-    // Configurar mocks para retornar array vazio e total zero
+  it('deve retornar lista vazia quando não encontra agendamentos', async () => {
     mockBookingsRepository.findManyByUserId.mockResolvedValue([]);
     mockBookingsRepository.countByUserId.mockResolvedValue(0);
 
-    await expect(
-      useCase.execute({
-        userId: 'user-123',
-      }),
-    ).rejects.toThrow(BookingNotFoundError);
+    const result = await useCase.execute({
+      userId: 'user-123',
+    });
+
+    expect(result.bookings).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(result.totalPages).toBe(0);
   });
 
   it('deve lançar erro quando usuário tenta acessar agendamentos de outro', async () => {

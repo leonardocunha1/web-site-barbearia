@@ -1,3 +1,4 @@
+import { Status } from '@prisma/client';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { UsuarioTentandoPegarInformacoesDeOutro } from '../errors/usuario-pegando-informacao-de-outro-usuario-error';
@@ -25,12 +26,12 @@ export class CancelUserBookingUseCase {
       throw new UsuarioTentandoPegarInformacoesDeOutro();
     }
 
-    if (booking.status === 'CANCELED') {
+    if (booking.status === Status.CANCELED) {
       throw new BookingUpdateError('Agendamento ja cancelado');
     }
 
-    if (booking.status !== 'PENDING') {
-      throw new InvalidBookingStatusError(booking.status, 'PENDING');
+    if (booking.status !== Status.PENDING) {
+      throw new InvalidBookingStatusError(booking.status, Status.PENDING);
     }
 
     if (reason && reason.length > MAX_BOOKING_CANCEL_REASON_LENGTH) {
@@ -49,7 +50,7 @@ export class CancelUserBookingUseCase {
     }
 
     await this.bookingsRepository.update(bookingId, {
-      status: 'CANCELED',
+      status: Status.CANCELED,
       canceledAt: now,
       notes: reason
         ? `${booking.notes ? booking.notes + '\n' : ''}Motivo do cancelamento: ${reason}`

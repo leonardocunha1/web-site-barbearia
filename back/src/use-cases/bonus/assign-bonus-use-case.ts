@@ -1,3 +1,4 @@
+import { Status } from '@prisma/client';
 import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
 import { IBonusTransactionRepository } from '@/repositories/bonus-transaction-repository';
 import { IUsersRepository } from '@/repositories/users-repository';
@@ -85,8 +86,8 @@ export class AssignBonusUseCase {
       throw new InvalidBonusAssignmentError('Agendamento não pertence ao usuário');
     }
 
-    if (booking.status !== 'COMPLETED') {
-      throw new InvalidBookingStatusError(booking.status, 'COMPLETED');
+    if (booking.status !== Status.COMPLETED) {
+      throw new InvalidBookingStatusError(booking.status, Status.COMPLETED);
     }
 
     const existingTransaction = await this.bonusTransactionRepository.findByBookingId(bookingId);
@@ -100,7 +101,7 @@ export class AssignBonusUseCase {
       );
     }
 
-    const points = Math.floor((booking.totalAmount / 10) * POINTS_PER_10_REAIS);
+    const points = Math.floor((Number(booking.totalAmount) / 10) * POINTS_PER_10_REAIS);
     if (points <= 0) {
       throw new InvalidBonusAssignmentError('Agendamento com valor insuficiente para gerar pontos');
     }
@@ -111,7 +112,7 @@ export class AssignBonusUseCase {
   private async handleLoyaltyPoints(userId: string): Promise<number> {
     const totalCompletedBookings = await this.bookingsRepository.countByUserIdAndStatus(
       userId,
-      'COMPLETED',
+      Status.COMPLETED,
     );
 
     if (totalCompletedBookings < LOYALTY_BOOKINGS_REQUIRED) {

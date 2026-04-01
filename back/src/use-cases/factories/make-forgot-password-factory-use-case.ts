@@ -1,12 +1,9 @@
-import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository';
-import { PrismaPasswordResetTokensRepository } from '@/repositories/prisma/prisma-password-reset-tokens-repository';
+import { usersRepository, passwordResetTokensRepository } from '@/repositories/prisma/instances';
 import { EmailService } from '@/services/email-service';
 import { ForgotPasswordUseCase } from '../auth/forgot-password-use-case';
 import { traceUseCase } from '@/observability/use-case-trace';
 
 export function makeForgotPasswordUseCase() {
-  const usersRepository = new PrismaUsersRepository();
-  const passwordResetTokensRepository = new PrismaPasswordResetTokensRepository();
   const emailService = new EmailService();
 
   const useCase = new ForgotPasswordUseCase(

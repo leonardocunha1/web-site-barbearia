@@ -1,3 +1,4 @@
+import { Status } from '@prisma/client';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
 import { IBonusTransactionRepository } from '@/repositories/bonus-transaction-repository';
@@ -36,8 +37,8 @@ export class UpdateBookingStatusUseCase {
       throw new BookingUpdateError('Você não tem permissão para alterar este agendamento');
     }
 
-    if (status === 'CANCELED') {
-      if (booking.status === 'CANCELED') {
+    if (status === Status.CANCELED) {
+      if (booking.status === Status.CANCELED) {
         throw new BookingUpdateError('Agendamento já cancelado');
       }
 
@@ -49,7 +50,7 @@ export class UpdateBookingStatusUseCase {
       }
     }
 
-    if (status === 'COMPLETED') {
+    if (status === Status.COMPLETED) {
       const now = new Date();
       if (booking.endDateTime > now) {
         throw new BookingUpdateError(
@@ -58,11 +59,11 @@ export class UpdateBookingStatusUseCase {
       }
     }
 
-    const allowedTransitions: Record<string, string[]> = {
-      PENDING: ['CONFIRMED', 'CANCELED'],
-      CONFIRMED: ['COMPLETED', 'CANCELED'],
-      CANCELED: [],
-      COMPLETED: [],
+    const allowedTransitions: Record<string, Status[]> = {
+      [Status.PENDING]: [Status.CONFIRMED, Status.CANCELED],
+      [Status.CONFIRMED]: [Status.COMPLETED, Status.CANCELED],
+      [Status.CANCELED]: [],
+      [Status.COMPLETED]: [],
     };
 
     const allowedNextStatuses = allowedTransitions[booking.status] ?? [];
@@ -77,11 +78,11 @@ export class UpdateBookingStatusUseCase {
     // Preparar dados para atualização
     const updateData = {
       status,
-      ...(status === 'CONFIRMED' && {
+      ...(status === Status.CONFIRMED && {
         confirmedAt: new Date(),
-        notes: booking.notes, // Mantém as observações originais
+        notes: booking.notes,
       }),
-      ...(status === 'CANCELED' && {
+      ...(status === Status.CANCELED && {
         canceledAt: new Date(),
         notes: reason
           ? `${booking.notes ? booking.notes + '\n' : ''}Motivo do cancelamento: ${reason}`
@@ -97,7 +98,7 @@ export class UpdateBookingStatusUseCase {
     }
 
     // Se o agendamento foi concluído, atribuir pontos de bônus
-    if (status === 'COMPLETED') {
+    if (status === Status.COMPLETED) {
       await this.assignBonusPointsOnCompletion(booking.userId, bookingId);
     }
 
@@ -126,7 +127,7 @@ export class UpdateBookingStatusUseCase {
       if (!booking) return;
 
       // Atribuir pontos por agendamento (BOOKING_POINTS)
-      const bookingPoints = Math.floor((booking.totalAmount / 10) * POINTS_PER_10_REAIS);
+      const bookingPoints = Math.floor((Number(booking.totalAmount) / 10) * POINTS_PER_10_REAIS);
       if (bookingPoints > 0) {
         const expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + BONUS_EXPIRATION_MONTHS);
@@ -150,7 +151,7 @@ export class UpdateBookingStatusUseCase {
       // Verificar e atribuir pontos de fidelidade (LOYALTY)
       const totalCompletedBookings = await this.bookingsRepository.countByUserIdAndStatus(
         userId,
-        'COMPLETED',
+        Status.COMPLETED,
       );
 
       if (totalCompletedBookings >= LOYALTY_BOOKINGS_REQUIRED) {

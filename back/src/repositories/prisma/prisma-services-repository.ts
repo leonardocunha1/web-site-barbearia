@@ -1,4 +1,4 @@
-import { Prisma, Service } from '@prisma/client';
+import { Prisma, Service, Status } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { IServicesRepository } from '../services-repository';
 
@@ -155,7 +155,7 @@ export class PrismaServicesRepository implements IServicesRepository {
       where: {
         serviceId: { not: null },
         booking: {
-          status: 'COMPLETED',
+          status: Status.COMPLETED,
           startDateTime: { gte: startDate, lte: endDate },
         },
       },

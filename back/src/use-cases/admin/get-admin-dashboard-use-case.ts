@@ -1,3 +1,4 @@
+import { Status } from '@prisma/client';
 import { startOfMonth, startOfDay, endOfDay, subDays, isAfter, isValid } from 'date-fns';
 import { IBookingsRepository } from '@/repositories/bookings-repository';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
@@ -88,7 +89,7 @@ export class GetAdminDashboardUseCase {
       this.bookingsRepository.countTodayBookings(),
       this.bookingsRepository.countCanceledLast24h(),
       this.bookingsRepository.getCompletedBookingsCountByDateRange(dateRange.start, dateRange.end),
-      this.bookingsRepository.getRevenueByDateRange(dateRange.start, dateRange.end, 'COMPLETED'),
+      this.bookingsRepository.getRevenueByDateRange(dateRange.start, dateRange.end, Status.COMPLETED),
       this.bookingsRepository.getTopProfessionalsByCompletedBookings(
         dateRange.start,
         dateRange.end,

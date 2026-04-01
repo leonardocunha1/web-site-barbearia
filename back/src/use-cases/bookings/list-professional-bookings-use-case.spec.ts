@@ -86,15 +86,17 @@ describe('ListProfessionalBookingsUseCase', () => {
     ).rejects.toThrow(InvalidPageRangeError);
   });
 
-  it('deve lançar erro quando não encontra agendamentos', async () => {
+  it('deve retornar lista vazia quando não encontra agendamentos', async () => {
     mockBookingsRepository.findManyByProfessionalId.mockResolvedValue([]);
     mockBookingsRepository.countByProfessionalId.mockResolvedValue(0);
 
-    await expect(
-      useCase.execute({
-        professionalId: 'pro-123',
-      }),
-    ).rejects.toThrow(BookingNotFoundError);
+    const result = await useCase.execute({
+      professionalId: 'pro-123',
+    });
+
+    expect(result.bookings).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(result.totalPages).toBe(0);
   });
 
   it('deve lançar erro quando profissional tenta acessar agendamentos de outro', async () => {

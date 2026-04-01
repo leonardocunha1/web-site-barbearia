@@ -38,9 +38,10 @@ async function verifyRefreshToken(request: FastifyRequest) {
       sub: string;
       role: string;
       professionalId?: string;
+      tokenType?: string;
     };
 
-    if (!payload?.sub || !payload?.role) {
+    if (!payload?.sub || !payload?.role || payload.tokenType !== 'refresh') {
       throw new InvalidTokenError();
     }
 

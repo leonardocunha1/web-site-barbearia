@@ -1,6 +1,11 @@
-import { Booking, BonusType } from '@prisma/client';
+import { Booking, BonusType, Prisma } from '@prisma/client';
 
-export type BookingDTO = Booking & {
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type MonetaryValue = number | Prisma.Decimal;
+
+export type BookingDTO = Omit<Booking, 'totalAmount' | 'couponDiscount'> & {
+  totalAmount: MonetaryValue | null;
+  couponDiscount: MonetaryValue | null;
   user: {
     id: string;
     name: string;
@@ -14,7 +19,7 @@ export type BookingDTO = Booking & {
   items: {
     id: string;
     duration: number;
-    price: number;
+    price: MonetaryValue;
     serviceProfessional: {
       id: string;
       service: {
@@ -58,10 +63,10 @@ export function toBookingDTO(booking: any): BookingDTO {
     updatedAt: booking.updatedAt,
     userId: booking.userId,
     notes: booking.notes ?? null,
-    totalAmount: booking.totalAmount ?? null,
+    totalAmount: booking.totalAmount != null ? Number(booking.totalAmount) : null,
     pointsUsed: booking.pointsUsed ?? null,
     couponId: booking.couponId ?? null,
-    couponDiscount: booking.couponDiscount ?? null,
+    couponDiscount: booking.couponDiscount != null ? Number(booking.couponDiscount) : null,
     createdAt: booking.createdAt,
     pointsEarned: booking.pointsEarned ?? undefined,
     professional: {
@@ -77,7 +82,7 @@ export function toBookingDTO(booking: any): BookingDTO {
     },
     items: booking.items.map((item: any) => ({
       id: item.id,
-      price: item.price,
+      price: Number(item.price),
       duration: item.duration,
       serviceProfessional: {
         id: item.serviceProfessional.id,

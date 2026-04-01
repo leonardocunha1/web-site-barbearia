@@ -36,6 +36,9 @@ export async function tokenRoutes(app: FastifyTypedInstance) {
   app.post(
     '/users/send-verification-email',
     {
+      config: {
+        rateLimit: { max: 3, timeWindow: '1 minute' },
+      },
       schema: {
         operationId: 'sendUserVerificationEmail',
         tags: ['users'],
@@ -60,6 +63,9 @@ export async function tokenRoutes(app: FastifyTypedInstance) {
   app.post(
     '/users/forgot-password',
     {
+      config: {
+        rateLimit: { max: 3, timeWindow: '1 minute' },
+      },
       schema: {
         operationId: 'sendForgotPasswordEmail',
         tags: ['users'],

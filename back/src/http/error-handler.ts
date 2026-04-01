@@ -1,6 +1,5 @@
 import { ZodError } from 'zod';
 import { AppError } from '@/use-cases/errors';
-import { InvalidCouponError as InvalidBookingCouponError } from '@/use-cases/bookings/invalid-coupon-error';
 
 export type ErrorResponse = {
   status: number;
@@ -65,17 +64,6 @@ export function resolveHttpError(error: unknown): ErrorResponse {
       status: error.statusCode,
       body: {
         code: error.code,
-        message: error.message,
-      },
-    };
-  }
-
-  // Legacy booking coupon error (should be refactored to AppError)
-  if (error instanceof InvalidBookingCouponError) {
-    return {
-      status: 400,
-      body: {
-        code: 'INVALID_COUPON',
         message: error.message,
       },
     };

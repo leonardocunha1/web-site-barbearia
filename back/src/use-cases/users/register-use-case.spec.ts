@@ -7,6 +7,7 @@ import { makeUser } from '@/test/factories';
 
 import bcrypt from 'bcryptjs';
 import { RegisterUserUseCase } from './register-use-case';
+import { PASSWORD_HASH_ROUNDS } from '@/consts/const';
 
 // Mock do bcryptjs antes do import
 vi.mock('bcryptjs', () => {
@@ -69,7 +70,7 @@ describe('Register User Use Case', () => {
     await useCase.execute(userInput);
 
     expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('alice@example.com');
-    expect(bcryptHash).toHaveBeenCalledWith('secure-password', 6);
+    expect(bcryptHash).toHaveBeenCalledWith('secure-password', PASSWORD_HASH_ROUNDS);
     expect(mockUsersRepository.create).toHaveBeenCalledWith({
       name: 'Alice',
       email: 'alice@example.com',

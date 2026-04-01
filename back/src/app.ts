@@ -4,6 +4,7 @@ import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import { usersRoutes } from './http/controllers/users/routes';
 import fastifyCors from '@fastify/cors';
+import fastifyRateLimit from '@fastify/rate-limit';
 import { professionalsRoutes } from './http/controllers/professionals/routes';
 import { servicesRoutes } from './http/controllers/services/routes';
 import { bookingsRoutes } from './http/controllers/bookings/routes';
@@ -53,12 +54,15 @@ app.register(fastifyCookie);
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
   cookie: { cookieName: 'accessToken', signed: false },
-  sign: { expiresIn: '7d' },
 });
 app.register(fastifyCors, {
-  origin: ['http://localhost:3000'],
+  origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+});
+app.register(fastifyRateLimit, {
+  max: 100,
+  timeWindow: '1 minute',
 });
 
 // Middleware de tracing para enriquecer spans com contexto da requisição

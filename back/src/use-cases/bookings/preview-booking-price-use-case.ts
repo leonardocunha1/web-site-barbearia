@@ -4,6 +4,7 @@ import { IServiceProfessionalRepository } from '@/repositories/service-professio
 import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
 import { ICouponRepository } from '@/repositories/coupon-repository';
 import {
+  COUPON_MESSAGES,
   MIN_BOOKING_VALUE_AFTER_DISCOUNT,
   MIN_POINTS_TO_REDEEM,
   VALUE_PER_POINT,
@@ -51,7 +52,7 @@ export class PreviewBookingPriceUseCase {
     const services = await this.loadAndValidateServices(request.services, request.professionalId);
     this.ensureServiceTypeRules(services);
 
-    const totalValue = services.reduce((sum, s) => sum + s.price, 0);
+    const totalValue = services.reduce((sum, s) => sum + Number(s.price), 0);
 
     if (request.couponCode && request.useBonusPoints) {
       throw new CouponBonusConflictError();
@@ -148,7 +149,7 @@ export class PreviewBookingPriceUseCase {
     const now = new Date();
 
     if (coupon.startDate && coupon.startDate > now) {
-      throw new InvalidCouponError('Cupom ainda não está válido');
+      throw new InvalidCouponError(COUPON_MESSAGES.NOT_YET_VALID);
     }
 
     const isDateExpired = !!coupon.endDate && coupon.endDate < now;
@@ -158,27 +159,27 @@ export class PreviewBookingPriceUseCase {
     switch (coupon.expirationType) {
       case 'DATE':
         if (isDateExpired) {
-          throw new InvalidCouponError('Cupom expirado');
+          throw new InvalidCouponError(COUPON_MESSAGES.EXPIRED);
         }
         break;
       case 'QUANTITY':
         if (isQuantityExceeded) {
-          throw new InvalidCouponError('Limite de usos do cupom atingido');
+          throw new InvalidCouponError(COUPON_MESSAGES.MAX_USES_REACHED);
         }
         break;
       case 'BOTH':
         if (isDateExpired) {
-          throw new InvalidCouponError('Cupom expirado');
+          throw new InvalidCouponError(COUPON_MESSAGES.EXPIRED);
         }
         if (isQuantityExceeded) {
-          throw new InvalidCouponError('Limite de usos do cupom atingido');
+          throw new InvalidCouponError(COUPON_MESSAGES.MAX_USES_REACHED);
         }
         break;
     }
 
     const userAlreadyUsed = coupon.redemptions.some((r) => r.userId === userId);
     if (userAlreadyUsed) {
-      throw new InvalidCouponError('Este cupom já foi utilizado por você');
+      throw new InvalidCouponError(COUPON_MESSAGES.ALREADY_USED);
     }
 
     switch (coupon.scope) {
@@ -196,19 +197,21 @@ export class PreviewBookingPriceUseCase {
       }
     }
 
-    if (coupon.minBookingValue && totalValue < coupon.minBookingValue) {
+    const minBookingValue = coupon.minBookingValue ? Number(coupon.minBookingValue) : null;
+    if (minBookingValue && totalValue < minBookingValue) {
       throw new CouponNotApplicableError(
-        `Valor minimo para este cupom: R$ ${coupon.minBookingValue.toFixed(2)}`,
+        `Valor minimo para este cupom: R$ ${minBookingValue.toFixed(2)}`,
       );
     }
 
+    const couponValue = Number(coupon.value);
     let discount = 0;
     switch (coupon.type) {
       case 'PERCENTAGE':
-        discount = totalValue * (coupon.value / 100);
+        discount = totalValue * (couponValue / 100);
         break;
       case 'FIXED':
-        discount = Math.min(coupon.value, totalValue);
+        discount = Math.min(couponValue, totalValue);
         break;
       case 'FREE':
         discount = totalValue;

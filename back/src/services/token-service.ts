@@ -26,27 +26,28 @@ export class TokenService {
       : process.env.COOKIE_DOMAIN || 'localhost';
   }
 
-  private createTokenPayload(user: UserForToken | TokenPayload) {
-    const payload: { role: string; professionalId?: string } = {
+  private createTokenPayload(user: UserForToken | TokenPayload, tokenType: 'access' | 'refresh') {
+    const payload: { role: string; professionalId?: string; tokenType: 'access' | 'refresh' } = {
       role: user.role,
+      tokenType,
     };
 
     if (user.role === 'PROFESSIONAL' && user.professionalId) {
       payload.professionalId = user.professionalId;
     }
 
-    console.log('Criando payload de token:', payload);
     return payload;
   }
 
   async generateTokens(user: UserForToken) {
-    const payload = this.createTokenPayload(user);
+    const accessPayload = this.createTokenPayload(user, 'access');
+    const refreshPayload = this.createTokenPayload(user, 'refresh');
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.reply.jwtSign(payload, {
+      this.reply.jwtSign(accessPayload, {
         sign: { sub: user.id, expiresIn: `${this.accessTokenExpiration}s` },
       }),
-      this.reply.jwtSign(payload, {
+      this.reply.jwtSign(refreshPayload, {
         sign: { sub: user.id, expiresIn: `${this.refreshTokenExpiration}s` },
       }),
     ]);

@@ -1,3 +1,4 @@
+import { Status } from '@prisma/client';
 import { DashboardRequestDTO, TimeRange } from '@/dtos/dashboard-dto';
 import { ProfessionalNotFoundError } from '../errors/professional-not-found-error';
 import { IProfessionalsRepository } from '@/repositories/professionals-repository';
@@ -89,23 +90,23 @@ export class GetProfessionalDashboardUseCase {
         professional.id,
         dateRange.start,
         dateRange.end,
-        'COMPLETED',
+        Status.COMPLETED,
       ),
       this.bookingsRepository.countByProfessionalAndStatus(
         professional.id,
-        'CANCELED',
+        Status.CANCELED,
         dateRange.start,
         dateRange.end,
       ),
       this.bookingsRepository.countByProfessionalAndStatus(
         professional.id,
-        'COMPLETED',
+        Status.COMPLETED,
         dateRange.start,
         dateRange.end,
       ),
       this.bookingsRepository.countByProfessionalAndStatusRange(
         professional.id,
-        'PENDING',
+        Status.PENDING,
         dateRange.start,
         dateRange.end,
       ),
@@ -165,7 +166,7 @@ export class GetProfessionalDashboardUseCase {
             ? 'Vários serviços'
             : appointment.items[0]?.serviceProfessional.service.name || 'Serviço não especificado',
         status: appointment.status as 'PENDING' | 'CONFIRMED',
-        totalAmount: appointment.totalAmount,
+        totalAmount: Number(appointment.totalAmount),
       })),
     };
   }

@@ -13,6 +13,9 @@ export async function authRoutes(app: FastifyTypedInstance) {
   app.post(
     '/auth/register',
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
       schema: {
         operationId: 'registerUser',
         tags: ['auth'],
@@ -44,6 +47,9 @@ export async function authRoutes(app: FastifyTypedInstance) {
   app.post(
     '/auth/login',
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
       schema: {
         operationId: 'loginUser',
         tags: ['auth'],

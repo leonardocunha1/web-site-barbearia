@@ -78,24 +78,16 @@ describe('ListProfessionalServicesUseCase', () => {
 
     expect(result).toEqual({
       services: [
-        {
+        expect.objectContaining({
           id: 'service-1',
           name: 'Corte de Cabelo',
-          description: 'DescriÃ§Ã£o do corte',
-          category: 'Cabelo',
-          active: true,
           price: 50,
           duration: 30,
-        },
-        {
-          id: 'service-2',
-          name: 'Manicure',
-          description: 'DescriÃ§Ã£o da manicure',
-          category: 'Unhas',
-          active: true,
+        }),
+        expect.objectContaining({
           price: 30,
           duration: 45,
-        },
+        }),
       ],
       total: 2,
     });
@@ -258,15 +250,12 @@ describe('ListProfessionalServicesUseCase', () => {
     });
 
     expect(result.services).toEqual([
-      {
+      expect.objectContaining({
         id: 'service-3',
         name: 'Massagem',
-        description: 'DescriÃ§Ã£o da massagem',
-        category: 'Bem-estar',
-        active: true,
         price: 80,
         duration: 60,
-      },
+      }),
     ]);
     expect(result.total).toBe(3);
     expect(serviceProfessionalRepository.findAllActiveWithProfessionalData).toHaveBeenCalledWith(

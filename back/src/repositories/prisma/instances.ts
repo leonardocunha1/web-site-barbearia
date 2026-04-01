@@ -1,0 +1,27 @@
+import { PrismaBonusRedemptionRepository } from './prisma-bonus-redemption-repository';
+import { PrismaBonusTransactionRepository } from './prisma-bonus-transaction-repository';
+import { PrismaBookingsRepository } from './prisma-bookings-repository';
+import { PrismaBusinessHoursRepository } from './prisma-business-hours-repository';
+import { PrismaCouponRepository } from './prisma-coupon-repository';
+import { PrismaHolidaysRepository } from './prisma-holidays-repository';
+import { PrismaPasswordResetTokensRepository } from './prisma-password-reset-tokens-repository';
+import { PrismaProfessionalsRepository } from './prisma-professionals-repository';
+import { PrismaServiceProfessionalRepository } from './prisma-service-professional-repository';
+import { PrismaServicesRepository } from './prisma-services-repository';
+import { PrismaUserBonusRepository } from './prisma-user-bonus-repository';
+import { PrismaUsersRepository } from './prisma-users-repository';
+import { PrismaVerificationTokensRepository } from './prisma-verification-tokens-repository';
+
+export const usersRepository = new PrismaUsersRepository();
+export const professionalsRepository = new PrismaProfessionalsRepository();
+export const servicesRepository = new PrismaServicesRepository();
+export const bookingsRepository = new PrismaBookingsRepository();
+export const businessHoursRepository = new PrismaBusinessHoursRepository();
+export const holidaysRepository = new PrismaHolidaysRepository();
+export const couponRepository = new PrismaCouponRepository();
+export const userBonusRepository = new PrismaUserBonusRepository();
+export const bonusTransactionRepository = new PrismaBonusTransactionRepository();
+export const bonusRedemptionRepository = new PrismaBonusRedemptionRepository();
+export const passwordResetTokensRepository = new PrismaPasswordResetTokensRepository();
+export const verificationTokensRepository = new PrismaVerificationTokensRepository();
+export const serviceProfessionalRepository = new PrismaServiceProfessionalRepository();

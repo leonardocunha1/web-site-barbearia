@@ -1,48 +1,34 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { UpdateBookingStatusUseCase } from './update-booking-status-use-case';
-import { IBookingsRepository } from '@/repositories/bookings-repository';
-import { IUserBonusRepository } from '@/repositories/user-bonus-repository';
-import { IBonusTransactionRepository } from '@/repositories/bonus-transaction-repository';
 import { BookingNotFoundError } from '../errors/booking-not-found-error';
 import { InvalidBookingStatusError } from '../errors/invalid-booking-status-error';
 import { BookingUpdateError } from '../errors/booking-update-error';
 import { Status } from '@prisma/client';
-import { createMockBookingsRepository } from '@/mock/mock-repositories';
+import {
+  createMockBookingsRepository,
+  createMockUserBonusRepository,
+  createMockBonusTransactionRepository,
+} from '@/mock/mock-repositories';
 import { mockBooking as mockBookingDTO } from '@/dtos/booking-dto';
+import { MAX_BOOKING_CANCEL_REASON_LENGTH } from '@/consts/const';
 
-type MockBookingsRepository = Mocked<IBookingsRepository>;
-type MockUserBonusRepository = Mocked<IUserBonusRepository>;
-type MockBonusTransactionRepository = Mocked<IBonusTransactionRepository>;
+const createMockRepos = () => ({
+  bookingsRepository: createMockBookingsRepository(),
+  userBonusRepository: createMockUserBonusRepository(),
+  bonusTransactionRepository: createMockBonusTransactionRepository(),
+});
 
 describe('UpdateBookingStatusUseCase', () => {
   let useCase: UpdateBookingStatusUseCase;
-  let mockBookingsRepository: MockBookingsRepository;
-  let mockUserBonusRepository: MockUserBonusRepository;
-  let mockBonusTransactionRepository: MockBonusTransactionRepository;
+  let mockRepos: ReturnType<typeof createMockRepos>;
 
   beforeEach(() => {
-    mockBookingsRepository = createMockBookingsRepository();
-    mockUserBonusRepository = {
-      upsert: vi.fn().mockResolvedValue(undefined),
-      findByUserIdAndType: vi.fn().mockResolvedValue(null),
-      getPointsByType: vi.fn().mockResolvedValue(0),
-      getValidPointsByType: vi.fn().mockResolvedValue(0),
-      getValidPointsWithExpiration: vi.fn().mockResolvedValue({ points: 0 }),
-      consumePoints: vi.fn().mockResolvedValue(undefined),
-    } as unknown as MockUserBonusRepository;
-    mockBonusTransactionRepository = {
-      findByBookingId: vi.fn().mockResolvedValue(null),
-      create: vi.fn().mockResolvedValue(undefined),
-      findByUserId: vi.fn().mockResolvedValue([]),
-      sumPointsByUserAndType: vi.fn().mockResolvedValue(0),
-      countByUserAndBooking: vi.fn().mockResolvedValue(0),
-    } as unknown as MockBonusTransactionRepository;
+    mockRepos = createMockRepos();
 
     useCase = new UpdateBookingStatusUseCase(
-      mockBookingsRepository,
-      mockUserBonusRepository,
-      mockBonusTransactionRepository,
+      mockRepos.bookingsRepository,
+      mockRepos.userBonusRepository,
+      mockRepos.bonusTransactionRepository,
     );
   });
 
@@ -51,7 +37,7 @@ describe('UpdateBookingStatusUseCase', () => {
     id: 'booking-123',
     userId: 'user-123',
     professionalId: 'pro-123',
-    status: 'PENDING' as Status,
+    status: Status.PENDING,
     startDateTime: new Date('2023-01-01T10:00:00'),
     endDateTime: new Date('2023-01-01T11:00:00'),
     notes: 'Observação original',
@@ -84,24 +70,24 @@ describe('UpdateBookingStatusUseCase', () => {
 
   it('deve confirmar um agendamento pendente', async () => {
     // Configurar mocks
-    mockBookingsRepository.findById.mockResolvedValue(mockBooking);
-    mockBookingsRepository.update.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue(mockBooking);
+    mockRepos.bookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'CONFIRMED',
+      status: Status.CONFIRMED,
       confirmedAt: new Date(),
     });
 
     // Executar
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'CONFIRMED',
+      status: Status.CONFIRMED,
       professionalId: 'pro-123',
     });
 
     // Verificar
-    expect(result.booking.status).toBe('CONFIRMED');
-    expect(mockBookingsRepository.update).toHaveBeenCalledWith('booking-123', {
-      status: 'CONFIRMED',
+    expect(result.booking.status).toBe(Status.CONFIRMED);
+    expect(mockRepos.bookingsRepository.update).toHaveBeenCalledWith('booking-123', {
+      status: Status.CONFIRMED,
       confirmedAt: expect.any(Date),
       notes: 'Observação original',
     });
@@ -109,10 +95,10 @@ describe('UpdateBookingStatusUseCase', () => {
 
   it('deve cancelar um agendamento com motivo', async () => {
     // Configurar mocks
-    mockBookingsRepository.findById.mockResolvedValue(mockBooking);
-    mockBookingsRepository.update.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue(mockBooking);
+    mockRepos.bookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'CANCELED',
+      status: Status.CANCELED,
       canceledAt: new Date(),
       notes: 'Observação original\nMotivo do cancelamento: Motivo teste',
     });
@@ -120,167 +106,167 @@ describe('UpdateBookingStatusUseCase', () => {
     // Executar
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'CANCELED',
+      status: Status.CANCELED,
       reason: 'Motivo teste',
       professionalId: 'pro-123',
     });
 
     // Verificar
-    expect(result.booking.status).toBe('CANCELED');
-    expect(mockBookingsRepository.update).toHaveBeenCalledWith('booking-123', {
-      status: 'CANCELED',
+    expect(result.booking.status).toBe(Status.CANCELED);
+    expect(mockRepos.bookingsRepository.update).toHaveBeenCalledWith('booking-123', {
+      status: Status.CANCELED,
       canceledAt: expect.any(Date),
       notes: 'Observação original\nMotivo do cancelamento: Motivo teste',
     });
   });
 
   it('deve concluir um agendamento confirmado', async () => {
-    mockBookingsRepository.findById.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'CONFIRMED',
+      status: Status.CONFIRMED,
     });
-    mockBookingsRepository.update.mockResolvedValue({
+    mockRepos.bookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'COMPLETED',
+      status: Status.COMPLETED,
     });
 
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'COMPLETED',
+      status: Status.COMPLETED,
       professionalId: 'pro-123',
     });
 
-    expect(result.booking.status).toBe('COMPLETED');
-    expect(mockBookingsRepository.update).toHaveBeenCalledWith('booking-123', {
-      status: 'COMPLETED',
+    expect(result.booking.status).toBe(Status.COMPLETED);
+    expect(mockRepos.bookingsRepository.update).toHaveBeenCalledWith('booking-123', {
+      status: Status.COMPLETED,
     });
   });
 
   it('deve impedir conclusao de agendamento futuro', async () => {
     const futureEnd = new Date(Date.now() + 60 * 60 * 1000);
-    mockBookingsRepository.findById.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'CONFIRMED',
+      status: Status.CONFIRMED,
       endDateTime: futureEnd,
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'COMPLETED',
+        status: Status.COMPLETED,
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
 
   it('deve lançar erro quando agendamento não existe', async () => {
-    mockBookingsRepository.findById.mockResolvedValue(null);
+    mockRepos.bookingsRepository.findById.mockResolvedValue(null);
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CONFIRMED',
+        status: Status.CONFIRMED,
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingNotFoundError);
   });
 
   it('deve lançar erro quando profissional não é o dono', async () => {
-    mockBookingsRepository.findById.mockResolvedValue(mockBooking);
+    mockRepos.bookingsRepository.findById.mockResolvedValue(mockBooking);
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CONFIRMED',
+        status: Status.CONFIRMED,
         professionalId: 'pro-456', // ID diferente
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
 
   it('deve lançar erro quando tenta confirmar agendamento não pendente', async () => {
-    mockBookingsRepository.findById.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'CONFIRMED',
+      status: Status.CONFIRMED,
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CONFIRMED',
+        status: Status.CONFIRMED,
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(InvalidBookingStatusError);
   });
 
   it('deve lançar erro quando tenta concluir agendamento pendente', async () => {
-    mockBookingsRepository.findById.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'PENDING',
+      status: Status.PENDING,
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'COMPLETED',
+        status: Status.COMPLETED,
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(InvalidBookingStatusError);
   });
 
   it('deve lançar erro quando tenta cancelar agendamento concluído', async () => {
-    mockBookingsRepository.findById.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'COMPLETED',
+      status: Status.COMPLETED,
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CANCELED',
+        status: Status.CANCELED,
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(InvalidBookingStatusError);
   });
 
   it('deve lançar erro quando tenta cancelar agendamento já cancelado', async () => {
-    mockBookingsRepository.findById.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue({
       ...mockBooking,
-      status: 'CANCELED',
+      status: Status.CANCELED,
     });
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CANCELED',
+        status: Status.CANCELED,
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
 
   it('deve lançar erro quando motivo do cancelamento é muito longo', async () => {
-    mockBookingsRepository.findById.mockResolvedValue(mockBooking);
+    mockRepos.bookingsRepository.findById.mockResolvedValue(mockBooking);
 
     await expect(
       useCase.execute({
         bookingId: 'booking-123',
-        status: 'CANCELED',
-        reason: 'a'.repeat(501), // 501 caracteres
+        status: Status.CANCELED,
+        reason: 'a'.repeat(MAX_BOOKING_CANCEL_REASON_LENGTH + 1),
         professionalId: 'pro-123',
       }),
     ).rejects.toThrow(BookingUpdateError);
   });
 
   it('deve manter observações originais sem motivo de cancelamento', async () => {
-    mockBookingsRepository.findById.mockResolvedValue(mockBooking);
-    mockBookingsRepository.update.mockResolvedValue({
+    mockRepos.bookingsRepository.findById.mockResolvedValue(mockBooking);
+    mockRepos.bookingsRepository.update.mockResolvedValue({
       ...mockBooking,
-      status: 'CANCELED',
+      status: Status.CANCELED,
       canceledAt: new Date(),
     });
 
     const result = await useCase.execute({
       bookingId: 'booking-123',
-      status: 'CANCELED',
+      status: Status.CANCELED,
       professionalId: 'pro-123',
     });
 

@@ -2,129 +2,197 @@ import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
 import type { IBookingsRepository } from '@/repositories/bookings-repository';
 import type { IProfessionalsRepository } from '@/repositories/professionals-repository';
+import type { IUsersRepository } from '@/repositories/users-repository';
+import type { IServiceProfessionalRepository } from '@/repositories/service-professional-repository';
+import type { IHolidaysRepository } from '@/repositories/holidays-repository';
+import type { IBusinessHoursRepository } from '@/repositories/business-hours-repository';
+import type { IServicesRepository } from '@/repositories/services-repository';
+import type { IBonusRedemptionRepository } from '@/repositories/bonus-redemption-repository';
+import type { IUserBonusRepository } from '@/repositories/user-bonus-repository';
+import type { ICouponRepository } from '@/repositories/coupon-repository';
+import type { IBonusTransactionRepository } from '@/repositories/bonus-transaction-repository';
+import type { IVerificationTokensRepository } from '@/repositories/verification-tokens-repository';
+import type { IPasswordResetTokensRepository } from '@/repositories/password-reset-tokens-repository';
 
-export const createMockBookingsRepository = (): Mocked<IBookingsRepository> => ({
-  create: vi.fn(),
-  findOverlappingBooking: vi.fn(),
-  findById: vi.fn(),
-  findManyByProfessionalId: vi.fn(),
-  findManyByUserId: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  countActiveByServiceAndProfessional: vi.fn(),
-  countByUserId: vi.fn(),
-  countByProfessionalAndDate: vi.fn(),
-  getEarningsByProfessionalAndDate: vi.fn(),
-  countByProfessionalAndStatus: vi.fn(),
-  findNextAppointments: vi.fn(),
-  findByProfessionalAndDate: vi.fn(),
-  countByProfessionalId: vi.fn(),
-  countByUserIdAndStatus: vi.fn(),
-  countByStatus: vi.fn(),
-  countTodayBookings: vi.fn(),
-  countCanceledLast24h: vi.fn(),
-  getRevenueByDateRange: vi.fn(),
-  getCompletedBookingsCountByDateRange: vi.fn(),
-  getTopProfessionalsByCompletedBookings: vi.fn(),
-  findExpiredPendingBookings: vi.fn(),
-  cancelExpiredBookings: vi.fn(),
-  getServiceBreakdownByProfessional: vi.fn(),
-  countByProfessionalAndStatusRange: vi.fn(),
-});
+/**
+ * Cria um mock automático a partir das keys de uma interface.
+ *
+ * Uso:
+ *   const repo = createMock<IUsersRepository>(usersRepositoryKeys);
+ *   repo.findById.mockResolvedValue(user);
+ *
+ * Se adicionar um método na interface e esquecer de colocar aqui,
+ * o TypeScript vai dar erro de tipo — forçando a atualização.
+ */
+function createMock<T>(keys: Array<keyof T>): Mocked<T> {
+  const mock = {} as Record<string, unknown>;
+  for (const key of keys) {
+    mock[key as string] = vi.fn();
+  }
+  return mock as Mocked<T>;
+}
 
-export const createMockUsersRepository = () => ({
-  findById: vi.fn(),
-  findByPhone: vi.fn(),
-  findByEmail: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  updatePassword: vi.fn(),
-  listUsers: vi.fn(),
-  countUsers: vi.fn(),
-  anonymize: vi.fn(),
-});
+// As keys são tipadas: se a interface mudar, o TS acusa erro aqui.
+const bookingsKeys: Array<keyof IBookingsRepository> = [
+  'create',
+  'createWithRedemptions',
+  'findById',
+  'findOverlappingBooking',
+  'findManyByProfessionalId',
+  'findManyByUserId',
+  'update',
+  'delete',
+  'countActiveByServiceAndProfessional',
+  'countByUserId',
+  'countByProfessionalAndDate',
+  'getEarningsByProfessionalAndDate',
+  'countByProfessionalAndStatus',
+  'findNextAppointments',
+  'findByProfessionalAndDate',
+  'countByProfessionalId',
+  'countByUserIdAndStatus',
+  'countByStatus',
+  'countTodayBookings',
+  'countCanceledLast24h',
+  'getRevenueByDateRange',
+  'getCompletedBookingsCountByDateRange',
+  'getTopProfessionalsByCompletedBookings',
+  'findExpiredPendingBookings',
+  'cancelExpiredBookings',
+  'getServiceBreakdownByProfessional',
+  'countByProfessionalAndStatusRange',
+];
 
-export const createMockProfessionalsRepository = (): Mocked<IProfessionalsRepository> => ({
-  findById: vi.fn(),
-  findByUserId: vi.fn(),
-  findByProfessionalId: vi.fn(),
-  findByUserIdWithUser: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  list: vi.fn(),
-  count: vi.fn(),
-  search: vi.fn(),
-  countSearch: vi.fn(),
-  countActiveOnly: vi.fn(),
-  countNewByDateRange: vi.fn(),
-  findTopWithInclude: vi.fn(),
-});
+const usersKeys: Array<keyof IUsersRepository> = [
+  'findById',
+  'findByPhone',
+  'findByEmail',
+  'create',
+  'update',
+  'updatePassword',
+  'listUsers',
+  'countUsers',
+  'anonymize',
+];
 
-export const createMockServiceProfessionalRepository = () => ({
-  create: vi.fn(),
-  delete: vi.fn(),
-  deleteByServiceAndProfessional: vi.fn(),
-  findByServiceAndProfessional: vi.fn(),
-  findByProfessional: vi.fn(),
-  updateByServiceAndProfessional: vi.fn(),
-  findAllActiveWithProfessionalData: vi.fn(),
-  findAllWithProfessionalData: vi.fn(),
-});
+const professionalsKeys: Array<keyof IProfessionalsRepository> = [
+  'findById',
+  'findByUserId',
+  'findByProfessionalId',
+  'findByUserIdWithUser',
+  'create',
+  'update',
+  'delete',
+  'list',
+  'count',
+  'search',
+  'countSearch',
+  'countActiveOnly',
+  'countNewByDateRange',
+  'findTopWithInclude',
+];
 
-export const createMockHolidaysRepository = () => ({
-  findByProfessionalAndDate: vi.fn(),
-  addHoliday: vi.fn(),
-  isProfessionalHoliday: vi.fn(),
-  findById: vi.fn(),
-  delete: vi.fn(),
-  findManyByProfessionalId: vi.fn(),
-  countByProfessionalId: vi.fn(),
-});
+const serviceProfessionalKeys: Array<keyof IServiceProfessionalRepository> = [
+  'create',
+  'delete',
+  'deleteByServiceAndProfessional',
+  'findByServiceAndProfessional',
+  'findByProfessional',
+  'updateByServiceAndProfessional',
+  'findAllActiveWithProfessionalData',
+  'findAllWithProfessionalData',
+];
 
-export const createMockBusinessHoursRepository = () => ({
-  findByProfessionalAndDay: vi.fn(),
-  create: vi.fn(),
-  findById: vi.fn(),
-  delete: vi.fn(),
-  update: vi.fn(),
-  listByProfessional: vi.fn(),
-});
+const holidaysKeys: Array<keyof IHolidaysRepository> = [
+  'findByProfessionalAndDate',
+  'addHoliday',
+  'isProfessionalHoliday',
+  'findById',
+  'delete',
+  'findManyByProfessionalId',
+  'countByProfessionalId',
+];
 
-export const createMockServicesRepository = () => ({
-  findById: vi.fn(),
-  create: vi.fn(),
-  findByName: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  softDelete: vi.fn(),
-  toggleStatus: vi.fn(),
-  list: vi.fn(),
-  existsProfessional: vi.fn(),
-});
+const businessHoursKeys: Array<keyof IBusinessHoursRepository> = [
+  'findByProfessionalAndDay',
+  'create',
+  'findById',
+  'delete',
+  'update',
+  'listByProfessional',
+];
 
-export const createMockBonusRedemptionRepository = () => ({
-  create: vi.fn(),
-});
+const servicesKeys: Array<keyof IServicesRepository> = [
+  'findById',
+  'create',
+  'findByName',
+  'update',
+  'delete',
+  'softDelete',
+  'toggleStatus',
+  'list',
+  'existsProfessional',
+];
 
-export const createMockUserBonusRepository = () => ({
-  upsert: vi.fn(),
-  findByUserIdAndType: vi.fn(),
-  getPointsByType: vi.fn(),
-  getValidPointsByType: vi.fn(),
-  getValidPointsWithExpiration: vi.fn(),
-  consumePoints: vi.fn(),
-});
+const bonusRedemptionKeys: Array<keyof IBonusRedemptionRepository> = ['create'];
 
-export const createMockCouponsRepository = () => ({
-  findByCode: vi.fn(),
-  registerRedemption: vi.fn(),
-  incrementUses: vi.fn(),
-  findById: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  listValidCoupons: vi.fn(),
-  delete: vi.fn(),
-  findMany: vi.fn(),
-  count: vi.fn(),
-});
+const userBonusKeys: Array<keyof IUserBonusRepository> = [
+  'upsert',
+  'findByUserIdAndType',
+  'getPointsByType',
+  'getValidPointsByType',
+  'getValidPointsWithExpiration',
+  'consumePoints',
+];
+
+const couponKeys: Array<keyof ICouponRepository> = [
+  'findByCode',
+  'registerRedemption',
+  'incrementUses',
+  'findById',
+  'create',
+  'update',
+  'listValidCoupons',
+  'delete',
+  'findMany',
+  'count',
+];
+
+const bonusTransactionKeys: Array<keyof IBonusTransactionRepository> = [
+  'create',
+  'findByBookingId',
+];
+
+const verificationTokensKeys: Array<keyof IVerificationTokensRepository> = [
+  'create',
+  'findByToken',
+  'delete',
+];
+
+const passwordResetTokensKeys: Array<keyof IPasswordResetTokensRepository> = [
+  'create',
+  'findByToken',
+  'delete',
+];
+
+// Factory functions
+export const createMockBookingsRepository = () => createMock<IBookingsRepository>(bookingsKeys);
+export const createMockUsersRepository = () => createMock<IUsersRepository>(usersKeys);
+export const createMockProfessionalsRepository = () =>
+  createMock<IProfessionalsRepository>(professionalsKeys);
+export const createMockServiceProfessionalRepository = () =>
+  createMock<IServiceProfessionalRepository>(serviceProfessionalKeys);
+export const createMockHolidaysRepository = () => createMock<IHolidaysRepository>(holidaysKeys);
+export const createMockBusinessHoursRepository = () =>
+  createMock<IBusinessHoursRepository>(businessHoursKeys);
+export const createMockServicesRepository = () => createMock<IServicesRepository>(servicesKeys);
+export const createMockBonusRedemptionRepository = () =>
+  createMock<IBonusRedemptionRepository>(bonusRedemptionKeys);
+export const createMockUserBonusRepository = () => createMock<IUserBonusRepository>(userBonusKeys);
+export const createMockCouponsRepository = () => createMock<ICouponRepository>(couponKeys);
+export const createMockBonusTransactionRepository = () =>
+  createMock<IBonusTransactionRepository>(bonusTransactionKeys);
+export const createMockVerificationTokensRepository = () =>
+  createMock<IVerificationTokensRepository>(verificationTokensKeys);
+export const createMockPasswordResetTokensRepository = () =>
+  createMock<IPasswordResetTokensRepository>(passwordResetTokensKeys);

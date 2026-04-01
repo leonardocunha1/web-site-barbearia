@@ -6,6 +6,7 @@ import { createMockUsersRepository } from '@/mock/mock-users-repository';
 import { createMockProfessionalsRepository } from '@/mock/mock-repositories';
 import { AuthenticateUseCase } from './authenticate-use-case';
 import bcrypt from 'bcryptjs';
+import { PASSWORD_HASH_ROUNDS } from '@/consts/const';
 
 describe('AuthenticateUseCase', () => {
   const { mockRepository, createMockUser } = createMockUsersRepository();
@@ -20,7 +21,7 @@ describe('AuthenticateUseCase', () => {
   it('should authenticate a valid user with correct credentials', async () => {
     const user = createMockUser({
       email: 'john@example.com',
-      password: await bcrypt.hash('password', 6),
+      password: await bcrypt.hash('password', PASSWORD_HASH_ROUNDS),
     });
 
     mockRepository.findByEmail.mockResolvedValue(user);
@@ -46,7 +47,7 @@ describe('AuthenticateUseCase', () => {
   });
 
   it('should throw EmailNotVerifiedError when email is not verified', async () => {
-    const hashedPassword = await bcrypt.hash('password', 6);
+    const hashedPassword = await bcrypt.hash('password', PASSWORD_HASH_ROUNDS);
     const user = createMockUser({ emailVerified: false, password: hashedPassword });
     mockRepository.findByEmail.mockResolvedValue(user);
 
@@ -56,7 +57,7 @@ describe('AuthenticateUseCase', () => {
   });
 
   it('should throw InactiveUserError when user is inactive', async () => {
-    const hashedPassword = await bcrypt.hash('password', 6);
+    const hashedPassword = await bcrypt.hash('password', PASSWORD_HASH_ROUNDS);
     const user = createMockUser({ active: false, password: hashedPassword });
     mockRepository.findByEmail.mockResolvedValue(user);
 
@@ -75,7 +76,7 @@ describe('AuthenticateUseCase', () => {
   });
 
   it('should authenticate a professional and return professionalId', async () => {
-    const hashedPassword = await bcrypt.hash('password', 6);
+    const hashedPassword = await bcrypt.hash('password', PASSWORD_HASH_ROUNDS);
     const user = createMockUser({
       email: 'professional@example.com',
       password: hashedPassword,
@@ -105,7 +106,7 @@ describe('AuthenticateUseCase', () => {
   });
 
   it('should throw InactiveUserError when professional is inactive', async () => {
-    const hashedPassword = await bcrypt.hash('password', 6);
+    const hashedPassword = await bcrypt.hash('password', PASSWORD_HASH_ROUNDS);
     const user = createMockUser({
       email: 'professional@example.com',
       password: hashedPassword,
@@ -132,7 +133,7 @@ describe('AuthenticateUseCase', () => {
   });
 
   it('should throw InactiveUserError when professional does not exist', async () => {
-    const hashedPassword = await bcrypt.hash('password', 6);
+    const hashedPassword = await bcrypt.hash('password', PASSWORD_HASH_ROUNDS);
     const user = createMockUser({
       email: 'professional@example.com',
       password: hashedPassword,

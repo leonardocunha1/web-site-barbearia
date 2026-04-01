@@ -22,13 +22,17 @@ export type TestService = Service;
 
 export type TestBusinessHours = BusinessHours;
 
-export type TestServiceProfessional = ServiceProfessional & {
+export type TestServiceProfessional = Omit<ServiceProfessional, 'price'> & {
+  price: number;
   service: TestService;
 };
 
 export type TestHoliday = Holiday;
 
-export type TestCoupon = Coupon;
+export type TestCoupon = Omit<Coupon, 'value' | 'minBookingValue'> & {
+  value: number;
+  minBookingValue: number | null;
+};
 
 type UserOverrides = Partial<User> & {
   role?: Role;
@@ -50,7 +54,8 @@ type BusinessHoursOverrides = Partial<BusinessHours> & {
   ativo?: boolean;
 };
 
-type ServiceProfessionalOverrides = Partial<ServiceProfessional> & {
+type ServiceProfessionalOverrides = Partial<Omit<ServiceProfessional, 'price'>> & {
+  price?: number;
   service?: TestService;
   ativo?: boolean;
 };
@@ -160,7 +165,7 @@ export function makeHoliday(overrides: Partial<Holiday> = {}): TestHoliday {
   };
 }
 
-export function makeCoupon(overrides: Partial<Coupon> = {}): TestCoupon {
+export function makeCoupon(overrides: Partial<TestCoupon> = {}): TestCoupon {
   return {
     id: overrides.id ?? 'coupon-1',
     code: overrides.code ?? 'CODE10',

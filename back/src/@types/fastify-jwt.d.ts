@@ -6,6 +6,7 @@ declare module '@fastify/jwt' {
       sub: string;
       role: 'ADMIN' | 'CLIENT' | 'PROFESSIONAL';
       professionalId?: string;
+      tokenType: 'access' | 'refresh';
     }; // user type is return type of `request.user` object
   }
 }

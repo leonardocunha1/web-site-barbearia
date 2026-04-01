@@ -1,6 +1,26 @@
 import { BookingDTO } from '@/dtos/booking-dto';
 import { SortBookingSchema } from '@/schemas/booking-sort-schema';
-import { Booking, Prisma, Status } from '@prisma/client';
+import { Booking, BonusType, Prisma, Status } from '@prisma/client';
+
+export interface CreateBookingWithRedemptionsData {
+  bookingData: Prisma.BookingCreateInput;
+  conflictCheck: {
+    professionalId: string;
+    startDateTime: Date;
+    endDateTime: Date;
+  };
+  bonusRedemption?: {
+    userId: string;
+    pointsUsed: number;
+    discount: number;
+    breakdown: Array<{ type: BonusType; toConsume: number }>;
+  };
+  couponRedemption?: {
+    couponId: string;
+    userId: string;
+    discount: number;
+  };
+}
 
 export interface FindManyByUserIdParams {
   page: number;
@@ -26,6 +46,7 @@ export interface FindManyByProfessionalIdParams {
 
 export interface IBookingsRepository {
   create(data: Prisma.BookingCreateInput): Promise<Booking>;
+  createWithRedemptions(data: CreateBookingWithRedemptionsData): Promise<Booking>;
   findById(id: string): Promise<BookingDTO | null>;
   findOverlappingBooking(
     professionalId: string,

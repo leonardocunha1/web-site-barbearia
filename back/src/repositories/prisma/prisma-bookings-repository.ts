@@ -1,7 +1,9 @@
 import { Prisma, Status } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { SYSTEM_MESSAGES } from '@/consts/const';
 import {
   IBookingsRepository,
+  CreateBookingWithRedemptionsData,
   FindManyByProfessionalIdParams,
   FindManyByUserIdParams,
 } from '../bookings-repository';
@@ -65,6 +67,79 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     });
   }
 
+  async createWithRedemptions({
+    bookingData,
+    conflictCheck,
+    bonusRedemption,
+    couponRedemption,
+  }: CreateBookingWithRedemptionsData) {
+    return prisma.$transaction(async (tx) => {
+      // Re-verificar conflito dentro da transação para evitar race condition
+      const conflict = await tx.booking.findFirst({
+        where: {
+          professionalId: conflictCheck.professionalId,
+          canceledAt: null,
+          startDateTime: { lt: conflictCheck.endDateTime },
+          endDateTime: { gt: conflictCheck.startDateTime },
+          status: { not: Status.CANCELED },
+        },
+      });
+
+      if (conflict) {
+        throw new Error('TIME_SLOT_ALREADY_BOOKED');
+      }
+
+      const booking = await tx.booking.create({ data: bookingData });
+
+      // Consumir bônus
+      if (bonusRedemption) {
+        for (const bonus of bonusRedemption.breakdown) {
+          const updated = await tx.userBonus.updateMany({
+            where: {
+              userId: bonusRedemption.userId,
+              type: bonus.type,
+              points: { gte: bonus.toConsume },
+            },
+            data: {
+              points: { decrement: bonus.toConsume },
+            },
+          });
+
+          if (updated.count === 0) {
+            throw new Error('INSUFFICIENT_BONUS_POINTS');
+          }
+        }
+
+        await tx.bonusRedemption.create({
+          data: {
+            userId: bonusRedemption.userId,
+            bookingId: booking.id,
+            pointsUsed: bonusRedemption.pointsUsed,
+            discount: bonusRedemption.discount,
+          },
+        });
+      }
+
+      // Registrar redemption de cupom
+      if (couponRedemption) {
+        await tx.couponRedemption.create({
+          data: {
+            couponId: couponRedemption.couponId,
+            userId: couponRedemption.userId,
+            bookingId: booking.id,
+            discount: couponRedemption.discount,
+          },
+        });
+        await tx.coupon.update({
+          where: { id: couponRedemption.couponId },
+          data: { uses: { increment: 1 } },
+        });
+      }
+
+      return booking;
+    });
+  }
+
   async findById(id: string) {
     return prisma.booking.findUnique({
       where: { id },
@@ -84,7 +159,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
         canceledAt: null,
         startDateTime: { lt: end },
         endDateTime: { gt: start },
-        status: { not: 'CANCELED' },
+        status: { not: Status.CANCELED },
       },
 
       include: bookingInclude,
@@ -226,7 +301,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
       where: {
         professionalId,
         items: { some: { serviceId } },
-        status: { not: 'CANCELED' },
+        status: { not: Status.CANCELED },
         endDateTime: { gt: new Date() },
       },
     });
@@ -296,7 +371,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
         gte: filters?.startDate || new Date(),
         ...(filters?.endDate ? { lte: filters.endDate } : {}),
       },
-      status: { in: ['PENDING', 'CONFIRMED'] },
+      status: { in: [Status.PENDING, Status.CONFIRMED] },
       canceledAt: null,
     };
 
@@ -320,7 +395,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
       where: {
         professionalId,
         startDateTime: { gte: startOfDay, lte: endOfDay },
-        status: { not: 'CANCELED' },
+        status: { not: Status.CANCELED },
         canceledAt: null,
       },
 
@@ -374,7 +449,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
 
     return prisma.booking.count({
       where: {
-        status: 'CANCELED',
+        status: Status.CANCELED,
         canceledAt: { gte: last24h },
       },
     });
@@ -395,7 +470,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
   async getCompletedBookingsCountByDateRange(startDate: Date, endDate: Date): Promise<number> {
     return prisma.booking.count({
       where: {
-        status: 'COMPLETED',
+        status: Status.COMPLETED,
         startDateTime: { gte: startDate, lte: endDate },
       },
     });
@@ -414,7 +489,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     const results = await prisma.booking.groupBy({
       by: ['professionalId'],
       where: {
-        status: 'COMPLETED',
+        status: Status.COMPLETED,
         startDateTime: { gte: startDate, lte: endDate },
       },
       _count: { _all: true },
@@ -431,7 +506,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
   async findExpiredPendingBookings(currentDate: Date) {
     return prisma.booking.findMany({
       where: {
-        status: 'PENDING',
+        status: Status.PENDING,
         startDateTime: { lt: currentDate },
         canceledAt: null,
       },
@@ -444,9 +519,9 @@ export class PrismaBookingsRepository implements IBookingsRepository {
     const result = await prisma.booking.updateMany({
       where: { id: { in: bookingIds } },
       data: {
-        status: 'CANCELED',
+        status: Status.CANCELED,
         canceledAt: new Date(),
-        notes: 'Cancelado automaticamente por falta de confirmação',
+        notes: SYSTEM_MESSAGES.BOOKING_AUTO_CANCELED,
       },
     });
 
@@ -494,7 +569,7 @@ export class PrismaBookingsRepository implements IBookingsRepository {
         booking: {
           professionalId,
           startDateTime: { gte: startDate, lte: endDate },
-          status: { not: 'CANCELED' },
+          status: { not: Status.CANCELED },
           canceledAt: null,
         },
         serviceId: { not: null },
