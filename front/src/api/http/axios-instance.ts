@@ -122,15 +122,16 @@ AXIOS_INSTANCE.interceptors.response.use(
 );
 
 export const axiosInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-  const source = Axios.CancelToken.source();
+  const controller = new AbortController();
 
-  const promise = AXIOS_INSTANCE({ ...config, cancelToken: source.token }).then(
-    ({ data }) => data,
-  );
+  const promise = AXIOS_INSTANCE({
+    ...config,
+    signal: controller.signal,
+  }).then(({ data }) => data);
 
   // @ts-expect-error: adicionando método customizado `cancel` à promise
   promise.cancel = () => {
-    source.cancel("Query was cancelled by React Query");
+    controller.abort("Query was cancelled by React Query");
   };
 
   return promise;

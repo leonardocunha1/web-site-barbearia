@@ -18,8 +18,7 @@ export function useLogout() {
           router.push("/");
         },
       });
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Erro ao fazer logout");
     }
   }, [logoutMutation, setUser, router]);

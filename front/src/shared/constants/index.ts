@@ -18,8 +18,8 @@ export const ROUTES = {
 
 export const USER_ROLES = {
   ADMIN: "ADMIN",
-  PROFISSIONAL: "PROFISSIONAL",
-  CLIENTE: "CLIENTE",
+  PROFESSIONAL: "PROFESSIONAL",
+  CLIENT: "CLIENT",
 } as const;
 
 export const BOOKING_STATUS = {
@@ -34,49 +34,6 @@ export const BOOKING_STATUS_LABELS = {
   CONFIRMED: "Confirmado",
   CANCELED: "Cancelado",
   COMPLETED: "Concluído",
-} as const;
-
-export const API_ENDPOINTS = {
-  // Auth
-  LOGIN: "/auth/login",
-  LOGOUT: "/auth/logout",
-  VERIFY_EMAIL: "/auth/verify-email",
-
-  // Users
-  USERS: "/users",
-  USER_PROFILE: "/users/profile",
-  USER_ME: "/users/me",
-
-  // Professionals
-  PROFESSIONALS: "/professionals",
-  PROFESSIONAL_DETAIL: "/professionals/:id",
-  PROFESSIONAL_DASHBOARD: "/professionals/:id/dashboard",
-  PROFESSIONAL_SCHEDULE: "/professionals/:id/schedule",
-
-  // Services
-  SERVICES: "/services",
-  SERVICE_DETAIL: "/services/:id",
-
-  // Service Professionals
-  SERVICE_PROFESSIONAL: "/service-professional",
-
-  // Bookings
-  BOOKINGS: "/bookings",
-  BOOKINGS_ME: "/bookings/me",
-  BOOKINGS_PROFESSIONAL: "/bookings/:professionalId",
-  BOOKING_DETAIL: "/bookings/:bookingId",
-
-  // Holidays
-  HOLIDAYS: "/holidays",
-
-  // Business Hours
-  BUSINESS_HOURS: "/business-hours",
-
-  // Bonus
-  BONUS: "/bonus",
-
-  // Coupons
-  COUPONS: "/coupons",
 } as const;
 
 export const PAGINATION_DEFAULTS = {

@@ -91,7 +91,7 @@ export function RecentServices({
       data={services}
       columns={columns}
       rowKey="id"
-      onRowClick={(service) => console.log("Servico clicado:", service)}
+      onRowClick={() => {}}
       rowClassName={(service) =>
         service.status === "Cancelado" ? "bg-rose-50" : ""
       }

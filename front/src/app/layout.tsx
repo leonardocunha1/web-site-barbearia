@@ -5,6 +5,7 @@ import { ConditionalHeader } from "@/features/marketing/menu/conditional-header"
 import { ApplicationProviders } from "./providers";
 import { ConditionalFooter } from "@/shared/components/conditional-footer";
 import { ModalPortal } from "@/shared/components/modal-portal";
+import { ErrorBoundary } from "@/shared/components/error-boundary";
 
 const poppins = Poppins({
   variable: "--font-poppins-sans",
@@ -44,13 +45,15 @@ export default async function RootLayout({
       >
         <div id="modal-root"></div>
         <ApplicationProviders>
-          <div className="font-poppins flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
-            <ConditionalHeader />
-            <main className="animate-fadeIn flex flex-1 justify-center">
-              {children}
-            </main>
-            <ConditionalFooter />
-          </div>
+          <ErrorBoundary>
+            <div className="font-poppins flex min-h-screen flex-col bg-stone-50 text-sm text-stone-900">
+              <ConditionalHeader />
+              <main className="animate-fadeIn flex flex-1 justify-center">
+                {children}
+              </main>
+              <ConditionalFooter />
+            </div>
+          </ErrorBoundary>
           <ModalPortal />
         </ApplicationProviders>
       </body>

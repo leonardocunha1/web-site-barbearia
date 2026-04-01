@@ -10,7 +10,6 @@ export default async function userGet() {
     const cookieStore = await cookies();
     let token = cookieStore.get("accessToken")?.value;
     const refreshToken = cookieStore.get("refreshToken")?.value;
-    console.log("Access Token:", token);
 
     const { url } = USER_GET();
 

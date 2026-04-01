@@ -321,13 +321,6 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
   const isStepValid = getStepValidation();
   const isLastStep = currentStep === STEPS.length - 1;
 
-  // Monitorar mudanças de estado que podem disparar submit
-  useEffect(() => {
-    if (isLastStep) {
-      // Vazio
-    }
-  }, [isValid, isSubmitting, isLastStep]);
-
   return (
     <FormProvider {...methods}>
       <div className={cn("mx-auto w-full max-w-4xl", className)}>
@@ -403,9 +396,6 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
                   <Button
                     type="button"
                     onClick={() => {
-                      console.log(
-                        "[Button.onClick] Confirmando reserva (manual click, não submit)",
-                      );
                       handleSubmit(handleCreateBooking)();
                     }}
                     disabled={

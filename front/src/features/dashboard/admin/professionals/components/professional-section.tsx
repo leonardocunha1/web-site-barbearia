@@ -1,7 +1,6 @@
 "use client";
 
 import { Card } from "@/shared/components/ui/card";
-import { useEffect } from "react";
 
 import { useProfessionalFormModal } from "../hooks/use-professional-form-modal";
 import { LoadingState } from "@/shared/components/ui/loading-state";
@@ -17,7 +16,7 @@ import { ListOrSearchProfessionalsStatus } from "@/api";
 
 export function ProfessionalSection() {
   const { params } = useTableParams();
-  const { professionals, totalCount, isLoading, error, refetch } =
+  const { professionals, totalCount, isLoading, refetch } =
     useProfessionalData({
       page: params.page,
       limit: params.limit,
@@ -26,12 +25,6 @@ export function ProfessionalSection() {
       sortBy: params.sortBy ?? undefined,
       sortDirection: params.sortDirection ?? undefined,
     });
-
-  useEffect(() => {
-    if (error) {
-      console.error(error);
-    }
-  }, [error]);
 
   const { handleCreate, handleUpdate, isPending } =
     useProfessionalOperations(refetch);

@@ -24,8 +24,6 @@ interface BookingStepSummaryProps {
 }
 
 export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
-  console.log("[BookingStepSummary] Renderizando");
-
   const {
     watch,
     setValue,

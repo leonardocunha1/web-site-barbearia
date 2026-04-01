@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useLogoutUser } from "@/api";
 import userGet from "@/app/api/actions/user";
-import { usePathname } from "next/navigation";
 import type { GetUserProfile200 } from "@/api";
 
 export const useAuthValidation = (
@@ -14,7 +13,6 @@ export const useAuthValidation = (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
   const { mutateAsync: logout } = useLogoutUser();
-  const pathname = usePathname();
 
   useEffect(() => {
     let isMounted = true;
@@ -22,12 +20,8 @@ export const useAuthValidation = (
     const validateAuth = async () => {
       try {
         const { ok, data } = await userGet();
-        console.log("Validação de autenticação:", { ok, data });
         if (!ok || !data) {
           if (isMounted) {
-            console.warn(
-              "Usuário não autenticado ou falha ao obter dados do usuário",
-            );
             await logout();
             setUser(null);
           }
@@ -39,8 +33,7 @@ export const useAuthValidation = (
             !prevUser || prevUser.user.id !== data.user.id ? data : prevUser,
           );
         }
-      } catch (error) {
-        console.error("Erro inesperado na validação:", error);
+      } catch {
         if (isMounted) {
           await logout();
           setUser(null);
@@ -57,5 +50,5 @@ export const useAuthValidation = (
     return () => {
       isMounted = false;
     };
-  }, [logout, setUser, setIsLoading, pathname]);
+  }, [logout, setUser, setIsLoading]);
 };

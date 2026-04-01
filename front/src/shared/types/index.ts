@@ -17,7 +17,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export type Role = "ADMIN" | "PROFISSIONAL" | "CLIENTE";
+export type Role = "ADMIN" | "PROFESSIONAL" | "CLIENT";
 
 export interface User {
   id: string;

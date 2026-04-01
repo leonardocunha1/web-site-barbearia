@@ -48,8 +48,8 @@ export function DynamicForm<T extends z.ZodTypeAny>({
       if (resetAfterSubmit) {
         reset();
       }
-    } catch (error) {
-      console.error("Erro no envio do formulário:", error);
+    } catch {
+      // error handled by caller via onSubmit rejection
     }
   };
 

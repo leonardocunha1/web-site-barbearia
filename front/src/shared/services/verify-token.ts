@@ -7,8 +7,7 @@ export default async function verifyToken(token: string): Promise<boolean> {
       algorithms: ['HS256'],
     });
     return true;
-  } catch (error) {
-    console.error('Token verification failed:', error);
+  } catch {
     return false;
   }
 }

@@ -131,11 +131,6 @@ export function DateInput({ field }: { field: DateField }) {
         <p className="text-muted-foreground text-sm">{field.description}</p>
       )}
 
-      {/* {errors[field.name] && (
-        <p className="text-destructive text-sm font-medium">
-          {errors[field.name]?.message as string}
-        </p>
-      )} */}
     </div>
   );
 }

@@ -121,8 +121,7 @@ function PasswordChangeCard() {
 
       toast.success("Senha alterada com sucesso!");
       passwordForm.reset();
-    } catch (error) {
-      console.log("Error updating password:", error);
+    } catch {
       toast.error("Erro ao alterar senha. Verifique a senha atual.");
     }
   };

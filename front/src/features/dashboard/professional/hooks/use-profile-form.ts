@@ -112,14 +112,11 @@ export function useProfileForm() {
     try {
       // TODO: Integrar com API
       // await updateProfile.mutateAsync(data);
-      console.log("Dados do perfil:", data);
-
       toast.success("Perfil atualizado com sucesso!");
 
       // Simula delay de API
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
       toast.error("Erro ao atualizar perfil. Tente novamente.");
       throw error;
     }

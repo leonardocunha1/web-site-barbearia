@@ -157,8 +157,7 @@ function ProfileCard() {
       queryClient.invalidateQueries({
         queryKey: getGetProfessionalDashboardQueryKey({ range: "week" }),
       });
-    } catch (error) {
-      console.error("Error updating profile:", error);
+    } catch {
       toast.error("Erro ao atualizar perfil");
     }
   };
@@ -375,8 +374,7 @@ function PasswordChangeCard() {
 
       toast.success("Senha alterada com sucesso!");
       passwordForm.reset();
-    } catch (error) {
-      console.log("Error updating password:", error);
+    } catch {
       toast.error("Erro ao alterar senha. Verifique a senha atual.");
     }
   };

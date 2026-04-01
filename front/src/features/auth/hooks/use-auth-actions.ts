@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import axios from "axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
-import { API_BASE_URL } from "@/shared/constants";
+import { AXIOS_INSTANCE } from "@/api/http/axios-instance";
 import userGet from "@/app/api/actions/user";
 import type { GetUserProfile200 } from "@/api";
 import type { LoginSchema, RegisterSchema } from "../schemas/auth-schemas";
@@ -13,7 +13,7 @@ type UseAuthActionsParams = {
 };
 
 const getAxiosErrorMessage = (error: unknown, fallback: string) => {
-  if (axios.isAxiosError(error)) {
+  if (error instanceof AxiosError) {
     return error.response?.data?.message || error.message || fallback;
   }
 
@@ -30,10 +30,10 @@ export function useAuthActions({
   const login = useCallback(
     async (data: LoginSchema) => {
       try {
-        const res = await axios.post(
-          `${API_BASE_URL}/auth/login`,
+        const res = await AXIOS_INSTANCE.post(
+          "/auth/login",
           { email: data.email, password: data.password },
-          { withCredentials: true },
+          { skipAuthRefresh: true } as never,
         );
 
         if (res.status !== 200) {
@@ -49,7 +49,6 @@ export function useAuthActions({
         toast.success("Login realizado com sucesso!");
         onLoginSuccess?.();
       } catch (error: unknown) {
-        console.error("Erro ao logar:", error);
         toast.error(getAxiosErrorMessage(error, "Erro ao logar"));
       }
     },
@@ -59,8 +58,8 @@ export function useAuthActions({
   const register = useCallback(
     async (data: RegisterSchema) => {
       try {
-        const res = await axios.post(
-          `${API_BASE_URL}/auth/register`,
+        const res = await AXIOS_INSTANCE.post(
+          "/auth/register",
           {
             nome: data.name,
             email: data.email,
@@ -68,7 +67,7 @@ export function useAuthActions({
             role: "CLIENT",
             telefone: data.phone,
           },
-          { withCredentials: true },
+          { skipAuthRefresh: true } as never,
         );
 
         if (res.status === 201) {
@@ -81,7 +80,6 @@ export function useAuthActions({
 
         toast.error("Falha ao registrar. Tente novamente.");
       } catch (error: unknown) {
-        console.error("Erro ao registrar:", error);
         toast.error(getAxiosErrorMessage(error, "Erro ao registrar"));
       }
     },
