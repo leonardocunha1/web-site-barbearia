@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Briefcase, UserCircle2 } from "lucide-react";
+import { BriefcaseIcon, UserCircleIcon } from "@phosphor-icons/react";
 import { OverviewSection } from "./overview";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { DashboardLayout } from "../../layout/dashboard-layout";
@@ -40,9 +40,15 @@ export default function AdminDashboard() {
     <DashboardLayout
       title="Painel do Administrador"
       iconGroup={
-        <div className="flex items-center gap-2">
-          <Briefcase className="h-6 w-6 text-gray-600" />
-          <UserCircle2 className="h-8 w-8 text-gray-600" />
+        <div className="flex items-center gap-3">
+          <BriefcaseIcon
+            weight="duotone"
+            className="text-cobre-700 h-6 w-6"
+          />
+          <UserCircleIcon
+            weight="duotone"
+            className="text-cobre-700 h-7 w-7"
+          />
         </div>
       }
       tabs={[

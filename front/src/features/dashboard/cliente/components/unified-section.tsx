@@ -10,7 +10,8 @@ import {
 } from "@/shared/components/ui/card";
 import { LoadingState } from "@/shared/components/ui/loading-state";
 import { ErrorState } from "@/shared/components/ui/error-state";
-import { CalendarIcon, UserIcon, Info } from "lucide-react";
+import { Info } from "lucide-react";
+import { CalendarIcon, UserCircleIcon } from "@phosphor-icons/react";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
 import { Button } from "@/shared/components/ui/button";
@@ -167,95 +168,113 @@ export function UnifiedClientSection() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Cards de Resumo */}
+    <div className="space-y-8">
+      {/* KPIs editoriais */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Próximo Agendamento
-            </CardTitle>
-            <CalendarIcon className="text-muted-foreground h-4 w-4" />
+        <Card className="w-full">
+          <CardHeader className="flex flex-row items-start justify-between pb-2">
+            <div className="flex flex-col gap-1">
+              <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+                Próximo agendamento
+              </CardTitle>
+            </div>
+            <CalendarIcon
+              weight="duotone"
+              className="text-cobre-700 h-5 w-5"
+            />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {nextBooking ? `${nextDateTime.date}, ${nextDateTime.time}` : "-"}
+            <div className="font-display text-foreground text-2xl leading-tight font-medium tracking-tight">
+              {nextBooking ? `${nextDateTime.date} · ${nextDateTime.time}` : "—"}
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-foreground/60 mt-1 text-xs">
               {nextBooking ? nextServices : "Sem agendamento"}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Visitas Totais
-            </CardTitle>
-            <UserIcon className="text-muted-foreground h-4 w-4" />
+        <Card className="w-full">
+          <CardHeader className="flex flex-row items-start justify-between pb-2">
+            <div className="flex flex-col gap-1">
+              <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+                Visitas totais
+              </CardTitle>
+            </div>
+            <UserCircleIcon
+              weight="duotone"
+              className="text-cobre-700 h-5 w-5"
+            />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalBookings}</div>
-            <p className="text-muted-foreground text-xs">
+            <div className="font-display text-foreground text-4xl leading-tight font-medium tracking-tight">
+              {String(totalBookings).padStart(2, "0")}
+            </div>
+            <p className="text-foreground/60 mt-1 text-xs">
               Agendamentos realizados
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Seção de Pontuação */}
+      {/* Pontos + Bônus */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Meus Pontos</CardTitle>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Meus pontos
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-muted-foreground text-sm">Total</p>
-                <p className="text-4xl font-bold">{points?.totalPoints ?? 0}</p>
+            <div className="border-cobre-600 border-l-2 p-4">
+              <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                Total
+              </p>
+              <p className="font-display text-foreground mt-1 text-5xl font-medium tracking-tight">
+                {points?.totalPoints ?? 0}
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="border-foreground/15 border p-3">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                    Agendamentos
+                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="text-foreground/50 h-3.5 w-3.5 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[200px]">
+                      <p className="text-xs">
+                        Ganhe 1 ponto a cada R$ 10,00 gastos em agendamentos.
+                        Cada ponto vale R$ 0,50 em desconto.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <p className="font-display text-foreground mt-1 text-lg font-medium">
+                  {points?.bookingPoints ?? 0}
+                </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border p-3">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-muted-foreground text-xs">
-                      Agendamentos
-                    </p>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[200px]">
-                        <p className="text-xs">
-                          Ganhe 1 ponto a cada R$ 10,00 gastos em agendamentos.
-                          Cada ponto vale R$ 0,50 em desconto.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <p className="text-lg font-semibold">
-                    {points?.bookingPoints ?? 0}
+              <div className="border-foreground/15 border p-3">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                    Fidelidade
                   </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="text-foreground/50 h-3.5 w-3.5 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[200px]">
+                      <p className="text-xs">
+                        Ganhe 2 pontos de fidelidade a cada 5 agendamentos
+                        concluídos. Pontos expiram em 6 meses.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-                <div className="rounded-lg border p-3">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-muted-foreground text-xs">Fidelidade</p>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[200px]">
-                        <p className="text-xs">
-                          Ganhe 2 pontos de fidelidade a cada 5 agendamentos
-                          concluídos. Pontos expiram em 6 meses.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <p className="text-lg font-semibold">
-                    {points?.loyaltyPoints ?? 0}
-                  </p>
-                </div>
+                <p className="font-display text-foreground mt-1 text-lg font-medium">
+                  {points?.loyaltyPoints ?? 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -263,39 +282,47 @@ export function UnifiedClientSection() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Valor em Bônus</CardTitle>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Valor em bônus
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-muted-foreground text-sm">Total</p>
-                <p className="text-3xl font-bold">
-                  {formatCurrency(monetaryValue?.totalValue)}
+            <div className="border-cobre-600 border-l-2 p-4">
+              <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                Total
+              </p>
+              <p className="font-display text-cobre-700 mt-1 text-4xl font-medium tracking-tight">
+                {formatCurrency(monetaryValue?.totalValue)}
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="border-foreground/15 border p-3">
+                <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                  Agendamentos
+                </p>
+                <p className="text-foreground mt-1 font-mono text-base font-bold">
+                  {formatCurrency(monetaryValue?.bookingValue)}
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border p-3">
-                  <p className="text-muted-foreground text-xs">Agendamentos</p>
-                  <p className="text-lg font-semibold">
-                    {formatCurrency(monetaryValue?.bookingValue)}
-                  </p>
-                </div>
-                <div className="rounded-lg border p-3">
-                  <p className="text-muted-foreground text-xs">Fidelidade</p>
-                  <p className="text-lg font-semibold">
-                    {formatCurrency(monetaryValue?.loyaltyValue)}
-                  </p>
-                </div>
+              <div className="border-foreground/15 border p-3">
+                <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                  Fidelidade
+                </p>
+                <p className="text-foreground mt-1 font-mono text-base font-bold">
+                  {formatCurrency(monetaryValue?.loyaltyValue)}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Seção de Reservas */}
+      {/* Reservas */}
       <Card>
         <CardHeader>
-          <CardTitle>Minhas Reservas</CardTitle>
+          <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Minhas reservas
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <BookingFilters

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check } from "lucide-react";
+import { CheckIcon } from "@phosphor-icons/react";
 import { cn } from "@/shared/utils/cn";
 
 export interface Step {
@@ -15,75 +15,82 @@ interface StepperProps {
 }
 
 export function Stepper({ steps, currentStep, className }: StepperProps) {
+  const progress =
+    steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;
+
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Progress bar (barber-pole inspired) */}
+      <div className="relative mb-6 h-1.5 w-full bg-foreground/10">
+        <div
+          className="bg-cobre-600 absolute inset-y-0 left-0 transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <ol className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
         {steps.map((step, index) => {
-          const stepNumber = index + 1;
+          const stepNumber = String(index + 1).padStart(2, "0");
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
 
           return (
-            <div key={index} className="flex flex-1 items-center">
-              <div className="flex w-full items-center gap-3 sm:flex-col sm:items-center">
-                <div
+            <li
+              key={index}
+              className={cn(
+                "flex flex-col gap-2 border-t-2 pt-3 transition-colors",
+                {
+                  "border-cobre-600": isActive || isCompleted,
+                  "border-foreground/15": !isActive && !isCompleted,
+                },
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span
                   className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-full border-2 font-semibold transition-all",
+                    "font-mono text-xs font-bold tracking-widest",
                     {
-                      "border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-200/60":
-                        isCompleted,
-                      "border-amber-500 bg-white text-amber-600 ring-2 ring-amber-200":
-                        isActive && !isCompleted,
-                      "border-stone-300 bg-white text-stone-400":
-                        !isActive && !isCompleted,
+                      "text-cobre-700": isActive,
+                      "text-foreground": isCompleted,
+                      "text-foreground/40": !isActive && !isCompleted,
                     },
                   )}
                 >
-                  {isCompleted ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <span>{stepNumber}</span>
-                  )}
-                </div>
-                <div className="flex flex-col sm:items-center sm:text-center">
-                  <p
-                    className={cn("text-sm font-semibold", {
-                      "text-amber-700": isActive,
-                      "text-stone-900": !isActive && isCompleted,
-                      "text-stone-400": !isActive && !isCompleted,
-                    })}
-                  >
-                    {step.title}
-                  </p>
-                  {step.description && (
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      {step.description}
-                    </p>
-                  )}
-                </div>
+                  {stepNumber}
+                </span>
+                {isCompleted && (
+                  <CheckIcon
+                    weight="bold"
+                    className="text-cobre-700 h-3.5 w-3.5"
+                  />
+                )}
               </div>
-
-              {index < steps.length - 1 && (
-                <div className="hidden flex-1 items-center px-2 sm:flex">
-                  <div
-                    className={cn("h-0.5 flex-1 rounded-full transition-all", {
-                      "bg-gradient-to-r from-amber-400 to-orange-500":
-                        isCompleted,
-                      "bg-stone-300": !isCompleted,
-                    })}
-                  />
-                  <ArrowRight
-                    className={cn("ml-2 h-4 w-4", {
-                      "text-amber-500": isCompleted,
-                      "text-stone-300": !isCompleted,
-                    })}
-                  />
-                </div>
-              )}
-            </div>
+              <div className="flex flex-col gap-0.5">
+                <p
+                  className={cn("text-sm font-semibold tracking-tight", {
+                    "text-foreground": isActive || isCompleted,
+                    "text-foreground/40": !isActive && !isCompleted,
+                  })}
+                >
+                  {step.title}
+                </p>
+                {step.description && (
+                  <p
+                    className={cn(
+                      "text-xs leading-snug transition-colors",
+                      isActive
+                        ? "text-foreground/70"
+                        : "text-foreground/40",
+                    )}
+                  >
+                    {step.description}
+                  </p>
+                )}
+              </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }

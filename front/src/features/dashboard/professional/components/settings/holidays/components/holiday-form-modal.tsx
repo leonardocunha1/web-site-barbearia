@@ -19,6 +19,9 @@ type HolidayFormModalProps = {
   isSaving?: boolean;
 };
 
+const labelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
+
 export function HolidayFormModal({
   onSubmit,
   onClose,
@@ -44,7 +47,9 @@ export function HolidayFormModal({
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="date">Data</Label>
+          <Label htmlFor="date" className={labelClass}>
+            Data
+          </Label>
           <Controller
             name="date"
             control={control}
@@ -65,7 +70,9 @@ export function HolidayFormModal({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="reason">Motivo</Label>
+          <Label htmlFor="reason" className={labelClass}>
+            Motivo
+          </Label>
           <Input id="reason" {...register("reason")} />
           {errors.reason && (
             <p className="text-destructive text-sm font-medium">
@@ -74,11 +81,16 @@ export function HolidayFormModal({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3">
-          <Button type="button" variant="ghost" onClick={onClose}>
+        <div className="border-foreground/10 flex items-center justify-end gap-3 border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            className="font-mono text-xs tracking-widest uppercase"
+          >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" variant="editorial" size="sm" disabled={isSaving}>
             {isSaving ? "Salvando..." : "Adicionar"}
           </Button>
         </div>

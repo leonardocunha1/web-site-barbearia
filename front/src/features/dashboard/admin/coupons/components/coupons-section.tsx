@@ -6,6 +6,14 @@ import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { Column, GenericTable } from "@/shared/components/table/generic-table";
 import { StatusBadge } from "@/shared/components/table/status-badge";
 import { useTableParams } from "@/shared/hooks/useTableParams";
@@ -23,6 +31,7 @@ import {
 } from "@/api";
 import { useCouponFormModal } from "../hooks/use-coupon-form-modal";
 import type { CouponFormValues } from "../schemas/coupon-form-schema";
+import { PlusIcon } from "@phosphor-icons/react";
 
 const formatDate = (value?: string | null) => {
   if (!value) return "-";
@@ -277,9 +286,17 @@ export default function CouponsSection() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-stone-50 p-5 shadow">
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2">
+      <div className="space-y-1">
+        <p className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+          Promoções
+        </p>
+        <h2 className="font-display text-foreground text-2xl font-medium tracking-tight">
+          Cupons cadastrados
+        </h2>
+      </div>
+      <Card className="space-y-5 p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <InputFilter
               label="Codigo"
               value={params.filters.code || ""}
@@ -292,9 +309,9 @@ export default function CouponsSection() {
             />
             <SelectFilter
               label="Tipo"
-              value={params.filters.type || ""}
+              value={params.filters.type || "all"}
               options={[
-                { value: "", label: "Todos" },
+                { value: "all", label: "Todos" },
                 { value: "PERCENTAGE", label: "Percentual" },
                 { value: "FIXED", label: "Fixo" },
                 { value: "FREE", label: "Gratis" },
@@ -302,15 +319,18 @@ export default function CouponsSection() {
               onChange={(value) =>
                 updateParams({
                   page: 1,
-                  filters: { ...params.filters, type: value },
+                  filters: {
+                    ...params.filters,
+                    type: value === "all" ? "" : value,
+                  },
                 })
               }
             />
             <SelectFilter
               label="Escopo"
-              value={params.filters.scope || ""}
+              value={params.filters.scope || "all"}
               options={[
-                { value: "", label: "Todos" },
+                { value: "all", label: "Todos" },
                 { value: "GLOBAL", label: "Global" },
                 { value: "SERVICE", label: "Servico" },
                 { value: "PROFESSIONAL", label: "Profissional" },
@@ -318,27 +338,41 @@ export default function CouponsSection() {
               onChange={(value) =>
                 updateParams({
                   page: 1,
-                  filters: { ...params.filters, scope: value },
+                  filters: {
+                    ...params.filters,
+                    scope: value === "all" ? "" : value,
+                  },
                 })
               }
             />
             <SelectFilter
               label="Status"
-              value={params.filters.active || ""}
+              value={params.filters.active || "all"}
               options={[
-                { value: "", label: "Todos" },
+                { value: "all", label: "Todos" },
                 { value: "true", label: "Ativo" },
                 { value: "false", label: "Inativo" },
               ]}
               onChange={(value) =>
                 updateParams({
                   page: 1,
-                  filters: { ...params.filters, active: value },
+                  filters: {
+                    ...params.filters,
+                    active: value === "all" ? "" : value,
+                  },
                 })
               }
             />
           </div>
-          <Button onClick={handleCreate}>Novo cupom</Button>
+          <Button
+            onClick={handleCreate}
+            variant="editorial"
+            size="sm"
+            className="h-10 shrink-0 gap-2"
+          >
+            <PlusIcon weight="bold" className="h-4 w-4" />
+            Novo cupom
+          </Button>
         </div>
 
         <GenericTable
@@ -349,6 +383,8 @@ export default function CouponsSection() {
           rowKey="id"
           totalItems={listQuery.data?.total ?? 0}
           showPagination
+          className="border-foreground/15 border"
+          headerClassName="bg-foreground/[0.04]"
           actions={(row) => (
             <div className="flex items-center gap-2">
               <Button
@@ -368,7 +404,7 @@ export default function CouponsSection() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-600"
+                className="text-destructive hover:text-destructive"
                 onClick={() => deleteCoupon.mutate({ couponId: row.id })}
               >
                 Remover
@@ -381,6 +417,9 @@ export default function CouponsSection() {
   );
 }
 
+const filterLabelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
+
 function InputFilter({
   label,
   value,
@@ -391,10 +430,10 @@ function InputFilter({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="space-y-1">
-      <span className="text-muted-foreground text-xs">{label}</span>
+    <div className="space-y-2">
+      <Label className={filterLabelClass}>{label}</Label>
       <Input
-        className="h-9"
+        className="h-10"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -414,19 +453,20 @@ function SelectFilter({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="space-y-1">
-      <span className="text-muted-foreground text-xs">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+    <div className="space-y-2">
+      <Label className={filterLabelClass}>{label}</Label>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="h-10 w-full">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

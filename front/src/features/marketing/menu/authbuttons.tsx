@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
-import { SignInIcon } from "@phosphor-icons/react";
+import { SignInIcon, UserCircleIcon } from "@phosphor-icons/react";
 import { GetUserProfile200User } from "@/api";
 
 export function AuthButtons({
@@ -10,21 +10,15 @@ export function AuthButtons({
 }) {
   if (!user) {
     return (
-      <div className="flex items-center space-x-2">
-        <Link href="/login">
-          <Button
-            variant="default"
-            size="sm"
-            className="border-principal-500 hover:bg-principal-500 cursor-pointer border text-stone-100 duration-200"
-          >
-            Entrar
-            <SignInIcon className="size-4" />
-          </Button>
-        </Link>
-      </div>
+      <Link href="/login">
+        <Button variant="editorial" size="sm" className="gap-2">
+          <SignInIcon className="size-4" weight="bold" />
+          Entrar
+        </Button>
+      </Link>
     );
   }
-  // Se user existe, mostra botão de ir para conta
+
   const dashboardUrl =
     user.role === "PROFESSIONAL"
       ? "/painel/professional"
@@ -33,16 +27,11 @@ export function AuthButtons({
         : "/cliente";
 
   return (
-    <div className="flex items-center space-x-2">
-      <Link href={dashboardUrl}>
-        <Button
-          variant="default"
-          size="sm"
-          className="border-principal-500 hover:bg-principal-600 cursor-pointer border text-stone-200 duration-300"
-        >
-          Minha conta
-        </Button>
-      </Link>
-    </div>
+    <Link href={dashboardUrl}>
+      <Button variant="outline" size="sm" className="gap-2">
+        <UserCircleIcon className="size-4" weight="bold" />
+        Minha conta
+      </Button>
+    </Link>
   );
 }

@@ -10,6 +10,7 @@ import {
   SidebarNav,
   SidebarNavItem,
   SidebarNavGroup,
+  NavHrefsProvider,
   useSidebar,
 } from "@/shared/components/ui/sidebar";
 import { Button } from "@/shared/components/ui/button";
@@ -33,18 +34,18 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { LucideIcon } from "lucide-react";
+import type { NavIcon } from "@/shared/components/ui/sidebar";
 
 export interface NavItem {
   href: string;
-  icon: LucideIcon;
+  icon: NavIcon;
   label: string;
   badge?: string | number;
 }
 
 export interface NavGroup {
   label: string;
-  icon?: LucideIcon;
+  icon?: NavIcon;
   items: NavItem[];
 }
 
@@ -89,10 +90,17 @@ function SidebarLogo() {
         alt="Logo"
         width={32}
         height={32}
-        className="h-8 w-8 rounded-full"
+        className="h-9 w-9"
       />
       {!isCollapsed && (
-        <span className="font-bold text-stone-900">El Bigódon</span>
+        <div className="flex flex-col leading-tight">
+          <span className="font-display text-foreground text-base font-medium tracking-tight">
+            El Bigodón
+          </span>
+          <span className="text-foreground/60 font-mono text-[9px] tracking-[0.25em] uppercase">
+            Painel
+          </span>
+        </div>
       )}
     </Link>
   );
@@ -126,9 +134,11 @@ function UserMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium">{user.name}</p>
-              <p className="text-xs text-stone-500">{user.email}</p>
+            <div className="flex flex-col space-y-0.5">
+              <p className="text-foreground text-sm font-medium">{user.name}</p>
+              <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                {user.email}
+              </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -139,7 +149,7 @@ function UserMenu({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onLogout} className="cursor-pointer text-red-600">
+          <DropdownMenuItem onClick={onLogout} className="text-destructive focus:text-destructive cursor-pointer">
             <LogOut className="mr-2 h-4 w-4" />
             Sair
           </DropdownMenuItem>
@@ -153,20 +163,26 @@ function UserMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 px-2 hover:bg-stone-100"
+          className="hover:bg-foreground/5 w-full justify-start gap-3 px-2"
         >
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar} alt={user.name} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-1 flex-col items-start text-left">
-            <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-xs text-stone-500">{user.role}</span>
+            <span className="text-foreground text-sm font-medium">
+              {user.name}
+            </span>
+            <span className="text-foreground/60 font-mono text-[9px] tracking-widest uppercase">
+              {user.role}
+            </span>
           </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+          {user.email}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/" className="cursor-pointer">
@@ -175,7 +191,7 @@ function UserMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onLogout} className="cursor-pointer text-red-600">
+        <DropdownMenuItem onClick={onLogout} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           Sair
         </DropdownMenuItem>
@@ -204,16 +220,23 @@ function MobileSidebar({
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0">
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-stone-200 p-4">
+          <div className="border-foreground/15 flex items-center justify-between border-b p-4">
             <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/logo-sem-escrita.png"
                 alt="Logo"
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8"
               />
-              <span className="font-bold text-stone-900">El Bigódon</span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-display text-foreground text-base font-medium tracking-tight">
+                  El Bigodón
+                </span>
+                <span className="text-foreground/60 font-mono text-[9px] tracking-[0.25em] uppercase">
+                  Painel
+                </span>
+              </div>
             </Link>
           </div>
 
@@ -253,7 +276,7 @@ function MobileSidebar({
             </SidebarNav>
           </div>
 
-          <div className="border-t border-stone-200 p-4">
+          <div className="border-foreground/15 border-t p-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -267,14 +290,18 @@ function MobileSidebar({
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-1 flex-col">
-                <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-xs text-stone-500">{user.role}</span>
+                <span className="text-foreground text-sm font-medium">
+                  {user.name}
+                </span>
+                <span className="text-foreground/60 font-mono text-[9px] tracking-widest uppercase">
+                  {user.role}
+                </span>
               </div>
               <Button
                 onClick={onLogout}
                 variant="ghost"
                 size="icon"
-                className="text-red-600"
+                className="text-destructive hover:text-destructive"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -347,22 +374,31 @@ function DesktopSidebar({
   );
 }
 
+function collectNavHrefs(navigation: (NavItem | NavGroup)[]): string[] {
+  return navigation.flatMap((item) =>
+    "items" in item ? item.items.map((sub) => sub.href) : [item.href],
+  );
+}
+
 export function DashboardShell({
   children,
   navigation,
   user,
   onLogout,
 }: DashboardShellProps) {
+  const navHrefs = React.useMemo(() => collectNavHrefs(navigation), [navigation]);
+
   return (
     <SidebarProvider>
-      <div className="flex h-screen overflow-hidden bg-stone-50 w-full">
+      <NavHrefsProvider hrefs={navHrefs}>
+      <div className="bg-background flex h-screen w-full overflow-hidden">
         {/* Desktop Sidebar */}
         <DesktopSidebar navigation={navigation} user={user} onLogout={onLogout} />
 
         {/* Main Content */}
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Mobile Header */}
-          <header className="flex items-center gap-2 border-b border-stone-200 bg-white p-4 md:hidden">
+          <header className="border-foreground/15 bg-card flex items-center gap-2 border-b p-4 md:hidden">
             <MobileSidebar navigation={navigation} user={user} onLogout={onLogout} />
             <Link href="/" className="flex items-center gap-2">
               <Image
@@ -370,9 +406,11 @@ export function DashboardShell({
                 alt="Logo"
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8"
               />
-              <span className="font-bold text-stone-900">El Bigódon</span>
+              <span className="font-display text-foreground text-base font-medium tracking-tight">
+                El Bigodón
+              </span>
             </Link>
           </header>
 
@@ -392,6 +430,7 @@ export function DashboardShell({
           </main>
         </div>
       </div>
+      </NavHrefsProvider>
     </SidebarProvider>
   );
 }

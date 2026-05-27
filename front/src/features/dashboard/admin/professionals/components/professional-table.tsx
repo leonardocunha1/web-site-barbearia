@@ -48,7 +48,7 @@ export function ProfessionalTable({
     {
       header: "Status",
       accessor: "status",
-      render: (value) => <ButtonStatus value={value} />,
+      render: (value) => <ButtonStatus value={value as string} />,
       align: "center",
     },
   ];

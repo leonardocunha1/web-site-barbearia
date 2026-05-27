@@ -67,12 +67,10 @@ export function BookingTimeField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-stone-500" />
-          <Label className="text-sm font-medium text-stone-700">
-            Horário <span className="text-principal-600">*</span>
-          </Label>
-        </div>
+        <Label className="text-foreground/70 flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase">
+          <Clock className="h-3 w-3" />
+          Horário <span className="text-cobre-700">*</span>
+        </Label>
 
         {isLoading && (
           <motion.div
@@ -92,11 +90,8 @@ export function BookingTimeField({
       >
         <SelectTrigger
           className={cn(
-            "h-11 w-full border-stone-200 bg-white/50 transition-all",
-            "focus:border-principal-400 focus:ring-principal-200",
-            "hover:border-stone-300",
+            "h-11 w-full",
             error && "border-destructive focus:border-destructive",
-            disabled && "bg-stone-100 opacity-60",
           )}
         >
           <SelectValue
@@ -109,12 +104,12 @@ export function BookingTimeField({
             ([key, period]) =>
               period.slots.length > 0 && (
                 <div key={key}>
-                  <div className="px-2 py-1.5 text-xs font-medium text-stone-500">
+                  <div className="text-foreground/50 px-2 py-1.5 font-mono text-[10px] tracking-widest uppercase">
                     {period.label}
                   </div>
                   {period.slots.map((time) => (
                     <SelectItem key={time} value={time}>
-                      {time}
+                      <span className="font-mono">{time}</span>
                     </SelectItem>
                   ))}
                 </div>
@@ -130,7 +125,7 @@ export function BookingTimeField({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700"
+            className="border-foreground/20 text-foreground/70 flex items-center gap-2 border-l-2 px-3 py-2 text-xs"
           >
             <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
             <span>Não há horários disponíveis para esta data.</span>

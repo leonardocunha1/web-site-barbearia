@@ -5,13 +5,13 @@ import { LoadingState } from "@/shared/components/ui/loading-state";
 import { useLogout } from "@/shared/hooks/useLogout";
 import { useRouteProtection } from "@/shared/hooks/useRouteProtection";
 import {
-  LayoutDashboard,
-  Calendar,
-  Settings,
-  Clock,
-  Briefcase,
-  User,
-} from "lucide-react";
+  ChartBarIcon,
+  CalendarIcon,
+  GearIcon,
+  ClockIcon,
+  UmbrellaIcon,
+  UserCircleIcon,
+} from "@phosphor-icons/react";
 
 export default function ProfessionalDashboardLayoutClient({
   children,
@@ -23,7 +23,7 @@ export default function ProfessionalDashboardLayoutClient({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-50">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <LoadingState message="Carregando painel" size="lg" />
       </div>
     );
@@ -36,31 +36,31 @@ export default function ProfessionalDashboardLayoutClient({
   const navigation = [
     {
       href: "/painel/professional",
-      icon: LayoutDashboard,
-      label: "Visao Geral",
+      icon: ChartBarIcon,
+      label: "Visão geral",
     },
     {
       href: "/painel/professional/bookings",
-      icon: Calendar,
+      icon: CalendarIcon,
       label: "Agendamentos",
     },
     {
-      label: "Configuracoes",
-      icon: Settings,
+      label: "Configurações",
+      icon: GearIcon,
       items: [
         {
           href: "/painel/professional/settings/profile",
-          icon: User,
+          icon: UserCircleIcon,
           label: "Perfil",
         },
         {
           href: "/painel/professional/settings/business-hours",
-          icon: Clock,
-          label: "Horarios",
+          icon: ClockIcon,
+          label: "Horários",
         },
         {
           href: "/painel/professional/settings/holidays",
-          icon: Briefcase,
+          icon: UmbrellaIcon,
           label: "Feriados",
         },
       ],

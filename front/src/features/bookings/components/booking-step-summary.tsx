@@ -12,12 +12,19 @@ import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { Sparkles, Calendar, Clock, User, Scissors } from "lucide-react";
+import {
+  SparkleIcon,
+  CalendarIcon,
+  ClockIcon,
+  UserCircleIcon,
+  ScissorsIcon,
+} from "@phosphor-icons/react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo, useEffect, useRef } from "react";
 import { useUser } from "@/contexts/user";
 import { useProfessionalSchedule } from "../hooks/use-professional-schedule";
+import { BookingStepHeader } from "./booking-step-header";
 
 interface BookingStepSummaryProps {
   bonusBalance?: GetBonusBalance200;
@@ -100,7 +107,6 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
     user && professionalId && sortedServices.length > 0,
   );
 
-  // Chamar preview quando os dados mudarem (com debounce para evitar múltiplas chamadas)
   useEffect(() => {
     if (!shouldFetchPreview) return;
 
@@ -111,15 +117,12 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
       couponCode: couponCode || undefined,
     });
 
-    // Evitar chamadas desnecessárias comparando os params
     if (newParams === lastPreviewParamsRef.current) return;
 
-    // Limpar debounce anterior
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Definir novo debounce (300ms)
     debounceTimerRef.current = setTimeout(() => {
       lastPreviewParamsRef.current = newParams;
 
@@ -133,7 +136,6 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
       });
     }, 300);
 
-    // Cleanup do debounce ao desmontar
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -188,164 +190,193 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-2xl font-semibold text-stone-900">
-          Confirme seu agendamento
-        </h3>
-        <p className="text-muted-foreground mt-2">
-          Revise os detalhes e finalize sua reserva
-        </p>
-      </div>
+    <div className="space-y-8">
+      <BookingStepHeader
+        step="04"
+        title="Confirme sua"
+        highlight="reserva"
+        description="Revise os detalhes e finalize o agendamento."
+      />
 
-      {/* Resumo do agendamento */}
-      <div className="space-y-4 rounded-lg border border-stone-200 bg-stone-50 p-6">
-        <h4 className="font-semibold text-stone-900">
-          Detalhes do agendamento
-        </h4>
+      {/* Resumo editorial */}
+      <section className="border-foreground border p-6">
+        <div className="border-foreground/15 mb-4 flex items-baseline justify-between border-b pb-3">
+          <span className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Resumo · El Bigodón
+          </span>
+          <span className="text-foreground/50 font-mono text-[10px] tracking-widest uppercase">
+            N° rascunho
+          </span>
+        </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 text-sm">
-            <User className="text-principal-600 h-4 w-4" />
-            <span className="text-muted-foreground">Profissional:</span>
-            <span className="font-medium text-stone-900">
-              {professional?.user.name}
-            </span>
+        <dl className="space-y-3 text-sm">
+          <div className="flex items-center gap-3">
+            <UserCircleIcon
+              weight="duotone"
+              className="text-cobre-700 h-4 w-4 shrink-0"
+            />
+            <dt className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase w-24 shrink-0">
+              Profissional
+            </dt>
+            <dd className="text-foreground font-medium">
+              {professional?.user.name ?? "—"}
+            </dd>
           </div>
 
-          <div className="flex items-center gap-3 text-sm">
-            <Calendar className="text-principal-600 h-4 w-4" />
-            <span className="text-muted-foreground">Data:</span>
-            <span className="font-medium text-stone-900">{formattedDate}</span>
+          <div className="flex items-center gap-3">
+            <CalendarIcon
+              weight="duotone"
+              className="text-cobre-700 h-4 w-4 shrink-0"
+            />
+            <dt className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase w-24 shrink-0">
+              Data
+            </dt>
+            <dd className="text-foreground font-medium">{formattedDate || "—"}</dd>
           </div>
 
-          <div className="flex items-center gap-3 text-sm">
-            <Clock className="text-principal-600 h-4 w-4" />
-            <span className="text-muted-foreground">Horário:</span>
-            <span className="font-medium text-stone-900">{selectedTime}</span>
+          <div className="flex items-center gap-3">
+            <ClockIcon
+              weight="duotone"
+              className="text-cobre-700 h-4 w-4 shrink-0"
+            />
+            <dt className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase w-24 shrink-0">
+              Horário
+            </dt>
+            <dd className="text-foreground font-mono font-bold">
+              {selectedTime || "—"}
+            </dd>
           </div>
 
           {isHoliday && (
-            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="border-destructive/30 bg-destructive/5 text-destructive border-l-2 px-3 py-2 text-xs">
               <p className="font-medium">Dia indisponível (feriado).</p>
               {holidayReason && (
-                <p className="mt-1 text-amber-700">Motivo: {holidayReason}</p>
+                <p className="text-destructive/80 mt-1">Motivo: {holidayReason}</p>
               )}
             </div>
           )}
+        </dl>
 
-          <div className="border-t border-stone-200 pt-2">
-            <div className="flex items-start gap-3 text-sm">
-              <Scissors className="text-principal-600 mt-0.5 h-4 w-4" />
-              <div className="flex-1">
-                <span className="text-muted-foreground mb-2 block">
-                  Serviços:
+        {/* Serviços */}
+        <div className="border-foreground/15 mt-5 border-t pt-4">
+          <div className="mb-2 flex items-center gap-2">
+            <ScissorsIcon
+              weight="duotone"
+              className="text-cobre-700 h-4 w-4"
+            />
+            <span className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+              Serviços
+            </span>
+          </div>
+          <ul className="space-y-1.5 text-sm">
+            {selectedServicesDetails.map((service) => (
+              <li
+                key={service?.id}
+                className="text-foreground flex items-center justify-between"
+              >
+                <span>{service?.name}</span>
+                <span className="font-mono">
+                  R$ {(service?.price ?? 0).toFixed(2)}
                 </span>
-                <ul className="space-y-1">
-                  {selectedServicesDetails.map((service) => (
-                    <li
-                      key={service?.id}
-                      className="flex justify-between text-stone-900"
-                    >
-                      <span>{service?.name}</span>
-                      <span className="font-medium">
-                        R$ {(service?.price ?? 0).toFixed(2)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Totais */}
+        <div className="border-foreground/15 mt-5 space-y-1.5 border-t pt-4 text-sm">
+          <div className="text-foreground/70 flex justify-between">
+            <span>Subtotal</span>
+            <span className="font-mono">R$ {subtotalValue.toFixed(2)}</span>
           </div>
 
-          <div className="space-y-1 border-t border-stone-200 pt-2 text-sm">
-            <div className="flex justify-between text-stone-700">
-              <span>Subtotal:</span>
-              <span>R$ {subtotalValue.toFixed(2)}</span>
+          {couponDiscount > 0 && (
+            <div className="text-cobre-700 flex justify-between">
+              <span>Desconto do cupom</span>
+              <span className="font-mono">- R$ {couponDiscount.toFixed(2)}</span>
             </div>
+          )}
 
-            {couponDiscount > 0 && (
-              <div className="flex justify-between text-emerald-700">
-                <span>Desconto do cupom:</span>
-                <span>- R$ {couponDiscount.toFixed(2)}</span>
-              </div>
-            )}
-
-            {pointsDiscount > 0 && (
-              <div className="flex justify-between text-emerald-700">
-                <span>
-                  Desconto com pontos{pointsUsed > 0 ? ` (${pointsUsed})` : ""}:
-                </span>
-                <span>- R$ {pointsDiscount.toFixed(2)}</span>
-              </div>
-            )}
-
-            <div className="flex justify-between text-base font-semibold">
-              <span>Total final:</span>
-              <span className="text-principal-600">
-                {previewMutation.isPending
-                  ? "Calculando..."
-                  : `R$ ${finalValue.toFixed(2)}`}
+          {pointsDiscount > 0 && (
+            <div className="text-cobre-700 flex justify-between">
+              <span>
+                Pontos{pointsUsed > 0 ? ` (${pointsUsed})` : ""}
               </span>
+              <span className="font-mono">- R$ {pointsDiscount.toFixed(2)}</span>
             </div>
+          )}
+
+          <div className="border-foreground/15 mt-2 flex items-baseline justify-between border-t pt-3">
+            <span className="font-mono text-[10px] tracking-widest uppercase">
+              Total
+            </span>
+            <span className="font-display text-foreground text-2xl font-medium">
+              {previewMutation.isPending
+                ? "···"
+                : `R$ ${finalValue.toFixed(2)}`}
+            </span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-        {/* Cupom de desconto */}
-        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-          <Label htmlFor="couponCode" className="text-stone-700">
+      {/* Cupom + pontos */}
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
+        <div className="space-y-2">
+          <Label
+            htmlFor="couponCode"
+            className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase"
+          >
             Cupom de desconto
           </Label>
           <Input
             id="couponCode"
             {...register("couponCode")}
-            placeholder="Digite o código do cupom"
+            placeholder="Digite o código"
             disabled={Boolean(useBonusPoints)}
             onKeyDown={preventSubmit}
-            className="focus:border-principal-400 focus:ring-principal-200 mt-2 border-stone-200 transition-all"
           />
           {useBonusPoints && (
-            <p className="text-muted-foreground mt-2 text-xs">
-              Para usar pontos, os pontos bônus precisa ficar desativado.
+            <p className="text-foreground/60 text-xs">
+              Para usar cupom, desative os pontos bônus.
             </p>
           )}
           {errors.couponCode && (
-            <p className="text-destructive mt-2 text-sm font-medium">
+            <p className="text-destructive text-sm font-medium">
               {errors.couponCode.message}
             </p>
           )}
         </div>
 
-        {/* Pontos de bônus */}
         {bonusBalance && (
-          <div className="border-principal-200 bg-principal-50 space-y-3 rounded-xl border p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-stone-900">
-                  Seus pontos de bônus
+          <div className="border-cobre-600 border-l-2 px-4 py-3 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+                  Pontos bônus
                 </p>
-                <p className="text-muted-foreground mt-1 text-xs">
+                <p className="text-foreground mt-1 text-sm">
                   Você tem{" "}
-                  <span className="text-principal-700 font-semibold">
-                    {bonusBalance.points.totalPoints} pontos
+                  <span className="text-cobre-700 font-mono font-bold">
+                    {bonusBalance.points.totalPoints}
                   </span>{" "}
-                  disponíveis
+                  pontos
                   {bonusBalance.monetaryValue.totalValue > 0 && (
-                    <span>
+                    <span className="text-foreground/60">
                       {" "}
                       (R$ {bonusBalance.monetaryValue.totalValue.toFixed(2)})
                     </span>
                   )}
                 </p>
                 {pointValue && (
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Cada ponto equivale a R$ {pointValue.toFixed(2)}.
+                  <p className="text-foreground/60 mt-1 text-xs">
+                    1 ponto = R$ {pointValue.toFixed(2)}
                   </p>
                 )}
               </div>
-              <Sparkles className="text-principal-500 h-6 w-6" />
+              <SparkleIcon
+                weight="duotone"
+                className="text-cobre-600 h-5 w-5"
+              />
             </div>
 
             {hasEnoughPoints ? (
@@ -362,16 +393,15 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
                       setValue("couponCode", "", { shouldValidate: false });
                     }
                   }}
-                  className="border-principal-300 data-[state=checked]:bg-principal-600 data-[state=checked]:border-principal-600"
+                  className="data-[state=checked]:bg-foreground data-[state=checked]:border-foreground data-[state=checked]:text-background"
                 />
-                <Label className="cursor-pointer text-sm text-stone-700">
-                  Usar meus pontos neste agendamento
+                <Label className="text-foreground cursor-pointer text-sm">
+                  Usar meus pontos
                 </Label>
               </div>
             ) : (
-              <p className="text-xs text-amber-700">
-                Você precisa de pelo menos 100 pontos para utilizar no
-                agendamento.
+              <p className="text-foreground/60 text-xs">
+                Mínimo de 100 pontos para uso.
               </p>
             )}
           </div>
@@ -386,7 +416,10 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
 
       {/* Observações */}
       <div className="space-y-2">
-        <Label htmlFor="notes" className="text-stone-700">
+        <Label
+          htmlFor="notes"
+          className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase"
+        >
           Observações (opcional)
         </Label>
         <Textarea
@@ -395,7 +428,7 @@ export function BookingStepSummary({ bonusBalance }: BookingStepSummaryProps) {
           {...register("notes")}
           placeholder="Alguma informação adicional para o profissional?"
           onKeyDown={preventSubmit}
-          className="focus:border-principal-400 focus:ring-principal-200 resize-none border-stone-200 transition-all"
+          className="resize-none"
         />
         {errors.notes && (
           <p className="text-destructive text-sm font-medium">

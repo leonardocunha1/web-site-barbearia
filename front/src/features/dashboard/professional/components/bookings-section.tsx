@@ -187,7 +187,9 @@ export function BookingsSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Meus Agendamentos</CardTitle>
+        <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+          Meus agendamentos
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <BookingFilters
@@ -249,9 +251,17 @@ export function BookingsSection() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Alterar Status do Agendamento</DialogTitle>
+            <div className="flex items-center gap-3">
+              <span className="bg-foreground/60 h-px w-8" aria-hidden />
+              <span className="text-foreground/70 font-mono text-[10px] tracking-[0.25em] uppercase">
+                Atualizar status
+              </span>
+            </div>
+            <DialogTitle className="font-display text-foreground text-2xl font-medium tracking-tight">
+              Alterar status
+            </DialogTitle>
             <DialogDescription>
-              Selecione o novo status para este agendamento
+              Selecione o novo status para este agendamento.
             </DialogDescription>
           </DialogHeader>
 

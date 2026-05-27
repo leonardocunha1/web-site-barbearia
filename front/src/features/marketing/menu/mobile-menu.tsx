@@ -10,7 +10,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/shared/components/ui/sheet";
-import { SignInIcon, UserCircleIcon } from "@phosphor-icons/react";
+import {
+  SignInIcon,
+  UserCircleIcon,
+  ScissorsIcon,
+} from "@phosphor-icons/react";
 import { GetUserProfile200User } from "@/api";
 
 export function MobileMenu({
@@ -18,13 +22,12 @@ export function MobileMenu({
 }: {
   user: GetUserProfile200User | null | undefined;
 }) {
-  // Se undefined, ainda está carregando
   if (user === undefined) {
     return (
       <Button
         variant="ghost"
         size="icon"
-        className="text-principal-100 animate-pulse hover:bg-stone-100/50"
+        className="text-foreground hover:bg-foreground/5 animate-pulse"
         disabled
       >
         <Menu className="h-6 w-6" />
@@ -46,7 +49,7 @@ export function MobileMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="text-principal-100 hover:bg-stone-100/50"
+          className="text-foreground hover:bg-foreground/5"
           aria-label="Abrir menu de navegação"
         >
           <Menu className="h-6 w-6" />
@@ -54,52 +57,64 @@ export function MobileMenu({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-72 border-l-stone-200/80 bg-stone-50 p-6"
+        className="border-foreground/15 bg-background flex w-72 flex-col border-l p-6"
       >
-        <SheetHeader className="mb-6">
-          <SheetTitle className="text-left font-serif text-xl text-stone-800">
+        <SheetHeader className="mb-8 space-y-2 p-0 text-left">
+          <div className="flex items-center gap-3">
+            <span className="bg-foreground/60 h-px w-8" aria-hidden />
+            <span className="text-foreground/70 font-mono text-[10px] tracking-[0.25em] uppercase">
+              Menu
+            </span>
+          </div>
+          <SheetTitle className="font-display text-foreground text-2xl font-medium tracking-tight">
             El Bigodón
           </SheetTitle>
         </SheetHeader>
 
-        <nav className="flex flex-col gap-3">
+        <nav className="flex flex-col">
           <Link
             href="/agendar"
-            className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-100 hover:text-amber-700"
+            className="border-foreground/15 group hover:bg-foreground/5 flex items-center justify-between border-t border-b px-1 py-4 transition-colors"
           >
-            ✂️ Agende seu horário
+            <span className="flex items-center gap-3">
+              <ScissorsIcon
+                weight="duotone"
+                className="text-cobre-700 h-5 w-5"
+              />
+              <span className="text-foreground text-sm font-medium">
+                Agendar horário
+              </span>
+            </span>
+            <span className="text-foreground/40 font-mono text-[10px] tracking-widest uppercase group-hover:text-cobre-700">
+              →
+            </span>
           </Link>
+        </nav>
 
-          <div className="my-2 border-t border-stone-200"></div>
-
+        <div className="mt-6">
           {!user ? (
             <Link href="/login">
               <Button
-                variant="default"
+                variant="editorial"
                 size="sm"
-                className="w-full gap-2 bg-amber-600 font-medium text-white hover:bg-amber-700"
+                className="w-full gap-2"
               >
-                <SignInIcon className="size-4" />
+                <SignInIcon className="size-4" weight="bold" />
                 Entrar
               </Button>
             </Link>
           ) : (
             <Link href={dashboardUrl}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 border-stone-300 font-medium text-stone-800 hover:bg-stone-100"
-              >
-                <UserCircleIcon className="size-4" />
+              <Button variant="outline" size="sm" className="w-full gap-2">
+                <UserCircleIcon className="size-4" weight="bold" />
                 Minha conta
               </Button>
             </Link>
           )}
-        </nav>
+        </div>
 
-        {/* Rodapé do menu */}
-        <div className="mt-auto border-t border-stone-200 pt-4 text-xs text-stone-500">
-          © {new Date().getFullYear()} El Bigodón Barber
+        <div className="border-foreground/15 text-foreground/60 mt-auto border-t pt-4 font-mono text-[10px] tracking-widest uppercase">
+          © {new Date().getFullYear()} · El Bigodón
         </div>
       </SheetContent>
     </Sheet>

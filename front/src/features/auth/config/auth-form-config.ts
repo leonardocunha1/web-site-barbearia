@@ -14,8 +14,9 @@ type ClassNames = {
 
 const classNames: ClassNames = {
   input:
-    "bg-stone-800 text-stone-100 border-stone-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-  label: "text-stone-300 font-medium",
+    "h-12 rounded-none bg-background border-foreground/25 text-foreground placeholder:text-foreground/35 focus-visible:border-foreground focus-visible:ring-cobre-600/20 focus-visible:ring-2",
+  label:
+    "font-mono text-[10px] tracking-[0.25em] uppercase text-foreground/60",
 };
 
 export const loginFields: LoginFields = [

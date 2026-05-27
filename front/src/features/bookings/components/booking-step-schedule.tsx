@@ -8,6 +8,7 @@ import { DateInput } from "@/shared/components/form/fields/DateInput";
 import { BookingTimeField } from "./booking-time-field";
 import { useProfessionalSchedule } from "../hooks/use-professional-schedule";
 import { toScheduleDate } from "../utils/booking-formatters";
+import { BookingStepHeader } from "./booking-step-header";
 
 export function BookingStepSchedule() {
   const { watch } = useFormContext<BookingFormValues>();
@@ -45,22 +46,20 @@ export function BookingStepSchedule() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-2xl font-semibold text-stone-900">
-          Escolha data e horário
-        </h3>
-        <p className="text-muted-foreground mt-2">
-          Selecione o melhor dia e horário para seu agendamento
-        </p>
-      </div>
+    <div className="space-y-8">
+      <BookingStepHeader
+        step="03"
+        title="Escolha data e"
+        highlight="horário"
+        description="Selecione o melhor dia e horário para a sua reserva."
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+        <div>
           <DateInput field={dateField} />
         </div>
 
-        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+        <div className="space-y-2">
           <BookingTimeField
             timeSlots={scheduleQuery.data?.timeSlots ?? []}
             isLoading={scheduleQuery.isLoading}
@@ -72,15 +71,15 @@ export function BookingStepSchedule() {
             }
           />
           {!isDateValid && selectedDate && (
-            <p className="text-muted-foreground mt-2 text-xs">
+            <p className="text-foreground/60 text-xs">
               Selecione uma data válida para ver os horários.
             </p>
           )}
           {isHoliday && (
-            <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="border-destructive/30 bg-destructive/5 text-destructive border-l-2 px-3 py-2 text-xs">
               <p className="font-medium">Dia indisponível (feriado).</p>
               {holidayReason && (
-                <p className="mt-1 text-amber-700">Motivo: {holidayReason}</p>
+                <p className="text-destructive/80 mt-1">Motivo: {holidayReason}</p>
               )}
             </div>
           )}
@@ -88,11 +87,11 @@ export function BookingStepSchedule() {
       </div>
 
       {scheduleQuery.data && scheduleQuery.data.timeSlots.length === 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
-          <p className="text-sm font-medium text-amber-900">
+        <div className="border-foreground/20 border border-dashed p-6 text-center">
+          <p className="text-foreground text-sm font-medium">
             Não há horários disponíveis para esta data.
           </p>
-          <p className="text-muted-foreground mt-1 text-xs">
+          <p className="text-foreground/60 mt-1 text-xs">
             Tente selecionar outro dia.
           </p>
         </div>

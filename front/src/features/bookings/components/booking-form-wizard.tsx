@@ -325,12 +325,11 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
     <FormProvider {...methods}>
       <div className={cn("mx-auto w-full max-w-4xl", className)}>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-stone-100 bg-white/90 p-4 backdrop-blur-sm sm:p-6 lg:p-8"
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Stepper responsivo */}
-          <div className="mb-6 sm:mb-8">
+          <div className="mb-8 sm:mb-10">
             <Stepper steps={STEPS} currentStep={currentStep} className="px-0" />
           </div>
 
@@ -357,44 +356,44 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
               </motion.div>
             </AnimatePresence>
 
-            {/* Navegação responsiva */}
-            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Navegação editorial */}
+            <div className="border-foreground/10 mt-10 flex flex-col-reverse gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={handlePrevious}
                 disabled={currentStep === 0 || isNavigating}
                 className={cn(
-                  "flex items-center gap-2 transition-all",
+                  "font-mono text-xs tracking-widest uppercase transition-opacity",
                   currentStep === 0 && "pointer-events-none opacity-0",
                 )}
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Voltar</span>
-                <span className="sm:hidden">Voltar</span>
+                Voltar
               </Button>
 
               <div className="flex flex-1 justify-end">
                 {!isLastStep ? (
                   <Button
                     type="button"
+                    variant="editorial"
+                    size="lg"
                     onClick={handleNext}
                     disabled={!isStepValid || isNavigating}
-                    className={cn(
-                      "bg-principal-600 hover:bg-principal-700 flex w-full items-center gap-2 sm:w-auto",
-                      "transition-all duration-200",
-                      isStepValid && "animate-pulse-slow",
-                    )}
+                    className="group w-full gap-3 sm:w-auto"
                   >
                     <span>Próximo</span>
-                    <ArrowRight className="h-4 w-4" />
-                    {isNavigating && (
+                    {isNavigating ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     )}
                   </Button>
                 ) : (
                   <Button
                     type="button"
+                    variant="editorial"
+                    size="lg"
                     onClick={() => {
                       handleSubmit(handleCreateBooking)();
                     }}
@@ -404,24 +403,18 @@ export function BookingFormWizard({ className }: BookingFormWizardProps) {
                       !isValid ||
                       isHoliday
                     }
-                    className="from-principal-600 to-principal-500 hover:from-principal-700 hover:to-principal-600 relative w-full overflow-hidden bg-gradient-to-r sm:w-auto"
+                    className="w-full gap-3 sm:w-auto"
                   >
                     {isSubmitting || createBooking.isPending ? (
-                      <span className="flex items-center gap-2">
+                      <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="hidden sm:inline">
-                          Criando reserva...
-                        </span>
-                        <span className="sm:hidden">Criando...</span>
-                      </span>
+                        <span>Criando reserva</span>
+                      </>
                     ) : (
-                      <span className="flex items-center gap-2">
+                      <>
                         <CheckCircle2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                          Confirmar reserva
-                        </span>
-                        <span className="sm:hidden">Confirmar</span>
-                      </span>
+                        <span>Confirmar reserva</span>
+                      </>
                     )}
                   </Button>
                 )}

@@ -28,6 +28,10 @@ import {
   formatWeekDay,
 } from "../utils/business-hours-formatters";
 import type { BusinessHoursFormValues } from "../schemas/business-hours-form-schema";
+import { PlusIcon } from "@phosphor-icons/react";
+
+const titleClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
 
 const mapProfessionalId = (
   userId?: string,
@@ -194,7 +198,7 @@ export function BusinessHoursSection({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Horarios de funcionamento</CardTitle>
+          <CardTitle className={titleClass}>Horários de funcionamento</CardTitle>
         </CardHeader>
         <CardContent>
           <LoadingState
@@ -210,12 +214,12 @@ export function BusinessHoursSection({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Horarios de funcionamento</CardTitle>
+          <CardTitle className={titleClass}>Horários de funcionamento</CardTitle>
         </CardHeader>
         <CardContent>
           <ErrorState
             type="warning"
-            message="Nao foi possivel identificar o profissional logado."
+            message="Não foi possível identificar o profissional logado."
           />
         </CardContent>
       </Card>
@@ -225,8 +229,16 @@ export function BusinessHoursSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Horarios de funcionamento</CardTitle>
-        <Button onClick={handleCreate}>Adicionar horario</Button>
+        <CardTitle className={titleClass}>Horários de funcionamento</CardTitle>
+        <Button
+          onClick={handleCreate}
+          variant="editorial"
+          size="sm"
+          className="gap-2"
+        >
+          <PlusIcon weight="bold" className="h-4 w-4" />
+          Adicionar horário
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {listQuery.isLoading ? (
@@ -234,14 +246,16 @@ export function BusinessHoursSection({
         ) : listQuery.isError ? (
           <ErrorState
             type="error"
-            message="Nao foi possivel carregar os horarios."
+            message="Não foi possível carregar os horários."
           />
         ) : (
           <GenericTable
             data={rows}
             columns={columns}
             rowKey="id"
-            emptyMessage="Nenhum horario cadastrado"
+            emptyMessage="Nenhum horário cadastrado"
+            className="border-foreground/15 border"
+            headerClassName="bg-foreground/[0.04]"
             actions={(row) => (
               <div className="flex items-center gap-2">
                 <Button
@@ -254,7 +268,7 @@ export function BusinessHoursSection({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-red-600"
+                  className="text-destructive hover:text-destructive"
                   onClick={() =>
                     deleteBusinessHour.mutate({ businessHoursId: row.id })
                   }

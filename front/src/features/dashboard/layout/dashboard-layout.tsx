@@ -15,6 +15,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { ChevronDown, Menu } from "lucide-react";
+import { SignOutIcon } from "@phosphor-icons/react";
 import { useLogoutUser } from "@/api";
 import { useUser } from "@/contexts/user";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -47,18 +48,15 @@ export function DashboardLayout({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Se não receber currentTab do parent, usa o valor da URL ou default
   const activeTab = currentTab || searchParams.get("tab") || defaultTab;
 
   const { setUser } = useUser();
   const { mutateAsync: logout } = useLogoutUser();
 
-  // Função interna para mudar tab - usa a do parent se existir
   const handleTabChange = (newTab: string) => {
     if (onTabChange) {
       onTabChange(newTab);
     } else {
-      // fallback: atualiza a URL sem re-render global
       const params = new URLSearchParams(searchParams);
       params.set("tab", newTab);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -80,37 +78,48 @@ export function DashboardLayout({
   };
 
   return (
-    <div className="w-full flex-1 space-y-4 px-4 lg:px-0">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{title}</h1>
+    <div className="w-full flex-1 space-y-8 px-4 lg:px-0">
+      {/* Header editorial */}
+      <header className="border-foreground/15 flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <span className="bg-foreground/60 h-px w-8" aria-hidden />
+            <span className="text-foreground/70 font-mono text-[10px] tracking-[0.25em] uppercase">
+              Painel · El Bigodón
+            </span>
+          </div>
+          <h1 className="font-display text-foreground text-3xl leading-tight font-medium tracking-tight sm:text-4xl">
+            {title}
+          </h1>
+        </div>
         <div className="flex items-center gap-4">
           {iconGroup}
           <Button
             onClick={handleLogout}
-            variant="destructive"
-            className="cursor-pointer gap-2"
+            variant="outline"
+            size="sm"
+            className="gap-2"
           >
+            <SignOutIcon className="h-4 w-4" weight="bold" />
             Sair
           </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Tabs controladas por searchParams */}
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="space-y-4"
+        className="space-y-6"
       >
         <div className="flex items-center gap-2">
           {/* Tabs desktop */}
           <ScrollArea className="hidden w-full md:block">
-            <TabsList className="inline-flex flex-nowrap bg-stone-200">
+            <TabsList className="bg-transparent inline-flex flex-nowrap gap-0 border-b border-foreground/10 p-0 h-auto rounded-none">
               {tabs.map((tabItem) => (
                 <TabsTrigger
                   key={tabItem.value}
                   value={tabItem.value}
-                  className="cursor-pointer"
+                  className="relative cursor-pointer rounded-none border-0 bg-transparent px-4 py-2.5 font-mono text-[11px] tracking-[0.18em] uppercase text-foreground/60 hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-cobre-600 after:scale-x-0 after:origin-left after:transition-transform data-[state=active]:after:scale-x-100"
                 >
                   {tabItem.label}
                 </TabsTrigger>
@@ -144,7 +153,6 @@ export function DashboardLayout({
           </div>
         </div>
 
-        {/* Conteúdo das abas */}
         {tabs.map((tabItem) => (
           <TabsContent key={tabItem.value} value={tabItem.value}>
             {tabItem.content}

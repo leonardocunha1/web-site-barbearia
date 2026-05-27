@@ -1,153 +1,187 @@
 "use client";
 
 import Image from "next/image";
-import { cn } from "@/shared/utils/utils";
+import Link from "next/link";
 import { motion, easeOut } from "framer-motion";
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
+
+type Service = {
+  id: number;
+  title: string;
+  subtitle: string;
+};
+
+const services: Service[] = [
+  {
+    id: 1,
+    title: "Corte de Tesoura",
+    subtitle: "Precisão artesanal, técnica tradicional.",
+  },
+  {
+    id: 2,
+    title: "Corte Tradicional",
+    subtitle: "Máquina e tesoura — acabamento impecável.",
+  },
+  {
+    id: 3,
+    title: "Barba Premium",
+    subtitle: "Toalha quente, navalha, óleos da casa.",
+  },
+  {
+    id: 4,
+    title: "Combo Bigodón",
+    subtitle: "Corte + barba completos, sem pressa.",
+  },
+  {
+    id: 5,
+    title: "Corte Infantil",
+    subtitle: "Para os pequenos cavalheiros da casa.",
+  },
+];
+
+const gallery = [
+  { src: "/cortes/imagem-3.jpg", alt: "Detalhe de corte profissional" },
+  { src: "/cortes/corte-2.jpg", alt: "Acabamento clássico" },
+  { src: "/cortes/corte-1.jpg", alt: "Barbeiro em ação" },
+];
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: easeOut },
+  },
+};
 
 export default function Services() {
-  const services = [
-    {
-      id: 1,
-      title: "Corte de Tesoura",
-      description: "Cortes precisos com técnicas tradicionais de tesoura",
-      image: "/cortes/imagem-3.jpg",
-      position: "object-center",
-      icon: "✂️",
-    },
-    {
-      id: 2,
-      title: "Corte Tradicional",
-      description:
-        "O tradicional que nunca sai de moda, com acabamento impecável",
-      image: "/cortes/corte-2.jpg",
-      position: "object-center",
-      icon: "💈",
-    },
-    {
-      id: 3,
-      title: "Barba Premium",
-      description:
-        "Tratamento completo com toalha quente e produtos exclusivos",
-      image: "/cortes/corte-1.jpg",
-      position: "object-center",
-      icon: "🧴",
-    },
-    {
-      id: 5,
-      title: "Corte Infantil",
-      description: "Cortes para os Bigodons mais novos, com carinho e atenção",
-      image: "/cortes/corte-5.jpg",
-      position: "object-center",
-      icon: "🧒",
-    },
-  ];
-
-  // Variants para animação
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: { staggerChildren: 0.15 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: 100 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: easeOut } },
-  };
-
   return (
     <motion.section
+      id="servicos"
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, amount: 0.15 }}
       variants={containerVariants}
-      className="pt-16 pb-16 sm:pt-0 sm:pb-0"
+      className="py-24 sm:py-32"
     >
       <div className="mx-auto max-w-7xl">
-        {/* Cabeçalho */}
-        <motion.div
-          className="mb-8 text-center md:mb-16"
+        {/* Editorial header */}
+        <motion.header
           variants={itemVariants}
+          className="grid grid-cols-12 gap-x-4 gap-y-6 md:gap-x-8"
         >
-          <h4 className="text-base font-semibold text-stone-600 uppercase">
-            A Arte da Barbearia
-          </h4>
-          <h2 className="font-calistoga pt-5 text-5xl font-bold text-stone-900 sm:text-6xl">
-            Nossos Serviços
-            <span className="from-principal-500 to-principal-600 bg-gradient-to-r bg-clip-text pl-2 text-transparent">
-              !
+          <div className="col-span-12 flex items-center gap-3 md:col-span-4">
+            <span className="bg-foreground h-px w-8" aria-hidden />
+            <span className="text-foreground/70 font-mono text-[10px] tracking-[0.3em] uppercase">
+              A carta · Cap. 02
             </span>
+          </div>
+          <h2 className="font-display text-foreground col-span-12 text-5xl leading-[0.95] font-medium tracking-tight md:col-span-8 md:text-7xl lg:text-[5.5rem]">
+            Nossos{" "}
+            <span className="text-cobre-700 italic">serviços</span>,
+            <br className="hidden md:block" /> sem floreio.
           </h2>
-          <p className="mx-auto mt-4 text-base text-stone-600">
-            Cada corte é uma assinatura, cada barba é uma obra-prima. Conheça
-            nossos serviços exclusivos.
+          <p className="text-foreground/70 col-span-12 max-w-[52ch] text-base md:col-span-7 md:col-start-6 md:text-lg">
+            Cinco serviços, executados com método. Tempo certo, preço justo,
+            mão firme. Sem upsell, sem pressa, sem desculpas.
           </p>
-        </motion.div>
+        </motion.header>
 
-        {/* Grid de Serviços */}
-        <motion.div
-          className="grid auto-rows-[200px] grid-cols-1 sm:grid-cols-3 lg:auto-rows-[220px] lg:grid-cols-4"
+        {/* Printed menu */}
+        <motion.ol
           variants={containerVariants}
+          className="border-foreground/20 mt-16 border-t md:mt-20"
         >
-          {services.map((service, index) => {
-            const layoutClasses = cn(
-              "group relative overflow-hidden bg-stone-900",
-              {
-                "sm:col-span-2 sm:row-span-2": index === 0,
-                "sm:col-start-3 sm:row-span-1": index === 1,
-                "sm:col-start-3 sm:row-start-2 sm:row-span-1 lg:col-start-3 lg:col-span-2":
-                  index === 2,
-                "sm:hidden lg:block lg:col-span-1": index === 3,
-              },
-            );
-
-            return (
-              <motion.div
-                key={service.id}
-                className={layoutClasses}
-                variants={itemVariants}
-              >
-                <div className="relative h-full w-full">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    className={cn(
-                      "z-0 object-cover transition-transform duration-500 ease-out",
-                      service.position || "object-center",
-                    )}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        {/* Lista de serviços */}
-        <motion.div
-          className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3"
-          variants={containerVariants}
-        >
-          {services.slice(0, 3).map((service) => (
-            <motion.div
+          {services.map((service, index) => (
+            <motion.li
               key={service.id}
-              className="group cursor-pointer rounded-xl bg-white/20 p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/50 hover:shadow-lg"
               variants={itemVariants}
+              className="group border-foreground/15 hover:bg-foreground/[0.025] relative border-b transition-colors"
             >
-              <div className="flex flex-col items-center gap-2">
-                <span className="text-principal-600 text-2xl">
-                  {service.icon}
+              <div className="flex items-baseline gap-4 px-1 py-7 sm:gap-8 sm:py-8">
+                {/* Number */}
+                <span className="text-foreground/40 w-8 shrink-0 font-mono text-[10px] tracking-[0.25em] uppercase sm:w-12">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-                <h3 className="font-calistoga mb-1 text-xl text-stone-900">
-                  {service.title}
-                </h3>
-                <p className="text-center text-sm leading-relaxed text-stone-600 transition-colors duration-300 group-hover:text-stone-800">
-                  {service.description}
-                </p>
+
+                {/* Title + subtitle */}
+                <div className="flex-1">
+                  <h3 className="font-display text-foreground text-2xl leading-tight font-medium tracking-tight sm:text-3xl md:text-4xl">
+                    {service.title}
+                  </h3>
+                  <p className="text-foreground/65 mt-1.5 text-sm sm:text-base">
+                    {service.subtitle}
+                  </p>
+                </div>
               </div>
-            </motion.div>
+            </motion.li>
           ))}
+        </motion.ol>
+
+        {/* Footnote + CTA */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end"
+        >
+          <p className="text-foreground/55 max-w-md font-mono text-[10px] leading-relaxed tracking-[0.18em] uppercase">
+            Cada barbeiro define o seu próprio preço e duração.
+            <br />
+            Confira valor e disponibilidade no agendamento.
+          </p>
+          <Link
+            href="/agendar"
+            className="group inline-flex items-center gap-2 font-mono text-xs tracking-[0.25em] uppercase underline-offset-[6px] hover:underline"
+          >
+            reservar minha cadeira
+            <ArrowUpRightIcon
+              weight="bold"
+              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </Link>
+        </motion.div>
+
+        {/* Gallery strip */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-20 grid grid-cols-12 gap-2 sm:gap-3 md:mt-28"
+        >
+          <div className="bg-foreground relative col-span-12 aspect-[5/4] overflow-hidden sm:col-span-7 sm:aspect-[4/3]">
+            <Image
+              src={gallery[0].src}
+              alt={gallery[0].alt}
+              fill
+              sizes="(max-width: 640px) 100vw, 60vw"
+              className="object-cover transition-transform duration-[1200ms] ease-out hover:scale-[1.04]"
+            />
+            <div className="text-background/85 absolute bottom-4 left-4 font-mono text-[10px] tracking-[0.3em] uppercase">
+              Pl. 001 / Detalhe
+            </div>
+          </div>
+
+          <div className="col-span-12 grid grid-cols-2 gap-2 sm:col-span-5 sm:grid-cols-1 sm:gap-3">
+            {gallery.slice(1).map((g, i) => (
+              <div
+                key={g.src}
+                className="bg-foreground relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:flex-1"
+              >
+                <Image
+                  src={g.src}
+                  alt={g.alt}
+                  fill
+                  sizes="(max-width: 640px) 50vw, 35vw"
+                  className="object-cover transition-transform duration-[1200ms] ease-out hover:scale-[1.04]"
+                />
+                <div className="text-background/85 absolute bottom-3 left-3 font-mono text-[10px] tracking-[0.3em] uppercase">
+                  Pl. {String(i + 2).padStart(3, "0")}
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </motion.section>

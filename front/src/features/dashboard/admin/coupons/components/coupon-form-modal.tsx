@@ -118,14 +118,14 @@ export function CouponFormModal({
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="code">Código</Label>
+            <Label htmlFor="code" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Código</Label>
             <Input id="code" {...register("code")} />
             {errors.code && (
               <p className="text-destructive text-xs">{errors.code.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label>Tipo</Label>
+            <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Tipo</Label>
             <Select
               value={watch("type")}
               onValueChange={(v) =>
@@ -149,7 +149,7 @@ export function CouponFormModal({
         <div className="grid gap-4 sm:grid-cols-2">
           {couponType !== "FREE" && (
             <div className="space-y-2">
-              <Label htmlFor="value">Valor</Label>
+              <Label htmlFor="value" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Valor</Label>
               <Input
                 id="value"
                 type="number"
@@ -164,7 +164,7 @@ export function CouponFormModal({
             </div>
           )}
           <div className="space-y-2">
-            <Label>Escopo</Label>
+            <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Escopo</Label>
             <Select
               value={scope}
               onValueChange={(v) =>
@@ -186,7 +186,7 @@ export function CouponFormModal({
         </div>
 
         <div className="space-y-2">
-          <Label>Tipo de expiração</Label>
+          <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Tipo de expiração</Label>
           <Select
             value={expirationType}
             onValueChange={(v) =>
@@ -210,7 +210,7 @@ export function CouponFormModal({
           {expirationType !== "QUANTITY" && (
             <>
               <div className="space-y-2">
-                <Label>Data início</Label>
+                <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Data início</Label>
                 <Controller
                   name="startDate"
                   control={control}
@@ -223,7 +223,7 @@ export function CouponFormModal({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Data fim *</Label>
+                <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Data fim *</Label>
                 <Controller
                   name="endDate"
                   control={control}
@@ -245,7 +245,7 @@ export function CouponFormModal({
 
           {expirationType !== "DATE" && (
             <div className="space-y-2">
-              <Label htmlFor="maxUses">Máximo de usos *</Label>
+              <Label htmlFor="maxUses" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Máximo de usos *</Label>
               <Input
                 id="maxUses"
                 type="number"
@@ -262,7 +262,7 @@ export function CouponFormModal({
 
         {scope === "SERVICE" && (
           <div className="space-y-2">
-            <Label>Serviço</Label>
+            <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Serviço</Label>
             <Select
               value={watch("serviceId")}
               onValueChange={(v) =>
@@ -290,7 +290,7 @@ export function CouponFormModal({
 
         {scope === "PROFESSIONAL" && (
           <div className="space-y-2">
-            <Label>Profissional</Label>
+            <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Profissional</Label>
             <Select
               value={watch("professionalId")}
               onValueChange={(v) =>
@@ -317,25 +317,31 @@ export function CouponFormModal({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="description">Descrição</Label>
+          <Label htmlFor="description" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Descrição</Label>
           <Input id="description" {...register("description")} />
         </div>
 
         {mode === "edit" && (
-          <div className="flex items-center gap-3">
+          <label className="border-foreground/15 hover:border-foreground/40 flex cursor-pointer items-center gap-3 border-l-2 px-4 py-2 transition-colors">
             <Checkbox
               checked={Boolean(watch("active"))}
               onCheckedChange={(v) => setValue("active", Boolean(v))}
+              className="data-[state=checked]:bg-foreground data-[state=checked]:border-foreground data-[state=checked]:text-background"
             />
-            <Label>Ativo</Label>
-          </div>
+            <span className="text-foreground text-sm font-medium">Ativo</span>
+          </label>
         )}
 
-        <div className="flex items-center justify-end gap-3 pt-4">
-          <Button type="button" variant="ghost" onClick={onClose}>
+        <div className="border-foreground/10 flex items-center justify-end gap-3 border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            className="font-mono text-xs tracking-widest uppercase"
+          >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" variant="editorial" size="sm" disabled={isSaving}>
             {isSaving
               ? "Salvando..."
               : mode === "create"

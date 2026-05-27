@@ -4,7 +4,12 @@ import { DashboardShell } from "@/features/dashboard/layout/dashboard-shell";
 import { LoadingState } from "@/shared/components/ui/loading-state";
 import { useLogout } from "@/shared/hooks/useLogout";
 import { useRouteProtection } from "@/shared/hooks/useRouteProtection";
-import { LayoutDashboard, Users, Scissors, Ticket } from "lucide-react";
+import {
+  ChartBarIcon,
+  UsersIcon,
+  ScissorsIcon,
+  TicketIcon,
+} from "@phosphor-icons/react";
 
 export default function AdminDashboardLayoutClient({
   children,
@@ -16,7 +21,7 @@ export default function AdminDashboardLayoutClient({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-50">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <LoadingState message="Carregando painel" size="lg" />
       </div>
     );
@@ -29,22 +34,22 @@ export default function AdminDashboardLayoutClient({
   const navigation = [
     {
       href: "/painel/admin",
-      icon: LayoutDashboard,
-      label: "Visão Geral",
+      icon: ChartBarIcon,
+      label: "Visão geral",
     },
     {
       href: "/painel/admin/professionals",
-      icon: Users,
+      icon: UsersIcon,
       label: "Funcionários",
     },
     {
       href: "/painel/admin/services",
-      icon: Scissors,
+      icon: ScissorsIcon,
       label: "Serviços",
     },
     {
       href: "/painel/admin/coupons",
-      icon: Ticket,
+      icon: TicketIcon,
       label: "Cupons",
     },
   ];

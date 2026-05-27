@@ -92,7 +92,7 @@ export function BusinessHoursFormModal({
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
         <div className="space-y-2">
-          <Label>Dia da semana</Label>
+          <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Dia da semana</Label>
           <Select
             value={String(methods.watch("dayOfWeek"))}
             onValueChange={(value) =>
@@ -126,7 +126,7 @@ export function BusinessHoursFormModal({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="opensAt">Abertura</Label>
+            <Label htmlFor="opensAt" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Abertura</Label>
             <Input id="opensAt" type="time" {...register("opensAt")} />
             {errors.opensAt && (
               <p className="text-destructive text-sm font-medium">
@@ -135,7 +135,7 @@ export function BusinessHoursFormModal({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="closesAt">Fechamento</Label>
+            <Label htmlFor="closesAt" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Fechamento</Label>
             <Input id="closesAt" type="time" {...register("closesAt")} />
             {errors.closesAt && (
               <p className="text-destructive text-sm font-medium">
@@ -147,7 +147,7 @@ export function BusinessHoursFormModal({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="breakStart">Inicio da pausa</Label>
+            <Label htmlFor="breakStart" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Inicio da pausa</Label>
             <Input id="breakStart" type="time" {...register("breakStart")} />
             {errors.breakStart && (
               <p className="text-destructive text-sm font-medium">
@@ -156,7 +156,7 @@ export function BusinessHoursFormModal({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="breakEnd">Fim da pausa</Label>
+            <Label htmlFor="breakEnd" className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">Fim da pausa</Label>
             <Input id="breakEnd" type="time" {...register("breakEnd")} />
             {errors.breakEnd && (
               <p className="text-destructive text-sm font-medium">
@@ -166,11 +166,16 @@ export function BusinessHoursFormModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3">
-          <Button type="button" variant="ghost" onClick={onClose}>
+        <div className="border-foreground/10 flex items-center justify-end gap-3 border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            className="font-mono text-xs tracking-widest uppercase"
+          >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" variant="editorial" size="sm" disabled={isSaving}>
             {isSaving
               ? "Salvando..."
               : mode === "create"

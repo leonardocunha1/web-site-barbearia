@@ -1,4 +1,5 @@
 import { Button } from "@/shared/components/ui/button";
+import { PlusIcon } from "@phosphor-icons/react";
 
 interface ProfessionalActionsProps {
   onAdd: () => void;
@@ -10,13 +11,16 @@ export function ProfessionalActions({
   isPending,
 }: ProfessionalActionsProps) {
   return (
-    <div>
+    <div className="flex justify-end">
       <Button
         onClick={onAdd}
         disabled={isPending}
-        className="bg-principal-500 hover:bg-principal-600 cursor-pointer text-white"
+        variant="editorial"
+        size="sm"
+        className="gap-2"
       >
-        Novo Profissional
+        <PlusIcon weight="bold" className="h-4 w-4" />
+        Novo profissional
       </Button>
     </div>
   );

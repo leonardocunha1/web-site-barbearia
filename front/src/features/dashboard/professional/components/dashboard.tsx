@@ -45,17 +45,27 @@ export function ProfessionalDashboard() {
   //   return `Atualizado há ${Math.floor(diffSeconds / 60)}m`;
   // };
 
+  const tabTriggerClass =
+    "relative cursor-pointer rounded-none border-0 bg-transparent px-4 py-2.5 font-mono text-[11px] tracking-[0.18em] uppercase text-foreground/60 hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-cobre-600 after:scale-x-0 after:origin-left after:transition-transform data-[state=active]:after:scale-x-100";
+
   return (
-    <div className="space-y-6">
-      {/* Header com refresh button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Olá, {data?.professional?.name || "Profissional"}
+    <div className="space-y-8">
+      {/* Header editorial */}
+      <header className="border-foreground/15 flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <span className="bg-foreground/60 h-px w-8" aria-hidden />
+            <span className="text-foreground/70 font-mono text-[10px] tracking-[0.25em] uppercase">
+              Painel profissional · auto-refresh 30s
+            </span>
+          </div>
+          <h1 className="font-display text-foreground text-3xl leading-tight font-medium tracking-tight sm:text-4xl">
+            Olá,{" "}
+            <span className="text-cobre-700 italic">
+              {data?.professional?.name || "Profissional"}
+            </span>
+            .
           </h1>
-          <p className="mt-1 text-sm text-stone-500">
-            Atualização automática a cada 30s
-          </p>
         </div>
         <Button
           onClick={handleManualRefresh}
@@ -67,16 +77,25 @@ export function ProfessionalDashboard() {
           <RotateCw className="h-4 w-4" />
           Atualizar
         </Button>
-      </div>
+      </header>
 
-      {/* Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5 gap-0">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="bookings">Agendamentos</TabsTrigger>
-          <TabsTrigger value="analytics">Análises</TabsTrigger>
-          <TabsTrigger value="holidays">Feriados</TabsTrigger>
-          <TabsTrigger value="settings">Configurações</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="bg-transparent inline-flex flex-wrap gap-0 border-b border-foreground/10 p-0 h-auto rounded-none w-full justify-start">
+          <TabsTrigger value="overview" className={tabTriggerClass}>
+            Visão Geral
+          </TabsTrigger>
+          <TabsTrigger value="bookings" className={tabTriggerClass}>
+            Agendamentos
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className={tabTriggerClass}>
+            Análises
+          </TabsTrigger>
+          <TabsTrigger value="holidays" className={tabTriggerClass}>
+            Feriados
+          </TabsTrigger>
+          <TabsTrigger value="settings" className={tabTriggerClass}>
+            Configurações
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

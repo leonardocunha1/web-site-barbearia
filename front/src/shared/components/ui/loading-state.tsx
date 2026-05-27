@@ -14,12 +14,12 @@ const sizeStyles = {
     text: "text-xs",
   },
   md: {
-    spinner: "h-9 w-9 border-4",
+    spinner: "h-9 w-9 border-2",
     dot: "h-2.5 w-2.5",
     text: "text-sm",
   },
   lg: {
-    spinner: "h-12 w-12 border-4",
+    spinner: "h-12 w-12 border-2",
     dot: "h-3 w-3",
     text: "text-base",
   },
@@ -38,26 +38,33 @@ export function LoadingState({
     <div
       className={cn(
         "flex",
-        isInline ? "items-center gap-2" : "flex-col items-center gap-2",
+        isInline ? "items-center gap-2" : "flex-col items-center gap-3",
         className,
       )}
     >
       <div className="relative">
         <div
           className={cn(
-            "animate-spin rounded-full border-stone-200 border-t-principal-500",
+            "border-foreground/15 border-t-cobre-600 animate-spin rounded-full",
             styles.spinner,
           )}
         />
         <div
           className={cn(
-            "absolute inset-0 m-auto animate-pulse rounded-full bg-principal-500/70",
+            "bg-cobre-600/70 absolute inset-0 m-auto animate-pulse rounded-full",
             styles.dot,
           )}
         />
       </div>
       {message ? (
-        <p className={cn("text-principal-600", styles.text)}>{message}</p>
+        <p
+          className={cn(
+            "text-foreground/70 font-mono tracking-widest uppercase",
+            styles.text,
+          )}
+        >
+          {message}
+        </p>
       ) : null}
     </div>
   );

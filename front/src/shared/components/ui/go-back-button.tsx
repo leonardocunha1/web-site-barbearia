@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@phosphor-icons/react";
 
 interface GoBackButtonProps {
   href?: string;
@@ -22,9 +22,12 @@ export function GoBackButton({ href, label = "Voltar" }: GoBackButtonProps) {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-2 text-sm text-stone-600 transition hover:text-stone-900"
+      className="text-foreground/70 hover:text-foreground group flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase transition-colors"
     >
-      <ArrowLeft className="h-4 w-4" />
+      <ArrowLeftIcon
+        weight="bold"
+        className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5"
+      />
       {label}
     </button>
   );

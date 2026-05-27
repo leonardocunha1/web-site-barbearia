@@ -93,11 +93,11 @@ export function RecentServices({
       rowKey="id"
       onRowClick={() => {}}
       rowClassName={(service) =>
-        service.status === "Cancelado" ? "bg-rose-50" : ""
+        service.status === "Cancelado" ? "bg-destructive/5" : ""
       }
       emptyMessage="Nenhum serviço agendado recentemente"
-      className="rounded-lg border"
-      headerClassName="bg-gray-50"
+      className="border-foreground/15 border"
+      headerClassName="bg-foreground/[0.04]"
     />
   );
 }

@@ -27,15 +27,17 @@ import { BookingTimeField } from "./booking-time-field";
 import { toScheduleDate } from "../utils/booking-formatters";
 import { useBookingDraftStore } from "../store/booking-draft-store";
 import {
-  Sparkles,
-  User,
-  Calendar,
-  Clock,
-  Scissors,
-  Tag,
-  FileText,
-} from "lucide-react";
+  SparkleIcon,
+  UserCircleIcon,
+  CalendarIcon,
+  ClockIcon,
+  ScissorsIcon,
+  TagIcon,
+  NoteIcon,
+} from "@phosphor-icons/react";
 import { useProfessionalSchedule } from "../hooks/use-professional-schedule";
+import { cn } from "@/shared/utils/utils";
+import { FormError } from "@/shared/components/form/form-error";
 
 const professionalSelectField = {
   name: "professionalId",
@@ -53,8 +55,22 @@ const dateField = {
   required: true,
 };
 
+const labelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase flex items-center gap-2";
+
+const requiredMark = (
+  <span className="text-cobre-700" aria-hidden>
+    *
+  </span>
+);
+
 type BookingFormProps = {
   className?: string;
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0 },
 };
 
 export function BookingForm({ className }: BookingFormProps) {
@@ -197,7 +213,6 @@ export function BookingForm({ className }: BookingFormProps) {
     [],
   );
 
-  // Query para obter horários disponíveis
   const scheduleQuery = useProfessionalSchedule({
     professionalId,
     date: selectedDate,
@@ -220,18 +235,16 @@ export function BookingForm({ className }: BookingFormProps) {
     <div className={className ?? "space-y-6"}>
       {/* Profissional */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="space-y-2"
       >
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-stone-500" />
-          <Label className="text-sm font-medium text-stone-700">
-            {professionalSelectField.label}{" "}
-            <span className="text-principal-600">*</span>
-          </Label>
-        </div>
+        <Label className={labelClass}>
+          <UserCircleIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+          {professionalSelectField.label} {requiredMark}
+        </Label>
 
         {professionalsQuery.isLoading ? (
           <Skeleton className="h-11 w-full" />
@@ -245,8 +258,7 @@ export function BookingForm({ className }: BookingFormProps) {
           >
             <SelectTrigger
               className={cn(
-                "h-11 w-full border-stone-200 bg-white/50 transition-all",
-                "focus:border-principal-400 focus:ring-principal-200",
+                "h-11 w-full",
                 errors.professionalId &&
                   "border-destructive focus:border-destructive",
               )}
@@ -254,15 +266,10 @@ export function BookingForm({ className }: BookingFormProps) {
               <SelectValue placeholder={professionalSelectField.placeholder} />
             </SelectTrigger>
             <SelectContent>
-              {professionalOptions.map((option, index) => (
-                <motion.div
-                  key={option.value}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <SelectItem value={option.value}>{option.label}</SelectItem>
-                </motion.div>
+              {professionalOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -272,29 +279,22 @@ export function BookingForm({ className }: BookingFormProps) {
 
       {/* Data e Horário */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.1, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="grid gap-4 md:grid-cols-2"
       >
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-stone-500" />
-            <Label className="text-sm font-medium text-stone-700">
-              Data <span className="text-principal-600">*</span>
-            </Label>
-          </div>
+          <Label className={labelClass}>
+            <CalendarIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+            Data {requiredMark}
+          </Label>
           <DateInput field={dateFieldState} />
           <FormError message={errors.date?.message} />
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-stone-500" />
-            <Label className="text-sm font-medium text-stone-700">
-              Horário <span className="text-principal-600">*</span>
-            </Label>
-          </div>
           <BookingTimeField
             timeSlots={scheduleQuery.data?.timeSlots ?? []}
             isLoading={scheduleQuery.isLoading}
@@ -307,15 +307,17 @@ export function BookingForm({ className }: BookingFormProps) {
             error={errors.time?.message}
           />
           {!isDateValid && selectedDate && (
-            <p className="text-xs text-amber-600">
+            <p className="text-foreground/60 text-xs">
               Selecione uma data válida para ver os horários.
             </p>
           )}
           {isHoliday && (
-            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="border-destructive/30 bg-destructive/5 text-destructive border-l-2 px-3 py-2 text-xs">
               <p className="font-medium">Dia indisponível (feriado).</p>
               {holidayReason && (
-                <p className="mt-1 text-amber-700">Motivo: {holidayReason}</p>
+                <p className="text-destructive/80 mt-1">
+                  Motivo: {holidayReason}
+                </p>
               )}
             </div>
           )}
@@ -324,43 +326,40 @@ export function BookingForm({ className }: BookingFormProps) {
 
       {/* Serviços */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="space-y-2"
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.15, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="space-y-3"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Scissors className="h-4 w-4 text-stone-500" />
-            <Label className="text-sm font-medium text-stone-700">
-              Serviços <span className="text-principal-600">*</span>
-            </Label>
-          </div>
+          <Label className={labelClass}>
+            <ScissorsIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+            Serviços {requiredMark}
+          </Label>
           {totalDurationMinutes > 0 && (
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
+            <span className="border-foreground/15 text-foreground/70 border px-2 py-0.5 font-mono text-[10px] tracking-widest uppercase">
               {formatDuration(totalDurationMinutes)}
             </span>
           )}
         </div>
 
         {servicesQuery.isLoading && professionalId ? (
-          <div className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-lg border border-stone-200 bg-white p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <Skeleton className="h-4 w-4 rounded" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                    </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="border-foreground/15 border p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <Skeleton className="h-4 w-4" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         ) : (
           <BookingServicesField
@@ -374,21 +373,17 @@ export function BookingForm({ className }: BookingFormProps) {
 
       {/* Observações e Cupom */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="grid gap-4 md:grid-cols-2"
       >
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-stone-500" />
-            <Label
-              htmlFor="notes"
-              className="text-sm font-medium text-stone-700"
-            >
-              Observações
-            </Label>
-          </div>
+          <Label htmlFor="notes" className={labelClass}>
+            <NoteIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+            Observações
+          </Label>
           <Textarea
             id="notes"
             rows={3}
@@ -399,25 +394,16 @@ export function BookingForm({ className }: BookingFormProps) {
                 e.preventDefault();
               }
             }}
-            className={cn(
-              "resize-none border-stone-200 bg-white/50 transition-all",
-              "focus:border-principal-400 focus:ring-principal-200",
-              "placeholder:text-stone-400",
-            )}
+            className="resize-none"
           />
           <FormError message={errors.notes?.message} />
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Tag className="h-4 w-4 text-stone-500" />
-            <Label
-              htmlFor="couponCode"
-              className="text-sm font-medium text-stone-700"
-            >
-              Cupom
-            </Label>
-          </div>
+          <Label htmlFor="couponCode" className={labelClass}>
+            <TagIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+            Cupom
+          </Label>
           <Input
             id="couponCode"
             {...register("couponCode")}
@@ -429,15 +415,13 @@ export function BookingForm({ className }: BookingFormProps) {
               }
             }}
             className={cn(
-              "h-11 border-stone-200 bg-white/50 transition-all",
-              "focus:border-principal-400 focus:ring-principal-200",
-              "placeholder:text-stone-400",
-              useBonusPoints && "bg-stone-100 opacity-60",
+              "h-11",
+              useBonusPoints && "bg-muted opacity-60",
             )}
           />
           <FormError message={errors.couponCode?.message} />
           {useBonusPoints && (
-            <p className="text-xs text-amber-600">
+            <p className="text-foreground/60 text-xs">
               Desative os pontos para usar cupom.
             </p>
           )}
@@ -445,16 +429,17 @@ export function BookingForm({ className }: BookingFormProps) {
       </motion.div>
 
       {/* Pontos de bônus */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        whileHover={{ scale: 1.01 }}
+      <motion.label
+        htmlFor="useBonusPoints"
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.25, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          "flex items-center gap-3 rounded-lg border p-3 transition-all",
+          "flex cursor-pointer items-center gap-3 border-l-2 px-4 py-3 transition-colors",
           useBonusPoints
-            ? "border-principal-200 bg-principal-50"
-            : "border-stone-200 bg-stone-50",
+            ? "border-cobre-600 bg-cobre-50/40"
+            : "border-foreground/15 hover:border-foreground/40",
         )}
       >
         <Checkbox
@@ -473,34 +458,26 @@ export function BookingForm({ className }: BookingFormProps) {
               });
             }
           }}
-          className={cn(
-            "h-4 w-4 rounded border-2 transition-all",
-            useBonusPoints
-              ? "border-principal-600 bg-principal-600 data-[state=checked]:bg-principal-600"
-              : "data-[state=checked]:border-principal-600 data-[state=checked]:bg-principal-600 border-stone-300",
-          )}
+          className="data-[state=checked]:bg-foreground data-[state=checked]:border-foreground data-[state=checked]:text-background h-4 w-4"
         />
         <div className="flex-1">
-          <Label
-            htmlFor="useBonusPoints"
-            className="flex cursor-pointer items-center gap-2 text-sm font-medium text-stone-700"
-          >
-            Usar pontos de bônus
-            <Sparkles
+          <div className="flex items-center gap-2">
+            <span className="text-foreground text-sm font-medium">
+              Usar pontos de bônus
+            </span>
+            <SparkleIcon
+              weight="duotone"
               className={cn(
                 "h-3.5 w-3.5 transition-colors",
-                useBonusPoints ? "text-principal-600" : "text-stone-400",
+                useBonusPoints ? "text-cobre-600" : "text-foreground/40",
               )}
             />
-          </Label>
-          <p className="text-xs text-stone-500">
+          </div>
+          <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
             Ganhe e acumule pontos para próximos agendamentos
           </p>
         </div>
-      </motion.div>
+      </motion.label>
     </div>
   );
 }
-
-import { cn } from "@/shared/utils/utils";
-import { FormError } from "@/shared/components/form/form-error";

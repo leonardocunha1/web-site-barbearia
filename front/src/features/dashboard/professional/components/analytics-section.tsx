@@ -37,7 +37,15 @@ import {
 import { ptBR } from "date-fns/locale";
 import { formatBookingStatus } from "@/features/bookings/utils/booking-formatters";
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = ["#b5651d", "#7d4514", "#1f1f1f", "#cd7833", "#5f3510"];
+const ACCENT = "#b5651d"; // cobre-500
+const EMERALD = "#059669";
+const TOOLTIP_STYLE = {
+  backgroundColor: "oklch(0.985 0.008 75)",
+  border: "1px solid oklch(0.82 0.01 70)",
+  borderRadius: "0",
+  fontSize: "12px",
+};
 
 const formatCurrency = (value?: number | null) =>
   new Intl.NumberFormat("pt-BR", {
@@ -147,20 +155,22 @@ export function AnalyticsSection() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Revenue Trend */}
       <Card>
         <CardHeader>
-          <CardTitle>Receita Estimada - Próximos 7 Dias</CardTitle>
-          <CardDescription>
-            Baseado nos próximos agendamentos do profissional
+          <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Receita estimada · 7 dias
+          </CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Baseado nos próximos agendamentos
           </CardDescription>
         </CardHeader>
         <CardContent>
           {upcomingSeries.some((item) => item.appointments > 0) ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={upcomingSeries}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.82 0.01 70 / 0.4)" />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                 <YAxis
                   tick={{ fontSize: 12 }}
@@ -173,24 +183,22 @@ export function AnalyticsSection() {
                       ? `${label} (${payload[0].payload.dateLabel})`
                       : label
                   }
-                  contentStyle={{
-                    backgroundColor: "#fafafa",
-                    border: "1px solid #e7e5e4",
-                  }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#3b82f6"
+                  stroke={ACCENT}
                   name="Receita"
                   strokeWidth={2}
+                  dot={{ fill: ACCENT, r: 4 }}
                   connectNulls
                 />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="text-muted-foreground text-sm">
+            <div className="text-foreground/60 text-sm">
               Sem dados suficientes para gerar o gráfico.
             </div>
           )}
@@ -201,8 +209,12 @@ export function AnalyticsSection() {
         {/* Service Breakdown */}
         <Card>
           <CardHeader>
-            <CardTitle>Distribuição por Serviço</CardTitle>
-            <CardDescription>Agendamentos por tipo de serviço</CardDescription>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Distribuição por serviço
+            </CardTitle>
+            <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+              Agendamentos por tipo
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {serviceData.length ? (
@@ -217,7 +229,7 @@ export function AnalyticsSection() {
                       `${name} (${Math.round((percent ?? 0) * 100)}%)`
                     }
                     outerRadius={80}
-                    fill="#8884d8"
+                    fill={ACCENT}
                     dataKey="value"
                   >
                     {serviceData.map((entry, index) => (
@@ -227,11 +239,14 @@ export function AnalyticsSection() {
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `${value} agendamentos`} />
+                  <Tooltip
+                    formatter={(value) => `${value} agendamentos`}
+                    contentStyle={TOOLTIP_STYLE}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-muted-foreground text-sm">
+              <div className="text-foreground/60 text-sm">
                 Sem serviços suficientes para exibir.
               </div>
             )}
@@ -241,8 +256,10 @@ export function AnalyticsSection() {
         {/* Bookings Trend */}
         <Card>
           <CardHeader>
-            <CardTitle>Agendamentos - Próximos 7 Dias</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Agendamentos · 7 dias
+            </CardTitle>
+            <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
               Distribuição dos próximos horários
             </CardDescription>
           </CardHeader>
@@ -250,7 +267,7 @@ export function AnalyticsSection() {
             {upcomingSeries.some((item) => item.appointments > 0) ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={upcomingSeries}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.82 0.01 70 / 0.4)" />
                   <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                   <YAxis
                     tick={{ fontSize: 12 }}
@@ -262,21 +279,18 @@ export function AnalyticsSection() {
                         ? `${label} (${payload[0].payload.dateLabel})`
                         : label
                     }
-                    contentStyle={{
-                      backgroundColor: "#fafafa",
-                      border: "1px solid #e7e5e4",
-                    }}
+                    contentStyle={TOOLTIP_STYLE}
                   />
                   <Legend />
                   <Bar
                     dataKey="appointments"
-                    fill="#10b981"
+                    fill={EMERALD}
                     name="Agendamentos"
                   />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-muted-foreground text-sm">
+              <div className="text-foreground/60 text-sm">
                 Sem agendamentos futuros para exibir.
               </div>
             )}
@@ -286,8 +300,12 @@ export function AnalyticsSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Status dos Próximos Agendamentos</CardTitle>
-          <CardDescription>Distribuição por status</CardDescription>
+          <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Status · próximos
+          </CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Distribuição por status
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {statusData.length ? (
@@ -302,7 +320,7 @@ export function AnalyticsSection() {
                     `${name} (${Math.round((percent ?? 0) * 100)}%)`
                   }
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill={ACCENT}
                   dataKey="value"
                 >
                   {statusData.map((entry, index) => (
@@ -312,11 +330,14 @@ export function AnalyticsSection() {
                     />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => `${value} agendamentos`} />
+                <Tooltip
+                  formatter={(value) => `${value} agendamentos`}
+                  contentStyle={TOOLTIP_STYLE}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="text-muted-foreground text-sm">
+            <div className="text-foreground/60 text-sm">
               Sem dados de status para exibir.
             </div>
           )}
@@ -326,34 +347,47 @@ export function AnalyticsSection() {
       {/* Top Clients */}
       <Card>
         <CardHeader>
-          <CardTitle>Principais Clientes</CardTitle>
-          <CardDescription>Clientes com mais agendamentos</CardDescription>
+          <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Principais clientes
+          </CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Clientes com mais agendamentos
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {topClients.length ? (
-            <div className="space-y-4">
-              {topClients.map((client) => (
-                <div
+            <ol className="border-foreground/15 divide-foreground/15 divide-y border-t border-b">
+              {topClients.map((client, idx) => (
+                <li
                   key={client.name}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex items-center justify-between gap-4 py-4"
                 >
-                  <div className="flex-1">
-                    <p className="font-medium">{client.name}</p>
-                    <p className="text-sm text-stone-500">
-                      {client.bookings} agendamentos
-                    </p>
+                  <div className="flex items-center gap-4">
+                    <span className="text-foreground/40 font-mono text-xs tracking-widest">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <p className="text-foreground font-medium">
+                        {client.name}
+                      </p>
+                      <p className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+                        {client.bookings} agendamentos
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-blue-600">
+                    <p className="text-cobre-700 font-mono text-base font-bold">
                       {formatCurrency(client.total)}
                     </p>
-                    <p className="text-xs text-stone-500">Estimativa</p>
+                    <p className="text-foreground/50 font-mono text-[10px] tracking-widest uppercase">
+                      Estimativa
+                    </p>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ol>
           ) : (
-            <div className="text-muted-foreground text-sm">
+            <div className="text-foreground/60 text-sm">
               Sem clientes suficientes para destacar.
             </div>
           )}
@@ -364,28 +398,32 @@ export function AnalyticsSection() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Ticket Médio</CardTitle>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Ticket médio
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="font-display text-foreground text-2xl font-medium tracking-tight">
               {formatCurrency(averageTicket)}
             </p>
-            <p className="mt-1 text-xs text-stone-500">Por agendamento</p>
+            <p className="text-foreground/60 mt-1 text-xs">Por agendamento</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Taxa de Conclusão</CardTitle>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Taxa de conclusão
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="font-display text-foreground text-2xl font-medium tracking-tight">
               {metrics?.appointments
                 ? ((metrics.completed / metrics.appointments) * 100).toFixed(1)
                 : "0.0"}
               %
             </p>
-            <p className="mt-1 text-xs text-stone-500">
+            <p className="text-foreground/60 mt-1 text-xs">
               Agendamentos concluídos
             </p>
           </CardContent>
@@ -393,13 +431,15 @@ export function AnalyticsSection() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Receita Total</CardTitle>
+            <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+              Receita total
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="font-display text-cobre-700 text-2xl font-medium tracking-tight">
               {formatCurrency(metrics?.earnings ?? 0)}
             </p>
-            <p className="mt-1 text-xs text-stone-500">Total</p>
+            <p className="text-foreground/60 mt-1 text-xs">Total no período</p>
           </CardContent>
         </Card>
       </div>

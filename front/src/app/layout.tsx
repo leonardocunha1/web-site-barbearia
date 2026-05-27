@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Spectral, Poppins, Calistoga } from "next/font/google";
+import { Poppins, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalHeader } from "@/features/marketing/menu/conditional-header";
 import { ApplicationProviders } from "./providers";
@@ -14,17 +14,17 @@ const poppins = Poppins({
   display: "swap",
 });
 
-const type_second = Spectral({
-  weight: ["700"],
+const display = Fraunces({
+  weight: ["400", "600", "700"],
   subsets: ["latin"],
-  variable: "--type-second-spectral",
+  variable: "--type-third-calistoga",
   display: "swap",
 });
 
-const type_third = Calistoga({
-  weight: ["400"],
+const mono = JetBrains_Mono({
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
-  variable: "--type-third-calistoga",
+  variable: "--type-mono-editorial",
   display: "swap",
 });
 
@@ -41,7 +41,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} ${type_second.variable} ${type_third.variable} antialiased`}
+        className={`${poppins.variable} ${display.variable} ${mono.variable} antialiased`}
       >
         <div id="modal-root"></div>
         <ApplicationProviders>

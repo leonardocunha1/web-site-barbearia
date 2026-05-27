@@ -35,7 +35,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/shared/components/ui/page-header";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { User, Lock } from "lucide-react";
+import { UserCircleIcon, LockKeyIcon } from "@phosphor-icons/react";
+
+const sectionLabelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase flex items-center gap-2";
 
 const formatPhone = (phone: string) => {
   if (!phone) return "";
@@ -181,12 +184,12 @@ function ProfileCard() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-stone-600" />
-          <CardTitle>Informações do Perfil</CardTitle>
-        </div>
-        <CardDescription>
-          Atualize suas informações pessoais e profissionais
+        <CardTitle className={sectionLabelClass}>
+          <UserCircleIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+          Perfil
+        </CardTitle>
+        <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+          Informações do perfil
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -335,15 +338,18 @@ function ProfileCard() {
               )}
             />
 
-            <Button
-              type="submit"
-              disabled={updateProfessional.isPending}
-              className="w-full md:w-auto"
-            >
-              {updateProfessional.isPending
-                ? "Salvando..."
-                : "Salvar Alterações"}
-            </Button>
+            <div className="border-foreground/10 flex justify-end border-t pt-4">
+              <Button
+                type="submit"
+                variant="editorial"
+                size="sm"
+                disabled={updateProfessional.isPending}
+              >
+                {updateProfessional.isPending
+                  ? "Salvando..."
+                  : "Salvar alterações"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
@@ -382,12 +388,12 @@ function PasswordChangeCard() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Lock className="h-5 w-5 text-stone-600" />
-          <CardTitle>Alterar Senha</CardTitle>
-        </div>
-        <CardDescription>
-          Atualize sua senha para manter sua conta segura
+        <CardTitle className={sectionLabelClass}>
+          <LockKeyIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+          Segurança
+        </CardTitle>
+        <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+          Alterar senha
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -441,13 +447,16 @@ function PasswordChangeCard() {
               )}
             />
 
-            <Button
-              type="submit"
-              disabled={updatePassword.isPending}
-              className="w-full md:w-auto"
-            >
-              {updatePassword.isPending ? "Alterando..." : "Alterar Senha"}
-            </Button>
+            <div className="border-foreground/10 flex justify-end border-t pt-4">
+              <Button
+                type="submit"
+                variant="editorial"
+                size="sm"
+                disabled={updatePassword.isPending}
+              >
+                {updatePassword.isPending ? "Alterando..." : "Alterar senha"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
@@ -457,15 +466,18 @@ function PasswordChangeCard() {
 
 export default function ProfileSettingsPage() {
   return (
-    <div className="h-full space-y-6 p-6">
+    <div className="h-full space-y-8 p-6">
       <PageHeader
-        title="Configurações de Perfil"
-        description="Gerencie suas informações pessoais e de segurança"
+        icon={UserCircleIcon}
+        kicker="Configurações · Perfil"
+        title="Configurações de perfil"
+        description="Gerencie suas informações pessoais e de segurança."
       />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="space-y-6"
       >
         <ProfileCard />

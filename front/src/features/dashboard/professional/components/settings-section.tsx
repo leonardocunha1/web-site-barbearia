@@ -129,9 +129,11 @@ function PasswordChangeCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Alterar Senha</CardTitle>
-        <CardDescription>
-          Atualize sua senha para manter sua conta segura
+        <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+          Segurança
+        </CardTitle>
+        <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+          Alterar senha
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -183,9 +185,16 @@ function PasswordChangeCard() {
               )}
             />
 
-            <Button type="submit" disabled={updatePassword.isPending}>
-              {updatePassword.isPending ? "Alterando..." : "Alterar Senha"}
-            </Button>
+            <div className="border-foreground/10 flex justify-end border-t pt-4">
+              <Button
+                type="submit"
+                variant="editorial"
+                size="sm"
+                disabled={updatePassword.isPending}
+              >
+                {updatePassword.isPending ? "Alterando..." : "Alterar senha"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
@@ -269,9 +278,11 @@ export function SettingsSection() {
       {/* Profile Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Informações do Perfil</CardTitle>
-          <CardDescription>
-            Atualize suas informações profissionais
+          <CardTitle className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Perfil profissional
+          </CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Informações do perfil
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -418,11 +429,18 @@ export function SettingsSection() {
                 )}
               />
 
-              <Button type="submit" disabled={updateProfessional.isPending}>
-                {updateProfessional.isPending
-                  ? "Salvando..."
-                  : "Salvar Alterações"}
-              </Button>
+              <div className="border-foreground/10 flex justify-end border-t pt-4">
+                <Button
+                  type="submit"
+                  variant="editorial"
+                  size="sm"
+                  disabled={updateProfessional.isPending}
+                >
+                  {updateProfessional.isPending
+                    ? "Salvando..."
+                    : "Salvar alterações"}
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>

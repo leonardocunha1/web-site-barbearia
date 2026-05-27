@@ -9,27 +9,39 @@ import { WhatsAppFloat } from "@/features/marketing/home/whatsapp-float";
 
 export default function Page() {
   return (
-    <div className="flex flex-1 flex-col items-center overflow-x-hidden bg-gradient-to-br from-stone-100 to-stone-200 pt-[104px]">
-      <Container>
-        <Hero />
-      </Container>
+    <div className="bg-background text-foreground relative flex flex-1 flex-col items-center overflow-x-hidden pt-[104px]">
+      {/* subtle paper grain */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.035] mix-blend-multiply"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, #000 1px, transparent 0)",
+          backgroundSize: "3px 3px",
+        }}
+      />
 
-      <MarqueeDetails />
+      <div className="relative z-10 flex w-full flex-col items-center">
+        <Container>
+          <Hero />
+        </Container>
 
-      <BecomeBigodon />
+        <MarqueeDetails />
 
-      <Container>
-        <Services />
-      </Container>
+        <Container>
+          <Services />
+        </Container>
 
-      <Location />
+        <BecomeBigodon />
 
-      <Container>
-        <Reviews />
-      </Container>
+        <Location />
 
-      <WhatsAppFloat />
+        <Container>
+          <Reviews />
+        </Container>
+
+        <WhatsAppFloat />
+      </div>
     </div>
   );
 }
-

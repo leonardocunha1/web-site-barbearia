@@ -9,10 +9,13 @@ import {
 } from "@/shared/components/ui/card";
 import {
   CalendarIcon,
-  DollarSignIcon,
-  UserCheckIcon,
-  UserXIcon,
-} from "lucide-react";
+  CurrencyDollarIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  ReceiptIcon,
+} from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
 import { useGetProfessionalDashboard } from "@/api";
 import { formatBookingDateTime } from "@/features/bookings/utils/booking-formatters";
 import { RecentServices } from "./recent-services";
@@ -37,7 +40,7 @@ const formatCurrency = (value?: number | null) =>
 const rangeOptions = [
   { value: "today", label: "Hoje" },
   { value: "week", label: "Semana" },
-  { value: "month", label: "Mes" },
+  { value: "month", label: "Mês" },
   { value: "custom", label: "Personalizado" },
 ] as const;
 
@@ -45,6 +48,36 @@ const formatToday = () => {
   const now = new Date();
   return now.toISOString().slice(0, 10);
 };
+
+const labelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
+
+type KpiCardProps = {
+  label: string;
+  Icon: Icon;
+  value: React.ReactNode;
+  hint?: React.ReactNode;
+  span?: "default" | "wide";
+};
+
+function KpiCard({ label, Icon, value, hint, span = "default" }: KpiCardProps) {
+  return (
+    <Card className={span === "wide" ? "col-span-full lg:col-span-2" : ""}>
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <CardTitle className={labelClass}>{label}</CardTitle>
+        <Icon weight="duotone" className="text-cobre-700 h-5 w-5" />
+      </CardHeader>
+      <CardContent>
+        <div className="font-display text-foreground text-3xl leading-tight font-medium tracking-tight">
+          {value}
+        </div>
+        {hint && (
+          <p className="text-foreground/60 mt-1 text-xs">{hint}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export function OverviewSection() {
   const [range, setRange] = useState<"today" | "week" | "month" | "custom">(
@@ -79,17 +112,18 @@ export function OverviewSection() {
     rangeOptions.find((option) => option.value === range)?.label ?? "Hoje";
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-6">
+      {/* Filtro de período editorial */}
+      <div className="border-foreground/15 flex flex-col gap-4 border-l-2 px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium">Periodo do dashboard</p>
-          <p className="text-muted-foreground text-xs">
+          <p className={labelClass}>Período do dashboard</p>
+          <p className="text-foreground/60 text-xs">
             Ajuste o intervalo para atualizar os indicadores.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="space-y-2">
-            <Label>Periodo</Label>
+            <Label className={labelClass}>Período</Label>
             <Select
               value={range}
               onValueChange={(value: "today" | "week" | "month" | "custom") =>
@@ -111,7 +145,7 @@ export function OverviewSection() {
           {range === "custom" && (
             <div className="flex flex-col gap-3 sm:flex-row">
               <div className="space-y-2">
-                <Label>Inicio</Label>
+                <Label className={labelClass}>Início</Label>
                 <DatePicker
                   value={startDate}
                   max={endDate || undefined}
@@ -120,7 +154,7 @@ export function OverviewSection() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Fim</Label>
+                <Label className={labelClass}>Fim</Label>
                 <DatePicker
                   value={endDate}
                   min={startDate || undefined}
@@ -133,13 +167,12 @@ export function OverviewSection() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-6">
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Próximo Agendamento
-            </CardTitle>
-            <CalendarIcon className="text-muted-foreground h-4 w-4" />
+      {/* Grid de KPIs */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between pb-2">
+            <CardTitle className={labelClass}>Próximo agendamento</CardTitle>
+            <CalendarIcon weight="duotone" className="text-cobre-700 h-5 w-5" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -148,133 +181,77 @@ export function OverviewSection() {
               <ErrorState type="error" message="Erro ao carregar" />
             ) : nextAppointment ? (
               <>
-                <div className="text-2xl font-bold">
-                  {nextDateTime.date} {nextDateTime.time}
+                <div className="font-display text-foreground text-2xl leading-tight font-medium tracking-tight">
+                  {nextDateTime.date} · {nextDateTime.time}
                 </div>
-                <p className="text-muted-foreground text-xs">
-                  {nextAppointment.clientName} - {nextAppointment.service}
+                <p className="text-foreground/60 mt-1 text-xs">
+                  {nextAppointment.clientName} — {nextAppointment.service}
                 </p>
               </>
             ) : (
-              <div className="text-muted-foreground text-sm">
+              <div className="text-foreground/60 text-sm">
                 Sem agendamentos
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Faturamento ({rangeLabel})
-            </CardTitle>
-            <DollarSignIcon className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(metrics?.earnings)}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              {metrics?.appointments ?? 0} agendamentos no periodo
-            </p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          label={`Faturamento · ${rangeLabel}`}
+          Icon={CurrencyDollarIcon}
+          value={formatCurrency(metrics?.earnings)}
+          hint={`${metrics?.appointments ?? 0} agendamentos no período`}
+        />
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Clientes Atendidos
-            </CardTitle>
-            <UserCheckIcon className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics?.completed ?? 0}</div>
-            <p className="text-muted-foreground text-xs">
-              atendimentos concluidos
-            </p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          label="Clientes atendidos"
+          Icon={CheckCircleIcon}
+          value={String(metrics?.completed ?? 0).padStart(2, "0")}
+          hint="atendimentos concluídos"
+        />
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Cancelamentos</CardTitle>
-            <UserXIcon className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics?.canceled ?? 0}</div>
-            <p className="text-muted-foreground text-xs">no periodo</p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          label="Cancelamentos"
+          Icon={XCircleIcon}
+          value={String(metrics?.canceled ?? 0).padStart(2, "0")}
+          hint="no período"
+        />
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <CalendarIcon className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {metrics?.pendingCount ?? 0}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              aguardando confirmação
-            </p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          label="Pendentes"
+          Icon={ClockIcon}
+          value={String(metrics?.pendingCount ?? 0).padStart(2, "0")}
+          hint="aguardando confirmação"
+        />
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Taxa Conclusão
-            </CardTitle>
-            <UserCheckIcon className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {(metrics?.completionRate ?? 0).toFixed(1)}%
-            </div>
-            <p className="text-muted-foreground text-xs">
-              agendamentos concluídos
-            </p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          label="Taxa conclusão"
+          Icon={CheckCircleIcon}
+          value={`${(metrics?.completionRate ?? 0).toFixed(1)}%`}
+          hint="agendamentos concluídos"
+        />
 
-        <Card className="w-full rounded-2xl shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Taxa Cancelamento
-            </CardTitle>
-            <UserXIcon className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {(metrics?.cancellationRate ?? 0).toFixed(1)}%
-            </div>
-            <p className="text-muted-foreground text-xs">
-              do total de agendamentos
-            </p>
-          </CardContent>
-        </Card>
+        <KpiCard
+          label="Taxa cancelamento"
+          Icon={XCircleIcon}
+          value={`${(metrics?.cancellationRate ?? 0).toFixed(1)}%`}
+          hint="do total de agendamentos"
+        />
 
-        <div className="col-span-full lg:col-span-2">
-          <Card className="h-full w-full rounded-2xl shadow">
-            <CardHeader>
-              <CardTitle>Ticket Médio</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatCurrency(metrics?.averageTicket)}
-              </div>
-              <p className="text-muted-foreground text-xs">
-                ganho médio por agendamento
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <KpiCard
+          label="Ticket médio"
+          Icon={ReceiptIcon}
+          value={formatCurrency(metrics?.averageTicket)}
+          hint="ganho médio por agendamento"
+          span="wide"
+        />
 
         <div className="col-span-full lg:col-span-4">
-          <Card className="w-full rounded-2xl shadow">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle>Agenda ({rangeLabel})</CardTitle>
+              <CardTitle className={labelClass}>
+                Agenda · {rangeLabel}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <RecentServices

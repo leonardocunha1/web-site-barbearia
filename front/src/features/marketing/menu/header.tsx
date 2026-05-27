@@ -8,47 +8,54 @@ import NavLink from "./navlink";
 import { useUser } from "@/contexts/user";
 import { motion, Variants } from "framer-motion";
 
+const headerVariants: Variants = {
+  hidden: { y: -100, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
 export default function Header() {
   const { user } = useUser();
 
-  // Variantes de animação do header
-  const headerVariants: Variants = {
-    hidden: { y: -100, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.8, ease: "easeOut" },
-    },
-  };
-
   return (
     <motion.header
-      className="fixed right-0 left-0 z-50 mx-auto w-full max-w-7xl px-6 py-4 xl:px-0"
+      className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-7xl px-4 py-3 sm:px-6 xl:px-0"
       variants={headerVariants}
       initial="hidden"
       animate="visible"
     >
-      <nav className="flex items-center justify-between rounded-2xl bg-stone-900 px-4 py-2 font-medium text-stone-200 shadow-lg">
-        {/* Logo */}
-        <Link href="/">
+      <nav className="border-foreground/15 bg-background/90 text-foreground flex items-center justify-between border px-4 py-2 backdrop-blur-md sm:px-5">
+        {/* Logo + label */}
+        <Link href="/" className="flex items-center gap-3">
           <Image
             src="/logo-sem-escrita.png"
-            alt="Logo"
+            alt="El Bigodón"
             width={1024}
             height={1024}
-            className="size-16 rounded-full"
+            className="size-11 sm:size-12"
             priority
           />
+          <div className="hidden flex-col sm:flex">
+            <span className="font-display text-foreground text-base leading-tight font-medium tracking-tight">
+              El Bigodón
+            </span>
+            <span className="text-foreground/60 font-mono text-[9px] tracking-[0.25em] uppercase">
+              Estd. MMXXIV
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Menu */}
-        <ul className="hidden items-center space-x-6 tracking-wider md:flex">
+        <ul className="hidden items-center gap-8 md:flex">
           <li>
-            <NavLink href="/agendar">Agende seu horário!</NavLink>
+            <NavLink href="/agendar">Agendar</NavLink>
           </li>
         </ul>
 
-        {/* Botões de autenticação */}
+        {/* Auth */}
         <div className="hidden md:flex">
           <AuthButtons user={user?.user} />
         </div>

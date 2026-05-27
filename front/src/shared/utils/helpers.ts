@@ -6,8 +6,7 @@
 export { default as apiError } from "@/shared/services/api-error";
 export { getErrorMessage } from "@/shared/utils/getErrorMessage";
 export { cn } from "@/shared/utils/cn";
-export { assert } from "@/shared/utils/assert";
-export { formatTime } from "@/shared/utils/time";
+export { assertNever } from "@/shared/utils/assert";
 export * as xorType from "@/shared/utils/xor.type";
 
 

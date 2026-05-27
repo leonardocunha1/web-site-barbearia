@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Edit } from "lucide-react";
+import { PlusIcon } from "@phosphor-icons/react";
 import { GenericTable, Column } from "@/shared/components/table/generic-table";
 import { toast } from "sonner";
 import { ButtonStatus } from "@/shared/components/table/button-status";
@@ -141,14 +142,25 @@ export default function ServicesSection() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-stone-50 p-5 shadow">
-        <div>
+      <div className="space-y-1">
+        <p className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+          Catálogo
+        </p>
+        <h2 className="font-display text-foreground text-2xl font-medium tracking-tight">
+          Serviços oferecidos
+        </h2>
+      </div>
+      <Card className="space-y-5 p-5">
+        <div className="flex justify-end">
           <Button
             onClick={handleAdd}
             disabled={isCreating || isUpdating}
-            className="bg-principal-500 hover:bg-principal-600 cursor-pointer text-white"
+            variant="editorial"
+            size="sm"
+            className="gap-2"
           >
-            Novo Serviço
+            <PlusIcon weight="bold" className="h-4 w-4" />
+            Novo serviço
           </Button>
         </div>
         <GenericTable
@@ -157,8 +169,8 @@ export default function ServicesSection() {
           isLoading={isLoading}
           emptyMessage="Nenhum serviço cadastrado"
           rowKey="id"
-          className="rounded-lg border"
-          headerClassName="bg-gray-50"
+          className="border-foreground/15 border"
+          headerClassName="bg-foreground/[0.04]"
           actions={(row) => (
             <Button
               variant="outline"

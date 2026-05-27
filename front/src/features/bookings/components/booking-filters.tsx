@@ -28,11 +28,11 @@ type BookingFiltersProps = {
 };
 
 const statusOptions = [
-  { value: "all", label: "Todos", color: "bg-stone-500" },
-  { value: "PENDING", label: "Pendente", color: "bg-amber-500" },
-  { value: "CONFIRMED", label: "Confirmado", color: "bg-emerald-500" },
-  { value: "CANCELED", label: "Cancelado", color: "bg-rose-500" },
-  { value: "COMPLETED", label: "Concluído", color: "bg-blue-500" },
+  { value: "all", label: "Todos", color: "bg-foreground/40" },
+  { value: "PENDING", label: "Pendente", color: "bg-cobre-500" },
+  { value: "CONFIRMED", label: "Confirmado", color: "bg-emerald-600" },
+  { value: "CANCELED", label: "Cancelado", color: "bg-destructive" },
+  { value: "COMPLETED", label: "Concluído", color: "bg-foreground" },
 ];
 
 export function BookingFilters({
@@ -60,21 +60,23 @@ export function BookingFilters({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Header com toggle para mobile */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Filter className="h-4 w-4 text-stone-500" />
+            <Filter className="text-foreground/70 h-4 w-4" />
             {hasActiveFilters && (
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="bg-principal-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                <span className="bg-principal-600 relative inline-flex h-3 w-3 items-center justify-center rounded-full text-[10px] font-medium text-white">
+                <span className="bg-cobre-500 absolute inline-flex h-full w-full animate-ping opacity-75" />
+                <span className="bg-cobre-600 text-background relative inline-flex h-3 w-3 items-center justify-center text-[10px] font-medium">
                   {activeFiltersCount}
                 </span>
               </span>
             )}
           </div>
-          <span className="text-sm font-medium text-stone-700">Filtros</span>
+          <span className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Filtros
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -83,7 +85,7 @@ export function BookingFilters({
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              className="h-8 px-2 text-xs text-stone-600 hover:text-stone-900"
+              className="text-foreground/60 hover:text-foreground h-8 px-2 font-mono text-[10px] tracking-widest uppercase"
             >
               <X className="mr-1 h-3 w-3" />
               Limpar
@@ -105,7 +107,6 @@ export function BookingFilters({
         </div>
       </div>
 
-      {/* Filtros - responsivo */}
       <AnimatePresence initial={false}>
         {(isExpanded ||
           (typeof window !== "undefined" && window.innerWidth >= 1024)) && (
@@ -118,9 +119,8 @@ export function BookingFilters({
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
               <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Status */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-medium text-stone-600">
+                  <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
                     Status
                   </Label>
                   <Select
@@ -132,19 +132,14 @@ export function BookingFilters({
                       })
                     }
                   >
-                    <SelectTrigger className="h-10 border-stone-200 bg-white/50">
+                    <SelectTrigger className="h-10">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       {statusOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           <div className="flex items-center gap-2">
-                            <span
-                              className={cn(
-                                "h-2 w-2 rounded-full",
-                                option.color,
-                              )}
-                            />
+                            <span className={cn("h-2 w-2", option.color)} />
                             <span>{option.label}</span>
                           </div>
                         </SelectItem>
@@ -153,9 +148,8 @@ export function BookingFilters({
                   </Select>
                 </div>
 
-                {/* Data inicial */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-medium text-stone-600">
+                  <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
                     Data inicial
                   </Label>
                   <DatePicker
@@ -163,13 +157,12 @@ export function BookingFilters({
                     max={value.endDate || undefined}
                     onChange={(date) => onChange({ ...value, startDate: date })}
                     placeholder="Selecione a data inicial"
-                    className="h-10 border-stone-200 bg-white/50"
+                    className="h-10"
                   />
                 </div>
 
-                {/* Data final */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-medium text-stone-600">
+                  <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
                     Data final
                   </Label>
                   <DatePicker
@@ -177,12 +170,11 @@ export function BookingFilters({
                     min={value.startDate || undefined}
                     onChange={(date) => onChange({ ...value, endDate: date })}
                     placeholder="Selecione a data final"
-                    className="h-10 border-stone-200 bg-white/50"
+                    className="h-10"
                   />
                 </div>
               </div>
 
-              {/* Botão limpar - desktop */}
               <Button
                 variant="outline"
                 onClick={handleClear}

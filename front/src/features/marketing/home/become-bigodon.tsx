@@ -1,197 +1,221 @@
 "use client";
 
-import React from "react";
-import { CrownIcon, StarIcon, CreditCardIcon } from "@phosphor-icons/react";
-import Image from "next/image";
-import { motion, easeOut, easeInOut } from "framer-motion";
+import Link from "next/link";
+import { motion, easeOut } from "framer-motion";
+import {
+  CrownIcon,
+  StarIcon,
+  CreditCardIcon,
+  ArrowRightIcon,
+} from "@phosphor-icons/react";
+import { Button } from "@/shared/components/ui/button";
 
 const offerings = [
   {
     title: "Programa Bigodón VIP",
+    emphasis: "Estilo recompensado.",
     description:
-      "A cada serviço, você acumula pontos que se transformam em descontos, serviços gratuitos e experiências exclusivas. Sua fidelidade é o nosso maior valor.",
-    emphasis: "Seu estilo recompensado.",
-    icon: <CrownIcon size={32} weight="fill" className="text-secondary-500" />,
+      "Cada serviço acumula pontos que viram descontos, cortes na casa e experiências exclusivas para membros do clube.",
+    Icon: CrownIcon,
   },
   {
-    title: "Preço Justo, Qualidade Premium",
+    title: "Preço justo, mão premium",
+    emphasis: "Sem fórmula mágica.",
     description:
-      "Acreditamos que cuidar do seu visual não precisa custar uma fortuna. Oferecemos o melhor serviço da cidade com preços competitivos, garantindo o melhor custo-benefício.",
-    emphasis: "Economia e elegância.",
-    icon: (
-      <CreditCardIcon size={32} weight="fill" className="text-secondary-500" />
-    ),
+      "Bom corte não precisa ser caro — só precisa ser bem feito. Tabela transparente, sem upsell, sem surpresa.",
+    Icon: CreditCardIcon,
   },
   {
-    title: "Excelência em Cada Detalhe",
+    title: "Excelência em cada detalhe",
+    emphasis: "Obsessão pelo acabamento.",
     description:
-      "Nossos profissionais são especialistas em cortes e barbas, usando técnicas avançadas e produtos de alta performance. Seu visual impecável do início ao fim.",
-    emphasis: "O melhor para o seu visual.",
-    icon: <StarIcon size={32} weight="fill" className="text-secondary-500" />,
+      "Profissionais especialistas, ferramentas afiadas e produtos selecionados. Aqui o detalhe importa.",
+    Icon: StarIcon,
   },
 ];
 
 const containerVariants = {
   hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.3,
-    },
-  },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const imageVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.8,
-    rotate: -5,
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    rotate: 0,
-    transition: {
-      duration: 0.8,
-      ease: easeOut,
-    },
-  },
-};
-
-const titleVariants = {
-  hidden: {
-    opacity: 0,
-    y: 30,
-  },
+const itemVariants = {
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.8,
-      ease: easeOut,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: {
-    opacity: 0,
-    x: -60,
-    scale: 0.95,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: {
-      duration: 0.7,
-      ease: easeOut,
-    },
+    transition: { duration: 0.75, ease: easeOut },
   },
 };
 
 export default function BecomeBigodon() {
   return (
-    <>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1000 100"
-        className="-mb-1 w-full rotate-180"
+    <section className="bg-foreground text-background relative w-full overflow-hidden">
+      {/* paper-grain overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)",
+          backgroundSize: "5px 5px",
+        }}
+        aria-hidden
+      />
+      {/* corner cobre glow */}
+      <div
+        className="bg-cobre-700/25 pointer-events-none absolute -top-32 -right-32 h-[420px] w-[420px] rounded-full blur-3xl"
+        aria-hidden
+      />
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        className="relative mx-auto max-w-7xl px-6 py-24 sm:px-8 sm:py-32"
       >
-        <path
-          d="M0 0v47.6l5-2c1 0 11 3 12 0 2 3 6-3 6 0 0-4 12 3 12 0 0 3 15-1 17 0 2-2 5-1 6 0 0-2 6 2 6 0s2 4 4 0c5 2 12-3 16 0 2-2 4-3 4 0 0 2 6-1 6 0 1 4 15-2 17 0h7c0 1 3-3 6 0h17c2 2 3 1 6 0h6c1-2 21-1 24 0 2 1 4 2 6 0 0-1 22 4 24 0 0 0 5-3 5 0 2-2 10 2 12 0 2 2 6 1 6 0 2 3 4-2 6 0 1 0 25-2 25 1l10-1c3 1 6 6 7 0 1 5 4-2 6 0 2-2 4 3 5 0h12c6 1 36 2 36 0 0 2 3 0 6 0h6c5-2 7 4 11 0 2 0 15 2 17 0h13c3-4 5 1 7 0h29c0-3 6 0 6 0h5c0 2 16-1 18 0 1 4 9-1 12 0s6-2 6 0c8-2 3 4 13 0h10c3 4 19 1 19 0 2 0 21 1 23-1 1 4 3-1 6 1 1 2 11-1 12-1 3 3 9 0 12 1 3-4 6 1 6 0h6c0-3 5 1 6-1 0 3 2 1 4 1 3 4 10-1 13 0 3-2 6-1 6 0 2 2 2 0 6 0 1-2 6 2 6 0 2 0 4 5 6 0h18c2 3 4 1 6 0l6-1c3 2 12 3 17 1 14 3 18 1 24 0 2-1 3 3 5 0 6 2 10-1 16 0 1 3 6 0 9 0 0-2 3 2 5 0 6-6 8 7 13 0 0-2 5 2 5 0 3 3 10 0 10 0 1 2 5-2 8 0 3-1 8 3 12 0h6c2 1 10 4 12 0h6c1-1 5 2 6 0 1 2 4-1 6 0 0-2 5 3 6-1 2 1 6 5 5 1 1 1 3-2 6 0 2-1 5 3 6 0 0 1 6 2 6 0 2 3 4-4 6 0 0-2 3 2 6 0 3 0 6 3 6 0 5 3 8-1 13 0 3-4 6 1 6 0h5c0-1 9 2 12 0 1-1 9 3 11 0h6c2 2 4 4 7 0 3 2 5-4 5-1 10 4 15-2 18 2 0-1 6 2 6-2 0 0 6-2 6 1 1 6 12 2 12 0 1 3 4-3 7 2 2-2 5 2 5 0 1 5 4-5 6 0 2-1 4 2 6 0 1 3 1 0 5 0V0H0Z"
-          fill="#1c1917"
-        ></path>
-      </svg>
+        {/* Header */}
+        <motion.header
+          variants={itemVariants}
+          className="grid grid-cols-12 gap-x-4 gap-y-6 md:gap-x-8"
+        >
+          <div className="col-span-12 flex items-center gap-3 md:col-span-4">
+            <span className="bg-cobre-500 h-px w-8" aria-hidden />
+            <span className="text-background/65 font-mono text-[10px] tracking-[0.3em] uppercase">
+              O clube · Cap. 03
+            </span>
+          </div>
+          <h2 className="font-display text-background col-span-12 text-5xl leading-[0.95] font-medium tracking-tight md:col-span-8 md:text-7xl lg:text-[5.5rem]">
+            Seja parte da{" "}
+            <span className="text-cobre-400 italic">elite</span>.
+          </h2>
+        </motion.header>
 
-      <section className="w-full bg-stone-900 px-8 py-16 sm:py-24 md:-m-10">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-24">
-          {/* Esquerda */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, amount: 0.3 }}
-            className="space-y-8 lg:sticky lg:top-8 lg:h-fit"
-          >
-            <motion.div className="space-y-6" variants={titleVariants}>
-              <span className="text-principal-500 text-sm font-semibold tracking-wider uppercase">
-                Onde seu estilo encontra a excelência
-              </span>
-              <h2 className="font-calistoga pt-5 text-5xl font-bold text-stone-100 sm:text-6xl">
-                Seja parte da <span className="text-principal-500">elite</span>.
-              </h2>
-              <p className="max-w-lg text-base text-stone-400">
-                Três motivos para você elevar seu visual e fazer parte do clube
-                Bigodón.
-              </p>
-            </motion.div>
+        {/* Membership card */}
+        <motion.div
+          variants={itemVariants}
+          className="relative mt-14 md:mt-20"
+        >
+          <div className="border-background/20 relative grid grid-cols-12 gap-x-4 border md:gap-x-0">
+            {/* card-corner markers */}
+            <CornerMark className="-top-px -left-px" />
+            <CornerMark className="-top-px -right-px rotate-90" />
+            <CornerMark className="-bottom-px -left-px -rotate-90" />
+            <CornerMark className="-right-px -bottom-px rotate-180" />
 
-            <motion.div
-              variants={imageVariants}
-              viewport={{ once: false, amount: 0.3 }}
-              className="mt-8"
-            >
-              <Image
-                src="/info-img.png"
-                alt="Barber pole"
-                width={1024}
-                height={1536}
-                className="mx-auto w-full max-w-[200px] rounded-2xl object-cover md:max-w-[300px]"
-              />
-            </motion.div>
-          </motion.div>
+            {/* Left — seal column */}
+            <div className="border-background/15 col-span-12 flex flex-col justify-between gap-10 p-8 md:col-span-4 md:border-r md:p-10">
+              <div>
+                <p className="text-background/55 font-mono text-[10px] tracking-[0.3em] uppercase">
+                  Convite n° 0001
+                </p>
+                <p className="font-display text-background mt-1 text-xl font-medium tracking-tight">
+                  El Bigodón · Members
+                </p>
+              </div>
 
-          {/* Direita */}
-          <motion.div
-            className="relative md:pl-8 lg:pl-16"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, amount: 0.2 }}
-          >
-            <div className="absolute inset-y-0 left-6 hidden w-1 rounded-full bg-gradient-to-b from-amber-500 via-amber-700 to-amber-900 shadow-lg sm:block"></div>
+              <div className="relative flex items-center justify-center py-6 md:py-10">
+                <div
+                  className="border-cobre-400/40 absolute inset-0 m-auto aspect-square w-[78%] rounded-full border"
+                  aria-hidden
+                />
+                <div
+                  className="border-cobre-400/20 absolute inset-0 m-auto aspect-square w-[94%] rounded-full border"
+                  aria-hidden
+                />
+                <CrownIcon
+                  weight="duotone"
+                  className="text-cobre-400 size-20 md:size-24"
+                />
+              </div>
 
-            <div className="space-y-16 text-justify">
-              {offerings.map((offering, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={cardVariants}
-                  className="group relative flex cursor-pointer items-start gap-6 rounded-xl bg-stone-900 ring-1 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
-                >
-                  <motion.div
-                    whileHover={{
-                      rotate: [0, -8, 8, 0],
-                      transition: { duration: 0.5, ease: easeInOut },
-                    }}
-                    className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-stone-800 p-3 shadow-inner"
-                  >
-                    {offering.icon}
-                    <span className="bg-principal-500 absolute top-1/2 -left-6 hidden h-4 w-4 -translate-y-1/2 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110 lg:block"></span>
-                  </motion.div>
-
-                  <div className="flex-1">
-                    <h3 className="font-calistoga text-lg font-bold tracking-wider text-stone-100">
-                      {offering.title}
-                    </h3>
-                    <p className="mt-2 leading-relaxed text-stone-300">
-                      <span className="text-principal-500 font-semibold">
-                        {offering.emphasis}
-                      </span>{" "}
-                      {offering.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+              <div>
+                <p className="text-background/55 font-mono text-[10px] tracking-[0.3em] uppercase">
+                  Válido enquanto durar
+                </p>
+                <p className="font-display text-background mt-1 text-xl font-medium tracking-tight">
+                  o bom gosto.
+                </p>
+              </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
 
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100">
-        <path
-          d="M0 0v47.6l5-2c1 0 11 3 12 0 2 3 6-3 6 0 0-4 12 3 12 0 0 3 15-1 17 0 2-2 5-1 6 0 0-2 6 2 6 0s2 4 4 0c5 2 12-3 16 0 2-2 4-3 4 0 0 2 6-1 6 0 1 4 15-2 17 0h7c0 1 3-3 6 0h17c2 2 3 1 6 0h6c1-2 21-1 24 0 2 1 4 2 6 0 0-1 22 4 24 0 0 0 5-3 5 0 2-2 10 2 12 0 2 2 6 1 6 0 2 3 4-2 6 0 1 0 25-2 25 1l10-1c3 1 6 6 7 0 1 5 4-2 6 0 2-2 4 3 5 0h12c6 1 36 2 36 0 0 2 3 0 6 0h6c5-2 7 4 11 0 2 0 15 2 17 0h13c3-4 5 1 7 0h29c0-3 6 0 6 0h5c0 2 16-1 18 0 1 4 9-1 12 0s6-2 6 0c8-2 3 4 13 0h10c3 4 19 1 19 0 2 0 21 1 23-1 1 4 3-1 6 1 1 2 11-1 12-1 3 3 9 0 12 1 3-4 6 1 6 0h6c0-3 5 1 6-1 0 3 2 1 4 1 3 4 10-1 13 0 3-2 6-1 6 0 2 2 2 0 6 0 1-2 6 2 6 0 2 0 4 5 6 0h18c2 3 4 1 6 0l6-1c3 2 12 3 17 1 14 3 18 1 24 0 2-1 3 3 5 0 6 2 10-1 16 0 1 3 6 0 9 0 0-2 3 2 5 0 6-6 8 7 13 0 0-2 5 2 5 0 3 3 10 0 10 0 1 2 5-2 8 0 3-1 8 3 12 0h6c2 1 10 4 12 0h6c1-1 5 2 6 0 1 2 4-1 6 0 0-2 5 3 6-1 2 1 6 5 5 1 1 1 3-2 6 0 2-1 5 3 6 0 0 1 6 2 6 0 2 3 4-4 6 0 0-2 3 2 6 0 3 0 6 3 6 0 5 3 8-1 13 0 3-4 6 1 6 0h5c0-1 9 2 12 0 1-1 9 3 11 0h6c2 2 4 4 7 0 3 2 5-4 5-1 10 4 15-2 18 2 0-1 6 2 6-2 0 0 6-2 6 1 1 6 12 2 12 0 1 3 4-3 7 2 2-2 5 2 5 0 1 5 4-5 6 0 2-1 4 2 6 0 1 3 1 0 5 0V0H0Z"
-          fill="#1c1917"
-        ></path>
-      </svg>
-    </>
+            {/* Right — three benefits */}
+            <ol className="divide-background/15 col-span-12 divide-y md:col-span-8">
+              {offerings.map((offering, idx) => {
+                const ItemIcon = offering.Icon;
+                return (
+                  <li
+                    key={offering.title}
+                    className="group hover:bg-background/[0.03] flex flex-col gap-4 px-8 py-8 transition-colors sm:flex-row sm:items-start sm:gap-8 md:px-10 md:py-9"
+                  >
+                    <div className="flex items-center justify-between sm:w-24 sm:flex-col sm:items-start sm:gap-5">
+                      <span className="text-background/45 font-mono text-[11px] tracking-[0.25em]">
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <ItemIcon
+                        weight="duotone"
+                        className="text-cobre-400 size-7"
+                      />
+                    </div>
+
+                    <div className="flex-1 space-y-2.5">
+                      <h3 className="font-display text-background text-2xl leading-tight font-medium tracking-tight sm:text-3xl">
+                        {offering.title}
+                      </h3>
+                      <p className="text-background/70 max-w-prose text-sm leading-relaxed sm:text-base">
+                        <span className="text-cobre-400 mr-1 font-medium">
+                          {offering.emphasis}
+                        </span>
+                        {offering.description}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        </motion.div>
+
+        {/* Bottom action */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
+        >
+          <p className="text-background/65 max-w-md text-sm md:text-base">
+            Sem mensalidade, sem letra miúda. Você é cliente, automaticamente
+            é Bigodón.
+          </p>
+          <Link href="/agendar">
+            <Button
+              variant="outline"
+              size="xl"
+              className="group border-cobre-400 text-background hover:bg-cobre-400 hover:text-foreground gap-3 rounded-none border-2 text-xs tracking-[0.18em] uppercase"
+            >
+              Quero meu lugar
+              <ArrowRightIcon
+                weight="bold"
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </Button>
+          </Link>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+function CornerMark({ className = "" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute ${className}`}
+      style={{
+        width: 14,
+        height: 14,
+      }}
+    >
+      <span className="bg-cobre-400 absolute top-0 left-0 h-px w-full" />
+      <span className="bg-cobre-400 absolute top-0 left-0 h-full w-px" />
+    </span>
   );
 }

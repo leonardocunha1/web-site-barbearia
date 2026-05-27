@@ -25,6 +25,10 @@ import {
   buildHolidayDateTime,
   formatHolidayDate,
 } from "../utils/holiday-formatters";
+import { PlusIcon } from "@phosphor-icons/react";
+
+const titleClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
 
 type HolidayRow = {
   id: string;
@@ -100,8 +104,16 @@ export function HolidaysSection() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Feriados</CardTitle>
-        <Button onClick={handleCreate}>Adicionar feriado</Button>
+        <CardTitle className={titleClass}>Feriados e folgas</CardTitle>
+        <Button
+          onClick={handleCreate}
+          variant="editorial"
+          size="sm"
+          className="gap-2"
+        >
+          <PlusIcon weight="bold" className="h-4 w-4" />
+          Adicionar feriado
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {listQuery.isLoading ? (
@@ -109,7 +121,7 @@ export function HolidaysSection() {
         ) : listQuery.isError ? (
           <ErrorState
             type="error"
-            message="Nao foi possivel carregar os feriados."
+            message="Não foi possível carregar os feriados."
           />
         ) : (
           <GenericTable
@@ -119,11 +131,13 @@ export function HolidaysSection() {
             emptyMessage="Nenhum feriado cadastrado"
             totalItems={listQuery.data?.total ?? 0}
             showPagination
+            className="border-foreground/15 border"
+            headerClassName="bg-foreground/[0.04]"
             actions={(row) => (
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-600"
+                className="text-destructive hover:text-destructive"
                 onClick={() => deleteHoliday.mutate({ holidayId: row.id })}
               >
                 Remover
@@ -132,10 +146,11 @@ export function HolidaysSection() {
           />
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="text-muted-foreground text-sm">
-            Total de {listQuery.data?.total ?? 0} feriados
-          </div>
+        <div className="border-foreground/10 flex items-center justify-between border-t pt-4">
+          <span className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+            Total · {listQuery.data?.total ?? 0} feriado
+            {(listQuery.data?.total ?? 0) === 1 ? "" : "s"}
+          </span>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -144,6 +159,7 @@ export function HolidaysSection() {
                 updateParams({ page: Math.max(1, params.page - 1) })
               }
               disabled={params.page <= 1}
+              className="font-mono text-[10px] tracking-widest uppercase"
             >
               Anterior
             </Button>
@@ -152,8 +168,9 @@ export function HolidaysSection() {
               size="sm"
               onClick={() => updateParams({ page: params.page + 1 })}
               disabled={params.page >= (listQuery.data?.totalPages ?? 1)}
+              className="font-mono text-[10px] tracking-widest uppercase"
             >
-              Proximo
+              Próximo
             </Button>
           </div>
         </div>

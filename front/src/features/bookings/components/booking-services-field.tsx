@@ -7,7 +7,7 @@ import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/utils/utils";
 import type { BookingFormValues } from "../schemas/booking-form-schema";
 import type { ListProfessionalServices200ServicesItem } from "@/api";
-import { Sparkles, Clock, DollarSign } from "lucide-react";
+import { Sparkles, Clock } from "lucide-react";
 import { useMemo, useCallback, useState } from "react";
 
 interface BookingServicesFieldProps {
@@ -205,13 +205,13 @@ export function BookingServicesField({
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="animate-pulse rounded-lg border border-stone-200 bg-stone-50 p-4"
+            className="border-foreground/10 animate-pulse border p-4"
           >
             <div className="flex items-start gap-3">
-              <div className="h-4 w-4 rounded bg-stone-200" />
+              <div className="bg-foreground/10 h-4 w-4" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/4 rounded bg-stone-200" />
-                <div className="h-3 w-1/2 rounded bg-stone-200" />
+                <div className="bg-foreground/10 h-4 w-3/4" />
+                <div className="bg-foreground/10 h-3 w-1/2" />
               </div>
             </div>
           </div>
@@ -226,15 +226,13 @@ export function BookingServicesField({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-8 text-center"
+        className="border-foreground/20 flex flex-col items-center justify-center border border-dashed p-8 text-center"
       >
-        <div className="rounded-full bg-stone-100 p-3">
-          <Sparkles className="h-6 w-6 text-stone-400" />
-        </div>
-        <p className="mt-3 text-sm font-medium text-stone-600">
+        <Sparkles className="text-foreground/40 h-6 w-6" />
+        <p className="text-foreground mt-3 text-sm font-medium">
           Nenhum serviço disponível
         </p>
-        <p className="mt-1 text-xs text-stone-500">
+        <p className="text-foreground/60 mt-1 text-xs">
           Este profissional ainda não possui serviços cadastrados.
         </p>
       </motion.div>
@@ -259,52 +257,50 @@ export function BookingServicesField({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium text-stone-700">
-          Serviços
-          <Sparkles className="text-principal-500 ml-2 inline h-3 w-3" />
+        <Label className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+          Catálogo de serviços
         </Label>
         {selectedServices.length > 0 && (
-          <span className="text-xs text-stone-500">
-            {selectedServices.length} de {services.length} selecionados
+          <span className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
+            {String(selectedServices.length).padStart(2, "0")} /{" "}
+            {String(services.length).padStart(2, "0")} selecionado
+            {selectedServices.length > 1 ? "s" : ""}
           </span>
         )}
       </div>
 
       {(ruleMessage || errors.services?.message) && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive border-l-2 px-3 py-2 text-xs">
           {ruleMessage || String(errors.services?.message)}
         </div>
       )}
 
-      {/* Barra de resumo - apenas se houver serviços selecionados */}
+      {/* Barra de resumo — apenas se houver serviços selecionados */}
       <AnimatePresence>
         {selectedServices.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 0 }}
-            className="bg-principal-50/80 flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-lg px-4 py-3 text-sm"
+            className="border-cobre-600 bg-cobre-50/60 flex flex-wrap items-center justify-between gap-3 overflow-hidden border-l-2 px-4 py-3 text-sm"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-principal-700 font-medium">
-                {selectedServices.length}{" "}
-                {selectedServices.length === 1
-                  ? "serviço selecionado"
-                  : "serviços selecionados"}
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
+            <span className="text-foreground font-medium">
+              {selectedServices.length}{" "}
+              {selectedServices.length === 1
+                ? "serviço selecionado"
+                : "serviços selecionados"}
+            </span>
+            <div className="flex items-center gap-5 font-mono text-xs tracking-wider">
               {totalDuration > 0 && (
-                <span className="flex items-center gap-1 text-stone-600">
+                <span className="text-foreground/70 flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
                   {formatDuration(totalDuration)}
                 </span>
               )}
               {totalPrice > 0 && (
-                <span className="flex items-center gap-1 font-medium text-stone-900">
-                  <DollarSign className="text-principal-600 h-3.5 w-3.5" />
+                <span className="text-foreground flex items-center gap-1.5 font-bold">
                   R$ {totalPrice.toFixed(2)}
                 </span>
               )}
@@ -313,24 +309,22 @@ export function BookingServicesField({
         )}
       </AnimatePresence>
 
-      {/* Grid de serviços */}
-      <div className="space-y-6">
+      {/* Grid de serviços por categoria */}
+      <div className="space-y-7">
         {groupedServices.map((group) => (
           <div key={group.type} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-stone-900">
+            <div className="border-foreground/15 flex items-baseline justify-between border-b pb-2">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-foreground text-lg font-medium">
                   {group.label}
                 </span>
-                <span className="text-xs text-stone-500">
-                  {group.type === "ESTETICA"
-                    ? "Multiplos permitidos"
-                    : "Limite de 1"}
+                <span className="text-foreground/50 font-mono text-[10px] tracking-widest uppercase">
+                  {group.type === "ESTETICA" ? "Múltiplos" : "Limite 1"}
                 </span>
               </div>
-              <span className="text-xs text-stone-400">
-                {group.services.length} Opção
-                {group.services.length === 1 ? "" : "(es)"}
+              <span className="text-foreground/50 font-mono text-[10px] tracking-widest uppercase">
+                {String(group.services.length).padStart(2, "0")} opç
+                {group.services.length === 1 ? "ão" : "ões"}
               </span>
             </div>
 
@@ -362,82 +356,65 @@ export function BookingServicesField({
                       whileTap={isInteractive ? "tap" : undefined}
                       layout
                       className={cn(
-                        "group relative overflow-hidden rounded-xl border p-4 transition-all",
-                        "hover:shadow-lg",
+                        "group relative border p-4 transition-colors",
                         isSelected
-                          ? "border-principal-500 from-principal-50 bg-gradient-to-br to-white shadow-md"
-                          : "hover:border-principal-300 border-stone-200 bg-white hover:bg-stone-50/50",
+                          ? "border-foreground bg-foreground/[0.03]"
+                          : "border-foreground/15 hover:border-foreground/40 bg-transparent",
                         isInteractive && "cursor-pointer",
                         (disabled || isBlocked) &&
-                          "pointer-events-none cursor-not-allowed opacity-60",
+                          "pointer-events-none cursor-not-allowed opacity-50",
                       )}
                       onClick={() => isInteractive && toggleService(service.id)}
                     >
-                      {/* Badge de selecionado */}
+                      {/* Indicador lateral cobre quando selecionado */}
                       {isSelected && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          className="absolute top-3 right-3"
-                        >
-                          <div className="bg-principal-600 flex h-5 w-5 items-center justify-center rounded-full">
-                            <Sparkles className="h-3 w-3 text-white" />
-                          </div>
-                        </motion.div>
+                        <motion.span
+                          layoutId={`indicator-${service.id}`}
+                          className="bg-cobre-600 absolute inset-y-0 left-0 w-1"
+                          aria-hidden
+                        />
                       )}
 
                       <div className="flex items-start gap-3">
-                        {/* 🔥 CORREÇÃO: Checkbox controlado com onClick prevention */}
                         <div onClick={(e) => e.stopPropagation()}>
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={handleCheckboxChange(service.id)}
                             disabled={disabled || isBlocked}
                             className={cn(
-                              "mt-1 h-4 w-4 rounded border-2 transition-all",
-                              isSelected
-                                ? "border-principal-600 bg-principal-600 data-[state=checked]:bg-principal-600"
-                                : "data-[state=checked]:border-principal-600 data-[state=checked]:bg-principal-600 border-stone-300",
+                              "mt-1 h-4 w-4 transition-all",
+                              "data-[state=checked]:border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background",
                             )}
                           />
                         </div>
 
                         <div className="flex-1 space-y-1.5">
-                          <p
-                            className={cn(
-                              "text-sm font-medium transition-colors",
-                              isSelected
-                                ? "text-principal-900"
-                                : "text-stone-900",
-                            )}
-                          >
+                          <p className="text-foreground text-sm font-medium">
                             {service.name}
                           </p>
 
                           {service.category && (
-                            <p className="text-xs text-stone-500">
+                            <p className="text-foreground/60 text-xs">
                               {service.category}
                             </p>
                           )}
 
                           {isBlocked && (
-                            <p className="text-xs text-amber-600">
-                              Limite de 1 por tipo
+                            <p className="text-destructive font-mono text-[10px] tracking-widest uppercase">
+                              Limite atingido
                             </p>
                           )}
 
-                          <div className="flex items-center gap-3 text-xs">
+                          <div className="flex items-center gap-3 pt-1 font-mono text-[11px] tracking-wider">
                             {service.duration && service.duration > 0 && (
-                              <span className="flex items-center gap-1 text-stone-600">
+                              <span className="text-foreground/60 flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {formatDuration(service.duration)}
                               </span>
                             )}
 
                             {service.price && service.price > 0 && (
-                              <span className="text-principal-600 flex items-center gap-1 font-medium">
-                                <DollarSign className="h-3 w-3" />
+                              <span className="text-foreground font-bold">
                                 R$ {service.price.toFixed(2)}
                               </span>
                             )}

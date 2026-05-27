@@ -37,15 +37,19 @@ const formatPhone = (phone: string) => {
   const cleaned = phone.replace(/\D/g, "");
 
   if (cleaned.length === 11) {
-    // (11) 99000-0205
     return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
   } else if (cleaned.length === 10) {
-    // (11) 9000-0205
     return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
   }
 
   return phone;
 };
+
+const sectionLabelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
+
+const fieldLabelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
 
 export function ProfileSection() {
   const { data, isLoading, isError } = useGetUserProfile();
@@ -149,7 +153,7 @@ export function ProfileSection() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Meus Dados</CardTitle>
+          <CardTitle className={sectionLabelClass}>Meus dados</CardTitle>
         </CardHeader>
         <CardContent>
           <LoadingState message="Carregando dados..." size="sm" />
@@ -162,7 +166,7 @@ export function ProfileSection() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Meus Dados</CardTitle>
+          <CardTitle className={sectionLabelClass}>Meus dados</CardTitle>
         </CardHeader>
         <CardContent>
           <ErrorState
@@ -178,14 +182,18 @@ export function ProfileSection() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Meus Dados</CardTitle>
-          <CardDescription>Atualize suas informações pessoais</CardDescription>
+          <CardTitle className={sectionLabelClass}>Meus dados</CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Suas informações pessoais
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleProfileSubmit}>
+          <form className="space-y-5" onSubmit={handleProfileSubmit}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
+                <Label htmlFor="name" className={fieldLabelClass}>
+                  Nome completo
+                </Label>
                 <Input
                   id="name"
                   value={name}
@@ -194,7 +202,9 @@ export function ProfileSection() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
+                <Label htmlFor="email" className={fieldLabelClass}>
+                  E-mail
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -205,7 +215,9 @@ export function ProfileSection() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
+                <Label htmlFor="phone" className={fieldLabelClass}>
+                  Telefone
+                </Label>
                 <Input
                   id="phone"
                   value={formatPhone(data.user.phone ?? "")}
@@ -215,12 +227,14 @@ export function ProfileSection() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="border-foreground/10 flex justify-end border-t pt-4">
               <Button
                 type="submit"
+                variant="editorial"
+                size="sm"
                 disabled={!isProfileDirty || updateProfile.isPending}
               >
-                {updateProfile.isPending ? "Salvando..." : "Salvar Nome"}
+                {updateProfile.isPending ? "Salvando..." : "Salvar nome"}
               </Button>
             </div>
           </form>
@@ -229,16 +243,18 @@ export function ProfileSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Alterar Senha</CardTitle>
-          <CardDescription>
-            Defina uma nova senha para sua conta
+          <CardTitle className={sectionLabelClass}>Segurança</CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Alterar senha
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handlePasswordSubmit}>
+          <form className="space-y-5" onSubmit={handlePasswordSubmit}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Senha atual</Label>
+                <Label htmlFor="currentPassword" className={fieldLabelClass}>
+                  Senha atual
+                </Label>
                 <Input
                   id="currentPassword"
                   type="password"
@@ -253,7 +269,9 @@ export function ProfileSection() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">Nova senha</Label>
+                <Label htmlFor="newPassword" className={fieldLabelClass}>
+                  Nova senha
+                </Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -268,7 +286,9 @@ export function ProfileSection() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                <Label htmlFor="confirmPassword" className={fieldLabelClass}>
+                  Confirmar senha
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -283,43 +303,61 @@ export function ProfileSection() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="border-foreground/10 flex justify-end border-t pt-4">
               <Button
                 type="submit"
+                variant="editorial"
+                size="sm"
                 disabled={!canSubmitPassword || updatePassword.isPending}
               >
                 {updatePassword.isPending
                   ? "Atualizando..."
-                  : "Atualizar Senha"}
+                  : "Atualizar senha"}
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      <Card className="border-red-200">
+      <Card className="border-destructive/30">
         <CardHeader>
-          <CardTitle>Apagar Conta</CardTitle>
-          <CardDescription>
-            Sua conta será anonimizada e desativada para manter os registros.
+          <CardTitle className="text-destructive font-mono text-[10px] tracking-widest uppercase">
+            Zona de risco
+          </CardTitle>
+          <CardDescription className="font-display text-foreground text-xl font-medium tracking-tight">
+            Apagar conta
           </CardDescription>
+          <p className="text-foreground/60 mt-1 text-sm">
+            Sua conta será anonimizada e desativada para manter os registros.
+          </p>
         </CardHeader>
         <CardContent>
           <Dialog open={isAnonymizeOpen} onOpenChange={setIsAnonymizeOpen}>
             <DialogTrigger asChild>
-              <Button variant="destructive">Apagar conta</Button>
+              <Button variant="destructive" size="sm">
+                Apagar conta
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Confirmar exclusao</DialogTitle>
+                <div className="flex items-center gap-3">
+                  <span className="bg-destructive/60 h-px w-8" aria-hidden />
+                  <span className="text-destructive/80 font-mono text-[10px] tracking-[0.25em] uppercase">
+                    Confirmação
+                  </span>
+                </div>
+                <DialogTitle className="font-display text-foreground text-2xl font-medium tracking-tight">
+                  Apagar conta
+                </DialogTitle>
                 <DialogDescription>
-                  Esta acao ira remover seus dados pessoais e desativar a conta.
+                  Esta ação irá remover seus dados pessoais e desativar a conta.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => setIsAnonymizeOpen(false)}
+                  className="font-mono text-xs tracking-widest uppercase"
                 >
                   Voltar
                 </Button>

@@ -55,7 +55,15 @@ export function ProfessionalSection() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-stone-50 p-5 shadow">
+      <div className="space-y-1">
+        <p className="text-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+          Funcionários
+        </p>
+        <h2 className="font-display text-foreground text-2xl font-medium tracking-tight">
+          Profissionais cadastrados
+        </h2>
+      </div>
+      <Card className="space-y-5 p-5">
         <ProfessionalActions onAdd={handleAdd} isPending={isPending} />
         <ProfessionalTable
           totalCount={totalCount}

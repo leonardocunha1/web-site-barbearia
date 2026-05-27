@@ -10,10 +10,11 @@ import {
 import {
   CalendarIcon,
   UserPlusIcon,
-  UserXIcon,
+  UserMinusIcon,
   UsersIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+  TrendUpIcon,
+} from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 const formatCurrency = (value?: number | null) => {
@@ -24,21 +25,48 @@ const formatCurrency = (value?: number | null) => {
   }).format(value);
 };
 
+const labelClass =
+  "text-foreground/70 font-mono text-[10px] tracking-widest uppercase";
+
+type KpiCardProps = {
+  label: string;
+  Icon: Icon;
+  value: React.ReactNode;
+  hint: string;
+};
+
+function KpiCard({ label, Icon, value, hint }: KpiCardProps) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <CardTitle className={labelClass}>{label}</CardTitle>
+        <Icon weight="duotone" className="text-cobre-700 h-5 w-5" />
+      </CardHeader>
+      <CardContent>
+        <div className="font-display text-foreground text-3xl leading-tight font-medium tracking-tight">
+          {value}
+        </div>
+        <p className="text-foreground/60 mt-1 text-xs">{hint}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OverviewSection() {
   const { data: dashboard, isLoading } = useGetAdminDashboard();
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="w-full rounded-2xl shadow">
+          <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-5 w-5" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-12" />
-              <Skeleton className="mt-2 h-3 w-24" />
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="mt-2 h-3 w-32" />
             </CardContent>
           </Card>
         ))}
@@ -52,77 +80,65 @@ export function OverviewSection() {
   const financial = dashboard?.financial;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
-      <Card className="w-full rounded-2xl shadow">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Profissionais</CardTitle>
-          <UsersIcon className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {metrics?.professionalsActive}
-          </div>
-          <p className="text-muted-foreground text-xs">Ativos no sistema</p>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <KpiCard
+        label="Profissionais"
+        Icon={UsersIcon}
+        value={String(metrics?.professionalsActive ?? 0).padStart(2, "0")}
+        hint="Ativos no sistema"
+      />
 
-      <Card className="w-full rounded-2xl shadow">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Novos Cadastros</CardTitle>
-          <UserPlusIcon className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{metrics?.newProfessionals}</div>
-          <p className="text-muted-foreground text-xs">este mês</p>
-        </CardContent>
-      </Card>
+      <KpiCard
+        label="Novos cadastros"
+        Icon={UserPlusIcon}
+        value={String(metrics?.newProfessionals ?? 0).padStart(2, "0")}
+        hint="este mês"
+      />
 
-      <Card className="w-full rounded-2xl shadow">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">
-            Agendamentos Hoje
-          </CardTitle>
-          <CalendarIcon className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{metrics?.bookingsToday}</div>
-          <p className="text-muted-foreground text-xs">
-            Agendamentos realizados
-          </p>
-        </CardContent>
-      </Card>
+      <KpiCard
+        label="Agendamentos hoje"
+        Icon={CalendarIcon}
+        value={String(metrics?.bookingsToday ?? 0).padStart(2, "0")}
+        hint="agendamentos realizados"
+      />
 
-      <Card className="w-full rounded-2xl shadow">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Cancelamentos</CardTitle>
-          <UserXIcon className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {metrics?.cancellationsLast24h}
-          </div>
-          <p className="text-muted-foreground text-xs">nas últimas 24h</p>
-        </CardContent>
-      </Card>
+      <KpiCard
+        label="Cancelamentos"
+        Icon={UserMinusIcon}
+        value={String(metrics?.cancellationsLast24h ?? 0).padStart(2, "0")}
+        hint="nas últimas 24h"
+      />
 
       {topProfessionals.length > 0 && (
         <div className="col-span-full">
-          <Card className="w-full rounded-2xl shadow">
+          <Card>
             <CardHeader>
-              <CardTitle>Top Profissionais do Mês</CardTitle>
+              <CardTitle className={labelClass}>
+                Top profissionais · este mês
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
-                {topProfessionals.map((professional) => (
-                  <li key={professional.id} className="flex justify-between">
-                    <span>{professional.name}</span>
-                    <span className="text-muted-foreground text-sm">
+              <ol className="border-foreground/15 divide-foreground/15 divide-y border-t border-b">
+                {topProfessionals.map((professional, idx) => (
+                  <li
+                    key={professional.id}
+                    className="flex items-center justify-between gap-4 py-3"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-foreground/40 font-mono text-xs tracking-widest">
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-foreground font-medium">
+                        {professional.name}
+                      </span>
+                    </div>
+                    <span className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
                       {professional.totalBookings} atendimento
                       {professional.totalBookings !== 1 ? "s" : ""}
                     </span>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </CardContent>
           </Card>
         </div>
@@ -130,22 +146,34 @@ export function OverviewSection() {
 
       {topServices.length > 0 && (
         <div className="col-span-full">
-          <Card className="w-full rounded-2xl shadow">
+          <Card>
             <CardHeader>
-              <CardTitle>Serviços Mais Agendados</CardTitle>
+              <CardTitle className={labelClass}>
+                Serviços mais agendados
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
-                {topServices.map((service) => (
-                  <li key={service.id} className="flex justify-between">
-                    <span>{service.name}</span>
-                    <span className="text-muted-foreground text-sm">
+              <ol className="border-foreground/15 divide-foreground/15 divide-y border-t border-b">
+                {topServices.map((service, idx) => (
+                  <li
+                    key={service.id}
+                    className="flex items-center justify-between gap-4 py-3"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-foreground/40 font-mono text-xs tracking-widest">
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-foreground font-medium">
+                        {service.name}
+                      </span>
+                    </div>
+                    <span className="text-foreground/60 font-mono text-[10px] tracking-widest uppercase">
                       {service.totalBookings} agendamento
                       {service.totalBookings !== 1 ? "s" : ""}
                     </span>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </CardContent>
           </Card>
         </div>
@@ -153,32 +181,34 @@ export function OverviewSection() {
 
       {financial && (
         <div className="col-span-full">
-          <Card className="w-full rounded-2xl shadow">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUpIcon className="h-4 w-4" />
-                Resumo Financeiro - Este Mês
+              <CardTitle
+                className={`${labelClass} flex items-center gap-2`}
+              >
+                <TrendUpIcon weight="duotone" className="text-cobre-700 h-4 w-4" />
+                Resumo financeiro · este mês
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-                <div>
-                  <p className="text-sm font-medium text-black">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div className="border-cobre-600 border-l-2 px-4 py-2">
+                  <p className={labelClass}>Faturamento total</p>
+                  <p className="font-display text-cobre-700 mt-1 text-2xl font-medium tracking-tight">
                     {formatCurrency(financial.revenueTotal)}
                   </p>
-                  <p>Faturamento Total</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-black">
+                <div className="border-foreground/15 border-l px-4 py-2">
+                  <p className={labelClass}>Serviços realizados</p>
+                  <p className="font-display text-foreground mt-1 text-2xl font-medium tracking-tight">
                     {financial.completedBookings}
                   </p>
-                  <p>Serviços Realizados</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-black">
+                <div className="border-foreground/15 border-l px-4 py-2">
+                  <p className={labelClass}>Ticket médio</p>
+                  <p className="font-display text-foreground mt-1 text-2xl font-medium tracking-tight">
                     {formatCurrency(financial.averageTicket)}
                   </p>
-                  <p>Ticket Médio</p>
                 </div>
               </div>
             </CardContent>
