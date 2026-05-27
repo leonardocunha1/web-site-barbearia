@@ -1,0 +1,27 @@
+# Normaliza line endings: texto sempre LF no repo, ferramenta de cada SO converte no checkout
+* text=auto eol=lf
+
+# Binarios: nunca tocar (evita corromper)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.avif binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+
+# Scripts shell sempre LF (mesmo no Windows)
+*.sh text eol=lf
+
+# Arquivos especificos do Windows mantem CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
