@@ -101,10 +101,10 @@ export const zodlistUserBookingsQueryLimitMax = 100;
 export const zodlistUserBookingsQuerySortDirectionDefault = "asc";
 
 export const zodlistUserBookingsQueryParams = zod.object({
-  "page": zod.number().min(zodlistUserBookingsQueryPageMin).default(zodlistUserBookingsQueryPageDefault).describe('Número da página atual (começa em 1)'),
-  "limit": zod.number().min(zodlistUserBookingsQueryLimitMin).max(zodlistUserBookingsQueryLimitMax).default(zodlistUserBookingsQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
-  "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistUserBookingsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "page": zod.number().min(zodlistUserBookingsQueryPageMin).default(zodlistUserBookingsQueryPageDefault),
+  "limit": zod.number().min(zodlistUserBookingsQueryLimitMin).max(zodlistUserBookingsQueryLimitMax).default(zodlistUserBookingsQueryLimitDefault),
+  "sortBy": zod.enum(['startDateTime', 'totalAmount']).optional().describe('Campo para ordenação'),
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistUserBookingsQuerySortDirectionDefault).describe('Direção da ordenação'),
   "startDate": zod.string().datetime({}).optional(),
   "endDate": zod.string().datetime({}).optional(),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']).optional(),
@@ -184,10 +184,10 @@ export const zodlistProfessionalBookingsQueryLimitMax = 100;
 export const zodlistProfessionalBookingsQuerySortDirectionDefault = "asc";
 
 export const zodlistProfessionalBookingsQueryParams = zod.object({
-  "page": zod.number().min(zodlistProfessionalBookingsQueryPageMin).default(zodlistProfessionalBookingsQueryPageDefault).describe('Número da página atual (começa em 1)'),
-  "limit": zod.number().min(zodlistProfessionalBookingsQueryLimitMin).max(zodlistProfessionalBookingsQueryLimitMax).default(zodlistProfessionalBookingsQueryLimitDefault).describe('Quantidade de itens por página (máximo 100)'),
-  "sortBy": zod.string().optional().describe('Campo para ordenação (opcional)'),
-  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistProfessionalBookingsQuerySortDirectionDefault).describe('Direção da ordenação: asc (crescente) ou desc (decrescente)'),
+  "page": zod.number().min(zodlistProfessionalBookingsQueryPageMin).default(zodlistProfessionalBookingsQueryPageDefault),
+  "limit": zod.number().min(zodlistProfessionalBookingsQueryLimitMin).max(zodlistProfessionalBookingsQueryLimitMax).default(zodlistProfessionalBookingsQueryLimitDefault),
+  "sortBy": zod.enum(['startDateTime', 'totalAmount']).optional().describe('Campo para ordenação'),
+  "sortDirection": zod.enum(['asc', 'desc']).default(zodlistProfessionalBookingsQuerySortDirectionDefault).describe('Direção da ordenação'),
   "startDate": zod.string().datetime({}).optional(),
   "endDate": zod.string().datetime({}).optional(),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED']).optional(),
