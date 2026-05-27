@@ -45,12 +45,18 @@ next-env.d.ts
 # postgres local data
 postgres_data/
 
-# docs
-docs/
+# docs (mantem screenshots versionados pro README)
+docs/*
+!docs/screenshots/
+!docs/screenshots/**
+
+# Playwright MCP outputs (logs e snapshots de execucao)
+.playwright-mcp/
 
 # AI tools
 .claude/
 .claude_project
+.agents/
 .devflow/
 .cursor/
 .windsurf/
@@ -58,3 +64,4 @@ docs/
 .codeium/
 .continue/
 copilot-*
+skills-lock.json

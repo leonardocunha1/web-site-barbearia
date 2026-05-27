@@ -2,12 +2,7 @@
 
 Sistema completo de agendamento e gestao para barbearia, com painel administrativo, painel do profissional e area do cliente.
 
-<!-- TODO: Adicionar screenshots aqui -->
-<!-- ![Home](./docs/screenshots/home.png) -->
-<!-- ![Agendamento](./docs/screenshots/booking.png) -->
-<!-- ![Dashboard Admin](./docs/screenshots/admin.png) -->
-<!-- ![Dashboard Profissional](./docs/screenshots/professional.png) -->
-<!-- ![Dashboard Cliente](./docs/screenshots/client.png) -->
+![Home](./docs/screenshots/home-hero.png)
 
 ---
 
@@ -169,36 +164,7 @@ Visitantes (sem login) podem navegar na landing page e iniciar o agendamento. O 
 
 ## Arquitetura
 
-```
-web-site-barbearia/
-├── back/                    # API REST (Fastify + Prisma)
-│   ├── prisma/              # Schema, migrations, seed
-│   └── src/
-│       ├── http/
-│       │   ├── controllers/  # Rotas organizadas por dominio
-│       │   └── middlewares/   # JWT, roles, tracing
-│       ├── use-cases/        # Logica de negocio (Clean Architecture)
-│       ├── repositories/     # Interface de acesso a dados
-│       ├── services/         # Token, email
-│       ├── schemas/          # Validacao Zod
-│       ├── dtos/             # Data Transfer Objects
-│       └── scripts/          # Cron jobs
-│
-├── front/                   # Next.js 15 (App Router)
-│   └── src/
-│       ├── app/              # Pages e layouts (rotas)
-│       ├── features/         # Modulos por dominio
-│       │   ├── auth/         # Login/registro
-│       │   ├── bookings/     # Agendamento (wizard)
-│       │   ├── dashboard/    # Paineis (admin, profissional, cliente)
-│       │   └── marketing/    # Landing page
-│       ├── shared/           # Componentes, hooks, utils reutilizaveis
-│       ├── api/              # Hooks gerados (Orval) + Axios
-│       ├── contexts/         # React Context (user, query)
-│       └── middleware.ts     # Protecao de rotas (JWT + roles)
-│
-└── docs/                    # Documentacao adicional
-```
+Monorepo com backend e frontend separados — API Fastify + Prisma no `back/`, app Next.js 15 (App Router) no `front/`.
 
 ### Padroes do Backend
 
@@ -319,6 +285,8 @@ npm run start:dev
 O servidor roda em `http://localhost:3333`.
 Documentacao Swagger em `http://localhost:3333/docs`.
 
+> **Credenciais de teste:** o seed cria 2 admins, 5 profissionais e 10 clientes com emails no formato `<role>.<n>.<sufixo-aleatorio>@seed.local` — os emails completos sao impressos no log do `npm run seed`. Senhas padrao: `Admin@123` para admins, `Senha@123` para profissionais e clientes (override via `SEED_ADMIN_PASSWORD` / `SEED_PROFESSIONAL_PASSWORD` / `SEED_CLIENT_PASSWORD` no `.env`).
+
 ### Frontend
 
 ```bash
@@ -351,7 +319,7 @@ O app roda em `http://localhost:3000`.
 | `NODE_ENV` | Ambiente | `dev` |
 | `PORT` | Porta do servidor | `3333` |
 | `DATABASE_URL` | URL do PostgreSQL | `postgresql://user:pass@localhost:5432/barbearia` |
-| `JWT_SECRET` | Chave secreta do JWT | `sua-chave-secreta` |
+| `JWT_SECRET` | Chave secreta do JWT (gere com `openssl rand -hex 32`) | `sua-chave-secreta` |
 | `SENDGRID_API_KEY` | API key do SendGrid | `SG.xxx` |
 | `EMAIL_FROM` | Email remetente | `noreply@elbigodons.com` |
 | `APP_URL` | URL do frontend | `http://localhost:3000` |
@@ -362,11 +330,31 @@ O app roda em `http://localhost:3000`.
 | Variavel | Descricao | Exemplo |
 |----------|-----------|---------|
 | `NEXT_PUBLIC_API_URL` | URL da API | `http://localhost:3333` |
-| `JWT_SECRET` | Mesma chave do backend (para middleware) | `sua-chave-secreta` |
+| `JWT_SECRET` | Mesma chave do backend (para middleware) — copie do `back/.env` | `sua-chave-secreta` |
 
 ---
 
 ## API - Endpoints
+
+Documentacao interativa completa em [Swagger UI](http://localhost:3333/docs) (com o backend rodando). Resumo por dominio:
+
+| Dominio | Prefixo | Auth |
+|---------|---------|------|
+| Auth | `/auth/*` | Publico |
+| Users | `/users/*` | JWT (alguns publicos) |
+| Professionals | `/professionals/*`, `/me/professional/*` | Publico / JWT |
+| Services | `/services/*` | Publico / ADMIN |
+| Service-Professional | `/professionals/:id/services/*` | Publico / ADMIN |
+| Bookings | `/bookings/*` | CLIENT / PROFESSIONAL |
+| Business Hours | `/business-hours/*` | Publico / PROFESSIONAL |
+| Holidays | `/holidays/*` | JWT |
+| Coupons | `/coupons/*` | ADMIN |
+| Bonus | `/bonus/*` | JWT |
+| Admin | `/admin/dashboard` | ADMIN |
+| Outros | `/health`, `/docs` | Publico |
+
+<details>
+<summary><strong>Ver tabelas detalhadas por endpoint</strong></summary>
 
 ### Auth
 
@@ -488,6 +476,8 @@ O app roda em `http://localhost:3000`.
 | GET | `/health` | Health check |
 | GET | `/docs` | Swagger UI |
 
+</details>
+
 ---
 
 ## Banco de Dados
@@ -586,38 +576,40 @@ npm run build
 
 ## Screenshots
 
-<!-- Adicione suas screenshots abaixo -->
-
 ### Landing Page
-<!-- ![Hero](./docs/screenshots/hero.png) -->
-<!-- ![Servicos](./docs/screenshots/services.png) -->
-<!-- ![Depoimentos](./docs/screenshots/reviews.png) -->
-<!-- ![Localizacao](./docs/screenshots/location.png) -->
 
-### Agendamento
-<!-- ![Step 1 - Profissional](./docs/screenshots/booking-step1.png) -->
-<!-- ![Step 2 - Servicos](./docs/screenshots/booking-step2.png) -->
-<!-- ![Step 3 - Horario](./docs/screenshots/booking-step3.png) -->
-<!-- ![Step 4 - Resumo](./docs/screenshots/booking-step4.png) -->
-
-### Dashboard Admin
-<!-- ![Admin Overview](./docs/screenshots/admin-overview.png) -->
-<!-- ![Admin Profissionais](./docs/screenshots/admin-professionals.png) -->
-<!-- ![Admin Servicos](./docs/screenshots/admin-services.png) -->
-<!-- ![Admin Cupons](./docs/screenshots/admin-coupons.png) -->
-
-### Dashboard Profissional
-<!-- ![Professional Overview](./docs/screenshots/professional-overview.png) -->
-<!-- ![Professional Agendamentos](./docs/screenshots/professional-bookings.png) -->
-<!-- ![Professional Configuracoes](./docs/screenshots/professional-settings.png) -->
-
-### Dashboard Cliente
-<!-- ![Cliente Dashboard](./docs/screenshots/client-dashboard.png) -->
-<!-- ![Cliente Reservas](./docs/screenshots/client-bookings.png) -->
+![Hero](./docs/screenshots/home-hero.png)
+![Landing completa](./docs/screenshots/home-full.png)
 
 ### Login
-<!-- ![Login](./docs/screenshots/login.png) -->
-<!-- ![Registro](./docs/screenshots/register.png) -->
+
+![Login](./docs/screenshots/login.png)
+
+### Agendamento (Wizard)
+
+![Step 1 - Profissional](./docs/screenshots/booking-step1.png)
+![Step 2 - Servicos](./docs/screenshots/booking-step2.png)
+![Step 3 - Horario](./docs/screenshots/booking-step3.png)
+![Step 4 - Resumo](./docs/screenshots/booking-step4.png)
+
+### Dashboard Cliente
+
+![Cliente](./docs/screenshots/client-dashboard.png)
+
+### Dashboard Profissional
+
+![Professional Overview](./docs/screenshots/professional-overview.png)
+![Professional Agendamentos](./docs/screenshots/professional-bookings.png)
+![Professional Perfil](./docs/screenshots/professional-profile.png)
+![Professional Horarios](./docs/screenshots/professional-business-hours.png)
+![Professional Feriados](./docs/screenshots/professional-holidays.png)
+
+### Dashboard Admin
+
+![Admin Overview](./docs/screenshots/admin-overview.png)
+![Admin Profissionais](./docs/screenshots/admin-professionals.png)
+![Admin Servicos](./docs/screenshots/admin-services.png)
+![Admin Cupons](./docs/screenshots/admin-coupons.png)
 
 ---
 
